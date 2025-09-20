@@ -78,7 +78,7 @@
                     Team Respawn
                 </h1>
                 <p class="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto">
-                    Discover the BEST place to watch videos and guides for Halo and other popular games!
+                    Team Respawn is a thriving gaming channel led by Andy, dedicated to strategy lovers—especially fans of Halo Wars, Halo FPS, and Age of Empires.
                 </p>
             </div>
             
@@ -86,14 +86,23 @@
             <div class="h-8 w-8"></div>
         </header>
         
-        <!-- Tab Navigation -->
-        <div class="flex justify-center mb-8">
-            <button id="walkthroughs-tab" class="px-6 py-2 rounded-l-full font-bold text-gray-900 bg-gray-200 transition-colors duration-300">
-                Walkthroughs
-            </button>
-            <button id="halo-wars-tab" class="px-6 py-2 rounded-r-full font-bold text-gray-200 bg-gray-700 hover:bg-gray-600 transition-colors duration-300">
-                Halo Wars Guides
-            </button>
+        <!-- Tab Navigation - Updated for pill shape and description text -->
+        <div class="flex flex-col items-center mb-8">
+            <div class="flex justify-center bg-gray-700 rounded-full p-1 max-w-lg mx-auto">
+                <button id="walkthroughs-tab" class="flex-1 px-6 py-2 rounded-full font-bold text-gray-900 bg-gray-200 transition-colors duration-300">
+                    Walkthroughs
+                </button>
+                <button id="halo-wars-tab" class="flex-1 px-6 py-2 rounded-full font-bold text-gray-200 hover:bg-gray-600 transition-colors duration-300">
+                    Halo Wars Guides
+                </button>
+                <button id="age-of-empires-tab" class="flex-1 px-6 py-2 rounded-full font-bold text-gray-200 hover:bg-gray-600 transition-colors duration-300">
+                    Age of Empires Guides
+                </button>
+            </div>
+            <!-- Tab Descriptions -->
+            <p id="walkthroughs-summary" class="mt-4 text-center text-sm text-gray-400">Full walkthroughs from Team Respawn.</p>
+            <p id="halo-wars-summary" class="mt-4 text-center text-sm text-gray-400 hidden">In-depth strategies and tips for the Halo Wars series.</p>
+            <p id="age-of-empires-summary" class="mt-4 text-center text-sm text-gray-400 hidden">Master the battlefield with guides for Age of Empires and Age of Mythology games.</p>
         </div>
 
         <!-- Tab Content Containers -->
@@ -228,6 +237,41 @@
             </div>
             
         </main>
+
+        <!-- Age of Empires Tab Content -->
+        <main id="age-of-empires-content" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Age of Empires Placeholder Video 1 -->
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
+                <h2 class="text-2xl font-bold mb-4 text-yellow-400">Age of Empires IV: Beginner's Guide</h2>
+                <div class="aspect-video mb-4 rounded-lg overflow-hidden">
+                    <iframe src="https://www.youtube.com/embed/rV162wW_4H0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+                <p class="text-gray-300 mb-4">
+                    A comprehensive guide for new players to the world of Age of Empires IV, covering civilizations, resources, and combat.
+                </p>
+                <a href="https://www.youtube.com/watch?v=rV162wW_4H0" target="_blank" rel="noopener noreferrer" class="inline-block bg-yellow-500 text-white font-bold py-2 px-6 rounded-full hover:bg-yellow-600 transition-colors duration-300">
+                    Watch on YouTube
+                </a>
+            </div>
+            
+            <!-- Age of Empires Placeholder Video 2 -->
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
+                <h2 class="text-2xl font-bold mb-4 text-yellow-400">Age of Empires II: Advanced Build Orders</h2>
+                <div class="aspect-video mb-4 rounded-lg overflow-hidden">
+                    <iframe src="https://www.youtube.com/embed/q6w5R2sFpA0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+                <p class="text-gray-300 mb-4">
+                    Take your game to the next level with these advanced build orders and strategies for competitive play.
+                </p>
+                <a href="https://www.youtube.com/watch?v=q6w5R2sFpA0" target="_blank" rel="noopener noreferrer" class="inline-block bg-yellow-500 text-white font-bold py-2 px-6 rounded-full hover:bg-yellow-600 transition-colors duration-300">
+                    Watch on YouTube
+                </a>
+            </div>
+        </main>
+
+        <footer class="py-8 text-center text-gray-400">
+            <p>Made by &lt;3 by Team Respawn</p>
+        </footer>
     </div>
 
     <!-- Side Panel -->
@@ -259,8 +303,14 @@
         document.addEventListener('DOMContentLoaded', () => {
             const walkthroughsTab = document.getElementById('walkthroughs-tab');
             const haloWarsTab = document.getElementById('halo-wars-tab');
+            const ageOfEmpiresTab = document.getElementById('age-of-empires-tab');
             const walkthroughsContent = document.getElementById('walkthroughs-content');
             const haloWarsContent = document.getElementById('halo-wars-content');
+            const ageOfEmpiresContent = document.getElementById('age-of-empires-content');
+            
+            const walkthroughsSummary = document.getElementById('walkthroughs-summary');
+            const haloWarsSummary = document.getElementById('halo-wars-summary');
+            const ageOfEmpiresSummary = document.getElementById('age-of-empires-summary');
 
             // Side panel elements
             const openPanelButton = document.getElementById('open-panel-button');
@@ -268,25 +318,39 @@
             const sidePanel = document.getElementById('side-panel');
             const overlay = document.getElementById('overlay');
 
-            function switchTab(activeTab, inactiveTab, activeContent, inactiveContent) {
-                // Update button styles
+            function switchTab(activeTab, inactiveTab1, inactiveTab2, activeContent, inactiveContent1, inactiveContent2, activeSummary, inactiveSummary1, inactiveSummary2) {
+                // Remove active styles from all tabs
+                inactiveTab1.classList.remove('bg-gray-200', 'text-gray-900');
+                inactiveTab1.classList.add('bg-gray-700', 'hover:bg-gray-600', 'text-gray-200');
+
+                inactiveTab2.classList.remove('bg-gray-200', 'text-gray-900');
+                inactiveTab2.classList.add('bg-gray-700', 'hover:bg-gray-600', 'text-gray-200');
+
+                // Apply active styles to the selected tab
                 activeTab.classList.remove('bg-gray-700', 'hover:bg-gray-600', 'text-gray-200');
                 activeTab.classList.add('bg-gray-200', 'text-gray-900');
-                
-                inactiveTab.classList.remove('bg-gray-200', 'text-gray-900');
-                inactiveTab.classList.add('bg-gray-700', 'hover:bg-gray-600', 'text-gray-200');
 
                 // Update content visibility
                 activeContent.classList.remove('hidden');
-                inactiveContent.classList.add('hidden');
+                inactiveContent1.classList.add('hidden');
+                inactiveContent2.classList.add('hidden');
+
+                // Update summary text visibility
+                activeSummary.classList.remove('hidden');
+                inactiveSummary1.classList.add('hidden');
+                inactiveSummary2.classList.add('hidden');
             }
 
             walkthroughsTab.addEventListener('click', () => {
-                switchTab(walkthroughsTab, haloWarsTab, walkthroughsContent, haloWarsContent);
+                switchTab(walkthroughsTab, haloWarsTab, ageOfEmpiresTab, walkthroughsContent, haloWarsContent, ageOfEmpiresContent, walkthroughsSummary, haloWarsSummary, ageOfEmpiresSummary);
             });
 
             haloWarsTab.addEventListener('click', () => {
-                switchTab(haloWarsTab, walkthroughsTab, haloWarsContent, walkthroughsContent);
+                switchTab(haloWarsTab, walkthroughsTab, ageOfEmpiresTab, haloWarsContent, walkthroughsContent, ageOfEmpiresContent, haloWarsSummary, walkthroughsSummary, ageOfEmpiresSummary);
+            });
+
+            ageOfEmpiresTab.addEventListener('click', () => {
+                switchTab(ageOfEmpiresTab, walkthroughsTab, haloWarsTab, ageOfEmpiresContent, walkthroughsContent, haloWarsContent, ageOfEmpiresSummary, walkthroughsSummary, haloWarsSummary);
             });
 
             // Side panel event listeners
