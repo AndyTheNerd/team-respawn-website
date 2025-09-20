@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Game Blog</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Side panel styles */
+        .side-panel {
+            position: fixed;
+            top: 0;
+            left: -100%; /* Start off-screen on the left */
+            width: 100%;
+            max-width: 320px;
+            height: 100%;
+            background-color: #1a202c; /* Matches bg-gray-900 */
+            z-index: 50;
+            transition: left 0.3s ease-in-out;
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.5); /* Shadow on the right side of the panel */
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+        .side-panel.open {
+            left: 0; /* Slide into view */
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 40;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0s 0.3s;
+        }
+        .overlay.visible {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+
+    <div class="container mx-auto p-4 sm:p-8">
+        
+        <!-- Hero Section -->
+        <header class="flex justify-between items-center py-6 mb-8">
+            <!-- Open Side Panel Button -->
+            <button id="open-panel-button" class="p-2 rounded-full hover:bg-gray-800 transition-colors duration-200">
+                <svg class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>
+                </svg>
+            </button>
+            
+            <div class="flex-grow text-center">
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-2">
+                    Video Game Blog
+                </h1>
+                <p class="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto">
+                    News, reviews, and insights from the gaming world.
+                </p>
+            </div>
+            
+            <!-- Placeholder to maintain symmetry on the right -->
+            <div class="h-8 w-8"></div>
+        </header>
+
+        <!-- Blog Posts -->
+        <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Blog Post 1 - Updated to link to the new page -->
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
+                <h2 class="text-2xl font-bold mb-4 text-yellow-400">Top 5 Games to Play this Summer</h2>
+                <p class="text-gray-300 text-sm mb-2">Published on July 25, 2024</p>
+                <p class="text-gray-300 mb-4">
+                    Looking for a new game to get lost in? Here are our top picks for the summer, from indie gems to blockbuster hits.
+                </p>
+                <a href="blog-post.html" class="inline-block bg-yellow-500 text-white font-bold py-2 px-6 rounded-full hover:bg-yellow-600 transition-colors duration-300">
+                    Read More
+                </a>
+            </div>
+
+            <!-- Blog Post 2 -->
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
+                <h2 class="text-2xl font-bold mb-4 text-purple-400">Elden Ring DLC: Shadow of the Erdtree</h2>
+                <p class="text-gray-300 text-sm mb-2">Published on June 21, 2024</p>
+                <p class="text-gray-300 mb-4">
+                    Our in-depth review of the highly anticipated Elden Ring expansion. Is it worth returning to the Lands Between?
+                </p>
+                <a href="#" class="inline-block bg-purple-500 text-white font-bold py-2 px-6 rounded-full hover:bg-purple-600 transition-colors duration-300">
+                    Read More
+                </a>
+            </div>
+
+            <!-- Blog Post 3 -->
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
+                <h2 class="text-2xl font-bold mb-4 text-blue-400">The Future of AI in Gaming</h2>
+                <p class="text-gray-300 text-sm mb-2">Published on May 15, 2024</p>
+                <p class="text-gray-300 mb-4">
+                    How is artificial intelligence shaping the way we play games? We explore the new frontiers of AI-powered gameplay.
+                </p>
+                <a href="#" class="inline-block bg-blue-500 text-white font-bold py-2 px-6 rounded-full hover:bg-blue-600 transition-colors duration-300">
+                    Read More
+                </a>
+            </div>
+
+            <!-- Blog Post 4 -->
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
+                <h2 class="text-2xl font-bold mb-4 text-teal-400"> Indie Spotlight: The Next Big Thing</h2>
+                <p class="text-gray-300 text-sm mb-2">Published on April 28, 2024</p>
+                <p class="text-gray-300 mb-4">
+                    Don't miss out on these hidden gems! We highlight three fantastic indie games you need to play right now.
+                </p>
+                <a href="#" class="inline-block bg-teal-500 text-white font-bold py-2 px-6 rounded-full hover:bg-teal-600 transition-colors duration-300">
+                    Read More
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <!-- Side Panel -->
+    <aside id="side-panel" class="side-panel">
+        <!-- Close button for the side panel -->
+        <div class="flex justify-end mb-8">
+            <button id="close-panel-button" class="p-2 rounded-full hover:bg-gray-800 transition-colors duration-200">
+                <svg class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Side panel content -->
+        <h2 class="text-3xl font-extrabold mb-8 text-white">More Content</h2>
+        <nav class="flex flex-col space-y-4">
+            <a href="index.html" class="text-lg font-semibold text-gray-400 hover:text-white transition-colors duration-200">Home</a>
+            <a href="blog.html" class="text-lg font-semibold text-gray-400 hover:text-white transition-colors duration-200">
+                <span class="text-yellow-400">Future</span> Blog
+            </a>
+            <a href="#" class="text-lg font-semibold text-gray-400 hover:text-white transition-colors duration-200">Contact</a>
+        </nav>
+    </aside>
+
+    <!-- Overlay to dim background when panel is open -->
+    <div id="overlay" class="overlay"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Side panel elements
+            const openPanelButton = document.getElementById('open-panel-button');
+            const closePanelButton = document.getElementById('close-panel-button');
+            const sidePanel = document.getElementById('side-panel');
+            const overlay = document.getElementById('overlay');
+
+            // Side panel event listeners
+            openPanelButton.addEventListener('click', () => {
+                sidePanel.classList.add('open');
+                overlay.classList.add('visible');
+            });
+
+            closePanelButton.addEventListener('click', () => {
+                sidePanel.classList.remove('open');
+                overlay.classList.remove('visible');
+            });
+
+            overlay.addEventListener('click', () => {
+                sidePanel.classList.remove('open');
+                overlay.classList.remove('visible');
+            });
+        });
+    </script>
+</body>
+</html>
