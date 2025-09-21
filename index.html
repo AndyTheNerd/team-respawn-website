@@ -66,7 +66,7 @@
     <div class="container mx-auto p-4 sm:p-8">
         
         <!-- Hero Section -->
-        <header class="flex justify-between items-center py-6 mb-8">
+        <header class="flex flex-col sm:flex-row justify-between items-center py-6 mb-8 space-y-4 sm:space-y-0">
             <!-- Open Side Panel Button -->
             <button id="open-panel-button" class="p-2 rounded-full hover:bg-gray-800 transition-colors duration-200">
                 <svg class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -75,14 +75,14 @@
             </button>
             
             <div class="flex-grow text-center">
-                <img src="content/Team-Respawn-Full.png" alt="Team Respawn Logo" class="w-full max-w-sm sm:max-w-md mx-auto mb-2">
-                <p class="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto">
+                <img src="content/Team-Respawn-Full.png" alt="Team Respawn Logo" class="w-40 sm:w-64 lg:w-80 mx-auto mb-2">
+                <p class="text-base sm:text-lg lg:text-xl text-gray-400 max-w-2xl mx-auto px-2">
                     Team Respawn is a thriving gaming channel led by Andy, dedicated to strategy lovers—especially fans of Halo Wars, Halo FPS, and Age of Empires.
                 </p>
             </div>
             
     <!-- Social Media Icons -->
-    <div class="flex space-x-4 text-gray-400">
+    <div class="flex space-x-4 text-gray-400 justify-center sm:justify-end">
         <a href="https://www.youtube.com/@TeamRespawn" target="_blank" class="hover:text-red-500">
             <i class="fab fa-youtube fa-lg"></i>
         </a>
@@ -100,17 +100,17 @@
         
         <!-- Tab Navigation - Updated for pill shape and description text -->
         <div class="flex flex-col items-center mb-8">
-            <div class="flex justify-center bg-gray-700 rounded-full p-1 max-w-xl mx-auto">
-                <button id="walkthroughs-tab" class="flex-1 px-6 py-2 rounded-full font-bold text-gray-900 bg-gray-200 transition-colors duration-300">
+            <div class="flex flex-wrap justify-center bg-gray-700 rounded-full p-1 max-w-full sm:max-w-xl mx-auto">
+                <button id="walkthroughs-tab" class="flex-1 px-3 py-1 sm:px-6 sm:py-2 text-sm sm:text-base rounded-full font-bold text-gray-900 bg-gray-200 transition-colors duration-300">
                     Walkthroughs
                 </button>
-                <button id="halo-wars-tab" class="flex-1 px-6 py-2 rounded-full font-bold text-gray-200 hover:bg-gray-600 transition-colors duration-300">
+                <button id="halo-wars-tab" class="flex-1 px-3 py-1 sm:px-6 sm:py-2 text-sm sm:text-base rounded-full font-bold text-gray-200 hover:bg-gray-600 transition-colors duration-300">
                     Halo Wars Guides
                 </button>
-                <button id="age-of-empires-tab" class="flex-1 px-6 py-2 rounded-full font-bold text-gray-200 hover:bg-gray-600 transition-colors duration-300">
+                <button id="age-of-empires-tab" class="flex-1 px-3 py-1 sm:px-6 sm:py-2 text-sm sm:text-base rounded-full font-bold text-gray-200 hover:bg-gray-600 transition-colors duration-300">
                     Age of Empires Guides
                 </button>
-                <button id="age-of-mythology-tab" class="flex-1 px-6 py-2 rounded-full font-bold text-gray-200 hover:bg-gray-600 transition-colors duration-300">
+                <button id="age-of-mythology-tab" class="flex-1 px-3 py-1 sm:px-6 sm:py-2 text-sm sm:text-base rounded-full font-bold text-gray-200 hover:bg-gray-600 transition-colors duration-300">
                     Age of Mythology Guides
                 </button>
             </div>
@@ -122,13 +122,13 @@
         </div>
 
         <!-- Tab Content Containers -->
-        <main id="walkthroughs-content" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <main id="walkthroughs-content" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
             <!-- Existing Video Cards -->
 
             <!-- Video 1 -->
-            <div class="video-card bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
+            <div class="video-card bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
                 <a href="https://www.youtube.com/watch?v=uGvD8-tGf1U" target="_blank" rel="noopener noreferrer">
-                    <h2 class="text-2xl font-bold mb-4 text-orange-400">Halo: Combat Evolved Anniversary</h2>
+                    <h2 class="text-xl sm:text-2xl font-bold mb-4 text-orange-400">Halo: Combat Evolved Anniversary</h2>
                     <div class="aspect-video mb-4 rounded-lg overflow-hidden relative">
                         <!-- Replaced iframe with a static image from a placeholder 'img' folder -->
                         <img src="img\Halo-CEA-Walkthrough-2023.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/212121/ffffff?text=Halo+CEA';" alt="A screenshot from Halo Combat Evovled Anniversary">
@@ -144,7 +144,7 @@
 
             <!-- Video 2 -->
             <div class="bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                <h2 class="text-2xl font-bold mb-4 text-purple-400">Halo 2 Anniversary</h2>
+                <h2 class="text-xl sm:text-2xl font-bold mb-4 text-purple-400">Halo 2 Anniversary</h2>
                     <div class="aspect-video mb-4 rounded-lg overflow-hidden relative">
                         <!-- Replaced iframe with a static image from a placeholder 'img' folder -->
                         <img src="img\Halo-2 Walkthrough.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/212121/ffffff?text=Halo+2';" alt="A screenshot from Halo 2 Anniversary">
@@ -160,7 +160,7 @@
 
             <!-- Video 3 -->
             <div class="bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                <h2 class="text-2xl font-bold mb-4 text-blue-400">Halo 3</h2>
+                <h2 class="text-xl sm:text-2xl font-bold mb-4 text-blue-400">Halo 3</h2>
                     <div class="aspect-video mb-4 rounded-lg overflow-hidden relative">
                         <!-- Replaced iframe with a static image from a placeholder 'img' folder -->
                         <img src="img\Halo-3-Walkthrough.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/212121/ffffff?text=Halo+3';" alt="A screenshot from Halo 3">
@@ -175,7 +175,7 @@
 
             <!-- Video 4 -->
             <div class="bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                <h2 class="text-2xl font-bold mb-4 text-pink-400">Halo 3 ODST</h2>
+                <h2 class="text-xl sm:text-2xl font-bold mb-4 text-pink-400">Halo 3 ODST</h2>
                     <div class="aspect-video mb-4 rounded-lg overflow-hidden relative">
                         <!-- Replaced iframe with a static image from a placeholder 'img' folder -->
                         <img src="img\Halo-3-ODST-Walkthrough.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/212121/ffffff?text=Halo+ODST';" alt="A screenshot from Halo 3 ODST">
@@ -190,7 +190,7 @@
 
             <!-- Video 5 -->
             <div class="bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                <h2 class="text-2xl font-bold mb-4 text-lime-400">Halo Reach</h2>
+                <h2 class="text-xl sm:text-2xl font-bold mb-4 text-lime-400">Halo Reach</h2>
                     <div class="aspect-video mb-4 rounded-lg overflow-hidden relative">
                         <!-- Replaced iframe with a static image from a placeholder 'img' folder -->
                         <img src="img\Halo-Reach-Walkthrough.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/212121/ffffff?text=Halo+Reach';" alt="A screenshot from Halo 4">
@@ -205,7 +205,7 @@
 
             <!-- Video 6 -->
             <div class="bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                <h2 class="text-2xl font-bold mb-4 text-teal-400">Halo 4</h2>
+                <h2 class="text-xl sm:text-2xl font-bold mb-4 text-teal-400">Halo 4</h2>
                     <div class="aspect-video mb-4 rounded-lg overflow-hidden relative">
                         <!-- Replaced iframe with a static image from a placeholder 'img' folder -->
                         <img src="img\Halo-4-Walkthrough.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/212121/ffffff?text=Halo+4';" alt="A screenshot from Halo 4">
@@ -220,7 +220,7 @@
 
             <!-- Video 7 -->
             <div class="bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                <h2 class="text-2xl font-bold mb-4 text-red-400">Halo Infinite</h2>
+                <h2 class="text-xl sm:text-2xl font-bold mb-4 text-red-400">Halo Infinite</h2>
                     <div class="aspect-video mb-4 rounded-lg overflow-hidden relative">
                         <!-- Replaced iframe with a static image from a placeholder 'img' folder -->
                         <img src="img\Halo-Infinite-Walkthrough.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/212121/ffffff?text=Halo+4';" alt="A screenshot from Halo 4">
@@ -235,7 +235,7 @@
 
             <!-- Video 7 -->
             <div class="bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                <h2 class="text-2xl font-bold mb-4 text-teal-400">Gears of War: Ultimate Edition</h2>
+                <h2 class="text-xl sm:text-2xl font-bold mb-4 text-teal-400">Gears of War: Ultimate Edition</h2>
                     <div class="aspect-video mb-4 rounded-lg overflow-hidden relative">
                         <!-- Replaced iframe with a static image from a placeholder 'img' folder -->
                         <img src="img\Gears1-Walkthrough.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/212121/ffffff?text=Halo+4';" alt="A screenshot from Halo 4">
@@ -249,9 +249,9 @@
             </div>
 
             <!-- Video 8 -->
-            <div class="video-card bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
+            <div class="video-card bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
                 <a href="https://www.youtube.com/watch?v=uGvD8-tGf1U" target="_blank" rel="noopener noreferrer">
-                    <h2 class="text-2xl font-bold mb-4 text-orange-400">Goblin Commander: Unleash the Horde</h2>
+                    <h2 class="text-xl sm:text-2xl font-bold mb-4 text-orange-400">Goblin Commander: Unleash the Horde</h2>
                     <div class="aspect-video mb-4 rounded-lg overflow-hidden relative">
                         <!-- Replaced iframe with a static image from a placeholder 'img' folder -->
                         <img src="img\Goblin-Commander-Walkthrough.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/212121/ffffff?text=Halo+CEA';" alt="A screenshot from Halo Combat Evovled Anniversary">
@@ -281,10 +281,10 @@
                 <p class="text-gray-400 mb-6">
                     Dive into our guides for the original Halo Wars, covering campaign walkthroughs and strategies.
                 </p>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
                     <!-- Halo Wars Video 1 (Halo Wars 1) -->
-                    <div class="video-card bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                        <h2 class="text-2xl font-bold mb-4 text-green-400">Halo Wars: Campaign Walkthrough Part 1</h2>
+                    <div class="video-card bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
+                        <h2 class="text-xl sm:text-2xl font-bold mb-4 text-green-400">Halo Wars: Campaign Walkthrough Part 1</h2>
                         <div class="aspect-video mb-4 rounded-lg overflow-hidden">
                             <iframe src="https://www.youtube.com/embed/1B6Gz-1V5gI" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                         </div>
@@ -304,10 +304,10 @@
                 <p class="text-gray-400 mb-6">
                     Explore guides for Halo Wars 2, including collectibles, multiplayer strategies, and more.
                 </p>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
                     <!-- Halo Wars Video 2 (Halo Wars 2) -->
-                    <div class="video-card bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                        <h2 class="text-2xl font-bold mb-4 text-green-400">Halo Wars 2: All Skulls Location</h2>
+                    <div class="video-card bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
+                        <h2 class="text-xl sm:text-2xl font-bold mb-4 text-green-400">Halo Wars 2: All Skulls Location</h2>
                         <div class="aspect-video mb-4 rounded-lg overflow-hidden">
                             <iframe src="https://www.youtube.com/embed/4Hq9R_hY6-g" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                         </div>
@@ -330,10 +330,10 @@
                 <p class="text-gray-400 mb-6">
                     Master the classic Age of Empires II with our guides on campaigns, civilizations, and strategies.
                 </p>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
                     <!-- Age of Empires II Video 1 (AoE II) -->
-                    <div class="video-card bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                        <h2 class="text-2xl font-bold mb-4 text-yellow-400">Age of Empires II: Advanced Build Orders</h2>
+                    <div class="video-card bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
+                        <h2 class="text-xl sm:text-2xl font-bold mb-4 text-yellow-400">Age of Empires II: Advanced Build Orders</h2>
                         <div class="aspect-video mb-4 rounded-lg overflow-hidden">
                             <iframe src="https://www.youtube.com/embed/q6w5R2sFpA0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                         </div>
@@ -352,10 +352,10 @@
                 <p class="text-gray-400 mb-6">
                     Explore guides for Age of Empires IV, including civilization overviews and competitive strategies.
                 </p>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
                     <!-- Age of Empires IV Video 1 (AoE IV) -->
-                    <div class="video-card bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                        <h2 class="text-2xl font-bold mb-4 text-yellow-400">Age of Empires IV: Beginner's Guide</h2>
+                    <div class="video-card bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
+                        <h2 class="text-xl sm:text-2xl font-bold mb-4 text-yellow-400">Age of Empires IV: Beginner's Guide</h2>
                         <div class="aspect-video mb-4 rounded-lg overflow-hidden">
                             <iframe src="https://www.youtube.com/embed/rV162wW_4H0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                         </div>
@@ -374,7 +374,7 @@
         <main id="age-of-mythology-content" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <!-- Age of Mythology Placeholder Video 1 -->
             <div class="bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                <h2 class="text-2xl font-bold mb-4 text-red-400">Age of Mythology: Titans Expansion Guide</h2>
+                <h2 class="text-xl sm:text-2xl font-bold mb-4 text-red-400">Age of Mythology: Titans Expansion Guide</h2>
                 <div class="aspect-video mb-4 rounded-lg overflow-hidden">
                     <iframe src="https://www.youtube.com/embed/hT_F_0E3i4Y" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                 </div>
@@ -388,7 +388,7 @@
             
             <!-- Age of Mythology Placeholder Video 2 -->
             <div class="bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                <h2 class="text-2xl font-bold mb-4 text-red-400">Age of Mythology: Chinese Gods Overview</h2>
+                <h2 class="text-xl sm:text-2xl font-bold mb-4 text-red-400">Age of Mythology: Chinese Gods Overview</h2>
                 <div class="aspect-video mb-4 rounded-lg overflow-hidden">
                     <iframe src="https://www.youtube.com/embed/K844zE86iFo" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                 </div>
@@ -401,7 +401,7 @@
             </div>
         </main>
 
-        <footer class="py-8 text-center text-gray-400">
+        <footer class="py-6 text-center text-gray-400 text-sm sm:text-base">
             <p>Made with <span class="text-red-500">❤</span> by Team Respawn</p>
         </footer>
     </div>
