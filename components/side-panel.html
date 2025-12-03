@@ -1,0 +1,46 @@
+<aside 
+    id="side-panel" 
+    class="side-panel"
+    role="navigation"
+    aria-label="Main navigation"
+    aria-hidden="true">
+    <!-- Close button for the side panel -->
+    <div class="flex justify-end mb-8">
+        <button 
+            id="close-panel-button" 
+            class="p-2 rounded-full hover:bg-gray-800 transition-colors duration-200"
+            aria-label="Close navigation menu"
+            type="button">
+            <svg class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Side panel content -->
+    <h2 class="text-3xl font-extrabold mb-8 text-white">More Content</h2>
+    <nav class="flex flex-col space-y-4" aria-label="Site navigation">
+        <a href="./index.html" class="text-lg font-semibold text-gray-400 hover:text-white transition-colors duration-200">Home</a>
+        <a href="#" class="text-lg font-semibold text-gray-400 hover:text-white transition-colors duration-200">Blog
+            <span class="text-yellow-400"> Coming Soon</span>
+        </a>
+        <a 
+            href="https://andythenerd.github.io/Halo-Quotes/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            class="text-lg font-semibold text-gray-400 hover:text-white transition-colors duration-200">
+            Halo Quotes Website
+        </a>
+    </nav>
+
+    <!-- Social Icons in Sidebar -->
+    <div id="sidebar-social-icons" class="mt-auto flex justify-center space-x-4 text-gray-400" aria-label="Social media links"></div>
+</aside>
+
+<!-- Overlay to dim background when panel is open -->
+<div 
+    id="overlay" 
+    class="overlay"
+    aria-hidden="true"
+    aria-label="Close navigation menu overlay"></div>
+
