@@ -37,42 +37,47 @@ async function loadAndRenderVideos() {
         }
         const data = await response.json();
 
+        // Validate that data is an object
+        if (!data || typeof data !== 'object') {
+            throw new Error('Invalid video data format');
+        }
+
         // Render walkthroughs
-        if (data.walkthroughs && data.walkthroughs.length > 0) {
+        if (data.walkthroughs && Array.isArray(data.walkthroughs) && data.walkthroughs.length > 0) {
             renderVideoGrid(data.walkthroughs, 'walkthroughs-content');
         }
 
         // Render Halo Wars content
-        if (data['halo-wars']) {
+        if (data['halo-wars'] && typeof data['halo-wars'] === 'object') {
             const haloWarsContent = document.getElementById('halo-wars-content');
             if (haloWarsContent) {
                 haloWarsContent.innerHTML = ''; // Clear any existing content
                 
                 // Render Halo Wars 2 section
-                if (data['halo-wars']['halo-wars-2']) {
+                if (data['halo-wars']['halo-wars-2'] && typeof data['halo-wars']['halo-wars-2'] === 'object') {
                     renderVideoSection(data['halo-wars']['halo-wars-2'], 'halo-wars-content');
                 }
                 
                 // Render Halo Wars 1 section
-                if (data['halo-wars']['halo-wars-1']) {
+                if (data['halo-wars']['halo-wars-1'] && typeof data['halo-wars']['halo-wars-1'] === 'object') {
                     renderVideoSection(data['halo-wars']['halo-wars-1'], 'halo-wars-content');
                 }
             }
         }
 
         // Render Age of Empires content
-        if (data['age-of-empires']) {
+        if (data['age-of-empires'] && typeof data['age-of-empires'] === 'object') {
             const aoeContent = document.getElementById('age-of-empires-content');
             if (aoeContent) {
                 aoeContent.innerHTML = ''; // Clear any existing content
                 
                 // Render AoE II section
-                if (data['age-of-empires']['aoe-2']) {
+                if (data['age-of-empires']['aoe-2'] && typeof data['age-of-empires']['aoe-2'] === 'object') {
                     renderVideoSection(data['age-of-empires']['aoe-2'], 'age-of-empires-content');
                 }
                 
                 // Render AoE IV section
-                if (data['age-of-empires']['aoe-4']) {
+                if (data['age-of-empires']['aoe-4'] && typeof data['age-of-empires']['aoe-4'] === 'object') {
                     renderVideoSection(data['age-of-empires']['aoe-4'], 'age-of-empires-content');
                 }
             }
