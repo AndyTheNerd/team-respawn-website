@@ -1,0 +1,224 @@
+{
+  "walkthroughs": [
+    {
+      "title": "Halo: Combat Evolved Anniversary",
+      "description": "Humanity's last super-soldier fights an alien army and a parasitic threat on a mysterious ringworld.",
+      "youtubeUrl": "https://youtu.be/F1IcZeDYFd4",
+      "imageSrc": "img/Halo-CEA-Walkthrough-2023.jpg",
+      "color": "orange-400",
+      "buttonColor": "orange-500",
+      "alt": "A screenshot from Halo Combat Evolved Anniversary"
+    },
+    {
+      "title": "Halo 2 Anniversary",
+      "description": "Master Chief defends Earth while a disgraced alien, the Arbiter, uncovers a Covenant conspiracy.",
+      "youtubeUrl": "https://youtu.be/KmaZvyOKJ0k",
+      "imageSrc": "img/Halo-2 Walkthrough.jpg",
+      "color": "purple-400",
+      "buttonColor": "purple-500",
+      "alt": "A screenshot from Halo 2 Anniversary"
+    },
+    {
+      "title": "Halo 3",
+      "description": "Master Chief returns to Earth to finish the fight, stopping the Covenant and Flood once and for all.",
+      "youtubeUrl": "https://youtu.be/Mu7YMk5W8-8",
+      "imageSrc": "img/Halo-3-Walkthrough.jpg",
+      "color": "blue-400",
+      "buttonColor": "blue-500",
+      "alt": "A screenshot from Halo 3"
+    },
+    {
+      "title": "Halo 3 ODST",
+      "description": "A Helljumper awakens alone in New Mombasa, searching for his squad and uncovering a secret Covenant plot.",
+      "youtubeUrl": "https://youtu.be/PIirToORUM8",
+      "imageSrc": "img/Halo-3-ODST-Walkthrough.jpg",
+      "color": "pink-400",
+      "buttonColor": "pink-500",
+      "alt": "A screenshot from Halo 3 ODST"
+    },
+    {
+      "title": "Halo Reach",
+      "description": "As the Covenant invade humanity's last fortress, Noble Team makes a final stand to ensure Earth's survival.",
+      "youtubeUrl": "https://youtu.be/tKfsjD-ixGk",
+      "imageSrc": "img/Halo-Reach-Walkthrough.jpg",
+      "color": "lime-400",
+      "buttonColor": "lime-500",
+      "alt": "A screenshot from Halo Reach"
+    },
+    {
+      "title": "Halo 4",
+      "description": "After years adrift, Chief and Cortana crash on a Forerunner world, facing a new ancient foe and her AI rampancy.",
+      "youtubeUrl": "https://youtu.be/LmBFwjGlfmE",
+      "imageSrc": "img/Halo-4-Walkthrough.jpg",
+      "color": "teal-400",
+      "buttonColor": "teal-500",
+      "alt": "A screenshot from Halo 4"
+    },
+    {
+      "title": "Halo Infinite",
+      "description": "On a damaged Halo ring, Master Chief faces the Banished, searching for Cortana and uncovering a new threat.",
+      "youtubeUrl": "https://youtu.be/pI_oIv-3MSg",
+      "imageSrc": "img/Halo-Infinite-Walkthrough.jpg",
+      "color": "red-400",
+      "buttonColor": "red-500",
+      "alt": "A screenshot from Halo Infinite"
+    },
+    {
+      "title": "Halo Wars",
+      "description": "UNSC soldiers on the Spirit of Fire fight the Covenant and discover a Flood-infested Forerunner shield world.",
+      "youtubeUrl": "https://youtu.be/BYBLYmBIS2A",
+      "imageSrc": "img/Halo-Wars-Walkthrough.jpg",
+      "color": "blue-400",
+      "buttonColor": "blue-500",
+      "alt": "A screenshot from Halo Wars"
+    },
+    {
+      "title": "Halo Wars 2",
+      "description": "The Spirit of Fire awakens 28 years later to find a new brutal alien faction, the Banished.",
+      "youtubeUrl": "https://youtu.be/Ain_YH5VD6M",
+      "imageSrc": "img/Halo-Wars-2-Walkthrough.jpg",
+      "color": "yellow-400",
+      "buttonColor": "yellow-500",
+      "alt": "A screenshot from Halo Wars 2"
+    },
+    {
+      "title": "Halo Wars 2: Operation Spearbreaker",
+      "description": "An ODST team, Sunray 1-1, drops in to stop a Banished plan to destroy the Spirit of Fire.",
+      "youtubeUrl": "https://youtu.be/WxWnwAIB2Ak",
+      "imageSrc": "img/Spearbreaker-Walkthrough.jpg",
+      "color": "yellow-400",
+      "buttonColor": "yellow-500",
+      "alt": "A screenshot from Halo Wars 2 Operation Spearbreaker"
+    },
+    {
+      "title": "Gears of War: Ultimate Edition",
+      "description": "Freed from prison, Marcus Fenix joins Delta Squad to detonate a bomb in the Locust tunnels.",
+      "youtubeUrl": "https://www.youtube.com/watch?v=FwB3665hT-E",
+      "imageSrc": "img/Gears1-Walkthrough.jpg",
+      "color": "teal-400",
+      "buttonColor": "teal-500",
+      "alt": "A screenshot from Gears of War"
+    },
+    {
+      "title": "Goblin Commander: Unleash the Horde",
+      "description": "A wizard's death sparks a goblin civil war. Unite clans and discover the truth behind the plot.",
+      "youtubeUrl": "https://www.youtube.com/watch?v=VvD3M82_f_Q",
+      "imageSrc": "img/Goblin-Commander-Walkthrough.jpg",
+      "color": "orange-400",
+      "buttonColor": "orange-500",
+      "alt": "A screenshot from Goblin Commander: Unleash the Horde"
+    }
+  ],
+  "halo-wars": {
+    "halo-wars-2": {
+      "title": "Halo Wars 2 Guides",
+      "description": "Explore guides for Halo Wars 2, including leader builds, multiplayer strategies, and more.",
+      "videos": [
+        {
+          "title": "Ten Tips for Every Beginner!",
+          "description": "New to Halo Wars 2? Learn the basics with these ten essential tips to get you started on the battlefield!",
+          "youtubeUrl": "https://youtu.be/p5fnWN1E4nw",
+          "imageSrc": "img/HW-Guides/Ten-Tips.jpg",
+          "color": "green-400",
+          "buttonColor": "green-500",
+          "alt": "A screenshot from Halo Wars 2"
+        },
+        {
+          "title": "Placeholder Guide 1",
+          "description": "This is a placeholder description for a new Halo Wars 2 guide. More content is coming soon!",
+          "youtubeUrl": "#",
+          "imageSrc": "https://placehold.co/600x400/212121/ffffff?text=Coming+Soon",
+          "color": "cyan-400",
+          "buttonColor": "cyan-500",
+          "alt": "Placeholder image for a Halo Wars guide."
+        },
+        {
+          "title": "Placeholder Guide 2",
+          "description": "This is another placeholder description for a new Halo Wars 2 guide. Check back later for updates.",
+          "youtubeUrl": "#",
+          "imageSrc": "https://placehold.co/600x400/212121/ffffff?text=Coming+Soon",
+          "color": "orange-400",
+          "buttonColor": "orange-500",
+          "alt": "Placeholder image for a Halo Wars guide."
+        },
+        {
+          "title": "Placeholder Guide 3",
+          "description": "This is a final placeholder tile for a new guide. A new video will be linked here soon.",
+          "youtubeUrl": "#",
+          "imageSrc": "https://placehold.co/600x400/212121/ffffff?text=Coming+Soon",
+          "color": "purple-400",
+          "buttonColor": "purple-500",
+          "alt": "Placeholder image for a Halo Wars guide."
+        }
+      ]
+    },
+    "halo-wars-1": {
+      "title": "Halo Wars 1 Guides",
+      "description": "Dive into our guides for the original Halo Wars, covering campaign walkthroughs and strategies.",
+      "videos": [
+        {
+          "title": "Why is Arcadia City so DIFFICULT in Halo Wars?!",
+          "description": "A full guide to a mission of the original Halo Wars campaign.",
+          "youtubeUrl": "https://youtu.be/2xGB56Xao3k",
+          "iframeSrc": "https://www.youtube.com/embed/1B6Gz-1V5gI",
+          "color": "green-400",
+          "buttonColor": "green-500",
+          "alt": "A screenshot from Halo Wars"
+        }
+      ]
+    }
+  },
+  "age-of-empires": {
+    "aoe-2": {
+      "title": "Age of Empires II",
+      "description": "Master the classic Age of Empires II with our guides on campaigns, civilizations, and strategies.",
+      "videos": [
+        {
+          "title": "Age of Empires II: Advanced Build Orders",
+          "description": "Take your game to the next level with these advanced build orders and strategies for competitive play.",
+          "youtubeUrl": "https://www.youtube.com/watch?v=q6w5R2sFpA0",
+          "iframeSrc": "https://www.youtube.com/embed/q6w5R2sFpA0",
+          "color": "yellow-400",
+          "buttonColor": "yellow-500",
+          "alt": "A screenshot from Age of Empires II"
+        }
+      ]
+    },
+    "aoe-4": {
+      "title": "Age of Empires IV",
+      "description": "Explore guides for Age of Empires IV, including civilization overviews and competitive strategies.",
+      "videos": [
+        {
+          "title": "Age of Empires IV: Beginner's Guide",
+          "description": "A comprehensive guide for new players to the world of Age of Empires IV, covering civilizations, resources, and combat.",
+          "youtubeUrl": "https://www.youtube.com/watch?v=rV162wW_4H0",
+          "iframeSrc": "https://www.youtube.com/embed/rV162wW_4H0",
+          "color": "yellow-400",
+          "buttonColor": "yellow-500",
+          "alt": "A screenshot from Age of Empires IV"
+        }
+      ]
+    }
+  },
+  "age-of-mythology": [
+    {
+      "title": "Age of Mythology: Titans Expansion Guide",
+      "description": "Unleash the power of the Titans with this guide to the expansion pack.",
+      "youtubeUrl": "https://www.youtube.com/watch?v=hT_F_0E3i4Y",
+      "iframeSrc": "https://www.youtube.com/embed/hT_F_0E3i4Y",
+      "color": "red-400",
+      "buttonColor": "red-500",
+      "alt": "A screenshot from Age of Mythology"
+    },
+    {
+      "title": "Age of Mythology: Chinese Gods Overview",
+      "description": "A deep dive into the Chinese pantheon from the Tale of the Dragon expansion.",
+      "youtubeUrl": "https://www.youtube.com/watch?v=K844zE86iFo",
+      "iframeSrc": "https://www.youtube.com/embed/K844zE86iFo",
+      "color": "red-400",
+      "buttonColor": "red-500",
+      "alt": "A screenshot from Age of Mythology"
+    }
+  ]
+}
+

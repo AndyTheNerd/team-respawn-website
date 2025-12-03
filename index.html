@@ -3,601 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team Respawn</title>
+    
+    <!-- SEO Meta Tags -->
+    <title>Team Respawn - Gaming Walkthroughs & Strategy Guides | Halo Wars, Halo FPS, Age of Empires</title>
+    <meta name="description" content="Team Respawn is a thriving gaming channel led by Andy, dedicated to strategy lovers—especially fans of Halo Wars, Halo FPS, and Age of Empires. Watch full walkthroughs and in-depth strategy guides.">
+    <meta name="keywords" content="Team Respawn, gaming walkthroughs, Halo Wars guides, Age of Empires guides, strategy games, video game guides, Halo FPS walkthroughs">
+    <meta name="author" content="Team Respawn">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://www.teamrespawn.com/">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.teamrespawn.com/">
+    <meta property="og:title" content="Team Respawn - Gaming Walkthroughs & Strategy Guides">
+    <meta property="og:description" content="Full walkthroughs and strategy guides for Halo Wars, Halo FPS, and Age of Empires.">
+    <meta property="og:image" content="https://www.teamrespawn.com/content/Team-Respawn-Full.png">
+    <meta property="og:site_name" content="Team Respawn">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://www.teamrespawn.com/">
+    <meta name="twitter:title" content="Team Respawn - Gaming Walkthroughs & Strategy Guides">
+    <meta name="twitter:description" content="Full walkthroughs and strategy guides for Halo Wars, Halo FPS, and Age of Empires.">
+    <meta name="twitter:image" content="https://www.teamrespawn.com/content/Team-Respawn-Full.png">
+    
+    <!-- Security Headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    
+    <!-- External Resources -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        .aspect-video {
-            position: relative;
-            width: 100%;
-            padding-bottom: 56.25%; /* 16:9 aspect ratio */
-        }
-        .aspect-video iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-        /* Side panel styles */
-        .side-panel {
-            position: fixed;
-            top: 0;
-            left: -100%; /* Start off-screen on the left */
-            width: 100%;
-            max-width: 320px;
-            height: 100%;
-            background-color: #1a202c; /* Matches bg-gray-900 */
-            z-index: 50;
-            transition: left 0.3s ease-in-out;
-            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.5); /* Shadow on the right side of the panel */
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-        }
-        .side-panel.open {
-            left: 0; /* Slide into view */
-        }
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: 40;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease-in-out, visibility 0s 0.3s;
-        }
-        .overlay.visible {
-            opacity: 1;
-            visibility: visible;
-            transition: opacity 0.3s ease-in-out;
-        }
-    </style>
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Team Respawn",
+      "url": "https://www.teamrespawn.com",
+      "logo": "https://www.teamrespawn.com/content/Team-Respawn-Full.png",
+      "description": "Gaming channel dedicated to strategy lovers—especially fans of Halo Wars, Halo FPS, and Age of Empires.",
+      "sameAs": [
+        "https://www.youtube.com/@TeamRespawn",
+        "https://www.twitch.tv/TeamRespawnTV",
+        "https://discord.gg/TeamRespawn"
+      ]
+    }
+    </script>
 </head>
 <body class="bg-gray-900 text-white">
+    <!-- Skip to main content link for accessibility -->
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-white focus:text-black focus:px-4 focus:py-2 focus:rounded">Skip to main content</a>
 
     <div class="container mx-auto p-4 sm:p-8">
         
-        <!-- Hero Section -->
-        <header class="flex flex-col sm:flex-row justify-between items-center py-6 mb-8 space-y-4 sm:space-y-0">
-            <!-- Open Side Panel Button -->
-            <button id="open-panel-button" class="p-2 rounded-full hover:bg-gray-800 transition-colors duration-200">
-                <svg class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>
-                </svg>
-            </button>
-            
-            <div class="flex-grow text-center">
-                <img src="content/Team-Respawn-Full.png" alt="Team Respawn Logo" class="w-40 sm:w-64 lg:w-80 mx-auto mb-2">
-                <p class="text-base sm:text-lg lg:text-xl text-gray-400 max-w-2xl mx-auto px-2">
-                    Team Respawn is a thriving gaming channel led by Andy, dedicated to strategy lovers—especially fans of Halo Wars, Halo FPS, and Age of Empires.
-                </p>
-            </div>
-            
-    <!-- Social Media Icons -->
-    <div class="flex space-x-4 text-gray-400 justify-center sm:justify-end">
-        <a href="https://www.youtube.com/@TeamRespawn" target="_blank" class="hover:text-red-500">
-            <i class="fab fa-youtube fa-lg"></i>
-        </a>
-        <a href="https://www.twitch.tv/TeamRespawnTV" target="_blank" class="hover:text-purple-500">
-            <i class="fab fa-twitch fa-lg"></i>
-        </a>
-        <a href="https://discord.gg/TeamRespawn" target="_blank" class="hover:text-indigo-500">
-            <i class="fab fa-discord fa-lg"></i>
-        </a>
-        <a href="https://www.teamrespawn.shop" target="_blank" class="hover:text-green-400">
-            <i class="fas fa-shopping-cart fa-lg"></i>
-        </a>
-    </div>
-        </header>
+        <!-- Header Component -->
+        <div id="header-container"></div>
         
-        <!-- Tab Navigation - Updated for pill shape and description text -->
-        <div class="flex flex-col items-center mb-8">
-            <div class="flex flex-wrap justify-center bg-gray-700 rounded-full p-1 max-w-full sm:max-w-xl mx-auto">
-                <button id="walkthroughs-tab" class="flex-1 px-3 py-1 sm:px-6 sm:py-2 text-sm sm:text-base rounded-full font-bold text-gray-900 bg-gray-200 transition-colors duration-300">
-                    Walkthroughs
-                </button>
-                <button id="halo-wars-tab" class="flex-1 px-3 py-1 sm:px-6 sm:py-2 text-sm sm:text-base rounded-full font-bold text-gray-200 hover:bg-gray-600 transition-colors duration-300">
-                    Halo Wars Guides
-                </button>
-                <button id="age-of-empires-tab" class="flex-1 px-3 py-1 sm:px-6 sm:py-2 text-sm sm:text-base rounded-full font-bold text-gray-200 hover:bg-gray-600 transition-colors duration-300">
-                    Age of Empires Guides
-                </button>
-                <button id="age-of-mythology-tab" class="flex-1 px-3 py-1 sm:px-6 sm:py-2 text-sm sm:text-base rounded-full font-bold text-gray-200 hover:bg-gray-600 transition-colors duration-300">
-                    Age of Mythology Guides
-                </button>
-            </div>
-            <!-- Tab Descriptions -->
-            <p id="walkthroughs-summary" class="mt-4 text-center text-sm text-gray-400">Full walkthroughs from Team Respawn.</p>
-            <p id="halo-wars-summary" class="mt-4 text-center text-sm text-gray-400 hidden">In-depth strategies and tips for the Halo Wars series.</p>
-            <p id="age-of-empires-summary" class="mt-4 text-center text-sm text-gray-400 hidden">Master the battlefield with guides for Age of Empires.</p>
-            <p id="age-of-mythology-summary" class="mt-4 text-center text-sm text-gray-400 hidden">Delve into the mythology of this classic real-time strategy game.</p>
-        </div>
+        <!-- Tab Navigation Component -->
+        <div id="tab-navigation-container"></div>
 
         <!-- Tab Content Containers -->
-        <main id="walkthroughs-content" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-            <!-- Existing Video Cards -->
-
-            <!-- Halo 1 -->
-            <div class="relative bg-gray-800 p-6 rounded-xl shadow-lg hover:scale-105 transition-transform duration-300">
-                <h2 class="text-xl font-bold mb-4 text-orange-400">Halo: Combat Evolved Anniversary</h2>
-                    <div class="aspect-video mb-4 rounded-lg overflow-hidden relative">
-                        <!-- Replaced iframe with a static image from a placeholder 'img' folder -->
-                        <img src="img\Halo-CEA-Walkthrough-2023.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/212121/ffffff?text=Halo+CEA';" alt="A screenshot from Halo Combat Evovled Anniversary">
-                    </div>
-                </a>
-                <p class="text-gray-300 mb-4">
-                    Humanity's last super-soldier fights an alien army and a parasitic threat on a mysterious ringworld.
-                </p>
-                <a href="https://youtu.be/F1IcZeDYFd4" target="_blank" rel="noopener noreferrer" class="inline-block bg-orange-500 text-white font-bold py-2 px-6 rounded-full hover:bg-orange-600 transition-colors duration-300">
-                    Watch on YouTube
-                </a>
-            </div>
-
-            <!-- Halo 2 -->
-            <div class="bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                <h2 class="text-xl sm:text-2xl font-bold mb-4 text-purple-400">Halo 2 Anniversary</h2>
-                    <div class="aspect-video mb-4 rounded-lg overflow-hidden relative">
-                        <!-- Replaced iframe with a static image from a placeholder 'img' folder -->
-                        <img src="img\Halo-2 Walkthrough.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/212121/ffffff?text=Halo+2';" alt="A screenshot from Halo 2 Anniversary">
-                    </div>
-                </a>
-                <p class="text-gray-300 mb-4">
-                    Master Chief defends Earth while a disgraced alien, the Arbiter, uncovers a Covenant conspiracy.
-                </p>
-                <a href="https://youtu.be/KmaZvyOKJ0k" target="_blank" rel="noopener noreferrer" class="inline-block bg-purple-500 text-white font-bold py-2 px-6 rounded-full hover:bg-purple-600 transition-colors duration-300">
-                    Watch on YouTube
-                </a>
-            </div>
-
-            <!-- Halo 3 -->
-            <div class="bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                <h2 class="text-xl sm:text-2xl font-bold mb-4 text-blue-400">Halo 3</h2>
-                    <div class="aspect-video mb-4 rounded-lg overflow-hidden relative">
-                        <!-- Replaced iframe with a static image from a placeholder 'img' folder -->
-                        <img src="img\Halo-3-Walkthrough.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/212121/ffffff?text=Halo+3';" alt="A screenshot from Halo 3">
-                    </div>
-                <p class="text-gray-300 mb-4">
-                    Master Chief returns to Earth to finish the fight, stopping the Covenant and Flood once and for all.
-                </p>
-                <a href="https://youtu.be/Mu7YMk5W8-8" target="_blank" rel="noopener noreferrer" class="inline-block bg-blue-500 text-white font-bold py-2 px-6 rounded-full hover:bg-blue-600 transition-colors duration-300">
-                    Watch on YouTube
-                </a>
-            </div>
-
-            <!-- Halo 3 ODST -->
-            <div class="bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">  
-                <h2 class="text-xl sm:text-2xl font-bold mb-4 text-pink-400">Halo 3 ODST</h2>
-                    <div class="aspect-video mb-4 rounded-lg overflow-hidden relative">
-                        <!-- Replaced iframe with a static image from a placeholder 'img' folder -->
-                        <img src="img\Halo-3-ODST-Walkthrough.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/212121/ffffff?text=Halo+3+ODST';" alt="A screenshot from Halo 3 ODST">
-                    </div>
-                <p class="text-gray-300 mb-4">
-                    A Helljumper awakens alone in New Mombasa, searching for his squad and uncovering a secret Covenant plot.
-                </p>
-                <a href="https://youtu.be/PIirToORUM8" target="_blank" rel="noopener noreferrer" class="inline-block bg-pink-500 text-white font-bold py-2 px-6 rounded-full hover:bg-pink-600 transition-colors duration-300">
-                    Watch on YouTube
-                </a>
-            </div>
-
-            <!-- Halo Reach -->
-            <div class="bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                <h2 class="text-xl sm:text-2xl font-bold mb-4 text-lime-400">Halo Reach</h2>
-                    <div class="aspect-video mb-4 rounded-lg overflow-hidden relative">
-                        <!-- Replaced iframe with a static image from a placeholder 'img' folder -->
-                        <img src="img\Halo-Reach-Walkthrough.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/212121/ffffff?text=Halo+Reach';" alt="A screenshot from Halo Reach">
-                    </div>
-                <p class="text-gray-300 mb-4">
-                    As the Covenant invade humanity's last fortress, Noble Team makes a final stand to ensure Earth's survival.
-                </p>
-                <a href="https://youtu.be/tKfsjD-ixGk" target="_blank" rel="noopener noreferrer" class="inline-block bg-lime-500 text-white font-bold py-2 px-6 rounded-full hover:bg-lime-600 transition-colors duration-300">
-                    Watch on YouTube
-                </a>
-            </div>
-
-            <!-- Halo 4 -->
-            <div class="bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                <h2 class="text-xl sm:text-2xl font-bold mb-4 text-teal-400">Halo 4</h2>
-                    <div class="aspect-video mb-4 rounded-lg overflow-hidden relative">
-                        <!-- Replaced iframe with a static image from a placeholder 'img' folder -->
-                        <img src="img\Halo-4-Walkthrough.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/212121/ffffff?text=Halo+4';" alt="A screenshot from Halo 4">
-                    </div>
-                <p class="text-gray-300 mb-4">
-                    After years adrift, Chief and Cortana crash on a Forerunner world, facing a new ancient foe and her AI rampancy.
-                </p>
-                <a href="https://youtu.be/LmBFwjGlfmE" target="_blank" rel="noopener noreferrer" class="inline-block bg-teal-500 text-white font-bold py-2 px-6 rounded-full hover:bg-teal-600 transition-colors duration-300">
-                    Watch on YouTube
-                </a>
-            </div>
-
-            <!-- Halo Infinite -->
-            <div class="bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                <h2 class="text-xl sm:text-2xl font-bold mb-4 text-red-400">Halo Infinite</h2>
-                    <div class="aspect-video mb-4 rounded-lg overflow-hidden relative">
-                        <!-- Replaced iframe with a static image from a placeholder 'img' folder -->
-                        <img src="img\Halo-Infinite-Walkthrough.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/212121/ffffff?text=Halo+Infinite';" alt="A screenshot from Halo Infinite">
-                    </div>
-                <p class="text-gray-300 mb-4">
-                    On a damaged Halo ring, Master Chief faces the Banished, searching for Cortana and uncovering a new threat.
-                </p>
-                <a href="https://youtu.be/pI_oIv-3MSg" target="_blank" rel="noopener noreferrer" class="inline-block bg-red-500 text-white font-bold py-2 px-6 rounded-full hover:bg-red-600 transition-colors duration-300">
-                    Watch on YouTube
-                </a>
-            </div>
-
-            <!-- Halo Wars 1 -->
-            <div class="bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                <h2 class="text-xl sm:text-2xl font-bold mb-4 text-blue-400">Halo Wars</h2>
-                    <div class="aspect-video mb-4 rounded-lg overflow-hidden relative">
-                        <!-- Replaced iframe with a static image from a placeholder 'img' folder -->
-                        <img src="img\Halo-Wars-Walkthrough.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/212121/ffffff?text=Halo+Wars';" alt="A screenshot from Halo Wars">
-                    </div>
-                <p class="text-gray-300 mb-4">
-                    UNSC soldiers on the Spirit of Fire fight the Covenant and discover a Flood-infested Forerunner shield world.
-                </p>
-                <a href="https://youtu.be/BYBLYmBIS2A" target="_blank" rel="noopener noreferrer" class="inline-block bg-blue-500 text-white font-bold py-2 px-6 rounded-full hover:bg-blue-600 transition-colors duration-300">
-                    Watch on YouTube
-                </a>
-            </div>
-
-   
-            <!-- Halo Wars 2 -->
-            <div class="video-card bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                <h2 class="text-xl sm:text-2xl font-bold mb-4 text-yellow-400">Halo Wars 2</h2>
-                    <div class="aspect-video mb-4 rounded-lg overflow-hidden relative">
-                        <!-- Replaced iframe with a static image from a placeholder 'img' folder -->
-                        <img src="img\Halo-Wars-2-Walkthrough.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/212121/ffffff?text=Halo+Wars+2';" alt="A screenshot from Halo Wars 2">
-                    </div>
-                <p class="text-gray-300 mb-4">
-                    The Spirit of Fire awakens 28 years later to find a new brutal alien faction, the Banished.
-                </p>
-                <a href="https://youtu.be/Ain_YH5VD6M" target="_blank" rel="noopener noreferrer" class="inline-block bg-yellow-500 text-white font-bold py-2 px-6 rounded-full hover:bg-yellow-600 transition-colors duration-300">
-                    Watch on YouTube
-                </a>
-            </div>
-
-            <!-- Halo Wars 2: Spearbreaker -->
-            <div class="video-card bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                <h2 class="text-xl sm:text-2xl font-bold mb-4 text-yellow-400">Halo Wars 2: Operation Spearbreaker</h2>
-                    <div class="aspect-video mb-4 rounded-lg overflow-hidden relative">
-                        <!-- Replaced iframe with a static image from a placeholder 'img' folder -->
-                        <img src="img\Spearbreaker-Walkthrough.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/212121/ffffff?text=Halo+Wars+2+Spearbreaker';" alt="A screenshot from Halo Wars 2 Operation Spearbreaker">
-                    </div>
-                <p class="text-gray-300 mb-4">
-                    An ODST team, Sunray 1-1, drops in to stop a Banished plan to destroy the Spirit of Fire.
-                </p>
-                <a href="https://youtu.be/WxWnwAIB2Ak" target="_blank" rel="noopener noreferrer" class="inline-block bg-yellow-500 text-white font-bold py-2 px-6 rounded-full hover:bg-yellow-600 transition-colors duration-300">
-                    Watch on YouTube
-                </a>
-            </div>
-
-            <!-- Gears 1 -->
-            <div class="bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                <h2 class="text-xl sm:text-2xl font-bold mb-4 text-teal-400">Gears of War: Ultimate Edition</h2>
-                    <div class="aspect-video mb-4 rounded-lg overflow-hidden relative">
-                        <!-- Replaced iframe with a static image from a placeholder 'img' folder -->
-                        <img src="img\Gears1-Walkthrough.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/212121/ffffff?text=Gears+of+War';" alt="A screenshot from Gears of War">
-                    </div>
-                <p class="text-gray-300 mb-4">
-                    Freed from prison, Marcus Fenix joins Delta Squad to detonate a bomb in the Locust tunnels.
-                </p>
-                <a href="https://www.youtube.com/watch?v=FwB3665hT-E" target="_blank" rel="noopener noreferrer" class="inline-block bg-teal-500 text-white font-bold py-2 px-6 rounded-full hover:bg-teal-600 transition-colors duration-300">
-                    Watch on YouTube
-                </a>
-            </div>
-
-            <!-- Goblin Commander Unleash the Horde -->
-            <div class="video-card bg-gray-800  p-4 sm:p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                <a href="https://www.youtube.com/watch?v=uGvD8-tGf1U" target="_blank" rel="noopener noreferrer">
-                    <h2 class="text-xl sm:text-2xl font-bold mb-4 text-orange-400">Goblin Commander: Unleash the Horde</h2>
-                    <div class="aspect-video mb-4 rounded-lg overflow-hidden relative">
-                        <!-- Replaced iframe with a static image from a placeholder 'img' folder -->
-                        <img src="img\Goblin-Commander-Walkthrough.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/212121/ffffff?text=Goblin+Commander';" alt="A screenshot from Goblin Commander: Unleash the Horde">
-                    </div>
-                </a>
-                <p class="text-gray-300 mb-4">
-                    A wizard's death sparks a goblin civil war. Unite clans and discover the truth behind the plot.
-                </p>
-                <a href="https://www.youtube.com/watch?v=VvD3M82_f_Q" target="_blank" rel="noopener noreferrer" class="inline-block bg-orange-500 text-white font-bold py-2 px-6 rounded-full hover:bg-orange-600 transition-colors duration-300">
-                    Watch on YouTube
-                </a>
-            </div>
-
+        <main id="walkthroughs-content" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8" id="main-content" role="main" aria-label="Walkthroughs content">
+            <!-- Videos will be loaded from JSON -->
         </main>
 
         <!-- Halo Wars Tab Content -->
-        <main id="halo-wars-content" class="hidden grid grid-cols-1 gap-8">
-            <!-- Halo Wars 2 Content -->
-            <div class="p-6 rounded-xl border border-gray-700">
-                <h3 class="text-2xl font-bold text-gray-200 mb-2">Halo Wars 2 Guides</h3>
-                <p class="text-gray-400 mb-6">
-                    Explore guides for Halo Wars 2, including leader builds, multiplayer strategies, and more.
-                </p>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-                    <!-- Halo Wars Video 2 (Halo Wars 2) -->
-                    <div class="video-card bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                        <h2 class="text-xl sm:text-2xl font-bold mb-4 text-green-400">Ten Tips for Every Beginner!</h2>
-                    <div class="aspect-video mb-4 rounded-lg overflow-hidden relative">
-                        <!-- Replaced iframe with a static image from a placeholder 'img' folder -->
-                        <img src="img\HW-Guides\Ten-Tips.jpg" onerror="this.onerror=null;this.src='https://placehold.co/600x400/212121/ffffff?text=Ten+Tips';" alt="A screenshot from Halo Wars 2">
-                    </div>
-                        <p class="text-gray-300 mb-4">
-                            New to Halo Wars 2? Learn the basics with these ten essential tips to get you started on the battlefield!
-                        </p>
-                        <a href="https://youtu.be/p5fnWN1E4nw" target="_blank" rel="noopener noreferrer" class="inline-block bg-green-500 text-white font-bold py-2 px-6 rounded-full hover:bg-green-600 transition-colors duration-300">
-                            Watch on YouTube
-                        </a>
-                    </div>
-                    <!-- New Placeholder Tiles for Halo Wars 2 -->
-                    <div class="video-card bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                        <h2 class="text-xl sm:text-2xl font-bold mb-4 text-cyan-400">Placeholder Guide 1</h2>
-                        <div class="aspect-video mb-4 rounded-lg overflow-hidden relative">
-                            <img src="https://placehold.co/600x400/212121/ffffff?text=Coming+Soon" alt="Placeholder image for a Halo Wars guide.">
-                        </div>
-                        <p class="text-gray-300 mb-4">
-                            This is a placeholder description for a new Halo Wars 2 guide. More content is coming soon!
-                        </p>
-                        <a href="#" target="_blank" rel="noopener noreferrer" class="inline-block bg-cyan-500 text-white font-bold py-2 px-6 rounded-full hover:bg-cyan-600 transition-colors duration-300">
-                            Watch on YouTube
-                        </a>
-                    </div>
-                    <div class="video-card bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                        <h2 class="text-xl sm:text-2xl font-bold mb-4 text-orange-400">Placeholder Guide 2</h2>
-                        <div class="aspect-video mb-4 rounded-lg overflow-hidden relative">
-                            <img src="https://placehold.co/600x400/212121/ffffff?text=Coming+Soon" alt="Placeholder image for a Halo Wars guide.">
-                        </div>
-                        <p class="text-gray-300 mb-4">
-                            This is another placeholder description for a new Halo Wars 2 guide. Check back later for updates.
-                        </p>
-                        <a href="#" target="_blank" rel="noopener noreferrer" class="inline-block bg-orange-500 text-white font-bold py-2 px-6 rounded-full hover:bg-orange-600 transition-colors duration-300">
-                            Watch on YouTube
-                        </a>
-                    </div>
-                    <div class="video-card bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                        <h2 class="text-xl sm:text-2xl font-bold mb-4 text-purple-400">Placeholder Guide 3</h2>
-                        <div class="aspect-video mb-4 rounded-lg overflow-hidden relative">
-                            <img src="https://placehold.co/600x400/212121/ffffff?text=Coming+Soon" alt="Placeholder image for a Halo Wars guide.">
-                        </div>
-                        <p class="text-gray-300 mb-4">
-                            This is a final placeholder tile for a new guide. A new video will be linked here soon.
-                        </p>
-                        <a href="#" target="_blank" rel="noopener noreferrer" class="inline-block bg-purple-500 text-white font-bold py-2 px-6 rounded-full hover:bg-purple-600 transition-colors duration-300">
-                            Watch on YouTube
-                        </a>
-                    </div>
-                </div>
-            </div>
-        
-
-            <!-- Halo Wars 1 Content -->
-            <div class="p-6 rounded-xl border border-gray-700">
-                <h3 class="text-2xl font-bold text-gray-200 mb-2">Halo Wars 1 Guides</h3>
-                <p class="text-gray-400 mb-6">
-                    Dive into our guides for the original Halo Wars, covering campaign walkthroughs and strategies.
-                </p>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-                    <!-- Halo Wars Video 1 (Halo Wars 1) -->
-                    <div class="video-card bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                        <h2 class="text-xl sm:text-2xl font-bold mb-4 text-green-400">Why is Arcadia City so DIFFICULT in Halo Wars?!</h2>
-                        <div class="aspect-video mb-4 rounded-lg overflow-hidden">
-                            <iframe src="https://www.youtube.com/embed/1B6Gz-1V5gI" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                        </div>
-                        <p class="text-gray-300 mb-4">
-                            A full guide to a mission of the original Halo Wars campaign.
-                        </p>
-                        <a href="https://youtu.be/2xGB56Xao3k" target="_blank" rel="noopener noreferrer" class="inline-block bg-green-500 text-white font-bold py-2 px-6 rounded-full hover:bg-green-600 transition-colors duration-300">
-                            Watch on YouTube
-                        </a>
-                    </div>
-                </div>
-            </div>
+        <main id="halo-wars-content" class="hidden grid grid-cols-1 gap-8" role="main" aria-label="Halo Wars guides content">
+            <!-- Content will be loaded from JSON -->
         </main>
 
         <!-- Age of Empires Tab Content -->
-        <main id="age-of-empires-content" class="hidden grid grid-cols-1 gap-8">
-            <div class="p-6 rounded-xl border border-gray-700">
-                <h3 class="text-2xl font-bold text-gray-200 mb-2">Age of Empires II</h3>
-                <p class="text-gray-400 mb-6">
-                    Master the classic Age of Empires II with our guides on campaigns, civilizations, and strategies.
-                </p>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-                    <!-- Age of Empires II Video 1 (AoE II) -->
-                    <div class="video-card bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                        <h2 class="text-xl sm:text-2xl font-bold mb-4 text-yellow-400">Age of Empires II: Advanced Build Orders</h2>
-                        <div class="aspect-video mb-4 rounded-lg overflow-hidden">
-                            <iframe src="https://www.youtube.com/embed/q6w5R2sFpA0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                        </div>
-                        <p class="text-gray-300 mb-4">
-                            Take your game to the next level with these advanced build orders and strategies for competitive play.
-                        </p>
-                        <a href="https://www.youtube.com/watch?v=q6w5R2sFpA0" target="_blank" rel="noopener noreferrer" class="inline-block bg-yellow-500 text-white font-bold py-2 px-6 rounded-full hover:bg-yellow-600 transition-colors duration-300">
-                            Watch on YouTube
-                        </a>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="p-6 rounded-xl border border-gray-700">
-                <h3 class="text-2xl font-bold text-gray-200 mb-2">Age of Empires IV</h3>
-                <p class="text-gray-400 mb-6">
-                    Explore guides for Age of Empires IV, including civilization overviews and competitive strategies.
-                </p>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-                    <!-- Age of Empires IV Video 1 (AoE IV) -->
-                    <div class="video-card bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                        <h2 class="text-xl sm:text-2xl font-bold mb-4 text-yellow-400">Age of Empires IV: Beginner's Guide</h2>
-                        <div class="aspect-video mb-4 rounded-lg overflow-hidden">
-                            <iframe src="https://www.youtube.com/embed/rV162wW_4H0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                        </div>
-                        <p class="text-gray-300 mb-4">
-                            A comprehensive guide for new players to the world of Age of Empires IV, covering civilizations, resources, and combat.
-                        </p>
-                        <a href="https://www.youtube.com/watch?v=rV162wW_4H0" target="_blank" rel="noopener noreferrer" class="inline-block bg-yellow-500 text-white font-bold py-2 px-6 rounded-full hover:bg-yellow-600 transition-colors duration-300">
-                            Watch on YouTube
-                        </a>
-                    </div>
-                </div>
-            </div>
+        <main id="age-of-empires-content" class="hidden grid grid-cols-1 gap-8" role="main" aria-label="Age of Empires guides content">
+            <!-- Content will be loaded from JSON -->
         </main>
 
         <!-- Age of Mythology Tab Content -->
-        <main id="age-of-mythology-content" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <!-- Age of Mythology Placeholder Video 1 -->
-            <div class="bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                <h2 class="text-xl sm:text-2xl font-bold mb-4 text-red-400">Age of Mythology: Titans Expansion Guide</h2>
-                <div class="aspect-video mb-4 rounded-lg overflow-hidden">
-                    <iframe src="https://www.youtube.com/embed/hT_F_0E3i4Y" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                </div>
-                <p class="text-gray-300 mb-4">
-                    Unleash the power of the Titans with this guide to the expansion pack.
-                </p>
-                <a href="https://www.youtube.com/watch?v=hT_F_0E3i4Y" target="_blank" rel="noopener noreferrer" class="inline-block bg-red-500 text-white font-bold py-2 px-6 rounded-full hover:bg-red-600 transition-colors duration-300">
-                    Watch on YouTube
-                </a>
-            </div>
-            
-            <!-- Age of Mythology Placeholder Video 2 -->
-            <div class="bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                <h2 class="text-xl sm:text-2xl font-bold mb-4 text-red-400">Age of Mythology: Chinese Gods Overview</h2>
-                <div class="aspect-video mb-4 rounded-lg overflow-hidden">
-                    <iframe src="https://www.youtube.com/embed/K844zE86iFo" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                </div>
-                <p class="text-gray-300 mb-4">
-                    A deep dive into the Chinese pantheon from the Tale of the Dragon expansion.
-                </p>
-                <a href="https://www.youtube.com/watch?v=K844zE86iFo" target="_blank" rel="noopener noreferrer" class="inline-block bg-red-500 text-white font-bold py-2 px-6 rounded-full hover:bg-red-600 transition-colors duration-300">
-                    Watch on YouTube
-                </a>
-            </div>
+        <main id="age-of-mythology-content" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" role="main" aria-label="Age of Mythology guides content">
+            <!-- Content will be loaded from JSON -->
         </main>
 
-        <footer class="py-6 text-center text-gray-400 text-sm sm:text-base">
-            <p>Made with <span class="text-red-500">❤</span> by Team Respawn</p>
-        </footer>
+        <!-- Footer Component -->
+        <div id="footer-container"></div>
     </div>
 
-    <!-- Side Panel -->
-    <aside id="side-panel" class="side-panel">
-        <!-- Close button for the side panel -->
-        <div class="flex justify-end mb-8">
-            <button id="close-panel-button" class="p-2 rounded-full hover:bg-gray-800 transition-colors duration-200">
-                <svg class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
-        </div>
+    <!-- Side Panel Component -->
+    <div id="side-panel-container"></div>
 
-        <!-- Side panel content -->
-        <h2 class="text-3xl font-extrabold mb-8 text-white">More Content</h2>
-        <nav class="flex flex-col space-y-4">
-            <a href="./index.html" class="text-lg font-semibold text-gray-400 hover:text-white transition-colors duration-200">Home</a>
-            <a href="#" class="text-lg font-semibold text-gray-400 hover:text-white transition-colors duration-200">Blog
-                <span class="text-yellow-400"> Coming Soon</span>
-            </a>
-            <a href="https://andythenerd.github.io/Halo-Quotes/" target="_blank" class="text-lg font-semibold text-gray-400 hover:text-white transition-colors duration-200">Halo Quotes Website</a>
-        </nav>
-
-        <!-- Social Icons in Sidebar -->
-    <div class="mt-auto flex justify-center space-x-4 text-gray-400">
-        <a href="https://www.youtube.com/@TeamRespawn" target="_blank" class="hover:text-red-500">
-            <i class="fab fa-youtube fa-lg"></i>
-        </a>
-        <a href="https://www.twitch.tv/TeamRespawnTV" target="_blank" class="hover:text-purple-500">
-            <i class="fab fa-twitch fa-lg"></i>
-        </a>
-        <a href="https://discord.gg/TeamRespawn" target="_blank" class="hover:text-indigo-500">
-            <i class="fab fa-discord fa-lg"></i>
-        </a>
-        <a href="https://www.teamrespawn.shop" target="_blank" class="hover:text-green-400">
-            <i class="fas fa-shopping-cart fa-lg"></i>
-    </a>
-</div>
-    </aside>
-
-    <!-- Overlay to dim background when panel is open -->
-    <div id="overlay" class="overlay"></div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const tabs = {
-                'walkthroughs-tab': {
-                    button: document.getElementById('walkthroughs-tab'),
-                    content: document.getElementById('walkthroughs-content'),
-                    summary: document.getElementById('walkthroughs-summary')
-                },
-                'halo-wars-tab': {
-                    button: document.getElementById('halo-wars-tab'),
-                    content: document.getElementById('halo-wars-content'),
-                    summary: document.getElementById('halo-wars-summary')
-                },
-                'age-of-empires-tab': {
-                    button: document.getElementById('age-of-empires-tab'),
-                    content: document.getElementById('age-of-empires-content'),
-                    summary: document.getElementById('age-of-empires-summary')
-                },
-                'age-of-mythology-tab': {
-                    button: document.getElementById('age-of-mythology-tab'),
-                    content: document.getElementById('age-of-mythology-content'),
-                    summary: document.getElementById('age-of-mythology-summary')
-                }
-            };
-            
-            function switchTab(activeTabId) {
-                for (const id in tabs) {
-                    const tab = tabs[id];
-                    if (id === activeTabId) {
-                        tab.button.classList.remove('bg-gray-700', 'hover:bg-gray-600', 'text-gray-200');
-                        tab.button.classList.add('bg-gray-200', 'text-gray-900');
-                        tab.content.classList.remove('hidden');
-                        tab.summary.classList.remove('hidden');
-                    } else {
-                        tab.button.classList.remove('bg-gray-200', 'text-gray-900');
-                        tab.button.classList.add('bg-gray-700', 'hover:bg-gray-600', 'text-gray-200');
-                        tab.content.classList.add('hidden');
-                        tab.summary.classList.add('hidden');
-                    }
-                }
-            }
-
-            // Attach event listeners to all tab buttons
-            for (const id in tabs) {
-                tabs[id].button.addEventListener('click', () => {
-                    switchTab(id);
-                });
-            }
-
-            // Set the initial active tab
-            switchTab('walkthroughs-tab');
-
-            // Side panel elements
-            const openPanelButton = document.getElementById('open-panel-button');
-            const closePanelButton = document.getElementById('close-panel-button');
-            const sidePanel = document.getElementById('side-panel');
-            const overlay = document.getElementById('overlay');
-
-            // Side panel event listeners
-            openPanelButton.addEventListener('click', () => {
-                sidePanel.classList.add('open');
-                overlay.classList.add('visible');
-            });
-
-            closePanelButton.addEventListener('click', () => {
-                sidePanel.classList.remove('open');
-                overlay.classList.remove('visible');
-            });
-
-            overlay.addEventListener('click', () => {
-                sidePanel.classList.remove('open');
-                overlay.classList.remove('visible');
-            });
-        });
-    </script>
+    <!-- JavaScript Modules -->
+    <script src="js/components.js"></script>
+    <script src="js/side-panel.js"></script>
+    <script src="js/tabs.js"></script>
+    <script src="js/video-card.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>

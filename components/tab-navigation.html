@@ -1,0 +1,58 @@
+<div class="flex flex-col items-center mb-8">
+    <div 
+        class="flex flex-wrap justify-center bg-gray-700 rounded-full p-1 max-w-full sm:max-w-xl mx-auto" 
+        role="tablist" 
+        aria-label="Content categories">
+        <button 
+            id="walkthroughs-tab" 
+            role="tab"
+            aria-selected="true"
+            aria-controls="walkthroughs-content"
+            aria-label="View walkthroughs"
+            class="flex-1 px-3 py-1 sm:px-6 sm:py-2 text-sm sm:text-base rounded-full font-bold text-gray-900 bg-gray-200 transition-colors duration-300"
+            type="button"
+            tabindex="0">
+            Walkthroughs
+        </button>
+        <button 
+            id="halo-wars-tab" 
+            role="tab"
+            aria-selected="false"
+            aria-controls="halo-wars-content"
+            aria-label="View Halo Wars guides"
+            class="flex-1 px-3 py-1 sm:px-6 sm:py-2 text-sm sm:text-base rounded-full font-bold text-gray-200 hover:bg-gray-600 transition-colors duration-300"
+            type="button"
+            tabindex="-1">
+            Halo Wars Guides
+        </button>
+        <button 
+            id="age-of-empires-tab" 
+            role="tab"
+            aria-selected="false"
+            aria-controls="age-of-empires-content"
+            aria-label="View Age of Empires guides"
+            class="flex-1 px-3 py-1 sm:px-6 sm:py-2 text-sm sm:text-base rounded-full font-bold text-gray-200 hover:bg-gray-600 transition-colors duration-300"
+            type="button"
+            tabindex="-1">
+            Age of Empires Guides
+        </button>
+        <button 
+            id="age-of-mythology-tab" 
+            role="tab"
+            aria-selected="false"
+            aria-controls="age-of-mythology-content"
+            aria-label="View Age of Mythology guides"
+            class="flex-1 px-3 py-1 sm:px-6 sm:py-2 text-sm sm:text-base rounded-full font-bold text-gray-200 hover:bg-gray-600 transition-colors duration-300"
+            type="button"
+            tabindex="-1">
+            Age of Mythology Guides
+        </button>
+    </div>
+    <!-- Tab Descriptions with aria-live for announcements -->
+    <div role="status" aria-live="polite" aria-atomic="true" class="sr-only" id="tab-announcement"></div>
+    <p id="walkthroughs-summary" class="mt-4 text-center text-sm text-gray-400">Full walkthroughs from Team Respawn.</p>
+    <p id="halo-wars-summary" class="mt-4 text-center text-sm text-gray-400 hidden">In-depth strategies and tips for the Halo Wars series.</p>
+    <p id="age-of-empires-summary" class="mt-4 text-center text-sm text-gray-400 hidden">Master the battlefield with guides for Age of Empires.</p>
+    <p id="age-of-mythology-summary" class="mt-4 text-center text-sm text-gray-400 hidden">Delve into the mythology of this classic real-time strategy game.</p>
+</div>
+
