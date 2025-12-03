@@ -47,15 +47,15 @@ function renderVideoCard(videoData) {
     }
 
     return `
-        <div class="video-card bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
+        <div class="video-card bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300 flex flex-col">
             <h2 class="text-xl sm:text-2xl font-bold mb-4 text-${color}">${title}</h2>
             <div class="aspect-video mb-4 rounded-lg overflow-hidden ${iframeSrc ? '' : 'relative'}">
                 ${videoContent}
             </div>
-            <p class="text-gray-300 mb-4">
+            <p class="text-gray-300 mb-4 flex-grow">
                 ${description}
             </p>
-            <a href="${youtubeUrl}" target="_blank" rel="noopener noreferrer" class="inline-block bg-${buttonColor} text-white font-bold py-2 px-6 rounded-full hover:bg-${buttonColor.replace(/\d+$/, (match) => {
+            <a href="${youtubeUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 bg-${buttonColor} text-white font-bold py-2 px-6 rounded-full hover:bg-${buttonColor.replace(/\d+$/, (match) => {
                 const num = parseInt(match);
                 if (num < 600) {
                     return (num + 100).toString();
@@ -64,7 +64,8 @@ function renderVideoCard(videoData) {
                 } else {
                     return '800';
                 }
-            })} transition-colors duration-300">
+            })} transition-colors duration-300 mt-auto">
+                <i class="fas fa-play" aria-hidden="true"></i>
                 Watch on YouTube
             </a>
         </div>
