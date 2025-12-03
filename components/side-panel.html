@@ -18,20 +18,80 @@
     </div>
 
     <!-- Side panel content -->
-    <h2 class="text-3xl font-extrabold mb-8 text-white">More Content</h2>
-    <nav class="flex flex-col space-y-4" aria-label="Site navigation">
-        <a href="./index.html" class="text-lg font-semibold text-gray-400 hover:text-white transition-colors duration-200">Home</a>
-        <a href="#" class="text-lg font-semibold text-gray-400 hover:text-white transition-colors duration-200">Blog
-            <span class="text-yellow-400"> Coming Soon</span>
-        </a>
-        <a 
-            href="https://andythenerd.github.io/Halo-Quotes/" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            class="text-lg font-semibold text-gray-400 hover:text-white transition-colors duration-200">
-            Halo Quotes Website
-        </a>
-    </nav>
+    <!-- Main Content Navigation -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-extrabold mb-4 text-white">Content</h2>
+        <nav class="flex flex-col space-y-2" aria-label="Main content navigation">
+            <button 
+                data-tab-id="home-tab"
+                class="side-panel-tab-link side-panel-tab-active text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50"
+                type="button"
+                role="menuitem">
+                <i class="fas fa-home mr-2" aria-hidden="true"></i>
+                Home
+            </button>
+            <button 
+                data-tab-id="walkthroughs-tab"
+                class="side-panel-tab-link side-panel-tab-inactive text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50"
+                type="button"
+                role="menuitem">
+                <i class="fas fa-video mr-2" aria-hidden="true"></i>
+                Walkthroughs
+            </button>
+            <button 
+                data-tab-id="halo-wars-tab"
+                class="side-panel-tab-link side-panel-tab-inactive text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50"
+                type="button"
+                role="menuitem">
+                <i class="fas fa-gamepad mr-2" aria-hidden="true"></i>
+                Halo Wars Guides
+            </button>
+            <button 
+                data-tab-id="age-of-empires-tab"
+                class="side-panel-tab-link side-panel-tab-inactive text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50"
+                type="button"
+                role="menuitem">
+                <i class="fas fa-chess mr-2" aria-hidden="true"></i>
+                Age of Empires Guides
+            </button>
+            <button 
+                data-tab-id="age-of-mythology-tab"
+                class="side-panel-tab-link side-panel-tab-inactive text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50"
+                type="button"
+                role="menuitem">
+                <i class="fas fa-scroll mr-2" aria-hidden="true"></i>
+                Age of Mythology Guides
+            </button>
+            <button 
+                class="side-panel-tab-link side-panel-tab-inactive text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50"
+                type="button"
+                role="menuitem">
+                <i class="fas fa-blog mr-2" aria-hidden="true"></i>
+                Blog
+                <span class="text-yellow-400"> Coming Soon</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- More Content Section -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-extrabold mb-4 text-white">More Team Respawn</h2>
+        <nav class="flex flex-col space-y-2" aria-label="Site navigation">
+            <!-- <a href="#" class="text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50">
+                <i class="fas fa-blog mr-2" aria-hidden="true"></i>
+                Blog
+                <span class="text-yellow-400"> Coming Soon</span>
+            </a> -->
+            <a 
+                href="https://andythenerd.github.io/Halo-Quotes/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                class="text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50">
+                <i class="fas fa-quote-left mr-2" aria-hidden="true"></i>
+                Halo Quotes Website
+            </a>
+        </nav>
+    </div>
 
     <!-- Social Icons in Sidebar -->
     <div id="sidebar-social-icons" class="mt-auto flex justify-center space-x-4 text-gray-400" aria-label="Social media links"></div>

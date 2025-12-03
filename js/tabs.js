@@ -97,6 +97,11 @@ function switchTab(activeTabId) {
     if (announcement && tabs[activeTabId]?.button) {
         announcement.textContent = `Switched to ${tabs[activeTabId].button.textContent.trim()} tab`;
     }
+
+    // Update side panel active tab indicator if function exists
+    if (typeof updateSidePanelActiveTab === 'function') {
+        updateSidePanelActiveTab(activeTabId);
+    }
 }
 
 /**
@@ -222,10 +227,18 @@ function initTabs() {
 
     // Set the initial active tab
     switchTab('home-tab');
+    
+    // Update side panel active state on initialization if function exists
+    if (typeof updateSidePanelActiveTab === 'function') {
+        updateSidePanelActiveTab('home-tab');
+    }
 }
 
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { switchTab, initTabs, tabs, toggleTwitchCollapse, restoreTwitchCollapseState };
 }
+
+// Make switchTab available globally for side panel integration
+window.switchTab = switchTab;
 

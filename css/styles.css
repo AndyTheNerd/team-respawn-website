@@ -54,7 +54,7 @@ body {
     left: -100%; /* Start off-screen on the left */
     width: 100%;
     max-width: 320px;
-    height: 100%;
+    height: 100vh; /* Full viewport height */
     background-color: #1a202c; /* Matches bg-gray-900 */
     z-index: 50;
     transition: left 0.3s ease-in-out;
@@ -62,9 +62,13 @@ body {
     padding: 1.5rem;
     display: flex;
     flex-direction: column;
+    overflow-y: auto; /* Allow scrolling if content is long */
+    overflow-x: hidden;
 }
 .side-panel.open {
     left: 0; /* Slide into view */
+    /* Ensure panel stays visible when scrolling */
+    position: fixed;
 }
 .overlay {
     position: fixed;
@@ -589,5 +593,100 @@ body {
 .tab-nav-button,
 .tab-nav-glass-container {
     will-change: transform, box-shadow, background;
+}
+
+/* Side Panel Tab Navigation Links */
+.side-panel-tab-link {
+    position: relative;
+    text-align: left;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+.side-panel-tab-link::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 0;
+    background: linear-gradient(180deg, 
+        rgba(168, 85, 247, 0.8) 0%,
+        rgba(236, 72, 153, 0.8) 50%,
+        rgba(59, 130, 246, 0.8) 100%);
+    border-radius: 0 2px 2px 0;
+    transition: height 0.3s ease-in-out;
+}
+
+.side-panel-tab-active {
+    color: #ffffff !important;
+    background: rgba(168, 85, 247, 0.15) !important;
+    border-left: 3px solid;
+    border-image: linear-gradient(180deg, 
+        rgba(168, 85, 247, 0.8) 0%,
+        rgba(236, 72, 153, 0.8) 50%,
+        rgba(59, 130, 246, 0.8) 100%) 1;
+    box-shadow: inset 4px 0 8px rgba(168, 85, 247, 0.2);
+}
+
+.side-panel-tab-active::before {
+    height: 80%;
+}
+
+.side-panel-tab-inactive {
+    color: rgba(209, 213, 219, 0.9);
+}
+
+.side-panel-tab-inactive:hover {
+    color: #ffffff;
+    background: rgba(55, 65, 81, 0.5);
+    transform: translateX(4px);
+}
+
+.side-panel-tab-inactive:hover::before {
+    height: 60%;
+}
+
+.side-panel-tab-link i {
+    width: 20px;
+    text-align: center;
+    opacity: 0.8;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.side-panel-tab-active i {
+    opacity: 1;
+}
+
+.side-panel-tab-link:focus {
+    outline: 2px solid rgba(168, 85, 247, 0.5);
+    outline-offset: 2px;
+    border-radius: 0.5rem;
+}
+
+/* Side panel scrolling behavior */
+.side-panel {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(168, 85, 247, 0.3) transparent;
+}
+
+.side-panel::-webkit-scrollbar {
+    width: 6px;
+}
+
+.side-panel::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.side-panel::-webkit-scrollbar-thumb {
+    background: rgba(168, 85, 247, 0.3);
+    border-radius: 3px;
+}
+
+.side-panel::-webkit-scrollbar-thumb:hover {
+    background: rgba(168, 85, 247, 0.5);
 }
 
