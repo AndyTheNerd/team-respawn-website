@@ -7,7 +7,8 @@
       "imageSrc": "img/Halo-CEA-Walkthrough-2023.jpg",
       "color": "orange-400",
       "buttonColor": "orange-500",
-      "alt": "A screenshot from Halo Combat Evolved Anniversary"
+      "alt": "A screenshot from Halo Combat Evolved Anniversary",
+      "featured": true
     },
     {
       "title": "Halo 2 Anniversary",
@@ -16,7 +17,8 @@
       "imageSrc": "img/Halo-2 Walkthrough.jpg",
       "color": "purple-400",
       "buttonColor": "purple-500",
-      "alt": "A screenshot from Halo 2 Anniversary"
+      "alt": "A screenshot from Halo 2 Anniversary",
+      "featured": true
     },
     {
       "title": "Halo 3",
@@ -25,7 +27,8 @@
       "imageSrc": "img/Halo-3-Walkthrough.jpg",
       "color": "blue-400",
       "buttonColor": "blue-500",
-      "alt": "A screenshot from Halo 3"
+      "alt": "A screenshot from Halo 3",
+      "featured": true
     },
     {
       "title": "Halo 3 ODST",
@@ -43,7 +46,8 @@
       "imageSrc": "img/Halo-Reach-Walkthrough.jpg",
       "color": "lime-400",
       "buttonColor": "lime-500",
-      "alt": "A screenshot from Halo Reach"
+      "alt": "A screenshot from Halo Reach",
+      "featured": true
     },
     {
       "title": "Halo 4",
@@ -79,7 +83,8 @@
       "imageSrc": "img/Halo-Wars-2-Walkthrough.jpg",
       "color": "yellow-400",
       "buttonColor": "yellow-500",
-      "alt": "A screenshot from Halo Wars 2"
+      "alt": "A screenshot from Halo Wars 2",
+      "featured": true
     },
     {
       "title": "Halo Wars 2: Operation Spearbreaker",
@@ -121,7 +126,8 @@
           "imageSrc": "img/HW-Guides/Ten-Tips.jpg",
           "color": "green-400",
           "buttonColor": "green-500",
-          "alt": "A screenshot from Halo Wars 2"
+          "alt": "A screenshot from Halo Wars 2",
+          "featured": true
         },
         {
           "title": "Placeholder Guide 1",
@@ -180,7 +186,8 @@
           "iframeSrc": "https://www.youtube.com/embed/q6w5R2sFpA0",
           "color": "yellow-400",
           "buttonColor": "yellow-500",
-          "alt": "A screenshot from Age of Empires II"
+          "alt": "A screenshot from Age of Empires II",
+          "featured": true
         }
       ]
     },
@@ -208,7 +215,8 @@
       "iframeSrc": "https://www.youtube.com/embed/hT_F_0E3i4Y",
       "color": "red-400",
       "buttonColor": "red-500",
-      "alt": "A screenshot from Age of Mythology"
+      "alt": "A screenshot from Age of Mythology",
+      "featured": true
     },
     {
       "title": "Age of Mythology: Chinese Gods Overview",

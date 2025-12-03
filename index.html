@@ -72,48 +72,54 @@
         
         <!-- Tab Navigation Component -->
         <div id="tab-navigation-container"></div>
-        
-        <!-- Twitch Live Stream Embed -->
-        <section id="twitch-embed-container" class="mb-8 rounded-xl overflow-hidden border-2 border-purple-600 bg-gradient-to-br from-gray-800 via-gray-800 to-purple-900/20 shadow-2xl opacity-100 visible translate-y-0">
-            <div class="p-4 sm:p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-3">
-                        <h2 class="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 flex items-center gap-3">
-                            <i class="fab fa-twitch text-purple-400" aria-hidden="true"></i>
-                            Live on Twitch
-                        </h2>
-                        <button 
-                            id="twitch-collapse-toggle"
-                            aria-label="Toggle Twitch stream visibility"
-                            aria-expanded="true"
-                            class="p-2 rounded-lg hover:bg-purple-600/30 transition-colors duration-200 text-purple-400 hover:text-purple-300"
-                            type="button">
-                            <i class="fas fa-chevron-up transition-transform duration-300" id="twitch-collapse-icon" aria-hidden="true"></i>
-                        </button>
-                    </div>
-                    <a href="https://www.twitch.tv/teamrespawntv" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300 text-sm sm:text-base">
-                        <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-                        Watch on Twitch
-                    </a>
-                </div>
-                <div id="twitch-embed-content" class="twitch-content-expanded">
-                    <div class="aspect-video rounded-lg overflow-hidden border border-purple-500/30 shadow-lg">
-                        <iframe 
-                            src="https://player.twitch.tv/?channel=teamrespawntv&parent=localhost&parent=127.0.0.1&parent=teamrespawntv.com&parent=www.teamrespawntv.com&parent=andythenerd.github.io&muted=false"
-                            frameborder="0"
-                            allowfullscreen="true"
-                            scrolling="no"
-                            allow="autoplay; fullscreen"
-                            title="Team Respawn TV Live Stream"
-                            class="w-full h-full">
-                        </iframe>
-                    </div>
-                </div>
-            </div>
-        </section>
 
         <!-- Tab Content Containers -->
-        <main id="walkthroughs-content" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8" id="main-content" role="main" aria-label="Walkthroughs content">
+        <!-- Home Tab Content -->
+        <main id="home-content" role="main" aria-label="Home content">
+            <!-- Content will be loaded dynamically -->
+            
+            <!-- Twitch Live Stream Embed -->
+            <section id="twitch-embed-container" class="mb-8 rounded-xl overflow-hidden border-2 border-purple-600 bg-gradient-to-br from-gray-800 via-gray-800 to-purple-900/20 shadow-2xl opacity-100 visible translate-y-0">
+                <div class="p-4 sm:p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <h2 class="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 flex items-center gap-3">
+                                <i class="fab fa-twitch text-purple-400" aria-hidden="true"></i>
+                                Live on Twitch
+                            </h2>
+                            <button 
+                                id="twitch-collapse-toggle"
+                                aria-label="Toggle Twitch stream visibility"
+                                aria-expanded="true"
+                                class="p-2 rounded-lg hover:bg-purple-600/30 transition-colors duration-200 text-purple-400 hover:text-purple-300"
+                                type="button">
+                                <i class="fas fa-chevron-up transition-transform duration-300" id="twitch-collapse-icon" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <a href="https://www.twitch.tv/teamrespawntv" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300 text-sm sm:text-base">
+                            <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+                            Watch on Twitch
+                        </a>
+                    </div>
+                    <div id="twitch-embed-content" class="twitch-content-expanded">
+                        <div class="aspect-video rounded-lg overflow-hidden border border-purple-500/30 shadow-lg">
+                            <iframe 
+                                src="https://player.twitch.tv/?channel=teamrespawntv&parent=localhost&parent=127.0.0.1&parent=teamrespawntv.com&parent=www.teamrespawntv.com&parent=andythenerd.github.io&muted=false"
+                                frameborder="0"
+                                allowfullscreen="true"
+                                scrolling="no"
+                                allow="autoplay; fullscreen"
+                                title="Team Respawn TV Live Stream"
+                                class="w-full h-full">
+                            </iframe>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Walkthroughs Tab Content -->
+        <main id="walkthroughs-content" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8" role="main" aria-label="Walkthroughs content">
             <!-- Videos will be loaded from JSON -->
         </main>
 
@@ -144,6 +150,7 @@
     <script src="js/side-panel.js"></script>
     <script src="js/tabs.js"></script>
     <script src="js/video-card.js"></script>
+    <script src="js/home-content.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>

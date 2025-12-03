@@ -21,6 +21,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Load and render video data
         await loadAndRenderVideos();
+        
+        // Load and render home content
+        await loadAndRenderHomeContent();
     } catch (error) {
         console.error('Error initializing page:', error);
     }
@@ -89,6 +92,33 @@ async function loadAndRenderVideos() {
         }
     } catch (error) {
         console.error('Error loading and rendering videos:', error);
+    }
+}
+
+/**
+ * Loads video data and renders home content
+ */
+async function loadAndRenderHomeContent() {
+    try {
+        const response = await fetch('data/videos.json');
+        if (!response.ok) {
+            throw new Error('Failed to load video data');
+        }
+        const data = await response.json();
+
+        // Validate that data is an object
+        if (!data || typeof data !== 'object') {
+            throw new Error('Invalid video data format');
+        }
+
+        // Render home content with all video data
+        if (typeof renderHomeContent === 'function') {
+            renderHomeContent(data);
+        } else {
+            console.error('renderHomeContent function not found');
+        }
+    } catch (error) {
+        console.error('Error loading and rendering home content:', error);
     }
 }
 

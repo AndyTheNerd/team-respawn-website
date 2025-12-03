@@ -1,33 +1,43 @@
-<header class="flex flex-col sm:flex-row justify-between items-center py-6 mb-8 space-y-4 sm:space-y-0">
-    <!-- Open Side Panel Button -->
-    <button 
-        id="open-panel-button" 
-        class="p-2 rounded-full hover:bg-gray-800 transition-colors duration-200"
-        aria-label="Open navigation menu"
-        aria-expanded="false"
-        aria-controls="side-panel"
-        type="button">
-        <svg class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>
-        </svg>
-    </button>
-    
-    <div class="flex-grow text-center">
-        <a href="/" aria-label="Return to Team Respawn homepage">
-            <img 
-                src="content/Team-Respawn-Full.png" 
-                alt="Team Respawn Logo - Gaming Walkthroughs and Strategy Guides" 
-                width="320" 
-                height="80"
-                class="w-40 sm:w-64 lg:w-80 mx-auto mb-2 cursor-pointer hover:opacity-80 transition-opacity duration-200"
-                loading="eager">
-        </a>
-        <p class="text-base sm:text-lg lg:text-xl text-gray-400 max-w-2xl mx-auto px-2">
-            Team Respawn is a thriving gaming channel led by Andy, dedicated to strategy lovers—especially fans of Halo Wars, Halo FPS, and Age of Empires.
-        </p>
+<header class="elegant-header relative w-full mb-8">
+    <!-- Glassmorphism container with gradient background -->
+    <div class="header-glass-container relative w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 rounded-2xl sm:rounded-3xl overflow-hidden">
+        <!-- Gradient background overlay -->
+        <div class="absolute inset-0 bg-gradient-to-br from-purple-900/30 via-pink-900/20 to-blue-900/30 opacity-60"></div>
+        
+        <!-- Content wrapper with glassmorphism -->
+        <div class="header-content-wrapper relative z-10 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+            <!-- Open Side Panel Button -->
+            <button 
+                id="open-panel-button" 
+                class="header-menu-btn flex-shrink-0 p-3 rounded-xl backdrop-blur-sm bg-gray-800/40 hover:bg-gray-700/60 border border-white/10 hover:border-purple-400/30 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-purple-500/20 group"
+                aria-label="Open navigation menu"
+                aria-expanded="false"
+                aria-controls="side-panel"
+                type="button">
+                <svg class="h-6 w-6 sm:h-7 sm:w-7 text-gray-300 group-hover:text-purple-300 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>
+                </svg>
+            </button>
+            
+            <!-- Logo and Tagline Section -->
+            <div class="flex-grow text-center px-4">
+                <a href="/" aria-label="Return to Team Respawn homepage" class="logo-link inline-block group">
+                    <img 
+                        src="content/Team-Respawn-Full.png" 
+                        alt="Team Respawn Logo - Gaming Walkthroughs and RTS Strategy Guides" 
+                        width="320" 
+                        height="80"
+                        class="header-logo w-40 sm:w-64 lg:w-80 mx-auto mb-3 sm:mb-4 cursor-pointer transition-all duration-500 group-hover:scale-105 group-hover:drop-shadow-[0_0_20px_rgba(168,85,247,0.6)]"
+                        loading="eager">
+                </a>
+                <p class="header-tagline text-sm sm:text-base lg:text-lg text-gray-300 max-w-2xl mx-auto px-2 leading-relaxed font-light">
+                    Team Respawn is a thriving gaming channel led by Andy and his friends, dedicated to strategy lovers—especially fans of Halo Wars, Halo FPS, and Age of Empires.
+                </p>
+            </div>
+            
+            <!-- Social Media Icons Container -->
+            <div id="header-social-icons" class="flex-shrink-0 header-social-container" aria-label="Social media links"></div>
+        </div>
     </div>
-    
-    <!-- Social Media Icons -->
-    <div id="header-social-icons" aria-label="Social media links"></div>
 </header>
 

@@ -6,6 +6,11 @@
  * Tab configuration object
  */
 const tabs = {
+    'home-tab': {
+        button: null,
+        content: null,
+        summary: null
+    },
     'walkthroughs-tab': {
         button: null,
         content: null,
@@ -49,16 +54,16 @@ function switchTab(activeTabId) {
         }
 
         if (id === activeTabId) {
-            tab.button.classList.remove('bg-gray-700', 'hover:bg-gray-600', 'text-gray-200');
-            tab.button.classList.add('bg-gray-200', 'text-gray-900');
+            tab.button.classList.remove('tab-nav-inactive');
+            tab.button.classList.add('tab-nav-active');
             tab.content.classList.remove('hidden');
             tab.summary.classList.remove('hidden');
             // Update ARIA attributes
             tab.button.setAttribute('aria-selected', 'true');
             tab.button.setAttribute('tabindex', '0');
         } else {
-            tab.button.classList.remove('bg-gray-200', 'text-gray-900');
-            tab.button.classList.add('bg-gray-700', 'hover:bg-gray-600', 'text-gray-200');
+            tab.button.classList.remove('tab-nav-active');
+            tab.button.classList.add('tab-nav-inactive');
             tab.content.classList.add('hidden');
             tab.summary.classList.add('hidden');
             // Update ARIA attributes
@@ -67,10 +72,10 @@ function switchTab(activeTabId) {
         }
     }
     
-    // Control Twitch embed visibility - only show on walkthroughs tab
+    // Control Twitch embed visibility - only show on home tab
     const twitchContainer = document.getElementById('twitch-embed-container');
     if (twitchContainer) {
-        if (activeTabId === 'walkthroughs-tab') {
+        if (activeTabId === 'home-tab') {
             // Show Twitch embed - remove hidden class and show with transition
             twitchContainer.classList.remove('hidden');
             // Small delay to ensure display change happens before transition
@@ -78,7 +83,7 @@ function switchTab(activeTabId) {
                 twitchContainer.classList.remove('opacity-0', 'invisible', '-translate-y-2', 'pointer-events-none');
                 twitchContainer.classList.add('opacity-100', 'visible', 'translate-y-0');
             });
-            // Restore collapse state when switching to walkthroughs tab
+            // Restore collapse state when switching to home tab
             restoreTwitchCollapseState();
         } else {
             // Hide Twitch embed - remove from layout flow immediately (no blank space)
@@ -216,7 +221,7 @@ function initTabs() {
     restoreTwitchCollapseState();
 
     // Set the initial active tab
-    switchTab('walkthroughs-tab');
+    switchTab('home-tab');
 }
 
 // Export for use in other modules
