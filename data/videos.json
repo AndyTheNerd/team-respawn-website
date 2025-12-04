@@ -137,9 +137,9 @@
       "videos": [
         {
           "title": "Why is Arcadia City so DIFFICULT in Halo Wars?!",
-          "description": "A full guide to a mission of the original Halo Wars campaign.",
+          "description": "Learn how to beat the most difficult mission in Halo Wars.",
           "youtubeUrl": "https://youtu.be/2xGB56Xao3k",
-          "iframeSrc": "https://www.youtube.com/embed/1B6Gz-1V5gI",
+          "imageSrc": "img/HW-Guides/Why is Arcadia City so hard.jpg",
           "color": "green-400",
           "buttonColor": "green-500",
           "alt": "A screenshot from Halo Wars"
@@ -153,13 +153,31 @@
       "description": "Master the classic Age of Empires II with our guides on campaigns, civilizations, and strategies.",
       "videos": [
         {
-          "title": "Age of Empires II: Advanced Build Orders",
-          "description": "Take your game to the next level with these advanced build orders and strategies for competitive play.",
-          "youtubeUrl": "https://www.youtube.com/watch?v=q6w5R2sFpA0",
-          "iframeSrc": "https://www.youtube.com/embed/q6w5R2sFpA0",
+          "title": "Noob to Pro in 15 Minutes",
+          "description": "A guide for new players to Age of Empires II.",
+          "youtubeUrl": "https://youtu.be/fGxWr8s8qjo",
+          "imageSrc": "img/AOE2-Guides/Noob To Pro.jpg",
+          "color": "yellow-400",
+          "buttonColor": "yellow-500",
+          "alt": "A screenshot from Noob to Pro in 15 Minutes"
+        },
+        {
+          "title": "Xbox Beginners Guide",
+          "description": "A comprehensive guide for new players to the world of Age of Empires II, covering civilizations, resources, and combat. This guide is for the Xbox version of the game.",
+          "youtubeUrl": "https://youtu.be/yztl3e9I3bs",
+          "imageSrc": "img/AOE2-Guides/Guide for New players.jpg",
           "color": "yellow-400",
           "buttonColor": "yellow-500",
           "alt": "A screenshot from Age of Empires II"
+        },
+        {
+          "title": "Xbox Advanced Guide",
+          "description": "An advanced guide for Xbox players in Age of Empires II.",
+          "youtubeUrl": "https://youtu.be/nKX9uZon4bI",
+          "imageSrc": "img/AOE2-Guides/Advanced Guide.jpg",
+          "color": "yellow-400",
+          "buttonColor": "yellow-500",
+          "alt": "A screenshot from Advanced Xbox Guide"
         }
       ]
     },
@@ -228,7 +246,7 @@
       "alt": "A screenshot from Age of Mythology"
     },
     {
-      "title": "Noob to Pro in 10 Minutes",
+      "title": "Noob to Pro in 15 Minutes",
       "description": "A guide for new players to Age of Mythology.",
       "youtubeUrl": "https://youtu.be/V-RsVL8F-U4",
       "imageSrc": "img/AOM-Guides/Noob to Pro.jpg",
