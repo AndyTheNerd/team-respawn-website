@@ -5,12 +5,18 @@ A modern, component-based website showcasing curated gaming content from the Tea
 ## 🚀 Features
 
 - **Component-Based Architecture**: Modular HTML components loaded dynamically for better maintainability
-- **Tabbed Navigation**: Organized content by game series (Walkthroughs, Halo Wars, Age of Empires, Age of Mythology)
-- **Responsive Design**: Mobile-first design using Tailwind CSS
-- **Accessibility**: ARIA labels, keyboard navigation, skip links, and screen reader support
-- **Security**: XSS protection with DOMPurify, input sanitization, and URL validation
+- **Tabbed Navigation**: Organized content by game series (Home, Walkthroughs, Halo Wars, Age of Empires, Age of Mythology) with keyboard navigation support
+- **Home Page Features**:
+  - Hero section with social media links (YouTube, Twitch, Discord)
+  - Channel statistics display (Subscribers, Views, Videos, Years Active)
+  - Featured videos carousel with smooth scrolling navigation
+  - Live Twitch stream embed with collapse/expand functionality and state persistence
+- **Side Panel Navigation**: Mobile-friendly navigation panel with focus trapping and keyboard support
+- **Responsive Design**: Mobile-first design using Tailwind CSS with glassmorphism effects
+- **Accessibility**: ARIA labels, keyboard navigation, skip links, screen reader support, and focus management
+- **Security**: XSS protection with DOMPurify, input sanitization, URL validation, and path traversal prevention
 - **Performance**: Lazy loading images, optimized asset loading
-- **SEO Optimized**: Meta tags, Open Graph, Twitter Cards, and structured data
+- **SEO Optimized**: Meta tags, Open Graph, Twitter Cards, and structured data (JSON-LD)
 
 ## 📁 Project Structure
 
@@ -45,36 +51,16 @@ team-respawn-website/
 
 ### Prerequisites
 
+- Python 3
 - A modern web browser
-- A local web server (optional, but recommended)
 
-### Installation
+### Running the Server
 
-1. Clone the repository:
+1. Navigate to the project directory
+
+2. Start a local web server using Python 3:
 ```bash
-git clone https://github.com/yourusername/team-respawn-website.git
-cd team-respawn-website
-```
-
-2. Serve the files using a local web server:
-
-**Option 1: Using Python (if installed)**
-```bash
-# Python 3
 python -m http.server 8000
-
-# Python 2
-python -m SimpleHTTPServer 8000
-```
-
-**Option 2: Using Node.js (if installed)**
-```bash
-npx http-server -p 8000
-```
-
-**Option 3: Using PHP (if installed)**
-```bash
-php -S localhost:8000
 ```
 
 3. Open your browser and navigate to:
