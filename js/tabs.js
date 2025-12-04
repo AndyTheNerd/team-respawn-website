@@ -49,7 +49,7 @@ function switchTab(activeTabId) {
 
     for (const id in tabs) {
         const tab = tabs[id];
-        if (!tab.button || !tab.content || !tab.summary) {
+        if (!tab.button || !tab.content) {
             continue;
         }
 
@@ -57,7 +57,7 @@ function switchTab(activeTabId) {
             tab.button.classList.remove('tab-nav-inactive');
             tab.button.classList.add('tab-nav-active');
             tab.content.classList.remove('hidden');
-            tab.summary.classList.remove('hidden');
+            if (tab.summary) tab.summary.classList.remove('hidden');
             // Update ARIA attributes
             tab.button.setAttribute('aria-selected', 'true');
             tab.button.setAttribute('tabindex', '0');
@@ -65,7 +65,7 @@ function switchTab(activeTabId) {
             tab.button.classList.remove('tab-nav-active');
             tab.button.classList.add('tab-nav-inactive');
             tab.content.classList.add('hidden');
-            tab.summary.classList.add('hidden');
+            if (tab.summary) tab.summary.classList.add('hidden');
             // Update ARIA attributes
             tab.button.setAttribute('aria-selected', 'false');
             tab.button.setAttribute('tabindex', '-1');
