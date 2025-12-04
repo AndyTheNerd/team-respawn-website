@@ -42,6 +42,11 @@ async function loadAndRenderVideos() {
             throw new Error('Invalid video data format');
         }
 
+        // Render home content with all video data
+        if (typeof renderHomeContent === 'function') {
+            renderHomeContent(data);
+        }
+
         // Render walkthroughs
         if (data.walkthroughs && Array.isArray(data.walkthroughs) && data.walkthroughs.length > 0) {
             renderVideoGrid(data.walkthroughs, 'walkthroughs-content');
