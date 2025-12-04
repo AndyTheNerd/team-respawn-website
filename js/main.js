@@ -9,8 +9,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await loadAllComponents({
             'header': 'header-container',
             'footer': 'footer-container',
-            'side-panel': 'side-panel-container',
-            'tab-navigation': 'tab-navigation-container'
+            'side-panel': 'side-panel-container'
         });
 
         // Initialize side panel after components are loaded

@@ -209,6 +209,19 @@ body {
     z-index: 2;
 }
 
+/* Tab navigation within header */
+.header-content-wrapper .tab-nav-list {
+    position: relative;
+    z-index: 2;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-top: 0.5rem;
+}
+
+.header-content-wrapper .tab-nav-list::-webkit-scrollbar {
+    display: none;
+}
+
 /* Menu Button Styles */
 .header-menu-btn {
     position: relative;
@@ -386,11 +399,25 @@ body {
         font-size: 0.875rem;
         line-height: 1.5;
     }
+    
+    .header-content-wrapper .tab-nav-list {
+        gap: 0.5rem;
+        padding-top: 0.75rem;
+    }
+    
+    .header-content-wrapper .tab-nav-button {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.75rem;
+    }
 }
 
 @media (min-width: 641px) and (max-width: 1024px) {
     .header-glass-container {
         padding: 1.5rem 2rem;
+    }
+    
+    .header-content-wrapper .tab-nav-button {
+        padding: 0.625rem 1rem;
     }
 }
 
