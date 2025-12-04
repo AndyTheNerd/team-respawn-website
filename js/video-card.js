@@ -269,8 +269,9 @@ function renderVideoGrid(videos, containerId) {
  * Renders a section with title, description, and video grid
  * @param {Object} sectionData - Section data object
  * @param {string} containerId - ID of the parent container
+ * @param {string} sectionId - Optional unique identifier for the grid ID
  */
-function renderVideoSection(sectionData, containerId) {
+function renderVideoSection(sectionData, containerId, sectionId = null) {
     const { title, description, videos, gridClass = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8' } = sectionData;
     
     // Sanitize inputs
@@ -278,13 +279,18 @@ function renderVideoSection(sectionData, containerId) {
     const safeDescription = escapeHtml(description || '');
     const safeGridClass = escapeHtml(gridClass);
     
+    // Create unique grid ID using sectionId or generate from title
+    const uniqueGridId = sectionId 
+        ? `${containerId}-${sectionId}-grid` 
+        : `${containerId}-${safeTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-grid`;
+    
     const sectionHtml = `
         <div class="p-6 rounded-xl border border-gray-700">
             <h3 class="text-2xl font-bold text-gray-200 mb-2">${safeTitle}</h3>
             <p class="text-gray-400 mb-6">
                 ${safeDescription}
             </p>
-            <div class="${safeGridClass}" id="${containerId}-grid">
+            <div class="${safeGridClass}" id="${uniqueGridId}">
                 <!-- Videos will be rendered here -->
             </div>
         </div>
@@ -305,9 +311,9 @@ function renderVideoSection(sectionData, containerId) {
             container.appendChild(tempDiv.firstChild);
         }
         
-        // Render videos into the grid
+        // Render videos into the grid using the unique ID
         if (videos && videos.length > 0) {
-            renderVideoGrid(videos, `${containerId}-grid`);
+            renderVideoGrid(videos, uniqueGridId);
         }
     }
 }

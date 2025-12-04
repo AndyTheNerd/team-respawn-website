@@ -21,9 +21,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Load and render video data
         await loadAndRenderVideos();
-        
-        // Load and render home content
-        await loadAndRenderHomeContent();
     } catch (error) {
         console.error('Error initializing page:', error);
     }
@@ -58,12 +55,12 @@ async function loadAndRenderVideos() {
                 
                 // Render Halo Wars 2 section
                 if (data['halo-wars']['halo-wars-2'] && typeof data['halo-wars']['halo-wars-2'] === 'object') {
-                    renderVideoSection(data['halo-wars']['halo-wars-2'], 'halo-wars-content');
+                    renderVideoSection(data['halo-wars']['halo-wars-2'], 'halo-wars-content', 'halo-wars-2');
                 }
                 
                 // Render Halo Wars 1 section
                 if (data['halo-wars']['halo-wars-1'] && typeof data['halo-wars']['halo-wars-1'] === 'object') {
-                    renderVideoSection(data['halo-wars']['halo-wars-1'], 'halo-wars-content');
+                    renderVideoSection(data['halo-wars']['halo-wars-1'], 'halo-wars-content', 'halo-wars-1');
                 }
             }
         }
@@ -73,15 +70,15 @@ async function loadAndRenderVideos() {
             const aoeContent = document.getElementById('age-of-empires-content');
             if (aoeContent) {
                 aoeContent.innerHTML = ''; // Clear any existing content
+
+                // Render AoE IV section
+                if (data['age-of-empires']['aoe-4'] && typeof data['age-of-empires']['aoe-4'] === 'object') {
+                    renderVideoSection(data['age-of-empires']['aoe-4'], 'age-of-empires-content', 'aoe-4');
+                }
                 
                 // Render AoE II section
                 if (data['age-of-empires']['aoe-2'] && typeof data['age-of-empires']['aoe-2'] === 'object') {
-                    renderVideoSection(data['age-of-empires']['aoe-2'], 'age-of-empires-content');
-                }
-                
-                // Render AoE IV section
-                if (data['age-of-empires']['aoe-4'] && typeof data['age-of-empires']['aoe-4'] === 'object') {
-                    renderVideoSection(data['age-of-empires']['aoe-4'], 'age-of-empires-content');
+                    renderVideoSection(data['age-of-empires']['aoe-2'], 'age-of-empires-content', 'aoe-2');
                 }
             }
         }
@@ -92,33 +89,6 @@ async function loadAndRenderVideos() {
         }
     } catch (error) {
         console.error('Error loading and rendering videos:', error);
-    }
-}
-
-/**
- * Loads video data and renders home content
- */
-async function loadAndRenderHomeContent() {
-    try {
-        const response = await fetch('data/videos.json');
-        if (!response.ok) {
-            throw new Error('Failed to load video data');
-        }
-        const data = await response.json();
-
-        // Validate that data is an object
-        if (!data || typeof data !== 'object') {
-            throw new Error('Invalid video data format');
-        }
-
-        // Render home content with all video data
-        if (typeof renderHomeContent === 'function') {
-            renderHomeContent(data);
-        } else {
-            console.error('renderHomeContent function not found');
-        }
-    } catch (error) {
-        console.error('Error loading and rendering home content:', error);
     }
 }
 

@@ -1,7 +1,7 @@
 {
   "walkthroughs": [
     {
-      "title": "Halo: Combat Evolved Anniversary",
+      "title": "Halo: CE Anniversary",
       "description": "Humanity's last super-soldier fights an alien army and a parasitic threat on a mysterious ringworld.",
       "youtubeUrl": "https://youtu.be/F1IcZeDYFd4",
       "imageSrc": "img/Halo-CEA-Walkthrough-2023.jpg",
@@ -128,33 +128,6 @@
           "buttonColor": "green-500",
           "alt": "A screenshot from Halo Wars 2",
           "featured": true
-        },
-        {
-          "title": "Placeholder Guide 1",
-          "description": "This is a placeholder description for a new Halo Wars 2 guide. More content is coming soon!",
-          "youtubeUrl": "#",
-          "imageSrc": "https://placehold.co/600x400/212121/ffffff?text=Coming+Soon",
-          "color": "cyan-400",
-          "buttonColor": "cyan-500",
-          "alt": "Placeholder image for a Halo Wars guide."
-        },
-        {
-          "title": "Placeholder Guide 2",
-          "description": "This is another placeholder description for a new Halo Wars 2 guide. Check back later for updates.",
-          "youtubeUrl": "#",
-          "imageSrc": "https://placehold.co/600x400/212121/ffffff?text=Coming+Soon",
-          "color": "orange-400",
-          "buttonColor": "orange-500",
-          "alt": "Placeholder image for a Halo Wars guide."
-        },
-        {
-          "title": "Placeholder Guide 3",
-          "description": "This is a final placeholder tile for a new guide. A new video will be linked here soon.",
-          "youtubeUrl": "#",
-          "imageSrc": "https://placehold.co/600x400/212121/ffffff?text=Coming+Soon",
-          "color": "purple-400",
-          "buttonColor": "purple-500",
-          "alt": "Placeholder image for a Halo Wars guide."
         }
       ]
     },
@@ -186,8 +159,7 @@
           "iframeSrc": "https://www.youtube.com/embed/q6w5R2sFpA0",
           "color": "yellow-400",
           "buttonColor": "yellow-500",
-          "alt": "A screenshot from Age of Empires II",
-          "featured": true
+          "alt": "A screenshot from Age of Empires II"
         }
       ]
     },
@@ -196,33 +168,61 @@
       "description": "Explore guides for Age of Empires IV, including civilization overviews and competitive strategies.",
       "videos": [
         {
-          "title": "Age of Empires IV: Beginner's Guide",
-          "description": "A comprehensive guide for new players to the world of Age of Empires IV, covering civilizations, resources, and combat.",
-          "youtubeUrl": "https://www.youtube.com/watch?v=rV162wW_4H0",
-          "iframeSrc": "https://www.youtube.com/embed/rV162wW_4H0",
+          "title": "Xbox Beginner's Guide",
+          "description": "A comprehensive guide for new players to the world of Age of Empires IV, covering civilizations, resources, and combat. This guide is for the Xbox version of the game.",
+          "youtubeUrl": "https://youtu.be/lPFni5wEjQo",
+          "imageSrc": "img/AOE4-Guides/Beginner Guide.jpg",
           "color": "yellow-400",
           "buttonColor": "yellow-500",
-          "alt": "A screenshot from Age of Empires IV"
+          "alt": "A screenshot from Age of Empires IV",
+          "featured": true
+        },
+        {
+          "title": "Xbox Controller Guide",
+          "description": "A guide for using an Xbox controller in Age of Empires IV. This guide is for the Xbox version of the game.",
+          "youtubeUrl": "https://youtu.be/Tl2B9XfweSAo",
+          "imageSrc": "img/AOE4-Guides/Controller Tutorial.jpg",
+          "color": "yellow-400",
+          "buttonColor": "yellow-500",
+          "alt": "A screenshot from Age of Empires IV Controller Guide"
+        },
+        {
+          "title": "Nomad Megarandom 101",
+          "description": "Learn how to play the Nomad Megarandom game mode in Age of Empires IV.",
+          "youtubeUrl": "https://youtu.be/dw1d0n7jnR0",
+          "imageSrc": "img/AOE4-Guides/Nomad 1.jpg",
+          "color": "yellow-400",
+          "buttonColor": "yellow-500",
+          "alt": "A screenshot from Age of Empires IV Controller Guide"
         }
       ]
     }
   },
   "age-of-mythology": [
     {
-      "title": "Age of Mythology: Titans Expansion Guide",
-      "description": "Unleash the power of the Titans with this guide to the expansion pack.",
-      "youtubeUrl": "https://www.youtube.com/watch?v=hT_F_0E3i4Y",
-      "iframeSrc": "https://www.youtube.com/embed/hT_F_0E3i4Y",
+      "title": "Atlantean's Guide",
+      "description": "A guide for the Atlantean civilization in Age of Mythology.",
+      "youtubeUrl": "https://youtu.be/l9tJQI2JOBM",
+      "imageSrc": "img/AOM-Guides/Atlantean Guide.jpg",
       "color": "red-400",
       "buttonColor": "red-500",
       "alt": "A screenshot from Age of Mythology",
       "featured": true
     },
     {
-      "title": "Age of Mythology: Chinese Gods Overview",
-      "description": "A deep dive into the Chinese pantheon from the Tale of the Dragon expansion.",
-      "youtubeUrl": "https://www.youtube.com/watch?v=K844zE86iFo",
-      "iframeSrc": "https://www.youtube.com/embed/K844zE86iFo",
+      "title": "Egyptian's Guide",
+      "description": "A guide for the Egyptian civilization in Age of Mythology.",
+      "youtubeUrl": "https://youtu.be/kLhQXvGHdP4",
+      "imageSrc": "img/AOM-Guides/Egypt Guide.jpg",
+      "color": "red-400",
+      "buttonColor": "red-500",
+      "alt": "A screenshot from Age of Mythology"
+    },
+    {
+      "title": "Greek's Guide",
+      "description": "A guide for the Greek civilization in Age of Mythology.",
+      "youtubeUrl": "https://youtu.be/iyLZ3qcZcLE",
+      "imageSrc": "img/AOM-Guides/How to Play as Greeks.jpg",
       "color": "red-400",
       "buttonColor": "red-500",
       "alt": "A screenshot from Age of Mythology"
