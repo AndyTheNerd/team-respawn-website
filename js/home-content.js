@@ -147,7 +147,7 @@ function renderFeaturedCarousel(allVideos) {
     }
 
     // Create cards for carousel (wrapping video cards)
-    videoCardsHtml = featuredVideos.map(video => {
+    const videoCardsHtml = featuredVideos.map(video => {
         // Use renderVideoCard if available, otherwise create manually
         let cardContent = '';
         if (typeof renderVideoCard === 'function') {
