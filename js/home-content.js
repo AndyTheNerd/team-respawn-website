@@ -22,38 +22,37 @@ function renderHeroSection() {
     return `
         <section class="hero-section mb-8">
             <div class="max-w-4xl mx-auto px-4">
-                <div class="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-gray-700/50 shadow-xl">
-                    <div class="text-center mb-6">
-                        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
-                            Welcome to Team Respawn
-                        </h1>
-                        <p class="text-lg sm:text-xl text-gray-300">
-                            Your ultimate destination for RTS strategy guides and gaming walkthroughs
-                        </p>
-                    </div>
-                    <div class="flex flex-wrap justify-center gap-4">
-                        <a href="https://www.youtube.com/@TeamRespawn" target="_blank" rel="noopener noreferrer" 
-                           class="inline-flex items-center gap-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg">
-                            <i class="fab fa-youtube" aria-hidden="true"></i>
-                            YouTube
-                        </a>
-                        <a href="https://www.twitch.tv/teamrespawntv" target="_blank" rel="noopener noreferrer" 
-                           class="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg">
-                            <i class="fab fa-twitch" aria-hidden="true"></i>
-                            Twitch
-                        </a>
-                        <a href="https://discord.gg/TeamRespawn" target="_blank" rel="noopener noreferrer" 
-                           class="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg">
-                            <i class="fab fa-discord" aria-hidden="true"></i>
-                            Discord
-                        </a>
-                    </div>
+                <div class="text-center mb-6">
+                    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+                        Welcome to Team Respawn
+                    </h1>
+                    <p class="text-lg sm:text-xl text-gray-300">
+                        Your ultimate destination for RTS strategy guides and gaming walkthroughs. Team Respawn is a thriving gaming channel led by Andy and his friends, dedicated to strategy lovers—especially fans of Halo Wars, Halo FPS, and Age of Empires.
+                    </p>
                 </div>
+                <!-- Social media buttons commented out - can be restored later
+                <div class="flex flex-wrap justify-center gap-4">
+                    <a href="https://www.youtube.com/@TeamRespawn" target="_blank" rel="noopener noreferrer" 
+                       class="inline-flex items-center gap-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg">
+                        <i class="fab fa-youtube" aria-hidden="true"></i>
+                        YouTube
+                    </a>
+                    <a href="https://www.twitch.tv/teamrespawntv" target="_blank" rel="noopener noreferrer" 
+                       class="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg">
+                        <i class="fab fa-twitch" aria-hidden="true"></i>
+                        Twitch
+                    </a>
+                    <a href="https://discord.gg/TeamRespawn" target="_blank" rel="noopener noreferrer" 
+                       class="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg">
+                        <i class="fab fa-discord" aria-hidden="true"></i>
+                        Discord
+                    </a>
+                </div>
+                -->
             </div>
         </section>
     `;
 }
-
 /**
  * Renders the About Us section
  * @param {string} aboutText - About text content
