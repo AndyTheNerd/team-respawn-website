@@ -86,8 +86,8 @@
       "description": "UNSC soldiers on the Spirit of Fire fight the Covenant and discover a Flood-infested Forerunner shield world.",
       "youtubeUrl": "https://youtu.be/BYBLYmBIS2A",
       "imageSrc": "img/Halo-Wars-Walkthrough.jpg",
-      "color": "blue-400",
-      "buttonColor": "blue-500",
+      "color": "cyan-400",
+      "buttonColor": "cyan-500",
       "alt": "A screenshot from Halo Wars",
       "releaseDate": "2009-02-26",
       "series": "Halo Wars"
@@ -109,8 +109,8 @@
       "description": "An ODST team, Sunray 1-1, drops in to stop a Banished plan to destroy the Spirit of Fire.",
       "youtubeUrl": "https://youtu.be/WxWnwAIB2Ak",
       "imageSrc": "img/Spearbreaker-Walkthrough.jpg",
-      "color": "yellow-400",
-      "buttonColor": "yellow-500",
+      "color": "amber-400",
+      "buttonColor": "amber-500",
       "alt": "A screenshot from Halo Wars 2 Operation Spearbreaker",
       "releaseDate": "2017-07-26",
       "series": "Halo Wars"
@@ -120,8 +120,8 @@
       "description": "Freed from prison, Marcus Fenix joins Delta Squad to detonate a bomb in the Locust tunnels.",
       "youtubeUrl": "https://www.youtube.com/watch?v=FwB3665hT-E",
       "imageSrc": "img/Gears1-Walkthrough.jpg",
-      "color": "teal-400",
-      "buttonColor": "teal-500",
+      "color": "indigo-400",
+      "buttonColor": "indigo-500",
       "alt": "A screenshot from Gears of War",
       "releaseDate": "2015-08-25",
       "series": "Gears of War"
@@ -131,8 +131,8 @@
       "description": "A wizard's death sparks a goblin civil war. Unite clans and discover the truth behind the plot.",
       "youtubeUrl": "https://www.youtube.com/watch?v=VvD3M82_f_Q",
       "imageSrc": "img/Goblin-Commander-Walkthrough.jpg",
-      "color": "orange-400",
-      "buttonColor": "orange-500",
+      "color": "emerald-400",
+      "buttonColor": "emerald-500",
       "alt": "A screenshot from Goblin Commander: Unleash the Horde",
       "releaseDate": "2003-11-11",
       "series": "Goblin Commander"
@@ -298,5 +298,3 @@
     }
   ]
 }
-
-
