@@ -1,13 +1,15 @@
 {
   "walkthroughs": [
     {
-      "title": "Halo: CE Anniversary",
+      "title": "Halo CE Anniversary",
       "description": "Humanity's last super-soldier fights an alien army and a parasitic threat on a mysterious ringworld.",
       "youtubeUrl": "https://youtu.be/F1IcZeDYFd4",
       "imageSrc": "img/Halo-CEA-Walkthrough-2023.jpg",
       "color": "orange-400",
       "buttonColor": "orange-500",
       "alt": "A screenshot from Halo Combat Evolved Anniversary",
+      "releaseDate": "2011-11-15",
+      "series": "Halo",
       "featured": true
     },
     {
@@ -18,6 +20,8 @@
       "color": "purple-400",
       "buttonColor": "purple-500",
       "alt": "A screenshot from Halo 2 Anniversary",
+      "releaseDate": "2014-11-11",
+      "series": "Halo",
       "featured": true
     },
     {
@@ -28,6 +32,8 @@
       "color": "blue-400",
       "buttonColor": "blue-500",
       "alt": "A screenshot from Halo 3",
+      "releaseDate": "2007-09-25",
+      "series": "Halo",
       "featured": true
     },
     {
@@ -37,7 +43,9 @@
       "imageSrc": "img/Halo-3-ODST-Walkthrough.jpg",
       "color": "pink-400",
       "buttonColor": "pink-500",
-      "alt": "A screenshot from Halo 3 ODST"
+      "alt": "A screenshot from Halo 3 ODST",
+      "releaseDate": "2009-09-22",
+      "series": "Halo"
     },
     {
       "title": "Halo Reach",
@@ -47,6 +55,8 @@
       "color": "lime-400",
       "buttonColor": "lime-500",
       "alt": "A screenshot from Halo Reach",
+      "releaseDate": "2010-09-14",
+      "series": "Halo",
       "featured": true
     },
     {
@@ -56,7 +66,9 @@
       "imageSrc": "img/Halo-4-Walkthrough.jpg",
       "color": "teal-400",
       "buttonColor": "teal-500",
-      "alt": "A screenshot from Halo 4"
+      "alt": "A screenshot from Halo 4",
+      "releaseDate": "2012-11-06",
+      "series": "Halo"
     },
     {
       "title": "Halo Infinite",
@@ -65,7 +77,9 @@
       "imageSrc": "img/Halo-Infinite-Walkthrough.jpg",
       "color": "red-400",
       "buttonColor": "red-500",
-      "alt": "A screenshot from Halo Infinite"
+      "alt": "A screenshot from Halo Infinite",
+      "releaseDate": "2021-12-08",
+      "series": "Halo"
     },
     {
       "title": "Halo Wars",
@@ -74,7 +88,9 @@
       "imageSrc": "img/Halo-Wars-Walkthrough.jpg",
       "color": "blue-400",
       "buttonColor": "blue-500",
-      "alt": "A screenshot from Halo Wars"
+      "alt": "A screenshot from Halo Wars",
+      "releaseDate": "2009-02-26",
+      "series": "Halo Wars"
     },
     {
       "title": "Halo Wars 2",
@@ -84,6 +100,8 @@
       "color": "yellow-400",
       "buttonColor": "yellow-500",
       "alt": "A screenshot from Halo Wars 2",
+      "releaseDate": "2017-02-21",
+      "series": "Halo Wars",
       "featured": true
     },
     {
@@ -93,7 +111,9 @@
       "imageSrc": "img/Spearbreaker-Walkthrough.jpg",
       "color": "yellow-400",
       "buttonColor": "yellow-500",
-      "alt": "A screenshot from Halo Wars 2 Operation Spearbreaker"
+      "alt": "A screenshot from Halo Wars 2 Operation Spearbreaker",
+      "releaseDate": "2017-07-26",
+      "series": "Halo Wars"
     },
     {
       "title": "Gears of War: Ultimate Edition",
@@ -102,7 +122,9 @@
       "imageSrc": "img/Gears1-Walkthrough.jpg",
       "color": "teal-400",
       "buttonColor": "teal-500",
-      "alt": "A screenshot from Gears of War"
+      "alt": "A screenshot from Gears of War",
+      "releaseDate": "2015-08-25",
+      "series": "Gears of War"
     },
     {
       "title": "Goblin Commander: Unleash the Horde",
@@ -111,7 +133,9 @@
       "imageSrc": "img/Goblin-Commander-Walkthrough.jpg",
       "color": "orange-400",
       "buttonColor": "orange-500",
-      "alt": "A screenshot from Goblin Commander: Unleash the Horde"
+      "alt": "A screenshot from Goblin Commander: Unleash the Horde",
+      "releaseDate": "2003-11-11",
+      "series": "Goblin Commander"
     }
   ],
   "halo-wars": {

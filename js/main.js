@@ -2,6 +2,9 @@
  * Main initialization and orchestration
  */
 
+// Cached walkthrough data for sorting
+let walkthroughsData = [];
+
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', async () => {
     try {
@@ -48,7 +51,7 @@ async function loadAndRenderVideos() {
 
         // Render walkthroughs
         if (data.walkthroughs && Array.isArray(data.walkthroughs) && data.walkthroughs.length > 0) {
-            renderVideoGrid(data.walkthroughs, 'walkthroughs-content');
+            initWalkthroughSorting(data.walkthroughs);
         }
 
         // Render Halo Wars content
@@ -94,5 +97,74 @@ async function loadAndRenderVideos() {
     } catch (error) {
         console.error('Error loading and rendering videos:', error);
     }
+}
+
+/**
+ * Initializes walkthrough sorting controls and renders initial grid
+ * @param {Array} walkthroughs - Walkthrough data with metadata
+ */
+function initWalkthroughSorting(walkthroughs) {
+    walkthroughsData = Array.isArray(walkthroughs) ? [...walkthroughs] : [];
+    const sortSelect = document.getElementById('walkthroughs-sort-select');
+    const gridId = 'walkthroughs-grid';
+
+    if (!sortSelect) {
+        // Fallback: render without sorting controls
+        renderVideoGrid(walkthroughsData, gridId);
+        return;
+    }
+
+    const defaultSort = 'alpha';
+    sortSelect.value = defaultSort;
+
+    const renderSorted = () => {
+        const sorted = getSortedWalkthroughs(sortSelect.value || defaultSort);
+        renderVideoGrid(sorted, gridId);
+    };
+
+    sortSelect.addEventListener('change', renderSorted);
+    renderSorted();
+}
+
+/**
+ * Returns a sorted copy of walkthrough data based on the selected sort option
+ * @param {string} sortKey - Sort option key
+ * @returns {Array} Sorted walkthrough array
+ */
+function getSortedWalkthroughs(sortKey) {
+    const key = sortKey || 'alpha';
+    const safeList = [...walkthroughsData];
+
+    const compareTitlesAsc = (a, b) => (a.title || '').localeCompare(b.title || '', undefined, { sensitivity: 'base' });
+    const compareTitlesDesc = (a, b) => (b.title || '').localeCompare(a.title || '', undefined, { sensitivity: 'base' });
+
+    switch (key) {
+        case 'reverse-alpha':
+            return safeList.sort(compareTitlesDesc);
+        case 'release-desc':
+            return safeList.sort((a, b) => {
+                const diff = getReleaseTimestamp(b) - getReleaseTimestamp(a);
+                return diff !== 0 ? diff : compareTitlesAsc(a, b);
+            });
+        case 'series':
+            return safeList.sort((a, b) => {
+                const seriesCompare = (a.series || '').localeCompare(b.series || '', undefined, { sensitivity: 'base' });
+                return seriesCompare !== 0 ? seriesCompare : compareTitlesAsc(a, b);
+            });
+        case 'alpha':
+        default:
+            return safeList.sort(compareTitlesAsc);
+    }
+}
+
+/**
+ * Safely parses a release date string into a timestamp
+ * @param {Object} entry - Walkthrough entry with releaseDate
+ * @returns {number} Timestamp or 0 if invalid
+ */
+function getReleaseTimestamp(entry) {
+    if (!entry || !entry.releaseDate) return 0;
+    const parsed = Date.parse(entry.releaseDate);
+    return Number.isNaN(parsed) ? 0 : parsed;
 }
 
