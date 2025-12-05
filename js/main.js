@@ -146,6 +146,11 @@ function getSortedWalkthroughs(sortKey) {
                 const diff = getReleaseTimestamp(b) - getReleaseTimestamp(a);
                 return diff !== 0 ? diff : compareTitlesAsc(a, b);
             });
+        case 'release-asc':
+            return safeList.sort((a, b) => {
+                const diff = getReleaseTimestamp(a) - getReleaseTimestamp(b);
+                return diff !== 0 ? diff : compareTitlesAsc(a, b);
+            });
         case 'series':
             return safeList.sort((a, b) => {
                 const seriesCompare = (a.series || '').localeCompare(b.series || '', undefined, { sensitivity: 'base' });
@@ -164,7 +169,29 @@ function getSortedWalkthroughs(sortKey) {
  */
 function getReleaseTimestamp(entry) {
     if (!entry || !entry.releaseDate) return 0;
-    const parsed = Date.parse(entry.releaseDate);
+    
+    // Parse YYYY-MM-DD format explicitly for consistent sorting
+    const dateStr = entry.releaseDate.trim();
+    const dateMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    
+    if (dateMatch) {
+        const year = parseInt(dateMatch[1], 10);
+        const month = parseInt(dateMatch[2], 10) - 1; // Month is 0-indexed
+        const day = parseInt(dateMatch[3], 10);
+        
+        // Create date in UTC to avoid timezone issues
+        const date = new Date(Date.UTC(year, month, day));
+        const timestamp = date.getTime();
+        
+        // Validate the date was created correctly
+        if (!Number.isNaN(timestamp) && date.getUTCFullYear() === year && 
+            date.getUTCMonth() === month && date.getUTCDate() === day) {
+            return timestamp;
+        }
+    }
+    
+    // Fallback to Date.parse for other formats
+    const parsed = Date.parse(dateStr);
     return Number.isNaN(parsed) ? 0 : parsed;
 }
 
