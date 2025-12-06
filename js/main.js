@@ -5,6 +5,58 @@
 // Cached walkthrough data for sorting
 let walkthroughsData = [];
 
+/**
+ * Gets the base path for data directory based on current page location
+ * @returns {string} Base path to data directory
+ */
+function getDataBasePath() {
+    const currentPath = window.location.pathname;
+    // If we're in a subdirectory (blog/ or blog/posts/), go up one or two levels
+    if (currentPath.includes('/blog/posts/')) {
+        return '../../data/';
+    } else if (currentPath.includes('/blog/')) {
+        return '../data/';
+    }
+    return 'data/';
+}
+
+/**
+ * Loads taglines from JSON and randomly selects one to update the header
+ */
+async function loadAndUpdateTagline() {
+    try {
+        const dataPath = getDataBasePath();
+        const response = await fetch(`${dataPath}taglines.json`);
+        
+        if (!response.ok) {
+            // Silently fail if taglines.json doesn't exist - use default tagline
+            console.warn('Taglines file not found, using default tagline');
+            return;
+        }
+        
+        const taglines = await response.json();
+        
+        // Validate that taglines is an array
+        if (!Array.isArray(taglines) || taglines.length === 0) {
+            console.warn('Invalid taglines format, using default tagline');
+            return;
+        }
+        
+        // Select a random tagline
+        const randomIndex = Math.floor(Math.random() * taglines.length);
+        const selectedTagline = taglines[randomIndex];
+        
+        // Update the tagline element if it exists
+        const taglineElement = document.getElementById('header-tagline');
+        if (taglineElement && selectedTagline) {
+            taglineElement.textContent = selectedTagline;
+        }
+    } catch (error) {
+        // Silently fail if there's an error - use default tagline
+        console.warn('Error loading taglines, using default tagline:', error);
+    }
+}
+
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', async () => {
     try {
@@ -14,6 +66,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             'footer': 'footer-container',
             'side-panel': 'side-panel-container'
         });
+
+        // Load and update tagline after header is loaded
+        await loadAndUpdateTagline();
 
         // Initialize side panel after components are loaded
         initSidePanel();
