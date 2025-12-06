@@ -9,8 +9,7 @@
       "buttonColor": "orange-500",
       "alt": "A screenshot from Halo Combat Evolved Anniversary",
       "releaseDate": "2011-11-15",
-      "series": "Halo",
-      "featured": true
+      "series": "Halo"
     },
     {
       "title": "Halo 2 Anniversary",
@@ -33,8 +32,7 @@
       "buttonColor": "blue-500",
       "alt": "A screenshot from Halo 3",
       "releaseDate": "2007-09-25",
-      "series": "Halo",
-      "featured": true
+      "series": "Halo"
     },
     {
       "title": "Halo 3 ODST",
@@ -56,8 +54,7 @@
       "buttonColor": "lime-500",
       "alt": "A screenshot from Halo Reach",
       "releaseDate": "2010-09-14",
-      "series": "Halo",
-      "featured": true
+      "series": "Halo"
     },
     {
       "title": "Halo 4",
@@ -160,7 +157,8 @@
           "imageSrc": "img/HW-Guides/The UNSC - Beginners Guide.png",
           "color": "green-400",
           "buttonColor": "green-500",
-          "alt": "A screenshot from Halo Wars 2"
+          "alt": "A screenshot from Halo Wars 2",
+          "featured": true
         },
         {
           "title": "How to play as The Banished",
@@ -169,7 +167,8 @@
           "imageSrc": "img/HW-Guides/The Banished - Beginners Guide.png",
           "color": "green-400",
           "buttonColor": "green-500",
-          "alt": "A screenshot from Halo Wars 2"
+          "alt": "A screenshot from Halo Wars 2",
+          "featured": true
         },
         {
           "title": "How to play as Captain Cutter",
@@ -259,7 +258,8 @@
           "imageSrc": "img/HW-Guides/Stopping-Air-Spam.jpg",
           "color": "green-400",
           "buttonColor": "green-500",
-          "alt": "A screenshot from Halo Wars 2"
+          "alt": "A screenshot from Halo Wars 2",
+          "featured": true
         },
         {
           "title": "How to Super Turtle",
@@ -345,7 +345,7 @@
       "description": "Explore guides for Age of Empires IV, including civilization overviews and competitive strategies.",
       "videos": [
         {
-          "title": "Xbox Beginner's Guide",
+          "title": "Xbox Beginners Guide",
           "description": "A comprehensive guide for new players to the world of Age of Empires IV, covering civilizations, resources, and combat. This guide is for the Xbox version of the game.",
           "youtubeUrl": "https://youtu.be/lPFni5wEjQo",
           "imageSrc": "img/AOE4-Guides/Beginner Guide.jpg",
