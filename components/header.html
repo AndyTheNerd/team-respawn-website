@@ -7,11 +7,11 @@
         <!-- Content wrapper with glassmorphism -->
         <div class="header-content-wrapper relative z-10 flex flex-col">
             <!-- Top row: Menu, Logo, Social -->
-            <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0 mb-4 sm:mb-6">
+            <div class="grid grid-cols-3 items-center gap-4 mb-4 sm:mb-6">
                 <!-- Open Side Panel Button -->
                 <button 
                     id="open-panel-button" 
-                    class="header-menu-btn flex-shrink-0 p-3 rounded-xl backdrop-blur-sm bg-gray-800/40 hover:bg-gray-700/60 border border-white/10 hover:border-purple-400/30 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-purple-500/20 group"
+                    class="header-menu-btn flex-shrink-0 justify-self-start p-3 rounded-xl backdrop-blur-sm bg-gray-800/40 hover:bg-gray-700/60 border border-white/10 hover:border-purple-400/30 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-purple-500/20 group"
                     aria-label="Open navigation menu"
                     aria-expanded="false"
                     aria-controls="side-panel"
@@ -22,7 +22,7 @@
                 </button>
                 
                 <!-- Logo and Tagline Section -->
-                <div class="flex-grow text-center px-4">
+                <div class="text-center justify-self-center px-4">
                     <a href="/" aria-label="Return to Team Respawn homepage" class="logo-link inline-block group">
                         <img 
                             src="content/Team-Respawn-Full.png" 
@@ -38,7 +38,7 @@
                 </div>
                 
                 <!-- Social Media Icons Container -->
-                <div id="header-social-icons" class="flex-shrink-0 header-social-container" aria-label="Social media links"></div>
+                <div id="header-social-icons" class="flex-shrink-0 header-social-container justify-self-end" aria-label="Social media links"></div>
             </div>
             
             <!-- Tab Navigation Row -->
