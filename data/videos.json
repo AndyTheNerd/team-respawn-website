@@ -144,7 +144,7 @@
       "description": "Explore guides for Halo Wars 2, including leader builds, multiplayer strategies, and more.",
       "videos": [
         {
-          "title": "Ten Tips for Every Beginner!",
+          "title": "10 Tips for Beginners",
           "description": "New to Halo Wars 2? Learn the basics with these ten essential tips to get you started on the battlefield!",
           "youtubeUrl": "https://youtu.be/p5fnWN1E4nw",
           "imageSrc": "img/HW-Guides/Ten-Tips.jpg",
@@ -152,6 +152,141 @@
           "buttonColor": "green-500",
           "alt": "A screenshot from Halo Wars 2",
           "featured": true
+        },
+        {
+          "title": "How to play as UNSC",
+          "description": "Learn how to play as UNSC in Halo Wars 2.",
+          "youtubeUrl": "https://youtu.be/b1RJorPogME",
+          "imageSrc": "img/HW-Guides/The UNSC - Beginners Guide.png",
+          "color": "green-400",
+          "buttonColor": "green-500",
+          "alt": "A screenshot from Halo Wars 2"
+        },
+        {
+          "title": "How to play as The Banished",
+          "description": "Learn how to play as The Banished in Halo Wars 2.",
+          "youtubeUrl": "https://youtu.be/gb5GSp88n4Y",
+          "imageSrc": "img/HW-Guides/The Banished - Beginners Guide.png",
+          "color": "green-400",
+          "buttonColor": "green-500",
+          "alt": "A screenshot from Halo Wars 2"
+        },
+        {
+          "title": "How to play as Captain Cutter",
+          "description": "Learn how to play as Captain Cutter in Halo Wars 2.",
+          "youtubeUrl": "https://youtu.be/HtF6SzE69Fw",
+          "imageSrc": "img/HW-Guides/Captain Cutter - Beginners Guide.png",
+          "color": "green-400",
+          "buttonColor": "green-500",
+          "alt": "A screenshot from Halo Wars 2"
+        },
+        {
+          "title": "How to play as Colony",
+          "description": "Learn how to play as Colony in Halo Wars 2.",
+          "youtubeUrl": "https://youtu.be/ffCs-rFvbgM",
+          "imageSrc": "img/HW-Guides/The Colony - Beginners Guide.png",
+          "color": "green-400",
+          "buttonColor": "green-500",
+          "alt": "A screenshot from Halo Wars 2"
+        },
+        {
+          "title": "How to play as Kinsano",
+          "description": "Learn how to play as Kinsano in Halo Wars 2.",
+          "youtubeUrl": "https://youtu.be/tpVJOFNYM20",
+          "imageSrc": "img/HW-Guides/Kinsano-2.jpg",
+          "color": "green-400",
+          "buttonColor": "green-500",
+          "alt": "A screenshot from Halo Wars 2"
+        },
+        {
+          "title": "How to play as Yap Yap",
+          "description": "Learn how to play as Yap Yap in Halo Wars 2.",
+          "youtubeUrl": "https://youtu.be/OZEoTTjItz4",
+          "imageSrc": "img/HW-Guides/Yap Yap-2.jpg",
+          "color": "green-400",
+          "buttonColor": "green-500",
+          "alt": "A screenshot from Halo Wars 2"
+        },
+        {
+          "title": "How to play as Anders",
+          "description": "Learn how to play as Anders in Halo Wars 2.",
+          "youtubeUrl": "https://youtu.be/w3-ljhAVImo",
+          "imageSrc": "img/HW-Guides/Anders Guide.jpg",
+          "color": "green-400",
+          "buttonColor": "green-500",
+          "alt": "A screenshot from Halo Wars 2"
+        },
+        {
+          "title": "How to play as Pavium",
+          "description": "Learn how to play as Pavium in Halo Wars 2.",
+          "youtubeUrl": "https://youtu.be/SGDnowC0iqc",
+          "imageSrc": "img/HW-Guides/Pavium.jpg",
+          "color": "green-400",
+          "buttonColor": "green-500",
+          "alt": "A screenshot from Halo Wars 2"
+        },
+        {
+          "title": "How to play as Atriox",
+          "description": "Learn how to play as Atriox in Halo Wars 2.",
+          "youtubeUrl": "https://youtu.be/6dg1XqBiCuA",
+          "imageSrc": "img/HW-Guides/Atriox.jpg",
+          "color": "green-400",
+          "buttonColor": "green-500",
+          "alt": "A screenshot from Halo Wars 2"
+        },
+        {
+          "title": "How to play as Sgt. Forge",
+          "description": "Learn how to play as Sgt. Forge in Halo Wars 2.",
+          "youtubeUrl": "https://youtu.be/7j09kRQ3zsM",
+          "imageSrc": "img/HW-Guides/Forge.jpg",
+          "color": "green-400",
+          "buttonColor": "green-500",
+          "alt": "A screenshot from Halo Wars 2"
+        },
+        {
+          "title": "How to play as Voridus",
+          "description": "Learn how to play as Voridus in Halo Wars 2.",
+          "youtubeUrl": "https://youtu.be/PQvkY-9sJOU",
+          "imageSrc": "img/HW-Guides/Voridus.jpg",
+          "color": "green-400",
+          "buttonColor": "green-500",
+          "alt": "A screenshot from Halo Wars 2"
+        },
+        {
+          "title": "How to Stop Air Spam",
+          "description": "Learn how to stop air spam in Halo Wars 2.",
+          "youtubeUrl": "https://youtu.be/t2hzrzFeh_M",
+          "imageSrc": "img/HW-Guides/Stopping-Air-Spam.jpg",
+          "color": "green-400",
+          "buttonColor": "green-500",
+          "alt": "A screenshot from Halo Wars 2"
+        },
+        {
+          "title": "How to Super Turtle",
+          "description": "Learn how to super turtle in Halo Wars 2.",
+          "youtubeUrl": "https://youtu.be/EhtSyHrx8fo",
+          "imageSrc": "img/HW-Guides/How-to-Super-Turtle.jpg",
+          "color": "green-400",
+          "buttonColor": "green-500",
+          "alt": "A screenshot from Halo Wars 2"
+        },
+        {
+          "title": "How to Break the Super Turtle",
+          "description": "Learn how to break the super turtle in Halo Wars 2.",
+          "youtubeUrl": "https://youtu.be/1SDezpdQRGg",
+          "imageSrc": "img/HW-Guides/Break-The-Turtle.jpg",
+          "color": "green-400",
+          "buttonColor": "green-500",
+          "alt": "A screenshot from Halo Wars 2"
+        },
+        {
+          "title": "Advanced Movement and Splitting",
+          "description": "Learn how to advanced movement and splitting in Halo Wars 2.",
+          "youtubeUrl": "https://youtu.be/OcyABRReJE0",
+          "imageSrc": "img/HW-Guides/Advanced-Movement.jpg",
+          "color": "green-400",
+          "buttonColor": "green-500",
+          "alt": "A screenshot from Halo Wars 2"
         }
       ]
     },
