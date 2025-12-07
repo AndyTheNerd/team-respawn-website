@@ -295,10 +295,19 @@
       "description": "Dive into our guides for the original Halo Wars, covering campaign walkthroughs and strategies.",
       "videos": [
         {
-          "title": "Why is Arcadia City so DIFFICULT in Halo Wars?!",
+          "title": "Why is Arcadia City so DIFFICULT?",
           "description": "Learn how to beat the most difficult mission in Halo Wars.",
           "youtubeUrl": "https://youtu.be/2xGB56Xao3k",
           "imageSrc": "img/HW-Guides/Why is Arcadia City so hard.jpg",
+          "color": "green-400",
+          "buttonColor": "green-500",
+          "alt": "A screenshot from Halo Wars"
+        },
+        {
+          "title": "Why is the Scarab mission so FRUSTRATING?",
+          "description": "Learn how to beat the most frustrating mission in Halo Wars.",
+          "youtubeUrl": "https://youtu.be/4K8NxWJg9IIk",
+          "imageSrc": "img/HW-Guides/Why is the Scarab so frustrating.jpg",
           "color": "green-400",
           "buttonColor": "green-500",
           "alt": "A screenshot from Halo Wars"
