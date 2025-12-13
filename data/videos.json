@@ -346,6 +346,15 @@
           "color": "yellow-400",
           "buttonColor": "yellow-500",
           "alt": "A screenshot from Advanced Xbox Guide"
+        },
+        {
+          "title": "How to get Maximum Villager Efficiency",
+          "description": "Learn how to get maximum villager efficiency in Age of Empires II.",
+          "youtubeUrl": "https://youtu.be/WLFOhTXAgb4",
+          "imageSrc": "img/AOE2-Guides/Maximum Villager Efficiency.jpg",
+          "color": "yellow-400",
+          "buttonColor": "yellow-500",
+          "alt": "A screenshot from How to get Maximum Villager Efficiency"
         }
       ]
     },
@@ -380,6 +389,15 @@
           "color": "yellow-400",
           "buttonColor": "yellow-500",
           "alt": "A screenshot from Age of Empires IV Controller Guide"
+        },
+        {
+          "title": "10 Tips for every beginner",
+          "description": "Learn the basics of Age of Empires IV with these essential tips!",
+          "youtubeUrl": "https://youtu.be/jzmGMbeCWNA",
+          "imageSrc": "img/AOE4-Guides/10 Tips for every beginner.jpg",
+          "color": "yellow-400",
+          "buttonColor": "yellow-500",
+          "alt": "A screenshot from 10 Tips for every beginner"
         }
       ]
     }
@@ -415,7 +433,7 @@
     },
     {
       "title": "Noob to Pro in 15 Minutes",
-      "description": "A guide for new players to Age of Mythology.",
+      "description": "Be a noob no more! Learn the most important tips and tricks of Age of Mythology in 15 minutes.",
       "youtubeUrl": "https://youtu.be/V-RsVL8F-U4",
       "imageSrc": "img/AOM-Guides/Noob to Pro.jpg",
       "color": "red-400",
@@ -424,7 +442,7 @@
     },
     {
       "title": "Top Tips for Beginners on Xbox",
-      "description": "A guide for new players to Age of Mythology on Xbox.",
+      "description": "Learn the basics of Age of Mythology on Xbox with these essential tips!",
       "youtubeUrl": "https://youtu.be/WNtrTZRc0Nk",
       "imageSrc": "img/AOM-Guides/New Player Guide.jpg",
       "color": "red-400",
@@ -433,12 +451,30 @@
     },
     {
       "title": "Top Tips for Defensive Play",
-      "description": "A guide for defensive play in Age of Mythology.",
+      "description": "Understand the basics of defensive play in Age of Mythology.",
       "youtubeUrl": "https://youtu.be/Nudufrf4hqA",
       "imageSrc": "img/AOM-Guides/Defense v2.jpg",
       "color": "red-400",
       "buttonColor": "red-500",
       "alt": "A screenshot from Top Tips for Defensive Play"
+    },
+    {
+      "title": "Top Tips for Beginners on PS5",
+      "description": "New to Age of Mythology on PS5? Learn the basics of using the controller and the fundamentals of the game.",
+      "youtubeUrl": "https://youtu.be/dQTc8nBPLxE",
+      "imageSrc": "img/AOM-Guides/Offense v2.jpg",
+      "color": "red-400",
+      "buttonColor": "red-500",
+      "alt": "A screenshot from Top Tips for Beginners on PS5"
+    },
+    {
+      "title": "Best Practices for Relics",
+      "description": "Relics are a powerful resource in Age of Mythology. This guide will show you how to use them to your advantage.",
+      "youtubeUrl": "https://youtu.be/9kAAAt-A-_E",
+      "imageSrc": "img/AOM-Guides/Relics.jpg",
+      "color": "red-400",
+      "buttonColor": "red-500",
+      "alt": "A screenshot from Best Practices for Relics"
     }
   ]
 }
