@@ -26,7 +26,6 @@ team-respawn-website/
 │   ├── header.html
 │   ├── footer.html
 │   ├── side-panel.html
-│   ├── tab-navigation.html
 │   └── social-icons.html
 ├── css/                # Custom styles
 │   └── styles.css
