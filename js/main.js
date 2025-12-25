@@ -154,6 +154,63 @@ async function loadAndRenderVideos() {
     }
 }
 
+async function loadAndRenderProjects() {
+    try {
+        const dataPath = getDataBasePath();
+        const response = await fetch(`${dataPath}projects.json`);
+        if (!response.ok) {
+            // Silently fail if projects.json doesn't exist
+            console.warn('Projects file not found');
+            return;
+        }
+        
+        const data = await response.json();
+        
+        // Validate that data is an object with projects array
+        if (!data || typeof data !== 'object' || !Array.isArray(data.projects)) {
+            console.warn('Invalid projects data format');
+            return;
+        }
+        
+        // Render projects if function exists
+        if (typeof renderProjectGrid === 'function' && data.projects.length > 0) {
+            renderProjectGrid(data.projects, 'other-projects-content');
+        }
+    } catch (error) {
+        // Silently fail if there's an error
+        console.warn('Error loading projects:', error);
+    }
+}
+
+// Wait for DOM to be ready
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        // Load all components
+        await loadAllComponents({
+            'header': 'header-container',
+            'footer': 'footer-container',
+            'side-panel': 'side-panel-container'
+        });
+
+        // Load and update tagline after header is loaded
+        await loadAndUpdateTagline();
+
+        // Initialize side panel after components are loaded
+        initSidePanel();
+
+        // Initialize tabs after components are loaded
+        initTabs();
+
+        // Load and render video data
+        await loadAndRenderVideos();
+        
+        // Load and render project data
+        await loadAndRenderProjects();
+    } catch (error) {
+        console.error('Error initializing page:', error);
+    }
+});
+
 /**
  * Initializes walkthrough sorting controls and renders initial grid
  * @param {Array} walkthroughs - Walkthrough data with metadata
