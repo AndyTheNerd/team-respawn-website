@@ -320,6 +320,16 @@ function renderHomeContent(allVideos) {
     // Get reference to Twitch container (should already exist in HTML)
     const twitchContainer = document.getElementById('twitch-embed-container');
     
+    // Remove any existing dynamically added content (hero, stats, carousel sections)
+    // Keep only the Twitch container which is in the original HTML
+    const existingHero = container.querySelector('.hero-section');
+    const existingStats = container.querySelector('.stats-section');
+    const existingCarousel = container.querySelector('.featured-carousel-section');
+    
+    if (existingHero) existingHero.remove();
+    if (existingStats) existingStats.remove();
+    if (existingCarousel) existingCarousel.remove();
+    
     // Create a wrapper for content sections
     const heroHtml = renderHeroSection();
     const statsHtml = renderStatsSection();

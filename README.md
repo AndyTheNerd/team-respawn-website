@@ -26,7 +26,6 @@ team-respawn-website/
 │   ├── header.html
 │   ├── footer.html
 │   ├── side-panel.html
-│   ├── tab-navigation.html
 │   └── social-icons.html
 ├── css/                # Custom styles
 │   └── styles.css
@@ -48,11 +47,6 @@ team-respawn-website/
 ```
 
 ## 🛠️ Setup & Running Locally
-
-### Prerequisites
-
-- Python 3
-- A modern web browser
 
 ### Running the Server
 
@@ -94,44 +88,6 @@ Video data is stored in `data/videos.json`. Each video object should follow this
 }
 ```
 
-### Supported Categories
-
-- `walkthroughs` - Array of walkthrough videos
-- `halo-wars` - Object containing Halo Wars guides
-  - `halo-wars-1` - Halo Wars 1 guides
-  - `halo-wars-2` - Halo Wars 2 guides
-- `age-of-empires` - Object containing Age of Empires guides
-  - `aoe-2` - Age of Empires II guides
-  - `aoe-4` - Age of Empires IV guides
-- `age-of-mythology` - Array of Age of Mythology guides
-
-## 🔒 Security & Data Validation
-
-### XSS Protection
-
-The site implements multiple layers of XSS protection:
-
-1. **DOMPurify Integration**: All HTML content is sanitized using DOMPurify before insertion
-2. **Input Sanitization**: All user data is HTML-escaped before rendering
-3. **URL Validation**: URLs are validated and sanitized to prevent malicious links
-4. **Path Traversal Prevention**: Component names and image paths are validated to prevent directory traversal attacks
-5. **Type Validation**: Data structures are validated before processing
-
-### Security Features
-
-- **HTML Escaping**: All text content is escaped using `escapeHtml()` function
-- **URL Sanitization**: `sanitizeUrl()` validates absolute URLs (http/https only)
-- **Image Path Sanitization**: `sanitizeImageSrc()` handles both relative and absolute paths safely
-- **Component Name Validation**: Prevents path traversal in component loading
-- **YouTube URL Validation**: Ensures only valid YouTube URLs are used
-
-### Security Headers
-
-The site includes security headers:
-- `X-Content-Type-Options: nosniff`
-- `X-Frame-Options: SAMEORIGIN`
-- `Referrer-Policy: strict-origin-when-cross-origin`
-
 ## 🎨 Technologies Used
 
 - **HTML5** - Semantic markup
@@ -142,27 +98,6 @@ The site includes security headers:
 - **DOMPurify** - HTML sanitization library
 - **Google Fonts** - Inter font family
 
-## 📝 Adding New Videos
-
-1. Add your video thumbnail image to the `img/` directory
-2. Edit `data/videos.json` and add a new video object to the appropriate category
-3. Ensure the `imageSrc` path matches your image location
-4. Refresh the page to see your changes
-
-## 🌐 Browser Support
-
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
-
-## 📄 License
-
-See [LICENSE](LICENSE) file for details.
-
-## 🤝 Contributing
-
-Contributions are welcome! Please ensure all code follows the existing patterns and includes proper security measures.
 
 ## 🔗 Links
 

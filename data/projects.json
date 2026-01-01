@@ -1,0 +1,22 @@
+{
+  "projects": [
+    {
+      "name": "Halo Quotes",
+      "description": "A comprehensive project featuring a website, API, and bots for displaying and sharing random quotes from the Halo video game series.",
+      "features": [
+        "Website displaying random Halo quotes",
+        "RESTful API for programmatic access",
+        "Social media bots (Bluesky, Twitter coming soon)"
+      ],
+      "links": {
+        "website": "https://haloquotes.teamrespawntv.com/",
+        "github": "https://github.com/AndyTheNerd/Halo-Quotes",
+        "api": "https://api.haloquotes.teamrespawntv.com/"
+      },
+      "color": "blue-400",
+      "buttonColor": "blue-500"
+    }
+  ]
+}
+
+

@@ -30,6 +30,11 @@ const tabs = {
         button: null,
         content: null,
         summary: null
+    },
+    'other-projects-tab': {
+        button: null,
+        content: null,
+        summary: null
     }
 };
 

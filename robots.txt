@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://www.teamrespawntv.com/sitemap.xml
+
