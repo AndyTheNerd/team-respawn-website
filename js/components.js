@@ -8,10 +8,18 @@
  */
 function getComponentsBasePath() {
     const currentPath = window.location.pathname;
+    const pathParts = currentPath.split('/').filter(Boolean);
     // If we're in a subdirectory (blog/ or blog/posts/ or storehaus/), go up one or two levels
     if (currentPath.includes('/blog/posts/')) {
         return '../../components/';
-    } else if (currentPath.includes('/blog/') || currentPath.includes('/storehaus/')) {
+    } else if (currentPath.includes('/blog/')) {
+        return '../components/';
+    } else if (currentPath.includes('/storehaus/')) {
+        const storehausIndex = pathParts.indexOf('storehaus');
+        const depthFromStorehaus = storehausIndex === -1 ? 0 : pathParts.length - storehausIndex - 1;
+        const upLevels = depthFromStorehaus + 1;
+        return `${'../'.repeat(upLevels)}components/`;
+    } else if (currentPath.includes('/storehaus')) {
         return '../components/';
     }
     return 'components/';
