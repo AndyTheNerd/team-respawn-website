@@ -173,6 +173,13 @@ body {
     z-index: 10;
 }
 
+.elegant-header,
+.header-glass-container,
+.header-content-wrapper,
+.tab-nav-list {
+    overflow: visible !important;
+}
+
 .header-glass-container {
     background: rgba(17, 24, 39, 0.4);
     backdrop-filter: blur(20px) saturate(180%);
@@ -454,6 +461,7 @@ body {
     z-index: 2;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    overflow: visible;
 }
 
 .tab-nav-list::-webkit-scrollbar {
@@ -468,6 +476,103 @@ body {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
     cursor: pointer;
+}
+
+.tab-nav-dropdown {
+    position: relative;
+    z-index: 40;
+}
+
+.tab-nav-dropdown::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    height: 0.9rem;
+}
+
+.tab-nav-dropdown-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tab-nav-dropdown-icon {
+    transition: transform 0.2s ease-in-out;
+}
+
+.tab-nav-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 0;
+    min-width: 220px;
+    background: rgba(17, 24, 39, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    padding: 0.5rem;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+    z-index: 60;
+}
+
+.tab-nav-dropdown.open .tab-nav-dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.tab-nav-dropdown:hover .tab-nav-dropdown-menu,
+.tab-nav-dropdown:focus-within .tab-nav-dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.tab-nav-dropdown:hover .tab-nav-dropdown-icon,
+.tab-nav-dropdown:focus-within .tab-nav-dropdown-icon {
+    transform: rotate(180deg);
+}
+
+.tab-nav-dropdown.open .tab-nav-dropdown-icon {
+    transform: rotate(180deg);
+}
+
+.tab-nav-dropdown-item {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    color: rgba(209, 213, 219, 0.95);
+    font-weight: 600;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.tab-nav-dropdown-item:hover,
+.tab-nav-dropdown-item:focus {
+    background: rgba(168, 85, 247, 0.2);
+    color: #ffffff;
+    transform: translateX(2px);
+    outline: none;
+}
+
+@media (max-width: 640px) {
+    .tab-nav-list {
+        overflow-x: auto;
+        overflow-y: visible;
+    }
+
+    .tab-nav-dropdown-menu {
+        left: auto;
+        right: 0;
+        min-width: 180px;
+    }
 }
 
 .tab-nav-button::before {

@@ -8,10 +8,10 @@
  */
 function getComponentsBasePath() {
     const currentPath = window.location.pathname;
-    // If we're in a subdirectory (blog/ or blog/posts/), go up one or two levels
+    // If we're in a subdirectory (blog/ or blog/posts/ or storehaus/), go up one or two levels
     if (currentPath.includes('/blog/posts/')) {
         return '../../components/';
-    } else if (currentPath.includes('/blog/')) {
+    } else if (currentPath.includes('/blog/') || currentPath.includes('/storehaus/')) {
         return '../components/';
     }
     return 'components/';
@@ -54,7 +54,7 @@ async function loadComponent(componentName, targetElementId) {
             if (typeof DOMPurify !== 'undefined') {
                 const sanitized = DOMPurify.sanitize(html, {
                     ALLOWED_TAGS: ['div', 'header', 'footer', 'aside', 'nav', 'a', 'button', 'img', 'svg', 'path', 'h1', 'h2', 'h3', 'p', 'span', 'i', 'ul', 'li'],
-                    ALLOWED_ATTR: ['class', 'id', 'href', 'target', 'rel', 'aria-label', 'aria-hidden', 'aria-expanded', 'aria-controls', 'aria-selected', 'tabindex', 'role', 'type', 'src', 'alt', 'width', 'height', 'fill', 'stroke', 'viewBox', 'stroke-linecap', 'stroke-linejoin', 'stroke-width', 'd', 'data-tab-id'],
+                    ALLOWED_ATTR: ['class', 'id', 'href', 'target', 'rel', 'aria-label', 'aria-hidden', 'aria-expanded', 'aria-controls', 'aria-selected', 'tabindex', 'role', 'type', 'src', 'alt', 'width', 'height', 'fill', 'stroke', 'viewBox', 'stroke-linecap', 'stroke-linejoin', 'stroke-width', 'd', 'data-tab-id', 'data-tab-link'],
                     ALLOW_DATA_ATTR: true
                 });
                 targetElement.innerHTML = sanitized;

@@ -1,6 +1,6 @@
 <header class="elegant-header relative w-full mb-8">
     <!-- Glassmorphism container with gradient background -->
-    <div class="header-glass-container relative w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 rounded-2xl sm:rounded-3xl overflow-hidden">
+    <div class="header-glass-container relative w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 rounded-2xl sm:rounded-3xl overflow-visible">
         <!-- Gradient background overlay -->
         <div class="absolute inset-0 bg-gradient-to-br from-purple-900/30 via-pink-900/20 to-blue-900/30 opacity-60"></div>
         
@@ -25,7 +25,7 @@
                 <div class="text-center justify-self-center px-4">
                     <a href="/" aria-label="Return to Team Respawn homepage" class="logo-link inline-block group">
                         <img 
-                            src="content/Team-Respawn-Full.png" 
+                            src="/content/Team-Respawn-Full.png" 
                             alt="Team Respawn Logo - Gaming Walkthroughs and RTS Strategy Guides" 
                             width="320" 
                             height="80"
@@ -44,11 +44,12 @@
             <!-- Tab Navigation Row -->
             <div class="w-full">
                 <div 
-                    class="tab-nav-list relative z-10 flex justify-center items-center gap-2 sm:gap-3 overflow-x-auto scrollbar-hide" 
+                    class="tab-nav-list relative z-10 flex justify-center items-center gap-2 sm:gap-3" 
                     role="tablist" 
                     aria-label="Content categories">
                     <button 
                         id="home-tab" 
+                        data-tab-link="/"
                         role="tab"
                         aria-selected="true"
                         aria-controls="home-content"
@@ -60,6 +61,7 @@
                     </button>
                     <button 
                         id="walkthroughs-tab" 
+                        data-tab-link="/#walkthroughs"
                         role="tab"
                         aria-selected="false"
                         aria-controls="walkthroughs-content"
@@ -71,6 +73,7 @@
                     </button>
                     <button 
                         id="halo-wars-tab" 
+                        data-tab-link="/#halo-wars"
                         role="tab"
                         aria-selected="false"
                         aria-controls="halo-wars-content"
@@ -82,6 +85,7 @@
                     </button>
                     <button 
                         id="age-of-empires-tab" 
+                        data-tab-link="/#age-of-empires"
                         role="tab"
                         aria-selected="false"
                         aria-controls="age-of-empires-content"
@@ -93,6 +97,7 @@
                     </button>
                     <button 
                         id="age-of-mythology-tab" 
+                        data-tab-link="/#age-of-mythology"
                         role="tab"
                         aria-selected="false"
                         aria-controls="age-of-mythology-content"
@@ -104,6 +109,7 @@
                     </button>
                     <button 
                         id="other-projects-tab" 
+                        data-tab-link="/#other-projects"
                         role="tab"
                         aria-selected="false"
                         aria-controls="other-projects-content"
@@ -113,6 +119,28 @@
                         tabindex="-1">
                         Other Projects
                     </button>
+                    <div class="tab-nav-dropdown" data-dropdown>
+                        <button 
+                            class="tab-nav-button tab-nav-inactive tab-nav-dropdown-toggle px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm md:text-base rounded-xl font-semibold whitespace-nowrap transition-all duration-300"
+                            type="button"
+                            aria-expanded="false"
+                            aria-controls="storehaus-dropdown-menu"
+                            data-dropdown-toggle>
+                            <span class="hidden md:inline">Storehaus Privacy</span><span class="md:hidden">Storehaus</span>
+                            <svg class="tab-nav-dropdown-icon h-4 w-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+                        <div 
+                            id="storehaus-dropdown-menu" 
+                            class="tab-nav-dropdown-menu"
+                            role="menu"
+                            aria-label="Storehaus pages"
+                            data-dropdown-menu>
+                            <a href="/storehaus/privacy-policy" class="tab-nav-dropdown-item" role="menuitem">Privacy Policy</a>
+                            <a href="/storehaus/terms-of-service" class="tab-nav-dropdown-item" role="menuitem">Terms of Service</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

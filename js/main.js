@@ -11,10 +11,10 @@ let walkthroughsData = [];
  */
 function getDataBasePath() {
     const currentPath = window.location.pathname;
-    // If we're in a subdirectory (blog/ or blog/posts/), go up one or two levels
+    // If we're in a subdirectory (blog/ or blog/posts/ or storehaus/), go up one or two levels
     if (currentPath.includes('/blog/posts/')) {
         return '../../data/';
-    } else if (currentPath.includes('/blog/')) {
+    } else if (currentPath.includes('/blog/') || currentPath.includes('/storehaus/')) {
         return '../data/';
     }
     return 'data/';

@@ -107,6 +107,27 @@ function switchTab(activeTabId) {
     if (typeof updateSidePanelActiveTab === 'function') {
         updateSidePanelActiveTab(activeTabId);
     }
+    
+    // Update URL hash for bookmarking and back/forward navigation (only on home page)
+    const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index.html';
+    if (isHomePage) {
+        const tabToHashMap = {
+            'home-tab': '',
+            'walkthroughs-tab': 'walkthroughs',
+            'halo-wars-tab': 'halo-wars',
+            'age-of-empires-tab': 'age-of-empires',
+            'age-of-mythology-tab': 'age-of-mythology',
+            'other-projects-tab': 'other-projects'
+        };
+        
+        const hash = tabToHashMap[activeTabId] || '';
+        // Use replaceState to avoid adding to browser history
+        if (hash) {
+            window.history.replaceState(null, '', `/#${hash}`);
+        } else {
+            window.history.replaceState(null, '', '/');
+        }
+    }
 }
 
 /**
@@ -172,6 +193,74 @@ function restoreTwitchCollapseState() {
 }
 
 /**
+ * Converts tab buttons to links when not on the home page
+ */
+function convertTabsToLinks() {
+    const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index.html';
+    
+    if (!isHomePage) {
+        // Find all buttons with data-tab-link attribute (more reliable than using tabs object)
+        const tabButtons = document.querySelectorAll('button[data-tab-link]');
+        
+        tabButtons.forEach(button => {
+            const link = button.getAttribute('data-tab-link');
+            if (!link) return;
+            
+            // Get button ID BEFORE replacing (important!)
+            const buttonId = button.id;
+            
+            const classes = button.className;
+            const ariaLabel = button.getAttribute('aria-label');
+            const role = button.getAttribute('role');
+            const tabindex = button.getAttribute('tabindex');
+            
+            // Create a link element
+            const linkElement = document.createElement('a');
+            linkElement.href = link;
+            linkElement.id = buttonId; // Preserve the ID
+            linkElement.className = classes;
+            if (ariaLabel) linkElement.setAttribute('aria-label', ariaLabel);
+            if (role) linkElement.setAttribute('role', role);
+            if (tabindex) linkElement.setAttribute('tabindex', tabindex);
+            linkElement.innerHTML = button.innerHTML;
+            
+            // Replace button with link
+            button.parentNode.replaceChild(linkElement, button);
+            
+            // Update tabs object if the button ID exists in it
+            if (buttonId && tabs[buttonId]) {
+                tabs[buttonId].button = linkElement;
+            }
+        });
+    }
+}
+
+/**
+ * Handles hash-based navigation to switch tabs
+ */
+function handleHashNavigation() {
+    const hash = window.location.hash.substring(1); // Remove the #
+    if (!hash) return;
+    
+    // Map hash values to tab IDs
+    const hashToTabMap = {
+        'walkthroughs': 'walkthroughs-tab',
+        'halo-wars': 'halo-wars-tab',
+        'age-of-empires': 'age-of-empires-tab',
+        'age-of-mythology': 'age-of-mythology-tab',
+        'other-projects': 'other-projects-tab'
+    };
+    
+    const tabId = hashToTabMap[hash];
+    if (tabId && tabs[tabId] && tabs[tabId].button && tabs[tabId].content) {
+        // Small delay to ensure DOM is ready
+        setTimeout(() => {
+            switchTab(tabId);
+        }, 100);
+    }
+}
+
+/**
  * Initializes tab event listeners
  */
 function initTabs() {
@@ -182,12 +271,18 @@ function initTabs() {
         tabs[id].summary = document.getElementById(id.replace('-tab', '-summary'));
     }
 
-    // Attach event listeners to all tab buttons
-    for (const id in tabs) {
-        if (tabs[id].button) {
-            tabs[id].button.addEventListener('click', () => {
-                switchTab(id);
-            });
+    // Convert tabs to links if not on home page
+    convertTabsToLinks();
+
+    // Attach event listeners to all tab buttons (only on home page)
+    const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index.html';
+    if (isHomePage) {
+        for (const id in tabs) {
+            if (tabs[id].button && tabs[id].button.tagName === 'BUTTON') {
+                tabs[id].button.addEventListener('click', () => {
+                    switchTab(id);
+                });
+            }
         }
     }
 
@@ -230,20 +325,38 @@ function initTabs() {
     // Restore collapse state from localStorage
     restoreTwitchCollapseState();
 
+    // Handle hash navigation first, then set default tab
+    const hash = window.location.hash.substring(1);
+    const hashToTabMap = {
+        'walkthroughs': 'walkthroughs-tab',
+        'halo-wars': 'halo-wars-tab',
+        'age-of-empires': 'age-of-empires-tab',
+        'age-of-mythology': 'age-of-mythology-tab',
+        'other-projects': 'other-projects-tab'
+    };
+    
+    const initialTabId = hash && hashToTabMap[hash] ? hashToTabMap[hash] : 'home-tab';
+    
     // Set the initial active tab
-    switchTab('home-tab');
+    switchTab(initialTabId);
     
     // Update side panel active state on initialization if function exists
     if (typeof updateSidePanelActiveTab === 'function') {
-        updateSidePanelActiveTab('home-tab');
+        updateSidePanelActiveTab(initialTabId);
     }
+    
+    // Listen for hash changes (for browser back/forward)
+    window.addEventListener('hashchange', () => {
+        handleHashNavigation();
+    });
 }
 
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { switchTab, initTabs, tabs, toggleTwitchCollapse, restoreTwitchCollapseState };
+    module.exports = { switchTab, initTabs, tabs, toggleTwitchCollapse, restoreTwitchCollapseState, convertTabsToLinks };
 }
 
-// Make switchTab available globally for side panel integration
+// Make functions available globally for use on other pages
 window.switchTab = switchTab;
+window.convertTabsToLinks = convertTabsToLinks;
 

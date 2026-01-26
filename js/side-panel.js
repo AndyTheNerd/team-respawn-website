@@ -163,6 +163,26 @@ function initSidePanel() {
 
         console.log('Tab link clicked:', tabId);
 
+        // Check if we're on the home page
+        const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index.html';
+        
+        if (!isHomePage) {
+            // Navigate to home page with hash for the selected tab
+            const tabToHashMap = {
+                'home-tab': '',
+                'walkthroughs-tab': 'walkthroughs',
+                'halo-wars-tab': 'halo-wars',
+                'age-of-empires-tab': 'age-of-empires',
+                'age-of-mythology-tab': 'age-of-mythology',
+                'other-projects-tab': 'other-projects'
+            };
+            
+            const hash = tabToHashMap[tabId] || '';
+            const url = hash ? `/#${hash}` : '/';
+            window.location.href = url;
+            return;
+        }
+
         // Check if switchTab is available
         if (typeof window.switchTab !== 'function') {
             console.error('switchTab function not available. Tabs.js may not be loaded yet.');
@@ -202,6 +222,26 @@ function initSidePanel() {
             
             if (!tabId) {
                 console.warn('No data-tab-id on link:', link);
+                return;
+            }
+            
+            // Check if we're on the home page
+            const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index.html';
+            
+            if (!isHomePage) {
+                // Navigate to home page with hash for the selected tab
+                const tabToHashMap = {
+                    'home-tab': '',
+                    'walkthroughs-tab': 'walkthroughs',
+                    'halo-wars-tab': 'halo-wars',
+                    'age-of-empires-tab': 'age-of-empires',
+                    'age-of-mythology-tab': 'age-of-mythology',
+                    'other-projects-tab': 'other-projects'
+                };
+                
+                const hash = tabToHashMap[tabId] || '';
+                const url = hash ? `/#${hash}` : '/';
+                window.location.href = url;
                 return;
             }
             
