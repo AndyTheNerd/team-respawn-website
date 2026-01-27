@@ -58,22 +58,28 @@ function switchTab(activeTabId) {
             continue;
         }
 
+        const isTabButton = tab.button && tab.button.getAttribute('role') === 'tab';
+
         if (id === activeTabId) {
-            tab.button.classList.remove('tab-nav-inactive');
-            tab.button.classList.add('tab-nav-active');
+            if (isTabButton) {
+                tab.button.classList.remove('tab-nav-inactive');
+                tab.button.classList.add('tab-nav-active');
+                // Update ARIA attributes
+                tab.button.setAttribute('aria-selected', 'true');
+                tab.button.setAttribute('tabindex', '0');
+            }
             tab.content.classList.remove('hidden');
             if (tab.summary) tab.summary.classList.remove('hidden');
-            // Update ARIA attributes
-            tab.button.setAttribute('aria-selected', 'true');
-            tab.button.setAttribute('tabindex', '0');
         } else {
-            tab.button.classList.remove('tab-nav-active');
-            tab.button.classList.add('tab-nav-inactive');
+            if (isTabButton) {
+                tab.button.classList.remove('tab-nav-active');
+                tab.button.classList.add('tab-nav-inactive');
+                // Update ARIA attributes
+                tab.button.setAttribute('aria-selected', 'false');
+                tab.button.setAttribute('tabindex', '-1');
+            }
             tab.content.classList.add('hidden');
             if (tab.summary) tab.summary.classList.add('hidden');
-            // Update ARIA attributes
-            tab.button.setAttribute('aria-selected', 'false');
-            tab.button.setAttribute('tabindex', '-1');
         }
     }
     
@@ -286,33 +292,42 @@ function initTabs() {
         }
     }
 
-    // Add keyboard navigation
+    // Add keyboard navigation for visible tab buttons
     const tabList = document.querySelector('[role="tablist"]');
     if (tabList) {
         tabList.addEventListener('keydown', (e) => {
-            const tabsArray = Object.keys(tabs);
-            const currentIndex = tabsArray.findIndex(id => tabs[id].button === document.activeElement);
-            
+            const tabButtons = Array.from(tabList.querySelectorAll('[role="tab"]'));
+            const tabIds = tabButtons.map((button) => button.id).filter(Boolean);
+            const currentIndex = tabButtons.findIndex((button) => button === document.activeElement);
+
+            if (tabIds.length === 0 || currentIndex === -1) {
+                return;
+            }
+
             let nextIndex = currentIndex;
-            
+
             if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
                 e.preventDefault();
-                nextIndex = (currentIndex + 1) % tabsArray.length;
+                nextIndex = (currentIndex + 1) % tabIds.length;
             } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
                 e.preventDefault();
-                nextIndex = (currentIndex - 1 + tabsArray.length) % tabsArray.length;
+                nextIndex = (currentIndex - 1 + tabIds.length) % tabIds.length;
             } else if (e.key === 'Home') {
                 e.preventDefault();
                 nextIndex = 0;
             } else if (e.key === 'End') {
                 e.preventDefault();
-                nextIndex = tabsArray.length - 1;
+                nextIndex = tabIds.length - 1;
             } else {
                 return; // Not a navigation key
             }
-            
-            tabs[tabsArray[nextIndex]].button.focus();
-            switchTab(tabsArray[nextIndex]);
+
+            const nextTabId = tabIds[nextIndex];
+            const nextButton = document.getElementById(nextTabId);
+            if (nextButton) {
+                nextButton.focus();
+            }
+            switchTab(nextTabId);
         });
     }
 
@@ -359,4 +374,3 @@ if (typeof module !== 'undefined' && module.exports) {
 // Make functions available globally for use on other pages
 window.switchTab = switchTab;
 window.convertTabsToLinks = convertTabsToLinks;
-

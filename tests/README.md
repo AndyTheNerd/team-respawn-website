@@ -59,9 +59,10 @@ In addition to automated tests, manually verify:
 - [ ] Navigate to `/storehaus` page
 - [ ] Click on "Home" tab - should navigate to home page
 - [ ] Click on "Walkthroughs" tab - should navigate to home page with #walkthroughs hash
-- [ ] Click on "Halo Wars Guides" tab - should navigate to home page with #halo-wars hash
-- [ ] Click on "Age of Empires Guides" tab - should navigate to home page with #age-of-empires hash
-- [ ] Click on "Age of Mythology Guides" tab - should navigate to home page with #age-of-mythology hash
+- [ ] Open "Guides" dropdown - should reveal Halo Wars, Age of Empires, and Age of Mythology links
+- [ ] Click on "Halo Wars Guides" - should navigate to /halo-wars-guides
+- [ ] Click on "Age of Empires Guides" - should navigate to /age-of-empires-guides
+- [ ] Click on "Age of Mythology Guides" - should navigate to /age-of-mythology-guides
 - [ ] Click on "Other Projects" tab - should navigate to home page with #other-projects hash
 - [ ] On home page, tabs should work as buttons (no navigation, just content switching)
 - [ ] Logo should display correctly on all pages

@@ -1,5 +1,5 @@
 /**
- * Header dropdown logic for Storehaus menu
+ * Header dropdown logic for navigation menus
  */
 
 function setDropdownOpen(dropdown, isOpen) {

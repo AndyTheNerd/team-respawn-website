@@ -71,42 +71,54 @@
                         tabindex="-1">
                         Walkthroughs
                     </button>
-                    <button 
-                        id="halo-wars-tab" 
-                        data-tab-link="/#halo-wars"
-                        role="tab"
-                        aria-selected="false"
-                        aria-controls="halo-wars-content"
-                        aria-label="View Halo Wars guides"
-                        class="tab-nav-button tab-nav-inactive px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm md:text-base rounded-xl font-semibold whitespace-nowrap transition-all duration-300"
-                        type="button"
-                        tabindex="-1">
-                        <span class="hidden md:inline">Halo Wars Guides</span><span class="md:hidden">Halo Wars</span>
-                    </button>
-                    <button 
-                        id="age-of-empires-tab" 
-                        data-tab-link="/#age-of-empires"
-                        role="tab"
-                        aria-selected="false"
-                        aria-controls="age-of-empires-content"
-                        aria-label="View Age of Empires guides"
-                        class="tab-nav-button tab-nav-inactive px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm md:text-base rounded-xl font-semibold whitespace-nowrap transition-all duration-300"
-                        type="button"
-                        tabindex="-1">
-                        <span class="hidden md:inline">Age of Empires Guides</span><span class="md:hidden">AoE Guides</span>
-                    </button>
-                    <button 
-                        id="age-of-mythology-tab" 
-                        data-tab-link="/#age-of-mythology"
-                        role="tab"
-                        aria-selected="false"
-                        aria-controls="age-of-mythology-content"
-                        aria-label="View Age of Mythology guides"
-                        class="tab-nav-button tab-nav-inactive px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm md:text-base rounded-xl font-semibold whitespace-nowrap transition-all duration-300"
-                        type="button"
-                        tabindex="-1">
-                        <span class="hidden md:inline">Age of Mythology Guides</span><span class="md:hidden">AoM Guides</span>
-                    </button>
+                    <div class="tab-nav-dropdown" data-dropdown>
+                        <button 
+                            class="tab-nav-button tab-nav-inactive tab-nav-dropdown-toggle px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm md:text-base rounded-xl font-semibold whitespace-nowrap transition-all duration-300"
+                            type="button"
+                            aria-expanded="false"
+                            aria-controls="guides-dropdown-menu"
+                            aria-label="Open guides menu"
+                            data-dropdown-toggle>
+                            <span class="hidden md:inline">Guides</span><span class="md:hidden">Guides</span>
+                            <svg class="tab-nav-dropdown-icon h-4 w-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+                        <div 
+                            id="guides-dropdown-menu" 
+                            class="tab-nav-dropdown-menu"
+                            role="menu"
+                            aria-label="Guides pages"
+                            data-dropdown-menu>
+                            <button 
+                                id="halo-wars-tab" 
+                                data-tab-link="/halo-wars-guides"
+                                role="menuitem"
+                                aria-label="View Halo Wars guides"
+                                class="tab-nav-dropdown-item"
+                                type="button">
+                                Halo Wars Guides
+                            </button>
+                            <button 
+                                id="age-of-empires-tab" 
+                                data-tab-link="/age-of-empires-guides"
+                                role="menuitem"
+                                aria-label="View Age of Empires guides"
+                                class="tab-nav-dropdown-item"
+                                type="button">
+                                Age of Empires Guides
+                            </button>
+                            <button 
+                                id="age-of-mythology-tab" 
+                                data-tab-link="/age-of-mythology-guides"
+                                role="menuitem"
+                                aria-label="View Age of Mythology guides"
+                                class="tab-nav-dropdown-item"
+                                type="button">
+                                Age of Mythology Guides
+                            </button>
+                        </div>
+                    </div>
                     <button 
                         id="other-projects-tab" 
                         data-tab-link="/#other-projects"
@@ -150,4 +162,3 @@
         <div role="status" aria-live="polite" aria-atomic="true" class="sr-only" id="tab-announcement"></div>
     </div>
 </header>
-

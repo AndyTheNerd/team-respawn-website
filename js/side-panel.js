@@ -168,17 +168,16 @@ function initSidePanel() {
         
         if (!isHomePage) {
             // Navigate to home page with hash for the selected tab
-            const tabToHashMap = {
-                'home-tab': '',
-                'walkthroughs-tab': 'walkthroughs',
-                'halo-wars-tab': 'halo-wars',
-                'age-of-empires-tab': 'age-of-empires',
-                'age-of-mythology-tab': 'age-of-mythology',
-                'other-projects-tab': 'other-projects'
+            const tabToUrlMap = {
+                'home-tab': '/',
+                'walkthroughs-tab': '/#walkthroughs',
+                'halo-wars-tab': '/halo-wars-guides',
+                'age-of-empires-tab': '/age-of-empires-guides',
+                'age-of-mythology-tab': '/age-of-mythology-guides',
+                'other-projects-tab': '/#other-projects'
             };
             
-            const hash = tabToHashMap[tabId] || '';
-            const url = hash ? `/#${hash}` : '/';
+            const url = tabToUrlMap[tabId] || '/';
             window.location.href = url;
             return;
         }
@@ -230,17 +229,16 @@ function initSidePanel() {
             
             if (!isHomePage) {
                 // Navigate to home page with hash for the selected tab
-                const tabToHashMap = {
-                    'home-tab': '',
-                    'walkthroughs-tab': 'walkthroughs',
-                    'halo-wars-tab': 'halo-wars',
-                    'age-of-empires-tab': 'age-of-empires',
-                    'age-of-mythology-tab': 'age-of-mythology',
-                    'other-projects-tab': 'other-projects'
+                const tabToUrlMap = {
+                    'home-tab': '/',
+                    'walkthroughs-tab': '/#walkthroughs',
+                    'halo-wars-tab': '/halo-wars-guides',
+                    'age-of-empires-tab': '/age-of-empires-guides',
+                    'age-of-mythology-tab': '/age-of-mythology-guides',
+                    'other-projects-tab': '/#other-projects'
                 };
                 
-                const hash = tabToHashMap[tabId] || '';
-                const url = hash ? `/#${hash}` : '/';
+                const url = tabToUrlMap[tabId] || '/';
                 window.location.href = url;
                 return;
             }
@@ -265,4 +263,3 @@ function initSidePanel() {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { initSidePanel };
 }
-

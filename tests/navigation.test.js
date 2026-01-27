@@ -37,7 +37,7 @@ const navigationTests = {
             <div role="tablist">
                 <button id="home-tab" data-tab-link="/" class="tab-nav-button">Home</button>
                 <button id="walkthroughs-tab" data-tab-link="/#walkthroughs" class="tab-nav-button">Walkthroughs</button>
-                <button id="halo-wars-tab" data-tab-link="/#halo-wars" class="tab-nav-button">Halo Wars</button>
+                <button id="halo-wars-tab" data-tab-link="/halo-wars-guides" class="tab-nav-button">Halo Wars</button>
             </div>
         `;
         
@@ -128,10 +128,10 @@ const navigationTests = {
                 actual: haloWarsElement ? haloWarsElement.tagName : 'null'
             },
             {
-                name: 'Halo Wars link href contains "#halo-wars"',
+                name: 'Halo Wars link href contains "/halo-wars-guides"',
                 pass: haloWarsElement && (
-                    haloWarsElement.getAttribute('href') === '/#halo-wars' || 
-                    haloWarsElement.href.includes('#halo-wars')
+                    haloWarsElement.getAttribute('href') === '/halo-wars-guides' || 
+                    haloWarsElement.href.includes('/halo-wars-guides')
                 ),
                 element: haloWarsElement
             }
@@ -288,7 +288,7 @@ const navigationTests = {
             <div role="tablist">
                 <button id="home-tab" data-tab-link="/" class="tab-nav-button">Home</button>
                 <button id="walkthroughs-tab" data-tab-link="/#walkthroughs" class="tab-nav-button">Walkthroughs</button>
-                <button id="halo-wars-tab" data-tab-link="/#halo-wars" class="tab-nav-button">Halo Wars</button>
+                <button id="halo-wars-tab" data-tab-link="/halo-wars-guides" class="tab-nav-button">Halo Wars</button>
             </div>
         `;
         
@@ -325,8 +325,8 @@ const navigationTests = {
                 element: walkthroughsLink
             },
             {
-                name: 'Halo Wars link href contains "#halo-wars"',
-                pass: haloWarsLink && (haloWarsLink.href.includes('#halo-wars') || haloWarsLink.getAttribute('href') === '/#halo-wars'),
+                name: 'Halo Wars link href contains "/halo-wars-guides"',
+                pass: haloWarsLink && (haloWarsLink.href.includes('/halo-wars-guides') || haloWarsLink.getAttribute('href') === '/halo-wars-guides'),
                 element: haloWarsLink
             }
         ];
