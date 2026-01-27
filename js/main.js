@@ -12,10 +12,12 @@ let walkthroughsData = [];
 function getDataBasePath() {
     const currentPath = window.location.pathname;
     const pathParts = currentPath.split('/').filter(Boolean);
-    // If we're in a subdirectory (blog/ or blog/posts/ or storehaus/), go up one or two levels
+    // If we're in a subdirectory (blog/ or blog/posts/ or storehaus/ or storehaus-info), go up one or two levels
     if (currentPath.includes('/blog/posts/')) {
         return '../../data/';
     } else if (currentPath.includes('/blog/')) {
+        return '../data/';
+    } else if (currentPath.includes('/storehaus-info')) {
         return '../data/';
     } else if (currentPath.includes('/storehaus/')) {
         const storehausIndex = pathParts.indexOf('storehaus');

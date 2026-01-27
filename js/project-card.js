@@ -113,6 +113,26 @@ function renderProjectCard(projectData) {
         }
     }
     
+    if (links.invite) {
+        const safeInviteUrl = sanitizeUrl(links.invite);
+        if (safeInviteUrl) {
+            linksHtml += `<a href="${escapeHtml(safeInviteUrl)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 bg-${safeButtonColor} text-white font-semibold py-2 px-4 rounded-lg hover:bg-${hoverColor} transition-colors duration-300">
+                <i class="fas fa-link" aria-hidden="true"></i>
+                Invite
+            </a>`;
+        }
+    }
+    
+    if (links.discord) {
+        const safeDiscordUrl = sanitizeUrl(links.discord);
+        if (safeDiscordUrl) {
+            linksHtml += `<a href="${escapeHtml(safeDiscordUrl)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 bg-indigo-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-600 transition-colors duration-300">
+                <i class="fab fa-discord" aria-hidden="true"></i>
+                Try in Discord
+            </a>`;
+        }
+    }
+    
     linksHtml += '</div>';
 
     const cardHtml = `

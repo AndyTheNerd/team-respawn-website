@@ -10,6 +10,7 @@ function setupDropdownEnvironment() {
         <div class="tab-nav-dropdown" data-dropdown>
             <button data-dropdown-toggle aria-expanded="false" aria-controls="storehaus-menu">Storehaus Privacy</button>
             <div id="storehaus-menu" data-dropdown-menu>
+                <a href="/storehaus-info">Summary</a>
                 <a href="/storehaus/privacy-policy">Privacy Policy</a>
                 <a href="/storehaus/terms-of-service">Terms of Service</a>
             </div>
