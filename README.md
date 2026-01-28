@@ -2,79 +2,62 @@
 
 A modern, component-based website showcasing curated gaming content from the Team Respawn YouTube channel. Features walkthroughs and strategy guides for Halo Wars, Halo FPS, Age of Empires, and Age of Mythology.
 
-## 🚀 Features
+## Features
 
-- **Component-Based Architecture**: Modular HTML components loaded dynamically for better maintainability
-- **Tabbed Navigation**: Organized content by game series (Home, Walkthroughs, Halo Wars, Age of Empires, Age of Mythology) with keyboard navigation support
-- **Home Page Features**:
-  - Hero section with social media links (YouTube, Twitch, Discord)
-  - Channel statistics display (Subscribers, Views, Videos, Years Active)
-  - Featured videos carousel with smooth scrolling navigation
-  - Live Twitch stream embed with collapse/expand functionality and state persistence
-- **Side Panel Navigation**: Mobile-friendly navigation panel with focus trapping and keyboard support
-- **Responsive Design**: Mobile-first design using Tailwind CSS with glassmorphism effects
-- **Accessibility**: ARIA labels, keyboard navigation, skip links, screen reader support, and focus management
-- **Security**: XSS protection with DOMPurify, input sanitization, URL validation, and path traversal prevention
-- **Performance**: Lazy loading images, optimized asset loading
-- **SEO Optimized**: Meta tags, Open Graph, Twitter Cards, and structured data (JSON-LD)
+- Component-based Astro architecture
+- Tabbed navigation across game series
+- Home page with hero, stats, carousel, and Twitch embed
+- Side panel navigation with keyboard support
+- Responsive Tailwind-based styling
+- Accessibility and SEO meta tags
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 team-respawn-website/
-├── components/          # Reusable HTML components
-│   ├── header.html
-│   ├── footer.html
-│   ├── side-panel.html
-│   └── social-icons.html
-├── css/                # Custom styles
-│   └── styles.css
-├── js/                 # JavaScript modules
-│   ├── components.js   # Component loader
-│   ├── main.js         # Main initialization
-│   ├── video-card.js   # Video card renderer with XSS protection
-│   ├── tabs.js         # Tab navigation logic
-│   └── side-panel.js   # Side panel functionality
-├── data/               # JSON data files
-│   └── videos.json      # Video metadata
-├── img/                 # Image assets
-│   ├── [game]-Walkthrough.jpg
-│   └── [game]-Guides/
-├── blog/                # Blog pages
-│   ├── blog.html
-│   └── posts/
-└── index.html          # Main page
+|-- public/              # Static assets (served as-is)
+|   |-- css/
+|   |-- js/
+|   |-- data/
+|   |-- img/
+|   `-- content/
+|-- src/
+|   |-- components/       # Astro components
+|   |-- layouts/          # Shared layouts (head/SEO)
+|   `-- pages/            # File-based routes
+`-- astro.config.mjs
 ```
 
-## 🛠️ Setup & Running Locally
+## Setup & Running Locally
 
-### Running the Server
-
-1. Navigate to the project directory
-
-2. Start a local web server using Python 3:
+1. Install dependencies:
 ```bash
-python -m http.server 8000
+npm install
 ```
 
-3. Open your browser and navigate to:
+2. Start the Astro dev server:
+```bash
+npm run dev
 ```
-http://localhost:8000
+
+3. Open your browser:
+```
+http://localhost:4321
 ```
 
-### Development
+## Development
 
-The site uses vanilla JavaScript with no build process required. Simply edit the files and refresh your browser.
+The site uses Astro for layouts/pages and vanilla JavaScript for interactivity. Edit files and the dev server will hot-reload.
 
-**Key Files:**
-- `index.html` - Main page structure
-- `data/videos.json` - Video data (add/edit videos here)
-- `js/video-card.js` - Video card rendering logic
-- `components/*.html` - Reusable components
+Key Files:
+- src/pages/index.astro - Main page structure
+- public/data/videos.json - Video data
+- public/js/video-card.js - Video card rendering logic
+- src/components/*.astro - Reusable components
 
-## 📊 Data Structure
+## Data Structure
 
-Video data is stored in `data/videos.json`. Each video object should follow this structure:
+Video data is stored in public/data/videos.json. Each video object should follow this structure:
 
 ```json
 {
@@ -88,20 +71,20 @@ Video data is stored in `data/videos.json`. Each video object should follow this
 }
 ```
 
-## 🎨 Technologies Used
+## Technologies Used
 
-- **HTML5** - Semantic markup
-- **CSS3** - Custom styles with Tailwind CSS
-- **JavaScript (ES6+)** - Vanilla JS, no frameworks
-- **Tailwind CSS** - Utility-first CSS framework
-- **Font Awesome** - Icons
-- **DOMPurify** - HTML sanitization library
-- **Google Fonts** - Inter font family
+- Astro - Component and layout framework with file-based routing
+- HTML5 - Semantic markup
+- CSS3 - Custom styles with Tailwind CSS
+- JavaScript (ES6+) - Vanilla JS
+- Tailwind CSS - Utility-first CSS framework
+- Font Awesome - Icons
+- DOMPurify - HTML sanitization library
+- Google Fonts - Inter font family
 
+## Links
 
-## 🔗 Links
-
-- [YouTube Channel](https://www.youtube.com/@TeamRespawn)
-- [Twitch](https://www.twitch.tv/TeamRespawnTV)
-- [Discord](https://discord.gg/TeamRespawn)
-- [Shop](https://www.teamrespawn.shop)
+- YouTube Channel: https://www.youtube.com/@TeamRespawn
+- Twitch: https://www.twitch.tv/TeamRespawnTV
+- Discord: https://discord.gg/TeamRespawn
+- Shop: https://www.teamrespawn.shop

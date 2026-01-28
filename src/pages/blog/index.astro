@@ -1,0 +1,62 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BlogHeader from '../../components/BlogHeader.astro';
+import SidePanel from '../../components/SidePanel.astro';
+---
+<BaseLayout title="Video Game Blog">
+  <div class="container mx-auto p-4 sm:p-8">
+    <BlogHeader />
+
+    <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div class="bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
+        <h2 class="text-2xl font-bold mb-4 text-yellow-400">Top 5 Games to Play this Summer</h2>
+        <p class="text-gray-300 text-sm mb-2">Published on July 25, 2024</p>
+        <p class="text-gray-300 mb-4">
+          Looking for a new game to get lost in? Here are our top picks for the summer, from indie gems to blockbuster hits.
+        </p>
+        <a href="/blog/posts/post-1" class="inline-block bg-yellow-500 text-white font-bold py-2 px-6 rounded-full hover:bg-yellow-600 transition-colors duration-300">
+          Read More
+        </a>
+      </div>
+
+      <div class="bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
+        <h2 class="text-2xl font-bold mb-4 text-purple-400">Elden Ring DLC: Shadow of the Erdtree</h2>
+        <p class="text-gray-300 text-sm mb-2">Published on June 21, 2024</p>
+        <p class="text-gray-300 mb-4">
+          Our in-depth review of the highly anticipated Elden Ring expansion. Is it worth returning to the Lands Between?
+        </p>
+        <a href="#" class="inline-block bg-purple-500 text-white font-bold py-2 px-6 rounded-full hover:bg-purple-600 transition-colors duration-300">
+          Read More
+        </a>
+      </div>
+
+      <div class="bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
+        <h2 class="text-2xl font-bold mb-4 text-blue-400">The Future of AI in Gaming</h2>
+        <p class="text-gray-300 text-sm mb-2">Published on May 15, 2024</p>
+        <p class="text-gray-300 mb-4">
+          How is artificial intelligence shaping the way we play games? We explore the new frontiers of AI-powered gameplay.
+        </p>
+        <a href="#" class="inline-block bg-blue-500 text-white font-bold py-2 px-6 rounded-full hover:bg-blue-600 transition-colors duration-300">
+          Read More
+        </a>
+      </div>
+
+      <div class="bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
+        <h2 class="text-2xl font-bold mb-4 text-teal-400"> Indie Spotlight: The Next Big Thing</h2>
+        <p class="text-gray-300 text-sm mb-2">Published on April 28, 2024</p>
+        <p class="text-gray-300 mb-4">
+          Don't miss out on these hidden gems! We highlight three fantastic indie games you need to play right now.
+        </p>
+        <a href="#" class="inline-block bg-teal-500 text-white font-bold py-2 px-6 rounded-full hover:bg-teal-600 transition-colors duration-300">
+          Read More
+        </a>
+      </div>
+    </main>
+  </div>
+
+  <SidePanel />
+
+  <script src="/js/side-panel.js" is:inline></script>
+  <script src="/js/tabs.js" is:inline></script>
+  <script src="/js/secondary-init.js" is:inline></script>
+</BaseLayout>

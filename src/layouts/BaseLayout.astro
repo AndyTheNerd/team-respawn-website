@@ -1,0 +1,59 @@
+---
+const {
+  title = 'Team Respawn',
+  description,
+  keywords,
+  canonical,
+  ogTitle,
+  ogDescription,
+  ogImage,
+  twitterImage,
+  robots = 'index, follow',
+  author = 'Team Respawn'
+} = Astro.props;
+
+const canonicalUrl = canonical ?? (Astro.site ? new URL(Astro.url.pathname, Astro.site).toString() : undefined);
+const resolvedOgTitle = ogTitle ?? title;
+const resolvedOgDescription = ogDescription ?? description;
+const resolvedTwitterImage = twitterImage ?? ogImage;
+---
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    {keywords && <meta name="keywords" content={keywords} />}
+    <meta name="author" content={author} />
+    <meta name="robots" content={robots} />
+    {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+
+    {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
+    <meta property="og:title" content={resolvedOgTitle} />
+    {resolvedOgDescription && <meta property="og:description" content={resolvedOgDescription} />}
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta property="og:site_name" content="Team Respawn" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    {canonicalUrl && <meta name="twitter:url" content={canonicalUrl} />}
+    <meta name="twitter:title" content={resolvedOgTitle} />
+    {resolvedOgDescription && <meta name="twitter:description" content={resolvedOgDescription} />}
+    {resolvedTwitterImage && <meta name="twitter:image" content={resolvedTwitterImage} />}
+
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+
+    <link rel="icon" type="image/png" href="/content/Team%20Respawn%20Logo%20Full.png" />
+    <script src="https://cdn.tailwindcss.com" is:global></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="/css/styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" crossorigin="anonymous"></script>
+    <slot name="head" />
+  </head>
+  <body class="bg-gray-900 text-white">
+    <slot />
+  </body>
+</html>
