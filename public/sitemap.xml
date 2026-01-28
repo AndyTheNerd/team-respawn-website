@@ -14,15 +14,15 @@
     
     <!-- Blog Main Page -->
     <url>
-        <loc>https://www.teamrespawntv.com/blog/blog.html</loc>
-        <lastmod>2024-01-01</lastmod>
+        <loc>https://www.teamrespawntv.com/blog</loc>
+        <lastmod>2026-01-28</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     
     <!-- Blog Posts -->
     <url>
-        <loc>https://www.teamrespawntv.com/blog/posts/post-1.html</loc>
+        <loc>https://www.teamrespawntv.com/blog/posts/post-1</loc>
         <lastmod>2024-07-25</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>

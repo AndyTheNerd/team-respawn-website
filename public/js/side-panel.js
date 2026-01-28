@@ -6,19 +6,12 @@
  * Initializes side panel event listeners
  */
 function initSidePanel() {
-    const openPanelButton = document.getElementById('open-panel-button');
+    const openPanelButtons = document.querySelectorAll('[data-open-panel]');
     const closePanelButton = document.getElementById('close-panel-button');
     const sidePanel = document.getElementById('side-panel');
     const overlay = document.getElementById('overlay');
 
-    if (!openPanelButton || !closePanelButton || !sidePanel || !overlay) {
-        console.warn('Side panel elements not found. Make sure components are loaded first.');
-        console.log('Elements found:', {
-            openPanelButton: !!openPanelButton,
-            closePanelButton: !!closePanelButton,
-            sidePanel: !!sidePanel,
-            overlay: !!overlay
-        });
+    if (!openPanelButtons.length || !closePanelButton || !sidePanel || !overlay) {
         return;
     }
 
@@ -67,7 +60,7 @@ function initSidePanel() {
         overlay.classList.add('visible');
         sidePanel.setAttribute('aria-hidden', 'false');
         overlay.setAttribute('aria-hidden', 'false');
-        openPanelButton.setAttribute('aria-expanded', 'true');
+        openPanelButtons.forEach((button) => button.setAttribute('aria-expanded', 'true'));
         
         // Focus first element in panel
         const firstFocusable = sidePanel.querySelector('a, button');
@@ -86,7 +79,7 @@ function initSidePanel() {
         overlay.classList.remove('visible');
         sidePanel.setAttribute('aria-hidden', 'true');
         overlay.setAttribute('aria-hidden', 'true');
-        openPanelButton.setAttribute('aria-expanded', 'false');
+        openPanelButtons.forEach((button) => button.setAttribute('aria-expanded', 'false'));
         
         // Return focus to trigger button
         if (previousFocus) {
@@ -95,7 +88,9 @@ function initSidePanel() {
     }
 
     // Side panel event listeners
-    openPanelButton.addEventListener('click', openPanel);
+    openPanelButtons.forEach((button) => {
+        button.addEventListener('click', openPanel);
+    });
 
     closePanelButton.addEventListener('click', closePanel);
 
@@ -150,16 +145,13 @@ function initSidePanel() {
             return; // Not a tab link, ignore
         }
 
-        e.preventDefault();
-        e.stopPropagation();
-        
         const tabId = tabLink.getAttribute('data-tab-id');
         if (!tabId) {
-            console.warn('Tab link clicked but no data-tab-id found on:', tabLink);
-            console.log('Link element:', tabLink);
-            console.log('Link classes:', tabLink.className);
-            return;
+            return; // Allow normal navigation for non-tab links (e.g. Blog)
         }
+
+        e.preventDefault();
+        e.stopPropagation();
 
         console.log('Tab link clicked:', tabId);
 
@@ -213,16 +205,14 @@ function initSidePanel() {
     tabLinks.forEach(link => {
         const tabId = link.getAttribute('data-tab-id');
         console.log('Tab link:', tabId, link);
+        if (!tabId) {
+            return;
+        }
         
         // Add direct listener as backup
         link.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            
-            if (!tabId) {
-                console.warn('No data-tab-id on link:', link);
-                return;
-            }
             
             // Check if we're on the home page
             const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index.html';

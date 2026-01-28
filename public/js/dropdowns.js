@@ -30,6 +30,16 @@ function closeAllNavDropdowns(except) {
     });
 }
 
+function lockDropdownClosed(dropdown) {
+    if (!dropdown) {
+        return;
+    }
+    dropdown.classList.add('lock-closed');
+    window.setTimeout(() => {
+        dropdown.classList.remove('lock-closed');
+    }, 200);
+}
+
 function setupNavDropdown(dropdown) {
     if (!dropdown || dropdown.dataset.dropdownReady === 'true') {
         return;
@@ -84,6 +94,7 @@ function setupNavDropdown(dropdown) {
 
     menu.addEventListener('click', () => {
         closeAllNavDropdowns();
+        lockDropdownClosed(dropdown);
     });
 }
 

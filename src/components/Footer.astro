@@ -1,3 +1,87 @@
-<footer class="py-6 text-center text-gray-400 text-sm sm:text-base">
-  <p>Made with <span class="text-red-500">â¤</span> by Team Respawn</p>
+---
+import SocialIcons from './SocialIcons.astro';
+
+const year = new Date().getFullYear();
+const columns = [
+  {
+    title: 'Content',
+    links: [
+      { label: 'Home', href: '/' },
+      { label: 'Walkthroughs', href: '/#walkthroughs' },
+      { label: 'Guides', href: '/halo-wars-guides' },
+      { label: 'Blog', href: '/blog' }
+    ]
+  },
+  {
+    title: 'Projects',
+    links: [
+      { label: 'Storehaus Summary', href: '/storehaus-info' },
+      { label: 'Halo Quotes', href: 'https://haloquotes.teamrespawntv.com/' }
+    ]
+  },
+  {
+    title: 'Community',
+    links: [
+      { label: 'Discord', href: 'https://discord.gg/TeamRespawn' },
+      { label: 'Twitch', href: 'https://www.twitch.tv/TeamRespawnTV' },
+      { label: 'YouTube', href: 'https://www.youtube.com/@TeamRespawn' },
+      { label: 'Shop', href: 'https://www.teamrespawn.shop' }
+    ]
+  }
+];
+
+const legalLinks = [
+  { label: 'Privacy Policy', href: '/storehaus/privacy-policy' },
+  { label: 'Terms of Service', href: '/storehaus/terms-of-service' }
+];
+---
+<footer class="mt-16 border-t border-white/10 bg-gradient-to-b from-slate-950/40 to-slate-950/90">
+  <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+    <div class="grid gap-10 lg:grid-cols-[1.2fr_2fr]">
+      <div class="space-y-4">
+        <a href="/" aria-label="Team Respawn home" class="inline-flex items-center gap-3">
+          <img src="/content/Team-Respawn-Full.png" alt="Team Respawn logo" class="h-10 w-auto" loading="lazy" />
+        </a>
+        <p class="text-sm sm:text-base text-gray-300 leading-relaxed">
+          Strategy guides, walkthroughs, and tools for RTS fans. Follow Team Respawn for Halo Wars, Age of Empires, and more.
+        </p>
+        <div class="pt-2">
+          <SocialIcons />
+        </div>
+      </div>
+
+      <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        {columns.map((column) => (
+          <div>
+            <h3 class="text-sm font-semibold uppercase tracking-widest text-gray-400 mb-4">{column.title}</h3>
+            <ul class="space-y-3 text-sm sm:text-base">
+              {column.links.map((link) => (
+                <li>
+                  <a
+                    href={link.href}
+                    class="text-gray-300 hover:text-white transition-colors duration-200"
+                    target={link.href.startsWith('http') ? '_blank' : undefined}
+                    rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div class="mt-10 border-t border-white/10 pt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <p class="text-xs sm:text-sm text-gray-400">© {year} Team Respawn. All rights reserved.</p>
+      <div class="flex flex-wrap gap-4 text-xs sm:text-sm">
+        {legalLinks.map((link) => (
+          <a href={link.href} class="text-gray-400 hover:text-white transition-colors duration-200">
+            {link.label}
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
 </footer>

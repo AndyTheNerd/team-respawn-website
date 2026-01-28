@@ -2,12 +2,16 @@
   "projects": [
     {
       "name": "Storehaus RTS",
-      "description": "A Discord bot for Halo Wars 2, Age of Empires II and IV. Get civ stats, player search, game history, and an AI strategy advisor—all from slash commands in your server.",
+      "description": "A Discord bot for Halo Wars 2, Age of Empires II and IV. Get civ stats, player search, game history, and an AI strategy advisor - all from slash commands in your server.",
       "features": [
-        "Age of Empires IV: civ stats (1v1–4v4), player search, recent games via aoe4world",
+        "Age of Empires IV: civ stats (1v1-4v4), player search, recent games via aoe4world",
         "Age of Empires II: look up units, techs, structures, and civilizations",
         "Halo Wars 2: AI-powered strategy answers using RAG"
       ],
+      "status": "Active",
+      "tags": ["Discord Bot", "AI", "RTS"],
+      "cover": "/content/Banner.jpg",
+      "featured": true,
       "links": {
         "invite": "https://discord.com/oauth2/authorize?client_id=1446587655541227552&permissions=117760&integration_type=0&scope=bot",
         "discord": "https://discord.gg/TeamRespawn"
@@ -23,6 +27,8 @@
         "RESTful API for programmatic access",
         "Social media bots (Bluesky, Twitter coming soon)"
       ],
+      "status": "Active",
+      "tags": ["Web", "API", "Bots"],
       "links": {
         "website": "https://haloquotes.teamrespawntv.com/",
         "github": "https://github.com/AndyTheNerd/Halo-Quotes",
@@ -33,5 +39,3 @@
     }
   ]
 }
-
-

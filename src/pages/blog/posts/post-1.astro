@@ -1,10 +1,19 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import BlogHeader from '../../../components/BlogHeader.astro';
+import Footer from '../../../components/Footer.astro';
+import Header from '../../../components/Header.astro';
 import SidePanel from '../../../components/SidePanel.astro';
 ---
-<BaseLayout title="Blog Post">
+<BaseLayout
+  title="Top 5 Games to Play This Summer | Team Respawn Blog"
+  description="Team Respawn shares the top five games to dive into this summer, from blockbuster RPGs to indie gems."
+  canonical="https://www.teamrespawntv.com/blog/posts/post-1"
+  ogTitle="Top 5 Games to Play This Summer"
+  ogDescription="The Team Respawn blog shares five can't-miss games for your summer gaming queue."
+>
   <div class="container mx-auto p-4 sm:p-8">
+    <Header />
     <BlogHeader />
 
     <main class="max-w-4xl mx-auto">
@@ -52,11 +61,12 @@ import SidePanel from '../../../components/SidePanel.astro';
         </p>
       </div>
     </main>
+    <Footer />
   </div>
 
   <SidePanel />
-
-  <script src="/js/side-panel.js" is:inline></script>
+  <script src="/js/dropdowns.js" is:inline></script>
   <script src="/js/tabs.js" is:inline></script>
+  <script src="/js/side-panel.js" is:inline></script>
   <script src="/js/secondary-init.js" is:inline></script>
 </BaseLayout>
