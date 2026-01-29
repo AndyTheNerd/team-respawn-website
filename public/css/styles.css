@@ -1,5 +1,29 @@
-body {
-    font-family: 'Inter', sans-serif;
+body,
+button,
+input,
+select,
+textarea {
+    font-family: 'Inter', sans-serif !important;
+}
+.blog-page {
+    font-family: 'Inter', sans-serif !important;
+}
+
+.blog-page h1,
+.blog-page h2,
+.blog-page h3,
+.blog-page h4,
+.blog-page h5,
+.blog-page h6,
+.blog-page strong,
+.blog-page b,
+.blog-page button,
+.blog-page input,
+.blog-page select,
+.blog-page textarea,
+.blog-page label,
+.blog-page .prose {
+    font-family: inherit !important;
 }
 /* Skip to main content link - hidden by default, visible on focus */
 .sr-only {

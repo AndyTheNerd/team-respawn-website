@@ -1,0 +1,7 @@
+@use 'webcoreui/styles' as *;
+
+@include setup();
+
+body {
+  font-family: 'Inter', sans-serif;
+}

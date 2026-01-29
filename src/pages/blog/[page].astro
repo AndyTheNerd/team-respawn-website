@@ -1,0 +1,42 @@
+---
+import BlogListingPage from '../../components/BlogListingPage.astro';
+import blogPosts from '../../data/blogPosts.js';
+
+const POSTS_PER_PAGE = 12;
+
+export function getStaticPaths({ paginate }) {
+  return paginate(blogPosts, { pageSize: POSTS_PER_PAGE });
+}
+
+const { page } = Astro.props;
+const totalPages = page.lastPage;
+const currentPage = page.currentPage;
+const paginatedPosts = page.data;
+
+const paginationPages = Array.from({ length: totalPages }, (_, index) => {
+  const pageNumber = index + 1;
+  return {
+    label: pageNumber,
+    link: pageNumber === 1 ? '/blog' : `/blog/${pageNumber}`,
+    active: pageNumber === currentPage
+  };
+});
+
+const previousLink =
+  currentPage <= 1 ? '/blog' : currentPage === 2 ? '/blog' : `/blog/${currentPage - 1}`;
+const nextLink =
+  currentPage >= totalPages ? `/blog/${totalPages}` : `/blog/${currentPage + 1}`;
+const showPagination = totalPages > 1;
+const canonical =
+  currentPage <= 1 ? 'https://www.teamrespawntv.com/blog' : `https://www.teamrespawntv.com/blog/${currentPage}`;
+---
+<BlogListingPage
+  posts={paginatedPosts}
+  paginationPages={paginationPages}
+  previousLink={previousLink}
+  nextLink={nextLink}
+  disablePrevious={currentPage === 1}
+  disableNext={currentPage === totalPages}
+  showPagination={showPagination}
+  canonical={canonical}
+/>

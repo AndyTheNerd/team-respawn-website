@@ -9,13 +9,17 @@ const {
   ogImage,
   twitterImage,
   robots = 'index, follow',
-  author = 'Team Respawn'
+  author = 'Team Respawn',
+  bodyClass = ''
 } = Astro.props;
 
 const canonicalUrl = canonical ?? (Astro.site ? new URL(Astro.url.pathname, Astro.site).toString() : undefined);
 const resolvedOgTitle = ogTitle ?? title;
 const resolvedOgDescription = ogDescription ?? description;
 const resolvedTwitterImage = twitterImage ?? ogImage;
+const isBlogRoute = Astro.url?.pathname?.startsWith('/blog');
+const rawBodyClasses = [bodyClass, isBlogRoute ? 'blog-page' : ''].filter(Boolean).join(' ');
+const resolvedBodyClass = Array.from(new Set(rawBodyClasses.split(/\s+/).filter(Boolean))).join(' ');
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -53,7 +57,7 @@ const resolvedTwitterImage = twitterImage ?? ogImage;
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" crossorigin="anonymous"></script>
     <slot name="head" />
   </head>
-  <body class="bg-gray-900 text-white">
+  <body class={`bg-gray-900 text-white ${resolvedBodyClass}`.trim()}>
     <slot />
   </body>
 </html>
