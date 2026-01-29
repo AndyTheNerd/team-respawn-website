@@ -1,0 +1,204 @@
+---
+import ComponentWrapper from '@static/ComponentWrapper.astro'
+import Layout from '@static/Layout.astro'
+import PlaceholderText from '@static/PlaceholderText.astro'
+
+import Button from '@components/Button/Button.astro'
+import Icon from '@components/Icon/Icon.astro'
+import AstroMenu from '@components/Menu/Menu.astro'
+import SvelteMenu from '@components/Menu/Menu.svelte'
+import ReactMenu from '@components/Menu/Menu.tsx'
+
+import logo from '../../assets/img/logo.svg?raw'
+
+import { getSections } from '@helpers'
+import { menu, menuLogo } from '@data'
+
+const sections = getSections({
+    title: 'menus',
+    components: [AstroMenu, SvelteMenu, ReactMenu]
+})
+---
+
+<Layout nonStickyMenu={true} docs="/docs/menu">
+    <h1>Menu</h1>
+    <div class="grid md-2 lg-3">
+        <ComponentWrapper type="Astro">
+            <AstroMenu
+                items={menu}
+                logo={{ html: logo }}
+                className="backdrop"
+            />
+            <PlaceholderText amount={3} />
+        </ComponentWrapper>
+
+        <ComponentWrapper type="Svelte">
+            <SvelteMenu
+                items={menu}
+                logo={{ html: logo }}
+                className="backdrop"
+            />
+            <PlaceholderText amount={3} />
+        </ComponentWrapper>
+
+        <ComponentWrapper type="React">
+            <ReactMenu
+                items={menu}
+                logo={{ html: logo }}
+                className="backdrop"
+            />
+            <PlaceholderText amount={3} />
+        </ComponentWrapper>
+    </div>
+
+    {sections.map(section => (
+        <h1>{section.title}</h1>
+        <Fragment>
+            <h2>For mobile toggle, see the first example above</h2>
+        </Fragment>
+        <div class="grid md-2">
+            <ComponentWrapper title="Default" secondary={true}>
+                <section.component items={menu} />
+            </ComponentWrapper>
+
+            <ComponentWrapper title="With logo" secondary={true}>
+                <section.component items={menu} logo={menuLogo} />
+            </ComponentWrapper>
+
+            <ComponentWrapper title="Logo with left alignment" secondary={true}>
+                <section.component
+                    items={menu}
+                    logo={menuLogo}
+                    wrapperClassName="left-aligned"
+                />
+            </ComponentWrapper>
+
+            <ComponentWrapper title="Logo only" secondary={true}>
+                <section.component logo={menuLogo} />
+            </ComponentWrapper>
+
+            <ComponentWrapper title="Centered" secondary={true}>
+                <section.component items={menu} wrapperClassName="centered" />
+            </ComponentWrapper>
+
+            <ComponentWrapper title="Centered with logo" secondary={true}>
+                <section.component
+                    items={menu}
+                    logo={menuLogo}
+                    wrapperClassName="centered"
+                    centerLogo={true}
+                />
+            </ComponentWrapper>
+
+            <ComponentWrapper title="With backdrop (scroll above text)" secondary={true}>
+                <section.component items={menu} className="backdrop" />
+                <PlaceholderText />
+            </ComponentWrapper>
+
+            <ComponentWrapper title="With children" secondary={true}>
+                <section.component items={menu}>
+                    <div class="flex xs">
+                        <Button theme="flat">
+                            <Icon type="github" size={20} />
+                        </Button>
+                        <Button>Sign Up</Button>
+                    </div>
+                </section.component>
+                <PlaceholderText />
+            </ComponentWrapper>
+
+            <ComponentWrapper title="With logo and children" secondary={true}>
+                <section.component items={menu} logo={menuLogo}>
+                    <div class="flex xs">
+                        <Button theme="flat">
+                            <Icon type="github" size={20} />
+                        </Button>
+                        <Button>Sign Up</Button>
+                    </div>
+                </section.component>
+            </ComponentWrapper>
+
+            <ComponentWrapper title="With logo in center" secondary={true}>
+                <section.component
+                    items={menu}
+                    logo={menuLogo}
+                    centerLogo={true}
+                >
+                    <div class="flex xs">
+                        <Button theme="flat">
+                            <Icon type="github" size={20} />
+                        </Button>
+                        <Button>Sign Up</Button>
+                    </div>
+                </section.component>
+            </ComponentWrapper>
+
+            <ComponentWrapper title="Centered with backdrop" secondary={true}>
+                <section.component
+                    items={menu}
+                    logo={menuLogo}
+                    className="backdrop"
+                    wrapperClassName="centered"
+                >
+                    <div class="flex xs">
+                        <Button theme="flat">
+                            <Icon type="github" size={20} />
+                        </Button>
+                        <Button>Sign Up</Button>
+                    </div>
+                </section.component>
+            </ComponentWrapper>
+
+            <ComponentWrapper title="Secondary">
+                <section.component
+                    items={menu}
+                    logo={menuLogo}
+                    className="secondary"
+                >
+                    <div class="flex xs">
+                        <Button theme="flat" href="#">
+                            <Icon type="github" size={20} />
+                        </Button>
+                        <Button>Sign Up</Button>
+                    </div>
+                </section.component>
+            </ComponentWrapper>
+        </div>
+    ))}
+</Layout>
+
+<style is:global lang="scss">
+    @use '../../scss/config.scss' as *;
+
+    p {
+        text-align: justify;
+    }
+
+    .left-aligned {
+        justify-content: flex-start;
+    }
+
+    .centered {
+        justify-content: center;
+    }
+
+    .secondary {
+        background: var(--w-color-primary-60);
+        border-bottom: 1px solid var(--w-color-primary-70);
+    }
+
+    .backdrop {
+        backdrop-filter: blur(5px);
+        background: rgba(255, 255, 255, 0.1);
+
+        ul {
+            padding-top: 40px;
+        }
+    }
+
+    @include media('sm') {
+        .backdrop ul {
+            padding-top: 0;
+        }
+    }
+</style>

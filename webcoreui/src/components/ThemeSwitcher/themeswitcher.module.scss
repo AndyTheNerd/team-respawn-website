@@ -1,0 +1,76 @@
+@use '../../scss/config.scss' as *;
+
+body {
+    --w-theme-switcher-size: 20px;
+}
+
+.switcher {
+    @include layout(flex, sm);
+
+    &.toggle {
+        @include position(relative);
+        width: var(--w-theme-switcher-size);
+        height: var(--w-theme-switcher-size);
+
+        .switch {
+            position: absolute;
+
+            &:first-child {
+                @include layer(overlay);
+            }
+
+            &:nth-child(2) {
+                @include layer(fg);
+            }
+
+            &[data-active="true"] {
+                @include layer(popup);
+            }
+        }
+    }
+}
+
+.switch {
+    @include border(0);
+    @include border-radius(max);
+    @include position(relative);
+
+    width: var(--w-theme-switcher-size);
+    height: var(--w-theme-switcher-size);
+    cursor: pointer;
+
+    &.icons {
+        @include transition(opacity);
+        @include typography(primary);
+        @include background(transparent);
+        @include spacing(p0);
+        @include visibility(0);
+
+        &[data-active="true"] {
+            @include visibility(1);
+        }
+
+        svg, img {
+            pointer-events: none;
+            width: var(--w-theme-switcher-size);
+            height: var(--w-theme-switcher-size);
+        }
+    }
+
+    &:not(.icons)::after {
+        @include position(absolute, center);
+        @include border(primary);
+        @include border-radius(max);
+        @include layer(bg);
+        @include transition();
+        @include size(0);
+
+        content: '';
+    }
+
+    &[data-active="true"]::after {
+        @include layer(default);
+        width: calc(var(--w-theme-switcher-size) + 5px);
+        height: calc(var(--w-theme-switcher-size) + 5px);
+    }
+}

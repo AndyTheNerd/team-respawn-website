@@ -1,0 +1,42 @@
+---
+import type { CardProps } from './card'
+
+import styles from './card.module.scss'
+
+interface Props extends CardProps {}
+
+const {
+    element = 'section',
+    title,
+    titleTag = 'span',
+    compact,
+    className,
+    bodyClassName,
+    secondary,
+    ...rest
+} = Astro.props
+
+const classes = [
+    styles.card,
+    secondary && styles.secondary,
+    className
+]
+
+const bodyClasses = [
+    styles.body,
+    compact && styles.compact,
+    bodyClassName
+]
+
+const Component = element
+const Title = titleTag
+---
+
+<Component class:list={classes} {...rest}>
+    {title && (
+        <Title class:list={styles.title}>{title}</Title>
+    )}
+    <div class:list={bodyClasses}>
+        <slot />
+    </div>
+</Component>

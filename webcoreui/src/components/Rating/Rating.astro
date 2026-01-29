@@ -1,0 +1,71 @@
+---
+import type { RatingProps } from './rating'
+
+import ConditionalWrapper from '../ConditionalWrapper/ConditionalWrapper.astro'
+
+import { classNames } from '../../utils/classNames'
+
+import styles from './rating.module.scss'
+
+interface Props extends RatingProps {}
+
+const {
+    score,
+    total = 5,
+    showText,
+    text = '{0} out of {1}',
+    showEmpty = true,
+    outline = true,
+    reviewCount,
+    reviewText = '{0} reviews',
+    reviewLink,
+    reviewTarget,
+    color,
+    emptyColor,
+    size,
+    className
+} = Astro.props
+
+const classes = [
+    styles.rating,
+    outline && styles.outline,
+    className
+]
+
+const styleVariables = classNames([
+    color && `--w-rating-color: ${color};`,
+    size && `--w-rating-size: ${size}px;`,
+    emptyColor && `--w-rating-empty-color: ${emptyColor};`
+])
+
+const translatedText = text
+    .replace('{0}', `${score}`)
+    .replace('{1}', `${total}`)
+
+const translatedReviewText = reviewText.replace('{0}', `${reviewCount}`)
+---
+
+<span class:list={classes} style={styleVariables}>
+    {score > 0 && (
+        <span class={styles.score}>{Array(Math.round(score)).fill('★').join('')}</span>
+    )}
+    {showEmpty && (
+        <span class={styles.empty}>
+            {Array(total - Math.round(score)).fill('★').join('')}
+        </span>
+    )}
+    {showText && (
+        <span class:list={[styles.text, reviewCount && styles.m]}>
+            {translatedText}
+        </span>
+    )}
+    {reviewCount && '•'}
+    {reviewCount && (
+        <ConditionalWrapper condition={!!reviewLink}>
+            <a href={reviewLink} target={reviewTarget} slot="wrapper">
+                children
+            </a>
+            <span class={styles.text}>{translatedReviewText}</span>
+        </ConditionalWrapper>
+    )}
+</span>

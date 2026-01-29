@@ -1,0 +1,96 @@
+@use '../../scss/config.scss' as *;
+
+.button {
+    @include layout(inline-flex, center, xs);
+    @include typography(default, primary-50, none, normal);
+    @include spacing(py-sm, px-md);
+    @include border-radius(xs);
+    @include border(0);
+    @include transition();
+    @include background(primary);
+
+    cursor: pointer;
+
+    &[disabled] {
+        cursor: no-drop;
+        @include background(primary-20);
+    }
+
+    &:hover {
+        @include background(primary-20);
+    }
+    
+    &.secondary {
+        @include typography(primary);
+        @include background(primary-50);
+
+        &:hover {
+            @include background(primary-40);
+        }
+    }
+
+    &.outline {
+        @include typography(primary-20);
+        @include background(transparent);
+        box-shadow: inset 0px 0px 0px 1px var(--w-color-primary-20);
+        
+        &:hover {
+            @include typography(primary);
+            box-shadow: inset 0px 0px 0px 1px var(--w-color-primary);
+        }
+
+        &[disabled] {
+            @include typography(primary-30);
+            box-shadow: inset 0px 0px 0px 1px var(--w-color-primary-30);
+        }
+    }
+
+    &.flat {
+        @include typography(primary);
+        @include background(transparent);
+
+        &:hover {
+            @include background(primary-40);
+        }
+    }
+
+    &.info {
+        @include typography(info-fg);
+        @include background(info);
+
+        &:hover {
+            @include background(info-accent);
+        }
+    }
+
+    &.success {
+        @include typography(success-fg);
+        @include background(success);
+
+        &:hover {
+            @include background(success-accent);
+        }
+    }
+
+    &.warning {
+        @include typography(warning-fg);
+        @include background(warning);
+
+        &:hover {
+            @include background(warning-accent);
+        }
+    }
+
+    &.alert {
+        @include typography(alert-fg);
+        @include background(alert);
+
+        &:hover {
+            @include background(alert-accent);
+        }
+    }
+
+    svg {
+        pointer-events: none;
+    }
+}

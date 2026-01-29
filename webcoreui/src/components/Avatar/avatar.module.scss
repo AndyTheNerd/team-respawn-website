@@ -1,0 +1,40 @@
+@use '../../scss/config.scss' as *;
+
+body {
+    --w-avatar-border: var(--w-color-primary-70);
+}
+
+.avatar {
+    @include border-radius(max);
+
+    object-fit: cover;
+
+    &:not(.borderless) {
+        border: 3px solid var(--w-avatar-border);
+    }
+}
+
+.group {
+    @include layout(inline-flex, v-center);
+
+    &.reverse {
+        @include layout(row-reverse);
+
+        img {
+            @include layer(fg);
+        }
+
+        img:not(:first-child) {
+            margin-right: -10px;
+            margin-left: 0;
+        }
+    }
+
+    img:not(:first-child) {
+        margin-left: -10px;
+    }
+
+    img {
+        z-index: var(--w-avatar-index);
+    }
+}

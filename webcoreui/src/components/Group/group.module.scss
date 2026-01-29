@@ -1,0 +1,43 @@
+@use '../../scss/config.scss' as *;
+
+.group {
+    @include layout(flex, none);
+    @include visibility(auto);
+
+    button,
+    span {
+        @include border-radius(none);
+
+        &:first-child {
+            @include border-radius(left, md);
+        }
+
+        &:last-child {
+            @include border-radius(right, md);
+        }
+    }
+
+    &.separator button:not(:last-child),
+    &.separator span:not(:last-child) {
+        @include border(1px, right, primary-70);
+    }
+
+    &.outline button
+    &.outline span {
+        @include border(1px, primary-20);
+        box-shadow: none;
+
+        &:hover {
+            @include border(1px, primary);
+            box-shadow: none;
+        }
+
+        &:first-child {
+            @include border(right, 0);
+        }
+
+        &:last-child {
+            @include border(left, 0);
+        }
+    }
+}

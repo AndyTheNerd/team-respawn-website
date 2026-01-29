@@ -1,0 +1,45 @@
+@use '../../scss/config.scss' as *;
+
+body {
+    --w-rating-color: var(--w-color-primary);
+    --w-rating-empty-color: var(--w-color-primary);
+    --w-rating-empty-background: var(--w-color-primary-70);
+    --w-rating-size: 18px;
+}
+
+.rating {
+    @include layout(inline-flex, v-center);
+
+    color: var(--w-rating-color);
+    font-size: var(--w-rating-size);
+
+    &.outline .empty {
+        transform: scale(.9);
+        transform-origin: left;
+        color: var(--w-rating-empty-background);
+        letter-spacing: 2px;
+        text-shadow:
+            -1px 0 var(--w-rating-empty-color),
+            0 1px var(--w-rating-empty-color),
+            1px 0 var(--w-rating-empty-color),
+            0 -1px var(--w-rating-empty-color);
+    }
+
+    .empty {
+        color: var(--w-rating-empty-color);
+    }
+
+    a:hover .text {
+        @include typography(primary);
+    }
+    
+    .text {
+        @include transition(color);
+        @include typography(default, primary-20);
+        @include spacing(ml-xs);
+
+        &.m {
+            margin-right: 5px;
+        }
+    }
+}

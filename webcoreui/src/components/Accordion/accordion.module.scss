@@ -1,0 +1,77 @@
+@use '../../scss/config.scss' as *;
+
+.accordion {
+    @include spacing(0);
+    list-style-type: none;
+
+    &.reverse .title {
+        @include layout(row-reverse, h-end);
+    }
+
+    &.plus .title[data-open="true"] svg {
+        transform: rotate(135deg);
+    }
+
+    li {
+        @include border(primary-50, bottom);
+        @include spacing(py-sm, px-none, m0);
+
+        &:first-child {
+            padding-top: 0;
+        }
+
+        &:last-child {
+            @include border(bottom, 0);
+            padding-bottom: 0;
+        }
+
+        .title {
+            @include layout(flex, h-between, v-center, sm);
+            @include typography(default, primary, left);
+            @include size('w100%');
+            @include spacing(p0);
+            @include border(0);
+
+            background: transparent;
+            cursor: pointer;
+
+            &.reverse {
+                @include layout(row-reverse);
+            }
+
+            svg {
+                @include transition(transform);
+                @include size(15px);
+                @include typography(primary-20);
+                pointer-events: none;
+                min-width: 15px;
+            }
+
+            &[data-open="true"] {
+                svg {
+                    transform: rotate(180deg);
+                }
+
+                + .wrapper {
+                    grid-template-rows: 1fr;
+        
+                    .content {
+                        @include spacing(py-sm, px-none);
+                    }
+                }
+            }
+        }
+
+        .wrapper {
+            @include transition(grid-template-rows);
+            @include layout(grid);
+            grid-template-rows: 0fr;
+        }
+
+        .content {
+            @include transition();
+            @include visibility(hidden);
+            @include typography(primary-20);
+        }
+    }
+}

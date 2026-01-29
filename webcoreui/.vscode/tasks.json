@@ -1,0 +1,56 @@
+// Tasks - https://code.visualstudio.com/docs/editor/tasks#vscode
+// Vars  - https://code.visualstudio.com/docs/editor/variables-reference
+{
+    "version": "2.0.0",
+    "type": "shell",
+    "tasks": [
+        {
+            "label": "🔍 Develop",
+            "command": "npm run dev",
+        },
+        {
+            "label": "🛠️ Build Package",
+            "command": "npm run build:package"
+        },
+        {
+            "label": "🛠️ Build Astro",
+            "command": "npm run build"
+        },
+        {
+            "label": "📥 Git fetch && pull",
+            "command": "git fetch && git pull"
+        },
+        {
+            "label": "✅ Run Tests",
+            "command": "npm run test"
+        },
+        {
+            "label": "✅🎨 Run Sass Tests",
+            "command": "npm run test:sass"
+        },
+        {
+            "label": "✅🎯 Run Current Spec",
+            "command": "npm run test:run ${relativeFile}"
+        },
+        {
+            "label": "✅🎭 Run Playwright",
+            "command": "npm run test:e2e"
+        },
+        {
+            "label": "✅🎭 Run Playwright UI",
+            "command": "npm run test:e2e:ui"
+        },
+        {
+            "label": "✔️ Check TypeScript Errors",
+            "command": "tsc",
+        },
+        {
+            "label": "✔️🎯 Check TypeScript for Current",
+            "command": "tsc ${relativeFile}",
+        },
+        {
+            "label": "🇪🇸 Lint Project",
+            "command": "npm run lint",
+        }
+    ]
+}

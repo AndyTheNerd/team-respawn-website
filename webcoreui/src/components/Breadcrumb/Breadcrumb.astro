@@ -1,0 +1,49 @@
+---
+import type { BreadcrumbProps } from './breadcrumb'
+
+import ConditionalWrapper from '../ConditionalWrapper/ConditionalWrapper.astro'
+import Icon from '../Icon/Icon.astro'
+
+import styles from './breadcrumb.module.scss'
+
+interface Props extends BreadcrumbProps {}
+
+const {
+    items,
+    separator,
+    className
+} = Astro.props
+
+const classes = [
+    styles.breadcrumb,
+    className
+]
+---
+
+<ul class:list={classes}>
+    {items?.map((item, index) => (
+        <li>
+            <ConditionalWrapper condition={!!(item.href && index !== items.length - 1)}>
+                <a href={item.href} target={item.target} slot="wrapper">
+                    children
+                </a>
+                {item.icon && (
+                    <Fragment>
+                        {item.icon.startsWith('<svg')
+                            ? <Fragment set:html={item.icon} />
+                            : <Icon type={item.icon} />
+                        }
+                    </Fragment>
+                )}
+                {item.label}
+            </ConditionalWrapper>
+        </li>
+        <Fragment>
+            {index < items.length - 1 && (
+                <li>
+                    {separator || <Icon type="chevron-right" />}
+                </li>
+            )}
+        </Fragment>
+    ))}
+</ul>

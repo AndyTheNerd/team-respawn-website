@@ -1,0 +1,22 @@
+---
+import type { GroupProps } from './group'
+
+import styles from './group.module.scss'
+
+interface Props extends GroupProps {}
+
+const {
+    withSeparator,
+    className
+} = Astro.props
+
+const classes = [
+    styles.group,
+    withSeparator && styles.separator,
+    className
+]
+---
+
+<div class:list={classes}>
+    <slot />
+</div>

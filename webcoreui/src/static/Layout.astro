@@ -1,0 +1,242 @@
+---
+import Footer from '@components/Footer/Footer.astro'
+import Menu from '@components/Menu/Menu.astro'
+
+import Icon from '@blocks/Icon/Icon.astro'
+
+import logo from '../assets/img/logo.svg?raw'
+
+import { classNames } from '@utils/classNames'
+import { ClientRouter } from 'astro:transitions'
+
+const {
+    nonStickyMenu,
+    docs = ''
+} = Astro.props
+
+const menuClasses = classNames([
+    'menu',
+    nonStickyMenu && 'fixed'
+])
+
+const theme = (Astro.cookies.get('w-theme')?.value || 'dark')
+const isPath = (path: string) => Astro.url.pathname === `/${path}`
+
+const menu = {
+    logo: {
+        html: logo
+    },
+    items: [
+        { href: '/templates', name: 'Templates', active: isPath('templates') },
+        { href: '/blocks', name: 'Blocks', active: isPath('blocks') },
+        { href: '/css/themes', name: 'Themes', active: isPath('css/themes') },
+        { href: '/css/resets', name: 'Resets', active: isPath('css/resets') },
+        { href: '/css/utilities', name: 'Utilities', active: isPath('css/utilities') },
+        { href: '/svelte', name: 'Svelte', active: isPath('svelte') },
+        { href: '/react', name: 'React', active: isPath('react') }
+    ]
+}
+
+const footer = [
+    {
+        title: 'Templates',
+        items: [
+            { name: 'Product Page', href: '/templates/product-page/astro' },
+            { name: 'Portfolio', href: '/templates/portfolio/astro' },
+            { name: 'Blog', href: '/templates/blog/astro' }
+        ]
+    },
+    {
+        title: 'Playground',
+        items: [
+            { name: 'Svelte', href: '/svelte', active: isPath('svelte') },
+            { name: 'React', href: '/react', active: isPath('react') }
+        ]
+    },
+    {
+        title: 'CSS',
+        items: [
+            { name: 'Themes', href: '/css/themes', active: isPath('css/themes') },
+            { name: 'Resets', href: '/css/resets', active: isPath('css/resets') },
+            { name: 'Utilities', href: '/css/utilities', active: isPath('css/utilities') }
+        ]
+    },
+    {
+        title: 'Examples',
+        items: [
+            { name: 'Astro', href: '/examples/astro', active: isPath('examples/astro') },
+            { name: 'Svelte', href: '/examples/svelte', active: isPath('examples/svelte') },
+            { name: 'React', href: '/examples/react', active: isPath('examples/react') },
+            { name: 'Blocks', href: '/blocks', active: isPath('blocks') }
+        ]
+    }
+]
+
+const externalLinks = [
+    {
+        url: 'https://github.com/Frontendland/webcoreui',
+        name: 'github',
+        icon: 'github'
+    },
+    {
+        url: 'https://www.npmjs.com/package/webcoreui',
+        name: 'npm',
+        icon: 'components'
+    },
+    {
+        url: `https://webcoreui.dev${docs}`,
+        name: 'docs',
+        icon: 'file'
+    }
+]
+---
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <link rel="icon" href="/img/logo.png" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <title>Webcore</title>
+        <ClientRouter />
+    </head>
+    <body class:list={[theme, 'flex column none']}>
+        <Menu
+            logo={menu.logo}
+            items={menu.items}
+            className={menuClasses}
+        >
+            <div class="items">
+                {externalLinks.map(link => (
+                    <a href={link.url} target="_blank" rel="noreferrer">
+                        {link.name}
+                    </a>
+                ))}
+            </div>
+        </Menu>
+        <div class="container my">
+            <slot />
+        </div>
+        <Footer
+            logo={{ html: logo }}
+            columns={footer}
+            subText="Learn more at <a href='https://webcoreui.dev' target='_blank'>webcoreui.dev</a>"
+        >
+            <div class="flex sm">
+                {externalLinks.map(link => (
+                    <a href={link.url} target="_blank" rel="noreferrer">
+                        <Icon type={link.icon} size={18} />
+                    </a>
+                ))}
+            </div>
+        </Footer>
+    </body>
+</html>
+
+<style is:global lang="scss">
+    @use '../scss/index.scss' as *;
+    @use '../scss/config.scss' as *;
+
+    @include setup((
+        fontRegular: '/fonts/Inter-Regular.woff2',
+        fontBold: '/fonts/Inter-Bold.woff2',
+        themes: (
+            dark: '.dark',
+            light: '.light',
+            midnight: '.midnight',
+            vintage: '.vintage',
+            amber: '.amber',
+            synthwave: '.synthwave',
+            velvet: '.velvet'
+        )
+    ));
+
+    body {
+        @include spacing('mb-5xl');
+        min-height: calc(100vh - 53px);
+    }
+
+    h1:not(.reset) {
+        margin: 100px 0 10px;
+        font-size: 48px;
+        text-align: center;
+    }
+
+    h2:not(.reset) {
+        color: var(--w-color-primary-10);
+        font-family: Regular;
+        font-weight: 400;
+        text-align: center;
+        line-height: 1.5;
+        font-size: 24px;
+        margin: 0 0 20px;
+
+        a {
+            text-decoration: underline;
+        }
+    }
+
+    .a:not(.default),
+    .a > strong {
+        background: #B545ED;
+        background: linear-gradient(to right, #505FFF, #B545ED);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .s:not(.default),
+    .s > strong {
+        color: #FF3E00;
+    }
+
+    .r:not(.default),
+    .r > strong {
+        color: #61DAFB;
+    }
+
+    .menu {
+        &.fixed {
+            position: relative;
+        }
+
+        .items {
+            @include layout(flex, sm);
+
+            a {
+                @include typography(primary-20);
+
+                &:hover {
+                    @include typography(primary);
+                }
+            }
+        }
+    }
+
+    .container {
+        @include size('w100%');
+        flex: 1;
+    }
+
+    .my {
+        @include spacing(auto-default);
+    }
+
+    .mb {
+        @include spacing(mb-default);
+    }
+
+    .relative {
+        @include position(relative);
+    }
+
+    .ctx {
+        @include size('w100%', h150px);
+        @include border(primary-40);
+        @include border-radius();
+        @include background(primary-60);
+        @include layout(flex, column, center);
+
+        border-style: dashed;
+    }
+</style>

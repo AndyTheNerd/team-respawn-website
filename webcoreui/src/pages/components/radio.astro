@@ -1,0 +1,138 @@
+---
+import ComponentWrapper from '@static/ComponentWrapper.astro'
+import Layout from '@static/Layout.astro'
+
+import AstroRadio from '@components/Radio/Radio.astro'
+import SvelteRadio from '@components/Radio/Radio.svelte'
+import ReactRadio from '@components/Radio/Radio.tsx'
+
+import { getSections } from '@helpers'
+
+const sections = getSections({
+    title: 'radios',
+    components: [AstroRadio, SvelteRadio, ReactRadio]
+})
+---
+
+<Layout docs="/docs/radio">
+    <h1>Radio</h1>
+    <div class="grid md-2 lg-3">
+        <ComponentWrapper type="Astro">
+            <AstroRadio
+                items={[{ label: 'Radio', selected: true, value: '1' }]}
+                name="radio1"
+            />
+        </ComponentWrapper>
+
+        <ComponentWrapper type="Svelte">
+            <SvelteRadio
+                items={[{ label: 'Radio', selected: true, value: '1' }]}
+                name="radio2"
+                color="#ee5253"
+            />
+        </ComponentWrapper>
+
+        <ComponentWrapper type="React">
+            <ReactRadio
+                items={[{ label: 'Radio', selected: true, value: '1' }]}
+                name="radio3"
+                color="#48dbfb"
+            />
+        </ComponentWrapper>
+    </div>
+
+    {sections.map((section, index) => (
+        <h1>{section.title}</h1>
+        <div class="grid md-2 lg-3">
+            <ComponentWrapper title="Default with link">
+                <section.component
+                    items={[
+                        { label: 'Small', value: 'sm' },
+                        { label: 'Medium with <a href="/" target="_blank">link</a>', value: 'md' },
+                        { label: 'Large', value: 'lg' }
+                    ]}
+                    name={`radio1-${index}`}
+                />
+            </ComponentWrapper>
+
+            <ComponentWrapper title="Preselected option">
+                <section.component
+                    items={[
+                        { label: 'Small', value: 'sm' },
+                        { label: 'Medium', selected: true, value: 'md' },
+                        { label: 'Large', value: 'lg' }
+                    ]}
+                    name={`radio2-${index}`}
+                />
+            </ComponentWrapper>
+
+            <ComponentWrapper title="Disabled option">
+                <section.component
+                    items={[
+                        { label: 'Small', value: 'sm' },
+                        { label: 'Medium', selected: true, disabled: true, value: 'md' },
+                        { label: 'Large', disabled: true, value: 'lg' }
+                    ]}
+                    name={`radio3-${index}`}
+                />
+            </ComponentWrapper>
+
+            <ComponentWrapper title="Options with subtext and link">
+                <section.component
+                    items={[
+                        { label: 'Starter', subText: 'For getting started', value: 'starter' },
+                        { label: 'Standard', subText: 'For existing small <a href="/" target="_blank">businesses</a>', value: 'standard' },
+                        { label: 'Premium', subText: 'For enterprise solutions', value: 'premium' }
+                    ]}
+                    name={`radio4-${index}`}
+                />
+            </ComponentWrapper>
+
+            <ComponentWrapper title="With custom color">
+                <section.component
+                    items={[
+                        { label: 'Small', value: 'sm' },
+                        { label: 'Medium', value: 'md' },
+                        { label: 'Large', value: 'lg' }
+                    ]}
+                    color="#1dd1a1"
+                    name={`radio5-${index}`}
+                />
+            </ComponentWrapper>
+
+            <ComponentWrapper title="With inline display">
+                <section.component
+                    items={[
+                        { label: 'Small', value: 'sm' },
+                        { label: 'Medium', value: 'md' },
+                        { label: 'Large', value: 'lg' }
+                    ]}
+                    inline={true}
+                    name={`radio6-${index}`}
+                />
+            </ComponentWrapper>
+
+            <ComponentWrapper title="Multiline">
+                <section.component
+                    items={[
+                        { label: 'Starter - Quickest way to get started as a new business owner', value: 'sm' },
+                        { label: 'Standard - If you\'re an existing business owner with customers', value: 'md' },
+                        { label: 'Premium - Contact sales for a unique pricing option', value: 'lg' }
+                    ]}
+                    name={`radio7-${index}`}
+                />
+            </ComponentWrapper>
+
+            <ComponentWrapper title="Multiline with subtext">
+                <section.component
+                    items={[
+                        { label: 'Starter - Quickest way to get started as a new business owner', subText: 'Get up and running as quickly as possible with our starter plan', value: 'sm' },
+                        { label: 'Standard - If you\'re an existing business owner with customers', subText: 'Customize the way your business operates with the standard plan.', value: 'md' },
+                        { label: 'Premium - Contact sales for a unique pricing option', subText: 'Get the most out of your business. Get priority support and a customized roadmap.', value: 'lg' }
+                    ]}
+                    name={`radio7-${index}`}
+                />
+            </ComponentWrapper>
+        </div>
+    ))}
+</Layout>

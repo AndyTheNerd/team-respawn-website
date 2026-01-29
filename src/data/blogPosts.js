@@ -8,7 +8,14 @@ const blogPosts = [
       'Looking for a new game to get lost in? Here are our top picks for the summer, from indie gems to blockbuster hits.',
     href: '/blog/posts/post-1',
     accentClass: 'text-yellow-400',
-    buttonClass: 'bg-yellow-500 hover:bg-yellow-600'
+    buttonClass: 'bg-yellow-500 hover:bg-yellow-600',
+    img: {
+      src: '/content/blog/features-placeholder.svg',
+      alt: 'Top 5 Games to Play this Summer',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
   },
   {
     title: 'Elden Ring DLC: Shadow of the Erdtree',
@@ -19,7 +26,14 @@ const blogPosts = [
       'Our in-depth review of the highly anticipated Elden Ring expansion. Is it worth returning to the Lands Between?',
     href: '#',
     accentClass: 'text-purple-400',
-    buttonClass: 'bg-purple-500 hover:bg-purple-600'
+    buttonClass: 'bg-purple-500 hover:bg-purple-600',
+    img: {
+      src: '/content/blog/reviews-placeholder.svg',
+      alt: 'Elden Ring DLC: Shadow of the Erdtree',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
   },
   {
     title: 'The Future of AI in Gaming',
@@ -30,7 +44,14 @@ const blogPosts = [
       'How is artificial intelligence shaping the way we play games? We explore the new frontiers of AI-powered gameplay.',
     href: '#',
     accentClass: 'text-blue-400',
-    buttonClass: 'bg-blue-500 hover:bg-blue-600'
+    buttonClass: 'bg-blue-500 hover:bg-blue-600',
+    img: {
+      src: '/content/blog/insights-placeholder.svg',
+      alt: 'The Future of AI in Gaming',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
   },
   {
     title: 'Indie Spotlight: The Next Big Thing',
@@ -41,7 +62,14 @@ const blogPosts = [
       "Don't miss out on these hidden gems! We highlight three fantastic indie games you need to play right now.",
     href: '#',
     accentClass: 'text-teal-400',
-    buttonClass: 'bg-teal-500 hover:bg-teal-600'
+    buttonClass: 'bg-teal-500 hover:bg-teal-600',
+    img: {
+      src: '/content/blog/spotlight-placeholder.svg',
+      alt: 'Indie Spotlight: The Next Big Thing',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
   }
 ];
 

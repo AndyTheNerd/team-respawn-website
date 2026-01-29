@@ -1,0 +1,143 @@
+@use '../config' as *;
+
+@mixin tooltip() {
+    body {
+        --w-tooltip-background: var(--w-color-primary);
+        --w-tooltip-color: var(--w-color-primary-70);
+    }
+
+    [data-tooltip] {
+        @include position(relative);
+        @include typography(normal);
+
+        display: inline-block;
+
+        &::before,
+        &::after {
+            @include transition();
+            @include visibility(0);
+            @include layer(header);
+
+            left: 50%;
+            transform: translate(-50%, 5px);
+            pointer-events: none;
+        }
+
+        &::before {
+            @include border-radius(md);
+            @include position(absolute);
+            @include typography(md, hlg);
+            @include background(var(--w-tooltip-background));
+            @include size(wmax-content);
+            @include spacing(px-xs);
+
+            content: attr(data-tooltip);
+            color: var(--w-tooltip-color);
+            bottom: calc(100% + 5px);
+            max-width: 300px;
+        }
+
+        &::after {
+            @include position(absolute, t-5px);
+            @include size(0);
+            @include border(5px, left, transparent);
+            @include border(5px, right, transparent);
+
+            content: '';
+            border-top: 5px solid var(--w-tooltip-background);
+        }
+
+        &:hover::before,
+        &:hover::after {
+            @include visibility(1);
+
+            pointer-events: all;
+            transform: translate(-50%, 0);
+        }
+
+        &[data-position="bottom"] {
+            &::before,
+            &::after {
+                transform: translate(-50%, -5px);
+            }
+
+            &::before {
+                top: calc(100% + 5px);
+                bottom: auto;
+            }
+
+            &::after {
+                @include border(5px, top, transparent);
+
+                border-bottom: 5px solid var(--w-tooltip-background);
+                top: auto;
+                bottom: -5px;
+            }
+
+            &:hover::before,
+            &:hover::after {
+                transform: translate(-50%, 0);
+            }
+        }
+
+        &[data-position="left"] {
+            &::before,
+            &::after {
+                transform: translate(0, 0);
+                left: auto;
+                right: 105%;
+            }
+
+            &::before {
+                bottom: auto;
+            }
+
+            &::after {
+                @include border(5px, top, transparent);
+                @include border(5px, bottom, transparent);
+
+                top: calc(50%);
+                border-left: 5px solid var(--w-tooltip-background);
+                transform: translate(10px, -50%);
+            }
+
+            &:hover::before {
+                transform: translate(-5px, 0);
+            }
+
+            &:hover::after {
+                transform: translate(5px, -50%);
+            }
+        }
+
+        &[data-position="right"] {
+            &::before,
+            &::after {
+                transform: translate(0, 0);
+                left: 105%;
+            }
+
+            &::before {
+                bottom: auto;
+            }
+
+            &::after {
+                @include border(5px, top, transparent);
+                @include border(5px, bottom, transparent);
+
+                top: calc(50%);
+                border-right: 5px solid var(--w-tooltip-background);
+                transform: translate(-10px, -50%);
+            }
+
+            &:hover::before {
+                transform: translate(5px, 0);
+            }
+
+            &:hover::after {
+                transform: translate(-5px, -50%);
+            }
+        }
+    }
+}
+

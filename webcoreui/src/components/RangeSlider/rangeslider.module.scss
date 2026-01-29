@@ -1,0 +1,143 @@
+@use '../../scss/config.scss' as *;
+
+body {
+    --w-range-slider-background: var(--w-color-primary-50);
+    --w-range-slider-color: var(--w-color-primary);
+    --w-range-slider-thumb: var(--w-color-primary-50);
+}
+
+.label {
+    @include layout(flex, column, xs);
+
+    cursor: pointer;
+}
+
+.container {
+    @include layout(flex, v-center, xs);
+
+    svg {
+        @include size(14px);
+    }
+
+    button {
+        @include layout(flex, v-center, xs);
+        @include background(transparent);
+        @include typography(primary, default);
+        @include border(0);
+
+        cursor: pointer;
+    }
+}
+
+.slider {
+    @include position(relative);
+    @include border-radius(xl);
+    @include size(h10px);
+    @include background(var(--w-range-slider-background));
+    @include visibility(hidden);
+
+    flex: 1;
+}
+
+.range {
+    @include position(absolute);
+    @include background(var(--w-range-slider-color));
+    @include size('h100%');
+    @include border-radius();
+
+    &[data-disabled] {
+        @include background(primary-30);
+        cursor: no-drop;
+    }
+}
+
+.input {
+    @include size('w100%', h10px);
+    @include background(none);
+    @include spacing(m0);
+    @include position(absolute, t0);
+
+    -webkit-appearance: none;
+    appearance: none;
+    pointer-events: none;
+
+    &:focus-visible {
+        outline: none;
+
+        &::-webkit-slider-thumb {
+            @include border(info);
+        }
+
+        &::-moz-range-thumb {
+            @include border(info);
+        }
+    }
+
+    &[disabled]::-webkit-slider-thumb {
+        @include background(primary-50);
+        @include border(primary-30);
+        cursor: no-drop;
+    }
+
+    &[disabled]::-moz-range-thumb {
+        @include background(primary-50);
+        @include border(primary-30);
+        cursor: no-drop;
+    }
+
+    &[data-min]::-webkit-slider-thumb  {
+        box-shadow: 3px 0 0 3px var(--w-range-slider-color);
+    }
+
+    &[data-max]::-webkit-slider-thumb  {
+        box-shadow: -3px 0 0 3px var(--w-range-slider-color);
+    }
+
+    &[data-min]::-moz-range-thumb   {
+        box-shadow: 3px 0 0 3px var(--w-range-slider-color);
+    }
+
+    &[data-max]::-moz-range-thumb   {
+        box-shadow: -3px 0 0 3px var(--w-range-slider-color);
+    }
+
+    
+    &[disabled][data-min]::-webkit-slider-thumb  {
+        box-shadow: 3px 0 0 3px var(--w-color-primary-30);
+    }
+
+    &[disabled][data-max]::-webkit-slider-thumb  {
+        box-shadow: -3px 0 0 3px var(--w-color-primary-30);
+    }
+
+    &[disabled][data-min]::-moz-range-thumb   {
+        box-shadow: 3px 0 0 3px var(--w-color-primary-30);
+    }
+
+    &[disabled][data-max]::-moz-range-thumb   {
+        box-shadow: -3px 0 0 3px var(--w-color-primary-30);
+    }
+}
+
+.input::-webkit-slider-thumb {
+    @include background(var(--w-range-slider-thumb));
+    @include size(10px);
+    @include border-radius(max);
+    @include border(var(--w-range-slider-color));
+
+    -webkit-appearance: none;
+    appearance: none;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.input::-moz-range-thumb {
+    @include background(var(--w-range-slider-thumb));
+    @include size(9px);
+    @include border-radius(max);
+    @include border(var(--w-range-slider-color));
+
+    pointer-events: auto;
+    appearance: none;
+    cursor: pointer;
+}

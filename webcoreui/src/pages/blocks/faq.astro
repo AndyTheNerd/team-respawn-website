@@ -1,0 +1,63 @@
+---
+import Layout from '@static/Layout.astro'
+
+import AstroFAQ from '@blocks/FAQ/FAQ.astro'
+import SvelteFAQ from '@blocks/FAQ/FAQ.svelte'
+import ReactFAQ from '@blocks/FAQ/FAQ.tsx'
+import Tiles from '@blocks/Tiles/Tiles.astro'
+
+import fileIcon from '@blocks/Icon/icons/file.svg?raw'
+
+import { accordionItems } from '@data'
+---
+
+<Layout docs="/blocks/faq">
+    <h1>FAQ Blocks</h1>
+    <h2 class="heading">
+        <a href="/blocks">
+            {'<-'} Back to all blocks
+        </a>
+    </h2>
+
+    <AstroFAQ items={accordionItems} titleTag="strong">
+        <span class="muted">Here are the most common questions we get asked. If you don't find an answer for your question, please reach out to us through our <a href="#">contact form</a>.</span>
+    </AstroFAQ>
+
+    <hr />
+
+    <SvelteFAQ
+        title="FAQs"
+        titleTag="strong"
+        items={accordionItems}
+        client:load
+    />
+
+    <hr />
+
+    <ReactFAQ
+        items={accordionItems}
+        titleTag="strong"
+        client:load
+    >
+        <span class="muted mb">Looking for a specific page? Find them below:</span>
+
+        <Tiles items={[
+            { icon: 'home', label: 'Home', href: '' },
+            { icon: 'github', label: 'GitHub', href: '' },
+            { icon: fileIcon, label: 'Documentation', href: '' }
+        ]} columns={1} />
+    </ReactFAQ>
+</Layout>
+
+<style lang="scss" is:global>
+    @use 'webcoreui/config' as *;
+
+    .mb {
+        @include visibility(block);
+        @include spacing(mb-default);
+    }
+
+    hr {
+        @include spacing('my-5xl');
+    }
+</style>

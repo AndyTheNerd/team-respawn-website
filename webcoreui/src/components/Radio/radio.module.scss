@@ -1,0 +1,83 @@
+@use '../../scss/config.scss' as *;
+
+body {
+    --w-radio-color: var(--w-color-primary);
+}
+
+.radio {
+    @include layout(flex, column, sm);
+
+    &.inline {
+        @include layout(row);
+    }
+
+    label {
+        @include layout(flex, xs);
+
+        cursor: pointer;
+
+        &.disabled {
+            cursor: no-drop;
+
+            input + span::after {
+                @include background(primary-20);
+            }
+        }
+
+        &.col {
+            @include layout(column, v-start);
+        }
+    }
+
+    input {
+        @include visibility(none);
+
+        + span::after {
+            @include transition(transform);
+            @include position(absolute, 't50%', 'l50%');
+            @include size(8px);
+            @include border-radius(max);
+            @include background(var(--w-radio-color));
+
+            content: '';
+            transform: translate(-50%, -50%) scale(0);
+        }
+
+        &:checked + span::after {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        &:disabled + span {
+            @include background(primary-40);
+            @include border(primary-40);
+        }
+    }
+
+    .wrapper {
+        @include layout(flex, sm);
+    }
+    
+    .icon {
+        @include size(16px);
+        @include border-radius(max);
+        @include position(relative);
+        @include spacing(mt-xxs);
+
+        display: inline-block;
+        min-width: 16px;
+        border: 1px solid var(--w-radio-color);
+    }
+
+    .subtext {
+        @include spacing(ml-lg);
+        @include typography(md, primary-20);
+
+        a {
+            @include typography(primary-20);
+
+            &:hover {
+                @include typography(primary);
+            }
+        }
+    }
+}

@@ -1,0 +1,70 @@
+// Blog-specific style overrides for webcoreui components
+// Maintains dark theme aesthetic with Inter font
+
+.blog-page {
+  background-color: #111827; // gray-900
+  min-height: 100vh;
+
+  // Category badge styling
+  .blog-category {
+    display: inline-flex;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #d1d5db;
+    background: rgba(55, 65, 81, 0.6);
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    margin-bottom: 0.5rem;
+  }
+
+  // Dark theme for hero section
+  section[class*="hero"] {
+    background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
+  }
+
+  // Section titles
+  h2 {
+    color: #f3f4f6;
+    font-family: 'Inter', sans-serif;
+  }
+
+  // Muted text (excerpts)
+  .muted {
+    color: #9ca3af;
+  }
+
+  // Card styling for dark theme
+  [class*="card"] {
+    background-color: #1f2937;
+    border-color: rgba(255, 255, 255, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    strong {
+      color: #f3f4f6;
+    }
+  }
+
+  // Grid layout adjustments
+  .grid {
+    gap: 1.5rem;
+  }
+
+  // Container spacing
+  .container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+// Ensure Inter font is applied throughout
+.blog-page,
+.blog-page * {
+  font-family: 'Inter', sans-serif;
+}

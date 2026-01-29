@@ -1,0 +1,82 @@
+@use '../../scss/config.scss' as *;
+
+body {
+    --w-switch-off-color: var(--w-color-primary-50);
+    --w-switch-on-color: var(--w-color-primary);
+}
+
+.switch {
+    @include layout(inline-flex, v-center, sm);
+    cursor: pointer;
+
+    &.reverse {
+        @include layout(row-reverse);
+    }
+
+    &.disabled .toggle {
+        @include background(primary-40);
+        cursor: no-drop;
+
+        &::before {
+            @include background(primary-50);
+        }
+    }
+
+    &.small {
+        input:checked + span::before {
+            transform: translateX(20px);
+        }
+
+        .toggle {
+            @include size(w40px, h20px);
+    
+            &::before {
+                @include size(14px);
+            }
+        }
+
+        .label {
+            @include typography(md);
+        }
+    }
+
+    &.square .toggle {
+        @include border-radius(md);
+
+        &::before {
+            @include border-radius(md);
+        }
+    }
+
+    input {
+        @include visibility(none);
+
+        &:checked + span {
+            @include background(var(--w-switch-on-color));
+    
+            &::before {
+                transform: translateX(30px);
+            }
+        }
+    }
+
+    .toggle {
+        @include transition(background);
+        @include position(relative);
+        @include size(w60px, h30px);
+        @include border-radius(xl);
+        @include background(var(--w-switch-off-color));
+
+        &::before {
+            @include transition(transform);
+            @include position(absolute, l3px, b3px);
+            @include size(24px);
+            @include border-radius(max);
+            @include background(primary-70);
+
+            content: '';
+        }
+    }
+}
+  
+  

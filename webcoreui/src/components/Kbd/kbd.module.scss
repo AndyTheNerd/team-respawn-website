@@ -1,0 +1,8 @@
+@use '../../scss/config.scss' as *;
+
+.kbd {
+    @include background(primary-50);
+    @include border-radius(md);
+    @include typography(md, regular);
+    @include spacing(py-xs, px-xs);
+}

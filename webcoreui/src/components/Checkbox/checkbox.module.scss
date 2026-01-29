@@ -1,0 +1,74 @@
+@use '../../scss/config.scss' as *;
+
+body {
+    --w-checkbox-color: var(--w-color-primary);
+}
+
+.checkbox {
+    @include layout(inline-flex, sm);
+    @include typography(hmd);
+
+    cursor: pointer;
+
+    &.col {
+        @include layout(column, h-start, v-start, none);
+
+        .wrapper {
+            @include layout(flex, sm);
+        }
+    }
+
+    input {
+        display: none;
+
+        &:checked + span {
+            @include background(var(--w-checkbox-color));
+
+            svg {
+                @include position(absolute, center);
+                @include typography(primary-50);
+                @include size(10px);
+
+                display: block;
+            }
+        }
+
+        &:disabled + span {
+            @include background(primary-30);
+            @include border(primary-30);
+            cursor: no-drop;
+        }
+    }
+
+    .check {
+        @include size(15px);
+        @include position(relative);
+        @include border-radius(sm);
+        @include spacing(mt-xs);
+
+        display: inline-block;
+        min-width: 15px;
+        border: 1px solid var(--w-checkbox-color);
+
+        svg {
+            @include visibility(none);
+
+            path {
+                stroke-width: 4px;
+            }
+        }
+    }
+
+    .text {
+        @include spacing(ml-lg);
+        @include typography(md, primary-20);
+
+        a {
+            @include typography(primary-20);
+
+            &:hover {
+                @include typography(primary);
+            }
+        }
+    }
+}

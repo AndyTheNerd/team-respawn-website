@@ -1,0 +1,71 @@
+---
+import {
+    Button,
+    Card,
+    Input
+} from 'webcoreui/astro'
+
+import type { SignUpProps } from './signup'
+
+interface Props extends SignUpProps {
+    primaryButtonSelector?: string
+    secondaryButtonSelector?: string
+}
+
+const {
+    label = 'Sign up',
+    emailLabel = 'Email',
+    emailPlaceholder = 'Enter your email',
+    emailSubText = '',
+    passwordLabel = 'Password',
+    passwordPlaceholder = 'Enter your password',
+    passwordSubText = 'Generate a unique password <a href="#">here</a>',
+    primaryButtonTheme = 'success',
+    primaryButtonLabel = 'Create an account',
+    secondaryButtonTheme = 'secondary',
+    secondaryButtonLabel = 'Sign in',
+    primaryButtonSelector,
+    secondaryButtonSelector
+} = Astro.props
+---
+
+<Card title={label}>
+    <form class="flex column sign-up-form">
+        <Input
+            label={emailLabel}
+            placeholder={emailPlaceholder}
+            subText={emailSubText}
+            autocomplete="on"
+        />
+        <Input
+            type="password"
+            label={passwordLabel}
+            placeholder={passwordPlaceholder}
+            subText={passwordSubText}
+            autocomplete="on"
+        />
+        <div class="flex xs wrap">
+            {primaryButtonLabel && (
+                <Button theme={primaryButtonTheme} className={primaryButtonSelector}>
+                    {primaryButtonLabel}
+                </Button>
+            )}
+            {secondaryButtonLabel && (
+                <Button theme={secondaryButtonTheme} className={secondaryButtonSelector}>
+                    {secondaryButtonLabel}
+                </Button>
+            )}
+        </div>
+    </form>
+</Card>
+
+<script>
+    import { on } from '@utils/DOMUtils'
+
+    const addEventListener = () => {
+        on('.sign-up-form', 'submit', (event: Event) => event.preventDefault())
+    }
+
+    on(document, 'astro:after-swap', addEventListener)
+    addEventListener()
+</script>

@@ -1,0 +1,10 @@
+@use 'webcoreui/config' as *;
+
+.proof {
+    @include typography(center);
+
+    strong {
+        @include typography(xl);
+        @include visibility(block);
+    }
+}

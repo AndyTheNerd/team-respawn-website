@@ -1,0 +1,85 @@
+@use '../../scss/config.scss' as *;
+
+body {
+    --w-progress-color: var(--w-color-primary);
+    --w-progress-background: var(--w-color-primary-50);
+    --w-progress-stripe-light: var(--w-color-primary);
+    --w-progress-stripe-dark: var(--w-color-primary-10);
+}
+
+.w-progress {
+    @include size('w100%', h10px);
+    @include border-radius(xl);
+    @include visibility(hidden);
+    @include typography(bold, xs);
+    @include background(var(--w-progress-background));
+
+    color: var(--w-progress-background);
+    
+    &.medium {
+        @include size(h15px);
+        @include typography(sm);
+    }
+
+    &.large {
+        @include size(h20px);
+        @include typography(md);
+    }
+
+    &.square {
+        @include border-radius(sm);
+
+        .progress {
+            @include border-radius(sm);
+        }
+    }
+
+    &.striped {
+        .progress {
+            background-size: 10px 10px;
+            background-image: linear-gradient(
+                -45deg,
+                var(--w-progress-stripe-light) 25%,
+                var(--w-progress-stripe-dark) 25%,
+                var(--w-progress-stripe-dark) 50%,
+                var(--w-progress-stripe-light) 50%,
+                var(--w-progress-stripe-light) 75%,
+                var(--w-progress-stripe-dark) 75%,
+                var(--w-progress-stripe-dark)
+            );
+        }
+
+        &.medium .progress {
+            background-size: 15px 15px;
+        }
+
+        &.large .progress {
+            background-size: 20px 20px;
+        }
+    }
+
+    &.indeterminate .progress {
+        @include position(relative);
+
+        animation: load 1s cubic-bezier(0.4, 0.0, 0.2, 1) infinite;
+    }
+
+    .progress {
+        @include transition(width);
+        @include size('h100%');
+        @include border-radius(xl);
+        @include layout(flex, center);
+        @include background(var(--w-progress-color));
+
+        width: var(--w-progress-width);
+    }
+}
+
+@keyframes load {
+    from {
+        left: -100%;
+    }
+    to {
+        left: 100%;
+    }
+}
