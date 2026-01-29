@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "WebFetch(domain:webcoreui.dev)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(dir \"c:\\\\Cloned Repos\\\\team-respawn-website\\\\node_modules\\\\webcoreui\" /b)"
     ]
   }
 }
