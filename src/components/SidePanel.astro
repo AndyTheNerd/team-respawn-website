@@ -3,10 +3,10 @@ import SocialIcons from './SocialIcons.astro';
 
 const pathname = Astro.url?.pathname ?? '';
 const isHome = pathname === '/' || pathname === '/index.html';
-const isHaloWars = pathname.startsWith('/halo-wars');
-const isAgeOfEmpires = pathname.startsWith('/age-of-empires');
-const isAgeOfMythology = pathname.startsWith('/age-of-mythology');
 const isBlog = pathname.startsWith('/blog');
+const guideCategory = Astro.url?.searchParams?.get('category')?.toLowerCase();
+const guideTag = Astro.url?.searchParams?.get('tag')?.toLowerCase();
+const isGuides = isBlog && guideCategory === 'guides';
 ---
 <aside
   id="side-panel"
@@ -68,28 +68,52 @@ const isBlog = pathname.startsWith('/blog');
       </button>
       <p class="text-xs uppercase tracking-wider text-gray-500 px-3 pt-3">Guides</p>
       <a
-        href="/halo-wars-guides"
-        class={`side-panel-tab-link ${isHaloWars ? 'side-panel-tab-active' : 'side-panel-tab-inactive'} text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50`}
+        href="/blog?category=Guides"
+        class={`side-panel-tab-link ${isGuides && !guideTag ? 'side-panel-tab-active' : 'side-panel-tab-inactive'} text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50`}
         role="menuitem"
       >
         <i class="fas fa-gamepad mr-2" aria-hidden="true"></i>
-        Halo Wars Guides
+        All Guides
       </a>
       <a
-        href="/age-of-empires-guides"
-        class={`side-panel-tab-link ${isAgeOfEmpires ? 'side-panel-tab-active' : 'side-panel-tab-inactive'} text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50`}
+        href="/blog?category=Guides&tag=Halo%20Wars%201"
+        class={`side-panel-tab-link ${guideTag === 'halo wars 1' ? 'side-panel-tab-active' : 'side-panel-tab-inactive'} text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50`}
+        role="menuitem"
+      >
+        <i class="fas fa-gamepad mr-2" aria-hidden="true"></i>
+        Halo Wars 1
+      </a>
+      <a
+        href="/blog?category=Guides&tag=Halo%20Wars%202"
+        class={`side-panel-tab-link ${guideTag === 'halo wars 2' ? 'side-panel-tab-active' : 'side-panel-tab-inactive'} text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50`}
+        role="menuitem"
+      >
+        <i class="fas fa-gamepad mr-2" aria-hidden="true"></i>
+        Halo Wars 2
+      </a>
+      <a
+        href="/blog?category=Guides&tag=Age%20of%20Empires%20II"
+        class={`side-panel-tab-link ${guideTag === 'age of empires ii' ? 'side-panel-tab-active' : 'side-panel-tab-inactive'} text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50`}
         role="menuitem"
       >
         <i class="fas fa-chess mr-2" aria-hidden="true"></i>
-        Age of Empires Guides
+        Age of Empires II
       </a>
       <a
-        href="/age-of-mythology-guides"
-        class={`side-panel-tab-link ${isAgeOfMythology ? 'side-panel-tab-active' : 'side-panel-tab-inactive'} text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50`}
+        href="/blog?category=Guides&tag=Age%20of%20Empires%20IV"
+        class={`side-panel-tab-link ${guideTag === 'age of empires iv' ? 'side-panel-tab-active' : 'side-panel-tab-inactive'} text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50`}
+        role="menuitem"
+      >
+        <i class="fas fa-chess mr-2" aria-hidden="true"></i>
+        Age of Empires IV
+      </a>
+      <a
+        href="/blog?category=Guides&tag=Age%20of%20Mythology"
+        class={`side-panel-tab-link ${guideTag === 'age of mythology' ? 'side-panel-tab-active' : 'side-panel-tab-inactive'} text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50`}
         role="menuitem"
       >
         <i class="fas fa-scroll mr-2" aria-hidden="true"></i>
-        Age of Mythology Guides
+        Age of Mythology
       </a>
     </nav>
   </div>

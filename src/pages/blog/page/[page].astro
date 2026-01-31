@@ -1,31 +1,51 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import BlogCard from '../../components/BlogCard/BlogCard.astro';
-import Header from '../../components/Header.astro';
-import Footer from '../../components/Footer.astro';
-import SidePanel from '../../components/SidePanel.astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import BlogCard from '../../../components/BlogCard/BlogCard.astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+import SidePanel from '../../../components/SidePanel.astro';
 import { Input, Select } from 'webcoreui/astro';
-import blogPosts from '../../data/blogPosts.js';
-import '../../styles/webcore.scss';
-import '../../styles/blog-overrides.scss';
+import blogPosts from '../../../data/blogPosts.js';
+import '../../../styles/webcore.scss';
+import '../../../styles/blog-overrides.scss';
 
-const pageSize = 12;
+export function getStaticPaths() {
+  const pageSize = 12;
+  const sortedPosts = [...blogPosts].sort((a, b) => {
+    const aDate = a.dateIso ? Date.parse(a.dateIso) : 0;
+    const bDate = b.dateIso ? Date.parse(b.dateIso) : 0;
+    return bDate - aDate;
+  });
+
+  const totalPages = Math.ceil(sortedPosts.length / pageSize);
+
+  return Array.from({ length: totalPages }, (_, index) => {
+    const pageNumber = index + 1;
+    const start = index * pageSize;
+    const end = start + pageSize;
+    return {
+      params: { page: String(pageNumber) },
+      props: {
+        page: {
+          data: sortedPosts.slice(start, end),
+          currentPage: pageNumber,
+          lastPage: totalPages
+        }
+      }
+    };
+  });
+}
+
 const sortedPosts = [...blogPosts].sort((a, b) => {
   const aDate = a.dateIso ? Date.parse(a.dateIso) : 0;
   const bDate = b.dateIso ? Date.parse(b.dateIso) : 0;
   return bDate - aDate;
 });
-const paginatedPosts = sortedPosts.slice(0, pageSize);
-const totalPages = Math.ceil(sortedPosts.length / pageSize);
-const currentPage = 1;
 
-// Transform posts to webcoreui BlogCardProps format
-const posts = paginatedPosts.map(post => ({
-  href: post.href,
-  img: post.img,
-  title: post.title,
-  text: `<span class="blog-category">${post.category}</span><br/>${post.excerpt}`
-}));
+const { page } = Astro.props;
+const paginatedPosts = page.data;
+const totalPages = page.lastPage;
+const currentPage = page.currentPage;
 
 // Get unique categories for filter
 const categories = [...new Set(blogPosts.map(post => post.category))];
@@ -55,12 +75,11 @@ const sortItems = [
   { name: 'Title A-Z', value: 'title-asc' },
   { name: 'Title Z-A', value: 'title-desc' }
 ];
-
 ---
 <BaseLayout
-  title="Team Respawn Blog | News, Reviews, and Insights"
-  description="The Team Respawn blog covers gaming news, reviews, and deep dives across strategy, FPS, and indie hits."
-  canonical="https://www.teamrespawntv.com/blog"
+  title={`Team Respawn Blog - Page ${currentPage}`}
+  description={`Gaming news, reviews, and insights from Team Respawn. Page ${currentPage}.`}
+  canonical={`https://www.teamrespawntv.com/blog/page/${currentPage}`}
   ogTitle="Team Respawn Blog"
   ogDescription="Gaming news, reviews, and insights from Team Respawn."
   bodyClass="blog-page"
@@ -174,7 +193,6 @@ const sortItems = [
           </div>
         </nav>
       )}
-
     </main>
 
     <Footer />

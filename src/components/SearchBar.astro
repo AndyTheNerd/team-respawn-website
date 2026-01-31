@@ -1,6 +1,7 @@
 ---
 import { Icon } from 'webcoreui/astro';
-import videosData from '../../public/data/videos.json';
+import blogPosts from '../data/blogPosts.js';
+import fs from 'node:fs';
 
 interface Props {
   placeholder?: string;
@@ -9,80 +10,78 @@ interface Props {
 
 const { placeholder = 'Search...', className = '' } = Astro.props;
 
-// Build search data from videos.json and static pages
-const searchData: Array<{ title: string; href: string; category: string; excerpt: string }> = [];
+// Load walkthrough + guide videos for search
+let videosData: any = {};
+try {
+  const videosPath = new URL('../../public/data/videos.json', import.meta.url);
+  videosData = JSON.parse(fs.readFileSync(videosPath, 'utf-8'));
+} catch (error) {
+  console.warn('SearchBar: unable to load videos.json for search data.', error);
+}
+
+const videoSearchItems: Array<{ title: string; href: string; category: string; excerpt: string }> = [];
+
+function addVideoItem(
+  video: any,
+  category: string,
+  extraKeywords: string[] = []
+) {
+  if (!video || !video.title || !video.youtubeUrl) return;
+  const keywords = extraKeywords.filter(Boolean).join(' ');
+  const description = video.description ? `${video.description} ` : '';
+  videoSearchItems.push({
+    title: video.title,
+    href: video.youtubeUrl,
+    category,
+    excerpt: `${description}${keywords}`.trim()
+  });
+}
+
+if (Array.isArray(videosData.walkthroughs)) {
+  videosData.walkthroughs.forEach((video: any) => {
+    addVideoItem(video, 'Walkthrough', ['walkthrough', video.series]);
+  });
+}
+
+const haloWars = videosData['halo-wars'] || {};
+Object.values(haloWars).forEach((section: any) => {
+  const sectionTitle = section?.title || 'Halo Wars Guides';
+  (section?.videos || []).forEach((video: any) => {
+    addVideoItem(video, 'Video Guide', [sectionTitle, 'guide']);
+  });
+});
+
+const ageOfEmpires = videosData['age-of-empires'] || {};
+Object.values(ageOfEmpires).forEach((section: any) => {
+  const sectionTitle = section?.title || 'Age of Empires Guides';
+  (section?.videos || []).forEach((video: any) => {
+    addVideoItem(video, 'Video Guide', [sectionTitle, 'guide']);
+  });
+});
+
+if (Array.isArray(videosData['age-of-mythology'])) {
+  videosData['age-of-mythology'].forEach((video: any) => {
+    addVideoItem(video, 'Video Guide', ['Age of Mythology', 'guide']);
+  });
+}
+
+// Build search data from blog posts, videos, and static pages
+const searchData: Array<{ title: string; href: string; category: string; excerpt: string }> = [
+  ...blogPosts.map(post => ({
+    title: post.title,
+    href: post.href,
+    category: post.category,
+    excerpt: post.excerpt
+  })),
+  ...videoSearchItems
+];
 
 // Add static pages
 searchData.push(
-  { title: "How to Super Turtle - Halo Wars 2", href: "/blog/posts/how-to-super-turtle", category: "Blog", excerpt: "Master the art of super turtling in Halo Wars 2." },
-  { title: "Anders Beginner's Guide - Halo Wars 2", href: "/blog/posts/anders-beginners-guide", category: "Blog", excerpt: "Learn how to master Professor Anders in Halo Wars 2." },
-  { title: "Top 5 Games to Play this Summer", href: "/blog/posts/post-1", category: "Blog", excerpt: "Looking for a new game to get lost in?" },
   { title: "Blog", href: "/blog", category: "Page", excerpt: "Read our latest articles and guides." },
-  { title: "Halo Wars Guides", href: "/halo-wars-guides", category: "Page", excerpt: "Strategy guides for Halo Wars series." },
-  { title: "Age of Empires Guides", href: "/age-of-empires-guides", category: "Page", excerpt: "Strategy guides for Age of Empires." },
-  { title: "Age of Mythology Guides", href: "/age-of-mythology-guides", category: "Page", excerpt: "Strategy guides for Age of Mythology." },
+  { title: "Guides", href: "/blog?category=Guides", category: "Page", excerpt: "Browse all game guides in the blog." },
   { title: "Storehaus Bot", href: "/storehaus-info", category: "Page", excerpt: "Discord bot for Xbox store deals." },
 );
-
-// Add Halo Wars 2 guide videos
-if (videosData['halo-wars']?.['halo-wars-2']?.videos) {
-  for (const video of videosData['halo-wars']['halo-wars-2'].videos) {
-    searchData.push({
-      title: video.title,
-      href: `/halo-wars-guides#${video.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`,
-      category: "Halo Wars 2 Guide",
-      excerpt: video.description
-    });
-  }
-}
-
-// Add Halo Wars 1 guide videos
-if (videosData['halo-wars']?.['halo-wars-1']?.videos) {
-  for (const video of videosData['halo-wars']['halo-wars-1'].videos) {
-    searchData.push({
-      title: video.title,
-      href: `/halo-wars-guides#${video.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`,
-      category: "Halo Wars Guide",
-      excerpt: video.description
-    });
-  }
-}
-
-// Add Age of Empires IV guide videos
-if (videosData['age-of-empires']?.['aoe-4']?.videos) {
-  for (const video of videosData['age-of-empires']['aoe-4'].videos) {
-    searchData.push({
-      title: video.title,
-      href: `/age-of-empires-guides#${video.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`,
-      category: "Age of Empires IV Guide",
-      excerpt: video.description
-    });
-  }
-}
-
-// Add Age of Empires II guide videos
-if (videosData['age-of-empires']?.['aoe-2']?.videos) {
-  for (const video of videosData['age-of-empires']['aoe-2'].videos) {
-    searchData.push({
-      title: video.title,
-      href: `/age-of-empires-guides#${video.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`,
-      category: "Age of Empires II Guide",
-      excerpt: video.description
-    });
-  }
-}
-
-// Add Age of Mythology guide videos
-if (Array.isArray(videosData['age-of-mythology'])) {
-  for (const video of videosData['age-of-mythology']) {
-    searchData.push({
-      title: video.title,
-      href: `/age-of-mythology-guides#${video.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`,
-      category: "Age of Mythology Guide",
-      excerpt: video.description
-    });
-  }
-}
 ---
 
 <div class={`search-bar-container ${className}`} data-search-data={JSON.stringify(searchData)}>
@@ -358,13 +357,13 @@ if (Array.isArray(videosData['age-of-mythology'])) {
     const mobileResults = document.getElementById('mobile-search-results');
 
     function searchItems(query: string) {
-      if (!query.trim()) return [];
-      const lowerQuery = query.toLowerCase();
-      return searchData.filter((item: any) =>
-        item.title.toLowerCase().includes(lowerQuery) ||
-        item.category.toLowerCase().includes(lowerQuery) ||
-        item.excerpt.toLowerCase().includes(lowerQuery)
-      );
+      const trimmed = query.trim();
+      if (!trimmed) return [];
+      const terms = trimmed.toLowerCase().split(/\s+/).filter(Boolean);
+      return searchData.filter((item: any) => {
+        const haystack = `${item.title} ${item.category} ${item.excerpt}`.toLowerCase();
+        return terms.every(term => haystack.includes(term));
+      });
     }
 
     function renderResults(results: any[], container: HTMLElement | null) {
@@ -375,12 +374,16 @@ if (Array.isArray(videosData['age-of-mythology'])) {
         return;
       }
 
-      container.innerHTML = results.map((item: any) => `
-        <a href="${item.href}" class="search-result-item">
+      container.innerHTML = results.map((item: any) => {
+        const isWalkthrough = item.category === 'Walkthrough';
+        const targetAttr = isWalkthrough ? ' target="_blank" rel="noopener noreferrer"' : '';
+        return `
+        <a href="${item.href}" class="search-result-item"${targetAttr}>
           <div class="search-result-category">${item.category}</div>
           <div class="search-result-title">${item.title}</div>
         </a>
-      `).join('');
+        `;
+      }).join('');
     }
 
     // Desktop search functionality

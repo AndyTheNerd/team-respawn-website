@@ -16,6 +16,7 @@ interface Props {
   dateIso: string;
   ogImage?: string;
   youtubeId?: string;
+  tags?: string[];
 }
 
 const {
@@ -25,7 +26,8 @@ const {
   publishedDate,
   dateIso,
   ogImage,
-  youtubeId
+  youtubeId,
+  tags
 } = Astro.props;
 
 const slug = Astro.url.pathname.split('/').pop();
@@ -102,6 +104,16 @@ if (youtubeId) {
         <p class="text-gray-400 text-sm mb-8">
           <time datetime={dateIso}>{publishedDate}</time> by Team Respawn
         </p>
+
+        {tags?.length ? (
+          <div class="flex flex-wrap gap-2 mb-6">
+            {tags.map(tag => (
+              <span class="text-xs font-semibold uppercase tracking-wide bg-gray-800 text-cyan-200 border border-cyan-500/30 rounded-full px-3 py-1">
+                {tag}
+              </span>
+            ))}
+          </div>
+        ) : null}
 
         {youtubeId && (
           <div class="aspect-video mb-8 rounded-lg overflow-hidden shadow-lg">
