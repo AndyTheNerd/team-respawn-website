@@ -1,24 +1,90 @@
 ---
-const redirectUrl = '/#age-of-mythology';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import SidePanel from '../../components/SidePanel.astro';
+
+// Import video data
+import videosData from '../../../public/data/videos.json';
+
+const aomVideos = videosData['age-of-mythology'];
 ---
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Redirecting... | Team Respawn</title>
-    <meta http-equiv="refresh" content={`0; url=${redirectUrl}`} />
-    <style>
-      body { margin: 0; background: #111827; color: #f9fafb; font-family: "Inter", system-ui, sans-serif; }
-      a { color: #facc15; }
-    </style>
-  </head>
-  <body>
-    <noscript>
-      <p>
-        JavaScript is required to redirect. Continue here:
-        <a href={redirectUrl}>Age of Mythology Guides</a>.
-      </p>
-    </noscript>
-  </body>
-</html>
+<BaseLayout
+  title="Age of Mythology Guides | Team Respawn"
+  description="Strategy guides, tips, and walkthroughs for Age of Mythology and Age of Mythology Retold. Master your RTS skills with Team Respawn."
+  keywords="Age of Mythology, AoM, Retold, strategy guides, RTS, Team Respawn, walkthroughs, tips"
+  canonical="https://www.teamrespawntv.com/age-of-mythology-guides"
+  ogTitle="Age of Mythology Guides | Team Respawn"
+  ogDescription="Strategy guides, tips, and walkthroughs for Age of Mythology and Age of Mythology Retold. Master your RTS skills with Team Respawn."
+  ogImage="https://www.teamrespawntv.com/content/Banner.jpg"
+>
+  <a
+    href="#main-content"
+    class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-white focus:text-black focus:px-4 focus:py-2 focus:rounded"
+  >
+    Skip to main content
+  </a>
+
+  <div class="container mx-auto p-4 sm:p-8">
+    <Header />
+
+    <main id="main-content" class="max-w-6xl mx-auto mt-8" role="main" aria-label="Age of Mythology guides">
+      <header class="mb-8">
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+          Age of Mythology Guides
+        </h1>
+        <p class="text-gray-400 text-lg">
+          Strategy guides, tips, and walkthroughs for Age of Mythology and Age of Mythology Retold.
+        </p>
+      </header>
+
+      <!-- Age of Mythology Guides Section -->
+      <section class="mb-12">
+        <h2 class="text-2xl sm:text-3xl font-bold mb-2 text-red-300">Age of Mythology Retold</h2>
+        <p class="text-gray-400 mb-6">Master the gods, heroes, and myth units with our comprehensive guides.</p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {aomVideos.map((video: any) => (
+            <a
+              href={video.youtubeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="group bg-gray-800/60 border border-gray-700/60 rounded-xl overflow-hidden hover:border-red-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-red-500/10"
+            >
+              <div class="aspect-video relative overflow-hidden">
+                <img
+                  src={`/${video.imageSrc}`}
+                  alt={video.alt}
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  loading="lazy"
+                />
+                <div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                  <div class="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <svg class="w-8 h-8 text-gray-900 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                  </div>
+                </div>
+                {video.featured && (
+                  <span class="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">Featured</span>
+                )}
+              </div>
+              <div class="p-4">
+                <h3 class="font-bold text-white group-hover:text-red-300 transition-colors duration-300 mb-2">{video.title}</h3>
+                <p class="text-gray-400 text-sm line-clamp-2">{video.description}</p>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+    </main>
+
+    <Footer />
+  </div>
+
+  <SidePanel />
+
+  <script src="/js/side-panel.js" is:inline></script>
+  <script src="/js/tabs.js" is:inline></script>
+  <script src="/js/dropdowns.js" is:inline></script>
+</BaseLayout>

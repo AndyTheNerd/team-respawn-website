@@ -130,7 +130,7 @@ const navigationTests = {
             {
                 name: 'Halo Wars link href contains "/halo-wars-guides"',
                 pass: haloWarsElement && (
-                    haloWarsElement.getAttribute('href') === '/halo-wars-guides' || 
+                    haloWarsElement.getAttribute('href') === '/halo-wars-guides' ||
                     haloWarsElement.href.includes('/halo-wars-guides')
                 ),
                 element: haloWarsElement

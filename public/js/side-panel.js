@@ -168,7 +168,7 @@ function initSidePanel() {
                 'age-of-mythology-tab': '/age-of-mythology-guides',
                 'other-projects-tab': '/#other-projects'
             };
-            
+
             const url = tabToUrlMap[tabId] || '/';
             window.location.href = url;
             return;
