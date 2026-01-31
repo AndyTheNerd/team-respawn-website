@@ -389,3 +389,10 @@ if (typeof module !== 'undefined' && module.exports) {
 // Make functions available globally for use on other pages
 window.switchTab = switchTab;
 window.convertTabsToLinks = convertTabsToLinks;
+
+// Initialize tabs when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTabs);
+} else {
+    initTabs();
+}

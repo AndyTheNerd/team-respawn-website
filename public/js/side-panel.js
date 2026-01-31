@@ -253,3 +253,10 @@ function initSidePanel() {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { initSidePanel };
 }
+
+// Initialize side panel when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSidePanel);
+} else {
+    initSidePanel();
+}

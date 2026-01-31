@@ -1,5 +1,6 @@
 ---
 import { Icon } from 'webcoreui/astro';
+import videosData from '../../public/data/videos.json';
 
 interface Props {
   placeholder?: string;
@@ -8,17 +9,80 @@ interface Props {
 
 const { placeholder = 'Search...', className = '' } = Astro.props;
 
-// Search data embedded for client-side searching
-const searchData = [
-  { title: "How to Super Turtle - Halo Wars 2", href: "/blog/posts/how-to-super-turtle", category: "Guides", excerpt: "Master the art of super turtling in Halo Wars 2." },
-  { title: "Anders Beginner's Guide - Halo Wars 2", href: "/blog/posts/anders-beginners-guide", category: "Guides", excerpt: "Learn how to master Professor Anders in Halo Wars 2." },
-  { title: "Top 5 Games to Play this Summer", href: "/blog/posts/post-1", category: "Features", excerpt: "Looking for a new game to get lost in?" },
+// Build search data from videos.json and static pages
+const searchData: Array<{ title: string; href: string; category: string; excerpt: string }> = [];
+
+// Add static pages
+searchData.push(
+  { title: "How to Super Turtle - Halo Wars 2", href: "/blog/posts/how-to-super-turtle", category: "Blog", excerpt: "Master the art of super turtling in Halo Wars 2." },
+  { title: "Anders Beginner's Guide - Halo Wars 2", href: "/blog/posts/anders-beginners-guide", category: "Blog", excerpt: "Learn how to master Professor Anders in Halo Wars 2." },
+  { title: "Top 5 Games to Play this Summer", href: "/blog/posts/post-1", category: "Blog", excerpt: "Looking for a new game to get lost in?" },
   { title: "Blog", href: "/blog", category: "Page", excerpt: "Read our latest articles and guides." },
   { title: "Halo Wars Guides", href: "/halo-wars-guides", category: "Page", excerpt: "Strategy guides for Halo Wars series." },
   { title: "Age of Empires Guides", href: "/age-of-empires-guides", category: "Page", excerpt: "Strategy guides for Age of Empires." },
   { title: "Age of Mythology Guides", href: "/age-of-mythology-guides", category: "Page", excerpt: "Strategy guides for Age of Mythology." },
   { title: "Storehaus Bot", href: "/storehaus-info", category: "Page", excerpt: "Discord bot for Xbox store deals." },
-];
+);
+
+// Add Halo Wars 2 guide videos
+if (videosData['halo-wars']?.['halo-wars-2']?.videos) {
+  for (const video of videosData['halo-wars']['halo-wars-2'].videos) {
+    searchData.push({
+      title: video.title,
+      href: `/halo-wars-guides#${video.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`,
+      category: "Halo Wars 2 Guide",
+      excerpt: video.description
+    });
+  }
+}
+
+// Add Halo Wars 1 guide videos
+if (videosData['halo-wars']?.['halo-wars-1']?.videos) {
+  for (const video of videosData['halo-wars']['halo-wars-1'].videos) {
+    searchData.push({
+      title: video.title,
+      href: `/halo-wars-guides#${video.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`,
+      category: "Halo Wars Guide",
+      excerpt: video.description
+    });
+  }
+}
+
+// Add Age of Empires IV guide videos
+if (videosData['age-of-empires']?.['aoe-4']?.videos) {
+  for (const video of videosData['age-of-empires']['aoe-4'].videos) {
+    searchData.push({
+      title: video.title,
+      href: `/age-of-empires-guides#${video.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`,
+      category: "Age of Empires IV Guide",
+      excerpt: video.description
+    });
+  }
+}
+
+// Add Age of Empires II guide videos
+if (videosData['age-of-empires']?.['aoe-2']?.videos) {
+  for (const video of videosData['age-of-empires']['aoe-2'].videos) {
+    searchData.push({
+      title: video.title,
+      href: `/age-of-empires-guides#${video.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`,
+      category: "Age of Empires II Guide",
+      excerpt: video.description
+    });
+  }
+}
+
+// Add Age of Mythology guide videos
+if (Array.isArray(videosData['age-of-mythology'])) {
+  for (const video of videosData['age-of-mythology']) {
+    searchData.push({
+      title: video.title,
+      href: `/age-of-mythology-guides#${video.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`,
+      category: "Age of Mythology Guide",
+      excerpt: video.description
+    });
+  }
+}
 ---
 
 <div class={`search-bar-container ${className}`} data-search-data={JSON.stringify(searchData)}>
@@ -153,7 +217,9 @@ const searchData = [
     transform: translateY(0);
   }
 
-  .search-result-item {
+  /* Use :global() for dynamically generated search results */
+  .search-results-dropdown :global(.search-result-item),
+  .mobile-search-results :global(.search-result-item) {
     display: block;
     padding: 0.625rem 0.75rem;
     border-radius: 0.5rem;
@@ -162,27 +228,37 @@ const searchData = [
     transition: background 0.2s ease;
   }
 
-  .search-result-item:hover,
-  .search-result-item:focus {
+  .search-results-dropdown :global(.search-result-item:hover),
+  .search-results-dropdown :global(.search-result-item:focus),
+  .mobile-search-results :global(.search-result-item:hover),
+  .mobile-search-results :global(.search-result-item:focus) {
     background: rgba(168, 85, 247, 0.2);
     outline: none;
   }
 
-  .search-result-title {
+  .search-results-dropdown :global(.search-result-title),
+  .mobile-search-results :global(.search-result-title) {
     font-size: 0.875rem;
     font-weight: 600;
     color: white;
-    margin-bottom: 0.125rem;
   }
 
-  .search-result-category {
-    font-size: 0.75rem;
-    color: rgba(168, 85, 247, 0.8);
+  .search-results-dropdown :global(.search-result-category),
+  .mobile-search-results :global(.search-result-category) {
+    display: inline-block;
+    font-size: 0.625rem;
+    color: rgba(168, 85, 247, 0.95);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.04em;
+    background: rgba(168, 85, 247, 0.15);
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
   }
 
-  .search-no-results {
+  .search-results-dropdown :global(.search-no-results),
+  .mobile-search-results :global(.search-no-results) {
     padding: 0.75rem;
     text-align: center;
     color: rgba(156, 163, 175, 0.8);

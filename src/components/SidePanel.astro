@@ -1,5 +1,12 @@
 ---
 import SocialIcons from './SocialIcons.astro';
+
+const pathname = Astro.url?.pathname ?? '';
+const isHome = pathname === '/' || pathname === '/index.html';
+const isHaloWars = pathname.startsWith('/halo-wars');
+const isAgeOfEmpires = pathname.startsWith('/age-of-empires');
+const isAgeOfMythology = pathname.startsWith('/age-of-mythology');
+const isBlog = pathname.startsWith('/blog');
 ---
 <aside
   id="side-panel"
@@ -26,7 +33,7 @@ import SocialIcons from './SocialIcons.astro';
     <nav class="flex flex-col space-y-2" aria-label="Main content navigation">
       <button
         data-tab-id="home-tab"
-        class="side-panel-tab-link side-panel-tab-active text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50"
+        class={`side-panel-tab-link ${isHome ? 'side-panel-tab-active' : 'side-panel-tab-inactive'} text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50`}
         type="button"
         role="menuitem"
       >
@@ -44,7 +51,7 @@ import SocialIcons from './SocialIcons.astro';
       </button>
       <a
         href="/blog"
-        class="side-panel-tab-link side-panel-tab-inactive text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50"
+        class={`side-panel-tab-link ${isBlog ? 'side-panel-tab-active' : 'side-panel-tab-inactive'} text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50`}
         role="menuitem"
       >
         <i class="fas fa-blog mr-2" aria-hidden="true"></i>
@@ -60,33 +67,30 @@ import SocialIcons from './SocialIcons.astro';
         Other Projects
       </button>
       <p class="text-xs uppercase tracking-wider text-gray-500 px-3 pt-3">Guides</p>
-      <button
-        data-tab-id="halo-wars-tab"
-        class="side-panel-tab-link side-panel-tab-inactive text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50"
-        type="button"
+      <a
+        href="/halo-wars-guides"
+        class={`side-panel-tab-link ${isHaloWars ? 'side-panel-tab-active' : 'side-panel-tab-inactive'} text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50`}
         role="menuitem"
       >
         <i class="fas fa-gamepad mr-2" aria-hidden="true"></i>
         Halo Wars Guides
-      </button>
-      <button
-        data-tab-id="age-of-empires-tab"
-        class="side-panel-tab-link side-panel-tab-inactive text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50"
-        type="button"
+      </a>
+      <a
+        href="/age-of-empires-guides"
+        class={`side-panel-tab-link ${isAgeOfEmpires ? 'side-panel-tab-active' : 'side-panel-tab-inactive'} text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50`}
         role="menuitem"
       >
         <i class="fas fa-chess mr-2" aria-hidden="true"></i>
         Age of Empires Guides
-      </button>
-      <button
-        data-tab-id="age-of-mythology-tab"
-        class="side-panel-tab-link side-panel-tab-inactive text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50"
-        type="button"
+      </a>
+      <a
+        href="/age-of-mythology-guides"
+        class={`side-panel-tab-link ${isAgeOfMythology ? 'side-panel-tab-active' : 'side-panel-tab-inactive'} text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50`}
         role="menuitem"
       >
         <i class="fas fa-scroll mr-2" aria-hidden="true"></i>
         Age of Mythology Guides
-      </button>
+      </a>
     </nav>
   </div>
 
