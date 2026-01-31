@@ -1,0 +1,408 @@
+---
+import { Icon } from 'webcoreui/astro';
+
+interface Props {
+  placeholder?: string;
+  className?: string;
+}
+
+const { placeholder = 'Search...', className = '' } = Astro.props;
+
+// Search data embedded for client-side searching
+const searchData = [
+  { title: "How to Super Turtle - Halo Wars 2", href: "/blog/posts/how-to-super-turtle", category: "Guides", excerpt: "Master the art of super turtling in Halo Wars 2." },
+  { title: "Anders Beginner's Guide - Halo Wars 2", href: "/blog/posts/anders-beginners-guide", category: "Guides", excerpt: "Learn how to master Professor Anders in Halo Wars 2." },
+  { title: "Top 5 Games to Play this Summer", href: "/blog/posts/post-1", category: "Features", excerpt: "Looking for a new game to get lost in?" },
+  { title: "Blog", href: "/blog", category: "Page", excerpt: "Read our latest articles and guides." },
+  { title: "Halo Wars Guides", href: "/halo-wars-guides", category: "Page", excerpt: "Strategy guides for Halo Wars series." },
+  { title: "Age of Empires Guides", href: "/age-of-empires-guides", category: "Page", excerpt: "Strategy guides for Age of Empires." },
+  { title: "Age of Mythology Guides", href: "/age-of-mythology-guides", category: "Page", excerpt: "Strategy guides for Age of Mythology." },
+  { title: "Storehaus Bot", href: "/storehaus-info", category: "Page", excerpt: "Discord bot for Xbox store deals." },
+];
+---
+
+<div class={`search-bar-container ${className}`} data-search-data={JSON.stringify(searchData)}>
+  <!-- Desktop: visible search input with dropdown -->
+  <div class="search-bar-desktop hidden md:block relative">
+    <div class="search-input-wrapper">
+      <Icon type="search" size={18} />
+      <input
+        type="search"
+        placeholder={placeholder}
+        class="search-input"
+        aria-label="Search the site"
+        id="desktop-search-input"
+        autocomplete="off"
+      />
+    </div>
+    <div id="desktop-search-results" class="search-results-dropdown" aria-live="polite"></div>
+  </div>
+
+  <!-- Mobile: search icon button that opens overlay -->
+  <button
+    class="search-bar-mobile md:hidden p-2 rounded-lg backdrop-blur-sm bg-gray-800/40 hover:bg-gray-700/60 border border-white/10 hover:border-purple-400/30 transition-all duration-300"
+    aria-label="Open search"
+    type="button"
+    id="mobile-search-toggle"
+  >
+    <Icon type="search" size={20} />
+  </button>
+
+  <!-- Mobile search overlay -->
+  <div id="mobile-search-overlay" class="mobile-search-overlay" aria-hidden="true">
+    <div class="mobile-search-content">
+      <div class="mobile-search-input-wrapper">
+        <Icon type="search" size={20} />
+        <input
+          type="search"
+          placeholder={placeholder}
+          class="mobile-search-input"
+          aria-label="Search the site"
+          id="mobile-search-input"
+          autocomplete="off"
+        />
+        <button
+          type="button"
+          class="mobile-search-close"
+          aria-label="Close search"
+          id="mobile-search-close"
+        >
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div id="mobile-search-results" class="mobile-search-results" aria-live="polite"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .search-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: rgba(55, 65, 81, 0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    transition: all 0.3s ease-in-out;
+  }
+
+  .search-input-wrapper:focus-within {
+    border-color: rgba(168, 85, 247, 0.5);
+    box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.2);
+  }
+
+  .search-input-wrapper :global(svg) {
+    color: rgba(156, 163, 175, 0.8);
+    flex-shrink: 0;
+  }
+
+  .search-input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: white;
+    font-size: 0.875rem;
+    width: 140px;
+    transition: width 0.3s ease-in-out;
+  }
+
+  .search-input::placeholder {
+    color: rgba(156, 163, 175, 0.6);
+  }
+
+  .search-input:focus {
+    width: 180px;
+  }
+
+  .search-bar-mobile :global(svg) {
+    color: rgba(209, 213, 219, 0.9);
+  }
+
+  .search-bar-mobile:hover :global(svg) {
+    color: rgba(168, 85, 247, 0.9);
+  }
+
+  /* Search results dropdown */
+  .search-results-dropdown {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    right: 0;
+    min-width: 280px;
+    background: rgba(17, 24, 39, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    padding: 0.5rem;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: all 0.2s ease-in-out;
+    z-index: 100;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .search-results-dropdown.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .search-result-item {
+    display: block;
+    padding: 0.625rem 0.75rem;
+    border-radius: 0.5rem;
+    color: rgba(209, 213, 219, 0.95);
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+
+  .search-result-item:hover,
+  .search-result-item:focus {
+    background: rgba(168, 85, 247, 0.2);
+    outline: none;
+  }
+
+  .search-result-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 0.125rem;
+  }
+
+  .search-result-category {
+    font-size: 0.75rem;
+    color: rgba(168, 85, 247, 0.8);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .search-no-results {
+    padding: 0.75rem;
+    text-align: center;
+    color: rgba(156, 163, 175, 0.8);
+    font-size: 0.875rem;
+  }
+
+  /* Mobile search overlay */
+  .mobile-search-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: rgba(17, 24, 39, 0.95);
+    backdrop-filter: blur(20px);
+    padding: 1rem;
+    transform: translateY(-100%);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease-in-out;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  .mobile-search-overlay.open {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .mobile-search-content {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .mobile-search-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: rgba(55, 65, 81, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+  }
+
+  .mobile-search-input-wrapper :global(svg) {
+    color: rgba(156, 163, 175, 0.8);
+    flex-shrink: 0;
+  }
+
+  .mobile-search-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: white;
+    font-size: 1rem;
+  }
+
+  .mobile-search-input::placeholder {
+    color: rgba(156, 163, 175, 0.6);
+  }
+
+  .mobile-search-close {
+    padding: 0.25rem;
+    color: rgba(156, 163, 175, 0.8);
+    transition: color 0.2s ease-in-out;
+  }
+
+  .mobile-search-close:hover {
+    color: white;
+  }
+
+  .mobile-search-results {
+    margin-top: 0.75rem;
+  }
+
+  .mobile-search-results .search-result-item {
+    padding: 0.75rem 1rem;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const container = document.querySelector('.search-bar-container');
+    const searchData = container ? JSON.parse(container.getAttribute('data-search-data') || '[]') : [];
+
+    // Desktop search
+    const desktopInput = document.getElementById('desktop-search-input') as HTMLInputElement;
+    const desktopResults = document.getElementById('desktop-search-results');
+
+    // Mobile search
+    const toggleBtn = document.getElementById('mobile-search-toggle');
+    const overlay = document.getElementById('mobile-search-overlay');
+    const closeBtn = document.getElementById('mobile-search-close');
+    const mobileInput = document.getElementById('mobile-search-input') as HTMLInputElement;
+    const mobileResults = document.getElementById('mobile-search-results');
+
+    function searchItems(query: string) {
+      if (!query.trim()) return [];
+      const lowerQuery = query.toLowerCase();
+      return searchData.filter((item: any) =>
+        item.title.toLowerCase().includes(lowerQuery) ||
+        item.category.toLowerCase().includes(lowerQuery) ||
+        item.excerpt.toLowerCase().includes(lowerQuery)
+      );
+    }
+
+    function renderResults(results: any[], container: HTMLElement | null) {
+      if (!container) return;
+
+      if (results.length === 0) {
+        container.innerHTML = '<div class="search-no-results">No results found</div>';
+        return;
+      }
+
+      container.innerHTML = results.map((item: any) => `
+        <a href="${item.href}" class="search-result-item">
+          <div class="search-result-category">${item.category}</div>
+          <div class="search-result-title">${item.title}</div>
+        </a>
+      `).join('');
+    }
+
+    // Desktop search functionality
+    if (desktopInput && desktopResults) {
+      let debounceTimer: number;
+
+      desktopInput.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = window.setTimeout(() => {
+          const query = desktopInput.value;
+          if (query.trim()) {
+            const results = searchItems(query);
+            renderResults(results, desktopResults);
+            desktopResults.classList.add('open');
+          } else {
+            desktopResults.classList.remove('open');
+          }
+        }, 200);
+      });
+
+      desktopInput.addEventListener('focus', () => {
+        if (desktopInput.value.trim()) {
+          const results = searchItems(desktopInput.value);
+          renderResults(results, desktopResults);
+          desktopResults.classList.add('open');
+        }
+      });
+
+      // Close on click outside
+      document.addEventListener('click', (e) => {
+        if (!container?.contains(e.target as Node)) {
+          desktopResults.classList.remove('open');
+        }
+      });
+
+      // Handle enter key
+      desktopInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          const firstResult = desktopResults.querySelector('.search-result-item') as HTMLAnchorElement;
+          if (firstResult) {
+            firstResult.click();
+          }
+        }
+        if (e.key === 'Escape') {
+          desktopResults.classList.remove('open');
+          desktopInput.blur();
+        }
+      });
+    }
+
+    // Mobile search functionality
+    if (toggleBtn && overlay && closeBtn && mobileInput && mobileResults) {
+      toggleBtn.addEventListener('click', () => {
+        overlay.classList.add('open');
+        overlay.setAttribute('aria-hidden', 'false');
+        mobileInput.focus();
+      });
+
+      closeBtn.addEventListener('click', () => {
+        overlay.classList.remove('open');
+        overlay.setAttribute('aria-hidden', 'true');
+        mobileInput.value = '';
+        mobileResults.innerHTML = '';
+      });
+
+      let debounceTimer: number;
+      mobileInput.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = window.setTimeout(() => {
+          const query = mobileInput.value;
+          if (query.trim()) {
+            const results = searchItems(query);
+            renderResults(results, mobileResults);
+          } else {
+            mobileResults.innerHTML = '';
+          }
+        }, 200);
+      });
+
+      mobileInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          const firstResult = mobileResults.querySelector('.search-result-item') as HTMLAnchorElement;
+          if (firstResult) {
+            firstResult.click();
+          }
+        }
+      });
+
+      // Close on escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && overlay.classList.contains('open')) {
+          overlay.classList.remove('open');
+          overlay.setAttribute('aria-hidden', 'true');
+          mobileInput.value = '';
+          mobileResults.innerHTML = '';
+          toggleBtn.focus();
+        }
+      });
+    }
+  });
+</script>

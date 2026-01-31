@@ -64,6 +64,8 @@ function switchTab(activeTabId) {
             if (isTabButton) {
                 tab.button.classList.remove('tab-nav-inactive');
                 tab.button.classList.add('tab-nav-active');
+                // Add nav-link-active for visual indicator on header nav
+                tab.button.classList.add('nav-link-active');
                 // Update ARIA attributes
                 tab.button.setAttribute('aria-selected', 'true');
                 tab.button.setAttribute('tabindex', '0');
@@ -74,6 +76,8 @@ function switchTab(activeTabId) {
             if (isTabButton) {
                 tab.button.classList.remove('tab-nav-active');
                 tab.button.classList.add('tab-nav-inactive');
+                // Remove nav-link-active from inactive tabs
+                tab.button.classList.remove('nav-link-active');
                 // Update ARIA attributes
                 tab.button.setAttribute('aria-selected', 'false');
                 tab.button.setAttribute('tabindex', '-1');
@@ -82,7 +86,18 @@ function switchTab(activeTabId) {
             if (tab.summary) tab.summary.classList.add('hidden');
         }
     }
-    
+
+    // Update Guides dropdown visual indicator based on active tab
+    const guidesDropdownToggle = document.getElementById('guides-dropdown-toggle');
+    if (guidesDropdownToggle) {
+        const isGuidesTab = ['halo-wars-tab', 'age-of-empires-tab', 'age-of-mythology-tab'].includes(activeTabId);
+        if (isGuidesTab) {
+            guidesDropdownToggle.classList.add('nav-link-active');
+        } else {
+            guidesDropdownToggle.classList.remove('nav-link-active');
+        }
+    }
+
     // Control Twitch embed visibility - only show on home tab
     const twitchContainer = document.getElementById('twitch-embed-container');
     if (twitchContainer) {

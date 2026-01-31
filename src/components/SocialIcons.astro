@@ -1,4 +1,12 @@
-<div class="flex space-x-4 text-gray-400 justify-center sm:justify-end" role="list">
+---
+interface Props {
+  compact?: boolean;
+}
+
+const { compact = false } = Astro.props;
+---
+
+<div class={`flex text-gray-400 justify-center sm:justify-end ${compact ? 'space-x-2' : 'space-x-4'}`} role="list" data-compact={compact}>
   <a
     href="https://www.youtube.com/@TeamRespawn"
     target="_blank"

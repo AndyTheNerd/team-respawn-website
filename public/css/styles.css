@@ -217,23 +217,7 @@ textarea {
     animation: headerFadeIn 0.6s ease-out;
 }
 
-.header-glass-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(
-        135deg,
-        rgba(168, 85, 247, 0.1) 0%,
-        rgba(236, 72, 153, 0.1) 50%,
-        rgba(59, 130, 246, 0.1) 100%
-    );
-    opacity: 0.5;
-    pointer-events: none;
-    z-index: 1;
-}
+/* Gradient overlay removed - was causing visual artifacts */
 
 .header-content-wrapper {
     position: relative;
@@ -900,5 +884,277 @@ textarea {
 
 .side-panel::-webkit-scrollbar-thumb:hover {
     background: rgba(168, 85, 247, 0.5);
+}
+
+/* ========================================
+   COMPACT HEADER STYLES
+   ======================================== */
+
+.compact-header {
+    position: relative;
+    z-index: 10;
+}
+
+.compact-header-glass {
+    background: rgba(17, 24, 39, 0.6);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow:
+        0 4px 20px 0 rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.1),
+        0 0 0 1px rgba(168, 85, 247, 0.1);
+    transition: all 0.3s ease-in-out;
+    animation: headerFadeIn 0.6s ease-out;
+}
+
+.compact-header-glass:hover {
+    box-shadow:
+        0 6px 24px 0 rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.15),
+        0 0 0 1px rgba(168, 85, 247, 0.2);
+}
+
+
+/* Compact Logo */
+.header-logo-compact {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    transition: all 0.3s ease-in-out;
+}
+
+/* Compact Menu Button */
+.header-menu-btn-compact {
+    position: relative;
+    overflow: hidden;
+}
+
+.header-menu-btn-compact::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(168, 85, 247, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.4s, height 0.4s;
+}
+
+.header-menu-btn-compact:hover::before {
+    width: 200px;
+    height: 200px;
+}
+
+.header-menu-btn-compact svg {
+    position: relative;
+    z-index: 1;
+}
+
+/* Navigation Links */
+.nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: rgba(209, 213, 219, 0.9);
+    border-radius: 0.5rem;
+    transition: all 0.2s ease-in-out;
+    white-space: nowrap;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.nav-link:hover {
+    color: white;
+    background: rgba(75, 85, 99, 0.4);
+}
+
+/* Remove the gradient underline from nav-link buttons when tab-nav-active is added by JS */
+.nav-link.tab-nav-active::after,
+.nav-link.tab-nav-inactive::after {
+    content: none !important;
+    display: none !important;
+}
+
+.nav-link-active {
+    color: white;
+    background: rgba(168, 85, 247, 0.25);
+    box-shadow: inset 0 0 0 1px rgba(168, 85, 247, 0.3);
+}
+
+.nav-link-active:hover {
+    background: rgba(168, 85, 247, 0.35);
+}
+
+/* Navigation Dropdown */
+.nav-dropdown {
+    position: relative;
+    z-index: 40;
+}
+
+.nav-dropdown::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    height: 0.75rem;
+}
+
+.nav-dropdown-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.nav-dropdown-icon {
+    transition: transform 0.2s ease-in-out;
+    opacity: 0.7;
+}
+
+.nav-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-8px);
+    margin-top: 0.5rem;
+    min-width: 180px;
+    background: rgba(17, 24, 39, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    padding: 0.5rem;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+    z-index: 60;
+}
+
+.nav-dropdown.open .nav-dropdown-menu,
+.nav-dropdown:hover .nav-dropdown-menu,
+.nav-dropdown:focus-within .nav-dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+}
+
+.nav-dropdown:hover .nav-dropdown-icon,
+.nav-dropdown:focus-within .nav-dropdown-icon,
+.nav-dropdown.open .nav-dropdown-icon {
+    transform: rotate(180deg);
+}
+
+.nav-dropdown.lock-closed .nav-dropdown-menu {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-50%) translateY(-8px);
+    pointer-events: none;
+}
+
+.nav-dropdown-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    color: rgba(209, 213, 219, 0.95);
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.nav-dropdown-item:hover,
+.nav-dropdown-item:focus {
+    background: rgba(168, 85, 247, 0.2);
+    color: #ffffff;
+    outline: none;
+}
+
+.nav-dropdown-item-active {
+    background: rgba(168, 85, 247, 0.15);
+    color: white;
+}
+
+/* Compact Social Icons Container */
+.header-social-container-compact {
+    position: relative;
+}
+
+.header-social-container-compact a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(55, 65, 81, 0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.2s ease-in-out;
+}
+
+.header-social-container-compact a:hover {
+    transform: translateY(-1px);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* YouTube hover */
+.header-social-container-compact a[href*="youtube"]:hover {
+    color: #ef4444 !important;
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+}
+
+/* Twitch hover */
+.header-social-container-compact a[href*="twitch"]:hover {
+    color: #a855f7 !important;
+    box-shadow: 0 0 12px rgba(168, 85, 247, 0.4);
+}
+
+/* Discord hover */
+.header-social-container-compact a[href*="discord"]:hover {
+    color: #6366f1 !important;
+    box-shadow: 0 0 12px rgba(99, 102, 241, 0.4);
+}
+
+/* Shop hover */
+.header-social-container-compact a[href*="shop"]:hover {
+    color: #4ade80 !important;
+    box-shadow: 0 0 12px rgba(74, 222, 128, 0.4);
+}
+
+/* Responsive adjustments for compact header */
+@media (max-width: 1024px) {
+    .nav-link {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .compact-header-glass {
+        padding: 0.75rem 1rem;
+        border-radius: 0.75rem;
+    }
+
+    .header-logo-compact {
+        height: 1.75rem;
+    }
+}
+
+/* Fallback for browsers without backdrop-filter support */
+@supports not (backdrop-filter: blur(20px)) {
+    .compact-header-glass {
+        background: rgba(17, 24, 39, 0.95);
+    }
+
+    .header-social-container-compact a {
+        background: rgba(55, 65, 81, 0.8);
+    }
 }
 
