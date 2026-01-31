@@ -1,3 +1,17 @@
 ---
-return Astro.redirect('/blog', 301);
+import blogPosts from '../../data/blogPosts.js';
+
+export function getStaticPaths() {
+  const pageSize = 12;
+  const totalPages = Math.max(1, Math.ceil(blogPosts.length / pageSize));
+
+  return Array.from({ length: totalPages }, (_, index) => ({
+    params: { page: String(index + 1) }
+  }));
+}
+
+const { page } = Astro.params;
+const destination = page === '1' ? '/blog' : `/blog/page/${page}`;
+
+return Astro.redirect(destination, 301);
 ---
