@@ -4,7 +4,7 @@ import BlogCard from '../../components/BlogCard/BlogCard.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import SidePanel from '../../components/SidePanel.astro';
-import { Pagination } from 'webcoreui/astro';
+import { Pagination, Input, Select } from 'webcoreui/astro';
 import blogPosts from '../../data/blogPosts.js';
 import '../../styles/webcore.scss';
 import '../../styles/blog-overrides.scss';
@@ -20,6 +20,13 @@ const posts = paginatedPosts.map(post => ({
   title: post.title,
   text: `<span class="blog-category">${post.category}</span><br/>${post.excerpt}`
 }));
+
+// Get unique categories for filter
+const categories = [...new Set(blogPosts.map(post => post.category))];
+const categoryItems = [
+  { name: 'All Categories', value: 'all' },
+  ...categories.map(cat => ({ name: cat, value: cat }))
+];
 
 const paginationPages = Array.from({ length: totalPages }, (_, index) => {
   const page = index + 1;
@@ -48,17 +55,55 @@ const showPagination = totalPages > 1;
     <!-- Hero Section -->
     <section class="text-center py-12 mb-8">
       <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">Team Respawn Blog</h1>
-      <p class="text-xl text-gray-400 max-w-2xl mx-auto">News, reviews, and insights from the gaming world.</p>
+      <p class="text-xl text-gray-400 max-w-2xl mx-auto">Guides and Articles by Team Respawn</p>
     </section>
 
     <main>
+      <!-- Search and Filter Section -->
+      <div class="blog-search-filter mb-8 bg-gray-800/50 border border-gray-700 rounded-lg p-4 sm:p-6">
+        <div class="flex flex-col sm:flex-row gap-4">
+          <div class="flex-1">
+            <Input
+              type="search"
+              id="blog-search"
+              placeholder="Search articles..."
+              className="w-full"
+            />
+          </div>
+          <div class="sm:w-48">
+            <Select
+              name="category-filter"
+              placeholder="All Categories"
+              itemGroups={[{ items: categoryItems }]}
+            />
+          </div>
+        </div>
+      </div>
+
       <!-- Latest Articles Section -->
       <h2 class="text-2xl font-bold text-white mb-8">Latest Articles</h2>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {posts.map((post) => (
-          <BlogCard {...post} />
+      <div id="blog-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {paginatedPosts.map((post, index) => (
+          <div
+            class="blog-card-wrapper"
+            data-title={post.title.toLowerCase()}
+            data-category={post.category}
+            data-excerpt={post.excerpt.toLowerCase()}
+          >
+            <BlogCard
+              href={post.href}
+              img={post.img}
+              title={post.title}
+              text={`<span class="blog-category">${post.category}</span><br/>${post.excerpt}`}
+            />
+          </div>
         ))}
+      </div>
+
+      <!-- No results message -->
+      <div id="no-results" class="hidden text-center py-12">
+        <p class="text-xl text-gray-400">No articles found matching your criteria.</p>
       </div>
 
       {showPagination && (
@@ -85,4 +130,10 @@ const showPagination = totalPages > 1;
   <script src="/js/tabs.js" is:inline></script>
   <script src="/js/side-panel.js" is:inline></script>
   <script src="/js/secondary-init.js" is:inline></script>
+
+  <!-- Blog post data for client-side filtering -->
+  <script define:vars={{ blogPosts }}>
+    window.blogPostsData = blogPosts;
+  </script>
+  <script src="/js/blog-search.js" is:inline></script>
 </BaseLayout>

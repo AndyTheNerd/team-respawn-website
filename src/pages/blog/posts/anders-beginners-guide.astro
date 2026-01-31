@@ -1,194 +1,139 @@
 ---
-import BaseLayout from '../../../layouts/BaseLayout.astro';
-import BlogHeader from '../../../components/BlogHeader.astro';
-import BlogSidebar from '../../../components/BlogSidebar.astro';
-import Footer from '../../../components/Footer.astro';
-import Header from '../../../components/Header.astro';
-import SidePanel from '../../../components/SidePanel.astro';
-import Author from '../../../blocks/Author/Author.astro';
-import authorInfo from '../../../data/authorInfo.js';
-
-const postMeta = {
-  title: "Anders Beginner's Guide - Halo Wars 2",
-  category: 'Guides'
-};
+import BlogPostLayout from '../../../layouts/BlogPostLayout.astro';
 ---
-<BaseLayout
-  title="Anders Beginner's Guide - Halo Wars 2 | Team Respawn Blog"
+<BlogPostLayout
+  title="Anders Beginner's Guide - Halo Wars 2"
   description="Learn how to master Professor Anders in Halo Wars 2. This beginner's guide covers her strengths with Sentinels and siege gameplay, build orders, and key strategies."
-  canonical="https://www.teamrespawntv.com/blog/posts/anders-beginners-guide"
-  ogTitle="Anders Beginner's Guide - Halo Wars 2"
-  ogDescription="Master Professor Anders with this comprehensive beginner's guide covering Sentinels, siege strategies, and build orders."
-  bodyClass="blog-page"
+  category="Guides"
+  publishedDate="Published on January 30, 2025"
+  dateIso="2025-01-30"
+  ogImage="/img/HW-Guides/Anders Guide.jpg"
+  youtubeId="w3-ljhAVImo"
 >
-  <div class="container mx-auto p-4 sm:p-8">
-    <Header />
-    <BlogHeader />
+  <p class="text-lg leading-relaxed mb-6">
+    This is a beginner's guide for Professor Anders in Halo Wars 2. Anders is one of the more favorite leaders in Halo Wars 2, and this guide will explain why.
+  </p>
 
-    <div class="max-w-6xl mx-auto flex flex-col lg:flex-row gap-8">
-      <!-- Sidebar (appears first on mobile, moves to right on desktop) -->
-      <div class="lg:order-2 lg:w-64 lg:flex-shrink-0">
-        <BlogSidebar category={postMeta.category} title={postMeta.title} />
-      </div>
+  <h2 class="text-2xl font-bold mb-4 text-cyan-300">Strengths (Pros)</h2>
 
-      <!-- Main Content -->
-      <main class="flex-1 min-w-0">
-      <h2 class="text-4xl font-bold mb-2 text-cyan-400">Anders Beginner's Guide - Halo Wars 2</h2>
-      <p class="text-gray-400 text-sm mb-8">Published on January 30, 2025 by Team Respawn</p>
+  <p class="mb-4">
+    <strong class="text-cyan-400">Cheap Upgrades:</strong> Professor Anders has some really cheap upgrades thanks to her R&D leader powers, which reduce research cost and research time.
+  </p>
 
-      <div class="aspect-video mb-8 rounded-lg overflow-hidden shadow-lg">
-        <iframe
-          src="https://www.youtube.com/embed/w3-ljhAVImo"
-          title="How to play as Anders - Halo Wars 2"
-          frameborder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen
-          class="w-full h-full"
-        ></iframe>
-      </div>
+  <p class="mb-4">
+    <strong class="text-cyan-400">Sentinels:</strong> Anders' main strength is her Sentinels. Whether it's the Protector Sentinel (a buildable unit), Arc Defense (an active leader power), or abilities like Sentinel Synergy and Sentinel Beacon that add Sentinels to your siege units.
+  </p>
 
-      <div class="prose prose-invert text-gray-300">
-        <p class="text-lg leading-relaxed mb-6">
-          This is a beginner's guide for Professor Anders in Halo Wars 2. Anders is one of the more favorite leaders in Halo Wars 2, and this guide will explain why.
-        </p>
+  <p class="mb-4">
+    <strong class="text-cyan-400">Retriever Sentinel:</strong> Anders gets a really cool ultimate ability - the Retriever Sentinel. This is essentially an addition to the Condor super unit, not a replacement.
+  </p>
 
-        <h3 class="text-2xl font-bold mb-4 text-cyan-300">Strengths (Pros)</h3>
+  <p class="mb-4">
+    <strong class="text-cyan-400">Great Siege:</strong> Anders excels at siege gameplay thanks to the Sentinel Beacon. When you have Kodiaks and Siege Turrets, they spawn friendly Sentinels similar to those from the Arc Defense active leader power.
+  </p>
 
-        <p class="mb-4">
-          <strong class="text-cyan-400">Cheap Upgrades:</strong> Professor Anders has some really cheap upgrades thanks to her R&D leader powers, which reduce research cost and research time.
-        </p>
+  <p class="mb-4">
+    <strong class="text-cyan-400">Douglas Spartan:</strong> The Spartan Douglas from the Armory is fantastic for Anders. With the Tech 2 upgrade, he gets a rocket launcher with great splash damage.
+  </p>
 
-        <p class="mb-4">
-          <strong class="text-cyan-400">Sentinels:</strong> Anders' main strength is her Sentinels. Whether it's the Protector Sentinel (a buildable unit), Arc Defense (an active leader power), or abilities like Sentinel Synergy and Sentinel Beacon that add Sentinels to your siege units.
-        </p>
+  <h2 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Weaknesses (Cons)</h2>
 
-        <p class="mb-4">
-          <strong class="text-cyan-400">Retriever Sentinel:</strong> Anders gets a really cool ultimate ability - the Retriever Sentinel. This is essentially an addition to the Condor super unit, not a replacement.
-        </p>
+  <p class="mb-4">
+    <strong class="text-cyan-400">No Nukes:</strong> Anders doesn't have devastating abilities like Eradication, Inferno, Rain of Fire, or even a Beam - abilities that can quickly annihilate an army. The Sentinel Network is good but won't eradicate an entire army quickly.
+  </p>
 
-        <p class="mb-4">
-          <strong class="text-cyan-400">Great Siege:</strong> Anders excels at siege gameplay thanks to the Sentinel Beacon. When you have Kodiaks and Siege Turrets, they spawn friendly Sentinels similar to those from the Arc Defense active leader power.
-        </p>
+  <p class="mb-4">
+    <strong class="text-cyan-400">Forces Opponents Into Air:</strong> If you go Siege with Sentinel Beacon, opponents will often be forced into air units to counter your Sentinels, similar to when facing Pavium with Mega Turrets.
+  </p>
 
-        <p class="mb-4">
-          <strong class="text-cyan-400">Douglas Spartan:</strong> The Spartan Douglas from the Armory is fantastic for Anders. With the Tech 2 upgrade, he gets a rocket launcher with great splash damage.
-        </p>
+  <p class="mb-4">
+    <strong class="text-cyan-400">No Unit Drops:</strong> Unlike Cutter (ODST drops), Forge (Kodiak drop), or Banished leaders (Spirit Assault), Anders doesn't have unit drops outside of the ultimate Retriever Sentinel. The rest of her abilities are passive or active leader powers.
+  </p>
 
-        <h3 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Weaknesses (Cons)</h3>
+  <h2 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Build Order</h2>
 
-        <p class="mb-4">
-          <strong class="text-cyan-400">No Nukes:</strong> Anders doesn't have devastating abilities like Eradication, Inferno, Rain of Fire, or even a Beam - abilities that can quickly annihilate an army. The Sentinel Network is good but won't eradicate an entire army quickly.
-        </p>
+  <p class="mb-4">
+    The typical opener is pad-pad, gen-gen (supply pads then generators). On maps with lots of power nodes like Bedrock, build some Marines to get aggressive with nodes early.
+  </p>
 
-        <p class="mb-4">
-          <strong class="text-cyan-400">Forces Opponents Into Air:</strong> If you go Siege with Sentinel Beacon, opponents will often be forced into air units to counter your Sentinels, similar to when facing Pavium with Mega Turrets.
-        </p>
+  <p class="mb-4">
+    For your 5th building slot, you have options. An Armory allows you to build Douglas early.
+  </p>
 
-        <p class="mb-4">
-          <strong class="text-cyan-400">No Unit Drops:</strong> Unlike Cutter (ODST drops), Forge (Kodiak drop), or Banished leaders (Spirit Assault), Anders doesn't have unit drops outside of the ultimate Retriever Sentinel. The rest of her abilities are passive or active leader powers.
-        </p>
+  <h3 class="text-xl font-bold mb-3 mt-6 text-cyan-200">Leader Point Progression</h3>
 
-        <h3 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Build Order</h3>
+  <p class="mb-4">
+    <strong class="text-cyan-400">First Point - R&D I:</strong> This passive power reduces research cost and time for all infantry, vehicle, aircraft, and hero upgrades. It also gives your turrets shields. Example: Grenade Throw drops from 400 to 340 power.
+  </p>
 
-        <p class="mb-4">
-          The typical opener is pad-pad, gen-gen (supply pads then generators). On maps with lots of power nodes like Bedrock, build some Marines to get aggressive with nodes early.
-        </p>
+  <p class="mb-4">
+    <strong class="text-cyan-400">Second Point - Options vary by strategy:</strong>
+  </p>
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li><strong>Protector Sentinel:</strong> Unlocks Sentinels buildable from your main base. These become insane once you get Sentinel Synergy (shields, increased health and damage), but that requires Tech 3 and two leader point investments.</li>
+    <li><strong>R&D II:</strong> Double up on cost reduction. Grenade Throw becomes 289, Hijack becomes 216.</li>
+  </ul>
 
-        <p class="mb-4">
-          For your 5th building slot, you have options. An Armory allows you to build Douglas early.
-        </p>
+  <p class="mb-4">
+    <strong class="text-cyan-400">Tech 2 Strategy:</strong> The best play for Anders is going into siege. Consider Arc Defense for defensive situations, Combat Tech Marines (rocket launchers for anti-air), and Wolverines for air coverage.
+  </p>
 
-        <h4 class="text-xl font-bold mb-3 mt-6 text-cyan-200">Leader Point Progression</h4>
+  <p class="mb-4">
+    <strong class="text-cyan-400">Third/Fourth Points:</strong> Sentinel Beacon (makes Kodiaks and Siege Turrets spawn Sentinels), Arc Defense for additional Sentinel spawning, and Sentinel Synergy to upgrade all Sentinel abilities.
+  </p>
 
-        <p class="mb-4">
-          <strong class="text-cyan-400">First Point - R&D I:</strong> This passive power reduces research cost and time for all infantry, vehicle, aircraft, and hero upgrades. It also gives your turrets shields. Example: Grenade Throw drops from 400 to 340 power.
-        </p>
+  <p class="mb-4">
+    <strong class="text-cyan-400">Later Points:</strong> Sentinel Network spawns Sentinels that sweep across the map providing vision. Turret Drop or Restoration Drones for utility.
+  </p>
 
-        <p class="mb-4">
-          <strong class="text-cyan-400">Second Point - Options vary by strategy:</strong>
-        </p>
-        <ul class="list-disc list-inside mb-4 ml-4">
-          <li><strong>Protector Sentinel:</strong> Unlocks Sentinels buildable from your main base. These become insane once you get Sentinel Synergy (shields, increased health and damage), but that requires Tech 3 and two leader point investments.</li>
-          <li><strong>R&D II:</strong> Double up on cost reduction. Grenade Throw becomes 289, Hijack becomes 216.</li>
-        </ul>
+  <h2 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Key Tips</h2>
 
-        <p class="mb-4">
-          <strong class="text-cyan-400">Tech 2 Strategy:</strong> The best play for Anders is going into siege. Consider Arc Defense for defensive situations, Combat Tech Marines (rocket launchers for anti-air), and Wolverines for air coverage.
-        </p>
+  <ol class="list-decimal list-inside mb-6 ml-4 space-y-2">
+    <li><strong>Use Nightingales:</strong> Build an Airpad for Nightingales to heal your units and protect your siege. Use the Y ability to cloak your siege units.</li>
+    <li><strong>Don't Over-Commit to Siege:</strong> While siege is Anders' strength, you need to balance your army.</li>
+    <li><strong>Stats Note:</strong> When playing Anders, you'll often show a lot of "units lost" because each Sentinel from Sentinel Beacon counts toward your opponent's "units destroyed" stat.</li>
+    <li><strong>Vehicle Upgrades Are Cheap:</strong> With R&D, vehicle upgrade 1 costs only 361 power - take advantage of this.</li>
+    <li><strong>Economy Tip:</strong> If going mass Kodiak, supplies will be your bottleneck more than power since you're saving money on unit upgrades thanks to R&D. Consider building three generators instead of four.</li>
+  </ol>
 
-        <p class="mb-4">
-          <strong class="text-cyan-400">Third/Fourth Points:</strong> Sentinel Beacon (makes Kodiaks and Siege Turrets spawn Sentinels), Arc Defense for additional Sentinel spawning, and Sentinel Synergy to upgrade all Sentinel abilities.
-        </p>
+  <h2 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Siege Setup</h2>
 
-        <p class="mb-4">
-          <strong class="text-cyan-400">Later Points:</strong> Sentinel Network spawns Sentinels that sweep across the map providing vision. Turret Drop or Restoration Drones for utility.
-        </p>
+  <p class="mb-4">
+    On maps like Bedrock, siege maps work excellently for Anders:
+  </p>
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li>Control power nodes for line of sight</li>
+    <li>Place Kodiaks on ramps for additional siege range</li>
+    <li>Build Siege Turrets on turret slots</li>
+    <li>Your siege turrets will have shields thanks to R&D</li>
+  </ul>
 
-        <h3 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Key Tips</h3>
+  <h2 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Unit Composition</h2>
 
-        <ol class="list-decimal list-inside mb-6 ml-4 space-y-2">
-          <li><strong>Use Nightingales:</strong> Build an Airpad for Nightingales to heal your units and protect your siege. Use the Y ability to cloak your siege units.</li>
-          <li><strong>Don't Over-Commit to Siege:</strong> While siege is Anders' strength, you need to balance your army.</li>
-          <li><strong>Stats Note:</strong> When playing Anders, you'll often show a lot of "units lost" because each Sentinel from Sentinel Beacon counts toward your opponent's "units destroyed" stat.</li>
-          <li><strong>Vehicle Upgrades Are Cheap:</strong> With R&D, vehicle upgrade 1 costs only 361 power - take advantage of this.</li>
-          <li><strong>Economy Tip:</strong> If going mass Kodiak, supplies will be your bottleneck more than power since you're saving money on unit upgrades thanks to R&D. Consider building three generators instead of four.</li>
-        </ol>
+  <p class="mb-4">
+    <strong class="text-cyan-400">Early Game:</strong> Marines with Combat Tech upgrade (rockets for anti-air)
+  </p>
+  <p class="mb-4">
+    <strong class="text-cyan-400">Mid Game:</strong> Kodiaks, Wolverines, Nightingales
+  </p>
+  <p class="mb-4">
+    <strong class="text-cyan-400">Late Game:</strong> Mass siege with Sentinel Beacon active, Protector Sentinels if fully upgraded
+  </p>
 
-        <h3 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Siege Setup</h3>
+  <h2 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Two Main Paths</h2>
 
-        <p class="mb-4">
-          On maps like Bedrock, siege maps work excellently for Anders:
-        </p>
-        <ul class="list-disc list-inside mb-4 ml-4">
-          <li>Control power nodes for line of sight</li>
-          <li>Place Kodiaks on ramps for additional siege range</li>
-          <li>Build Siege Turrets on turret slots</li>
-          <li>Your siege turrets will have shields thanks to R&D</li>
-        </ul>
+  <ol class="list-decimal list-inside mb-6 ml-4 space-y-2">
+    <li><strong>Mass Siege:</strong> R&D → Arc Defense → Sentinel Beacon → Sentinel Synergy</li>
+    <li><strong>Mass Protector Sentinels:</strong> R&D → Protector Sentinel → Sentinel Synergy (requires Tech 3)</li>
+  </ol>
 
-        <h3 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Unit Composition</h3>
+  <p class="mb-4">
+    Remember: More active leader powers are generally better than fewer. The Retriever Sentinel costs 2000/2000 (same as Condor) but can supplement your army composition.
+  </p>
 
-        <p class="mb-4">
-          <strong class="text-cyan-400">Early Game:</strong> Marines with Combat Tech upgrade (rockets for anti-air)
-        </p>
-        <p class="mb-4">
-          <strong class="text-cyan-400">Mid Game:</strong> Kodiaks, Wolverines, Nightingales
-        </p>
-        <p class="mb-4">
-          <strong class="text-cyan-400">Late Game:</strong> Mass siege with Sentinel Beacon active, Protector Sentinels if fully upgraded
-        </p>
+  <h2 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Final Notes</h2>
 
-        <h3 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Two Main Paths</h3>
-
-        <ol class="list-decimal list-inside mb-6 ml-4 space-y-2">
-          <li><strong>Mass Siege:</strong> R&D → Arc Defense → Sentinel Beacon → Sentinel Synergy</li>
-          <li><strong>Mass Protector Sentinels:</strong> R&D → Protector Sentinel → Sentinel Synergy (requires Tech 3)</li>
-        </ol>
-
-        <p class="mb-4">
-          Remember: More active leader powers are generally better than fewer. The Retriever Sentinel costs 2000/2000 (same as Condor) but can supplement your army composition.
-        </p>
-
-        <h3 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Final Notes</h3>
-
-        <p class="text-lg leading-relaxed mb-6">
-          Anders offers a lot of variation with strategies, heroes, leader power combinations, and playstyles. Try strategies that work for your play style and make sure your leader power picks complement your overall game plan.
-        </p>
-      </div>
-
-      <!-- Author Block -->
-      <div class="mt-12 pt-8 border-t border-gray-700">
-        <h3 class="text-lg font-semibold text-gray-400 mb-4">About the Author</h3>
-        <Author {...authorInfo} className="bg-gray-800/50 border border-gray-700" />
-      </div>
-      </main>
-    </div>
-    <Footer />
-  </div>
-
-  <SidePanel />
-  <script src="/js/dropdowns.js" is:inline></script>
-  <script src="/js/tabs.js" is:inline></script>
-  <script src="/js/side-panel.js" is:inline></script>
-  <script src="/js/secondary-init.js" is:inline></script>
-</BaseLayout>
+  <p class="text-lg leading-relaxed mb-6">
+    Anders offers a lot of variation with strategies, heroes, leader power combinations, and playstyles. Try strategies that work for your play style and make sure your leader power picks complement your overall game plan.
+  </p>
+</BlogPostLayout>

@@ -7,6 +7,7 @@ const {
   ogTitle,
   ogDescription,
   ogImage,
+  ogType = 'website',
   twitterImage,
   robots = 'index, follow',
   author = 'Team Respawn',
@@ -34,6 +35,7 @@ const resolvedBodyClass = Array.from(new Set(rawBodyClasses.split(/\s+/).filter(
     {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
 
     {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
+    <meta property="og:type" content={ogType} />
     <meta property="og:title" content={resolvedOgTitle} />
     {resolvedOgDescription && <meta property="og:description" content={resolvedOgDescription} />}
     {ogImage && <meta property="og:image" content={ogImage} />}

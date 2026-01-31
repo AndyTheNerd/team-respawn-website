@@ -1,5 +1,23 @@
 const blogPosts = [
   {
+    title: "How to Super Turtle - Halo Wars 2",
+    date: 'Published on January 30, 2025',
+    dateIso: '2025-01-30',
+    category: 'Guides',
+    excerpt:
+      'Master the art of super turtling in Halo Wars 2. Learn the best maps, leaders like Pavium and Serina, build orders, and defensive strategies.',
+    href: '/blog/posts/how-to-super-turtle',
+    accentClass: 'text-cyan-400',
+    buttonClass: 'bg-cyan-500 hover:bg-cyan-600',
+    img: {
+      src: '/img/HW-Guides/How-to-Super-Turtle.jpg',
+      alt: 'How to Super Turtle - Halo Wars 2',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
     title: "Anders Beginner's Guide - Halo Wars 2",
     date: 'Published on January 30, 2025',
     dateIso: '2025-01-30',
