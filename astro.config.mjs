@@ -11,6 +11,11 @@ export default defineConfig({
           api: 'modern-compiler'
         }
       }
+    },
+    resolve: {
+      alias: {
+        '@blocks': '/src/blocks'
+      }
     }
   }
 });

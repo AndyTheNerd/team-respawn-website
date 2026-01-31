@@ -1,5 +1,23 @@
 const blogPosts = [
   {
+    title: "Anders Beginner's Guide - Halo Wars 2",
+    date: 'Published on January 30, 2025',
+    dateIso: '2025-01-30',
+    category: 'Guides',
+    excerpt:
+      "Learn how to master Professor Anders in Halo Wars 2. This beginner's guide covers her strengths with Sentinels and siege gameplay, build orders, and key strategies.",
+    href: '/blog/posts/anders-beginners-guide',
+    accentClass: 'text-cyan-400',
+    buttonClass: 'bg-cyan-500 hover:bg-cyan-600',
+    img: {
+      src: '/img/HW-Guides/Anders Guide.jpg',
+      alt: "Anders Beginner's Guide - Halo Wars 2",
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
     title: 'Top 5 Games to Play this Summer',
     date: 'Published on July 25, 2024',
     dateIso: '2024-07-25',

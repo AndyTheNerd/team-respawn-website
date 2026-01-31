@@ -63,8 +63,8 @@
   }
 }
 
-// Ensure Inter font is applied throughout
+// Ensure Inter font is applied throughout (exclude Font Awesome icons)
 .blog-page,
-.blog-page * {
+.blog-page *:not(.fa):not(.fab):not(.fas):not(.far):not(.fal):not(.fad):not([class^="fa-"]) {
   font-family: 'Inter', sans-serif;
 }

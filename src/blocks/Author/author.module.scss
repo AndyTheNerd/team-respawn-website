@@ -1,0 +1,23 @@
+@use 'webcoreui/config' as *;
+
+.meta {
+    @include layout(flex, xs);
+
+    min-width: fit-content;
+}
+
+.info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.socials {
+    display: block;
+}
+
+.description {
+    @include border(3px, left, primary-50);
+    @include spacing(pl-sm);
+    @include typography(hmd);
+}

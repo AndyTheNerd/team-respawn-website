@@ -3,7 +3,9 @@
     "allow": [
       "WebFetch(domain:webcoreui.dev)",
       "Bash(npm run build:*)",
-      "Bash(dir \"c:\\\\Cloned Repos\\\\team-respawn-website\\\\node_modules\\\\webcoreui\" /b)"
+      "Bash(dir \"c:\\\\Cloned Repos\\\\team-respawn-website\\\\node_modules\\\\webcoreui\" /b)",
+      "Bash(curl:*)",
+      "Bash(npm create:*)"
     ]
   }
 }

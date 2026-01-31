@@ -1,0 +1,114 @@
+---
+import { Breadcrumb, Sidebar } from 'webcoreui/astro'
+
+export interface Props {
+  category: string
+  title: string
+}
+
+const { category, title } = Astro.props
+
+const categories = ['Guides', 'Features', 'Reviews', 'Insights', 'Spotlight']
+---
+
+<aside class="blog-sidebar sticky top-4 space-y-6">
+  <Breadcrumb
+    items={[
+      { label: 'Blog', href: '/blog' },
+      { label: category, href: `/blog?category=${category.toLowerCase()}` },
+      { label: title }
+    ]}
+    className="blog-breadcrumb"
+  />
+
+  <Sidebar
+    groups={[
+      {
+        title: 'Categories',
+        items: categories.map(cat => ({
+          name: cat,
+          href: `/blog?category=${cat.toLowerCase()}`,
+          active: cat === category
+        }))
+      }
+    ]}
+    className="blog-categories"
+  />
+
+  <slot />
+</aside>
+
+<style>
+  .blog-sidebar {
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+  }
+
+  .blog-sidebar :global(.blog-breadcrumb) {
+    font-size: 0.875rem;
+    padding: 0.75rem 1rem;
+    background: rgba(30, 41, 59, 0.5);
+    border-radius: 0.5rem;
+    border: 1px solid rgba(148, 163, 184, 0.1);
+  }
+
+  .blog-sidebar :global(.blog-breadcrumb a) {
+    color: #94a3b8;
+    transition: color 0.2s;
+  }
+
+  .blog-sidebar :global(.blog-breadcrumb a:hover) {
+    color: #f8fafc;
+  }
+
+  .blog-sidebar :global(.blog-breadcrumb li:last-child) {
+    color: #f8fafc;
+    font-weight: 500;
+  }
+
+  .blog-sidebar :global(.blog-categories) {
+    padding: 1rem;
+    background: rgba(30, 41, 59, 0.5);
+    border-radius: 0.5rem;
+    border: 1px solid rgba(148, 163, 184, 0.1);
+  }
+
+  .blog-sidebar :global(.blog-categories strong) {
+    color: #f8fafc;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+    display: block;
+  }
+
+  .blog-sidebar :global(.blog-categories ul) {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .blog-sidebar :global(.blog-categories a) {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.375rem;
+    color: #94a3b8;
+    transition: all 0.2s;
+    font-size: 0.875rem;
+  }
+
+  .blog-sidebar :global(.blog-categories a:hover) {
+    background: rgba(148, 163, 184, 0.1);
+    color: #f8fafc;
+  }
+
+  .blog-sidebar :global(.blog-categories a.active) {
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+  }
+</style>

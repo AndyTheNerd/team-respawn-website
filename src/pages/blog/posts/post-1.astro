@@ -1,9 +1,17 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import BlogHeader from '../../../components/BlogHeader.astro';
+import BlogSidebar from '../../../components/BlogSidebar.astro';
 import Footer from '../../../components/Footer.astro';
 import Header from '../../../components/Header.astro';
 import SidePanel from '../../../components/SidePanel.astro';
+import Author from '../../../blocks/Author/Author.astro';
+import authorInfo from '../../../data/authorInfo.js';
+
+const postMeta = {
+  title: 'Top 5 Games to Play this Summer',
+  category: 'Features'
+};
 ---
 <BaseLayout
   title="Top 5 Games to Play This Summer | Team Respawn Blog"
@@ -17,7 +25,14 @@ import SidePanel from '../../../components/SidePanel.astro';
     <Header />
     <BlogHeader />
 
-    <main class="max-w-4xl mx-auto">
+    <div class="max-w-6xl mx-auto flex flex-col lg:flex-row gap-8">
+      <!-- Sidebar (appears first on mobile, moves to right on desktop) -->
+      <div class="lg:order-2 lg:w-64 lg:flex-shrink-0">
+        <BlogSidebar category={postMeta.category} title={postMeta.title} />
+      </div>
+
+      <!-- Main Content -->
+      <main class="flex-1 min-w-0">
       <h2 class="text-4xl font-bold mb-2 text-yellow-400">Top 5 Games to Play this Summer</h2>
       <p class="text-gray-400 text-sm mb-8">Published on July 25, 2024 by Jane Doe</p>
 
@@ -61,7 +76,14 @@ import SidePanel from '../../../components/SidePanel.astro';
           What are your favorite games to play during the summer? Let us know in the comments below!
         </p>
       </div>
-    </main>
+
+      <!-- Author Block -->
+      <div class="mt-12 pt-8 border-t border-gray-700">
+        <h3 class="text-lg font-semibold text-gray-400 mb-4">About the Author</h3>
+        <Author {...authorInfo} className="bg-gray-800/50 border border-gray-700" />
+      </div>
+      </main>
+    </div>
     <Footer />
   </div>
 
