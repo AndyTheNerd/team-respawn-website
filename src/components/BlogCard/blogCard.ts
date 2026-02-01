@@ -13,6 +13,7 @@ export type BlogCardProps = {
     title?: string
     text?: string
     secondary?: boolean
+    featured?: boolean
     className?: string
     [key: string]: any
 } & CardProps

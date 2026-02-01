@@ -5,6 +5,7 @@
     dateIso: '2025-01-30',
     category: 'Guides',
     tags: ['Halo Wars 2'],
+    featured: true,
     excerpt:
       'Master the art of super turtling in Halo Wars 2. Learn the best maps, leaders like Pavium and Serina, build orders, and defensive strategies.',
     href: '/blog/posts/how-to-super-turtle',
@@ -347,6 +348,7 @@
     dateIso: '2026-01-31',
     category: 'Guides',
     tags: ['Age of Empires II'],
+    featured: true,
     excerpt:
       'A guide for new players to Age of Empires II.',
     href: '/blog/posts/noob-to-pro-in-15-minutes-age-of-empires-ii',
@@ -556,6 +558,7 @@
     dateIso: '2026-01-31',
     category: 'Guides',
     tags: ['Age of Mythology'],
+    featured: true,
     excerpt:
       'Be a noob no more! Learn the most important tips and tricks of Age of Mythology in 15 minutes.',
     href: '/blog/posts/noob-to-pro-in-15-minutes-age-of-mythology',

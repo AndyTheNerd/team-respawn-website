@@ -10,6 +10,11 @@ import '../../styles/webcore.scss';
 import '../../styles/blog-overrides.scss';
 
 const sortedPosts = [...blogPosts].sort((a, b) => {
+  // Featured posts always come first
+  if (a.featured && !b.featured) return -1;
+  if (!a.featured && b.featured) return 1;
+  
+  // Then sort by date (newest first)
   const aDate = a.dateIso ? Date.parse(a.dateIso) : 0;
   const bDate = b.dateIso ? Date.parse(b.dateIso) : 0;
   return bDate - aDate;
@@ -90,12 +95,19 @@ const sortItems = [
             />
           </div>
         </div>
-        <div id="blog-active-filters" class="blog-active-filters hidden">
+        <div id="blog-active-filters" class="blog-active-filters">
           <span class="blog-active-label">Active filters</span>
           <div id="blog-active-filter-list" class="blog-active-list" aria-live="polite"></div>
-          <button id="blog-clear-filters" class="blog-active-clear" type="button">
-            Clear
-          </button>
+          <div class="blog-controls-row">
+            <label class="blog-featured-toggle">
+              <input type="checkbox" id="featured-toggle" checked>
+              <span class="checkmark"></span>
+              <span>⭐ Featured</span>
+            </label>
+            <button id="blog-clear-filters" class="blog-active-clear" type="button">
+              Clear
+            </button>
+          </div>
         </div>
       </div>
 
@@ -111,12 +123,15 @@ const sortItems = [
             data-excerpt={post.excerpt.toLowerCase()}
             data-tags={(post.tags || []).join('|').toLowerCase()}
             data-date={post.dateIso}
+            data-featured={post.featured ? 'true' : 'false'}
+            data-featured-enabled="true"
           >
             <BlogCard
               href={post.href}
               img={post.img}
               title={post.title}
               text={`<span class="blog-category">${post.category}</span><br/>${post.excerpt}`}
+              featured={post.featured}
             />
           </div>
         ))}

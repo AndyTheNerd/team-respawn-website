@@ -17,25 +17,33 @@ const {
     title,
     text,
     secondary,
+    featured,
     className,
     ...rest
 } = Astro.props
 ---
 
-<a href={href} target={target} class:list={[styles.link, className]}>
+<a href={href} target={target} class:list={[styles.link, className, featured && styles.featured]}>
     <Card
         {...rest}
         className={styles.card}
         bodyClassName={classNames([styles.body, secondary && styles.secondary])}
         secondary={true}
     >
-        <img
-            src={img.src}
-            alt={img.alt}
-            width={img.width}
-            height={img.height}
-            loading={img.lazy ? 'lazy' : undefined}
-        />
+        <div class={styles.imageContainer}>
+            <img
+                src={img.src}
+                alt={img.alt}
+                width={img.width}
+                height={img.height}
+                loading={img.lazy ? 'lazy' : undefined}
+            />
+            {featured && (
+                <div class={styles.featuredBadge}>
+                    <span>⭐ Featured</span>
+                </div>
+            )}
+        </div>
         <ConditionalWrapper condition={!!text}>
             <div slot="wrapper">children</div>
             {title && <strong>{title}</strong>}

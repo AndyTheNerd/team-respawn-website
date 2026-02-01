@@ -11,11 +11,13 @@
   const activeFilters = document.getElementById('blog-active-filters');
   const activeFilterList = document.getElementById('blog-active-filter-list');
   const clearFiltersButton = document.getElementById('blog-clear-filters');
+  const featuredToggle = document.getElementById('featured-toggle');
 
   let currentSearchTerm = '';
   let currentCategory = 'all';
   let currentTag = 'all';
   let currentSort = 'newest';
+  let featuredEnabled = true; // Default to enabled
 
   function normalizeValue(value) {
     return (value || '').toLowerCase().trim();
@@ -116,19 +118,35 @@
     const searchValue = searchInput ? searchInput.value.trim() : '';
 
     if (searchValue) {
-      filters.push({ label: `Search: ${searchValue}` });
+      filters.push({ 
+        label: `Search: ${searchValue}`, 
+        type: 'search',
+        value: searchValue 
+      });
     }
 
     if (isActiveCategory()) {
-      filters.push({ label: `Category: ${getOptionLabel('category-filter', currentCategory)}` });
+      filters.push({ 
+        label: `Category: ${getOptionLabel('category-filter', currentCategory)}`, 
+        type: 'category',
+        value: currentCategory 
+      });
     }
 
     if (isActiveTag()) {
-      filters.push({ label: `Tag: ${getOptionLabel('tag-filter', currentTag)}` });
+      filters.push({ 
+        label: `Tag: ${getOptionLabel('tag-filter', currentTag)}`, 
+        type: 'tag',
+        value: currentTag 
+      });
     }
 
     if (isActiveSort()) {
-      filters.push({ label: `Sort: ${getOptionLabel('sort-filter', currentSort)}` });
+      filters.push({ 
+        label: `Sort: ${getOptionLabel('sort-filter', currentSort)}`, 
+        type: 'sort',
+        value: currentSort 
+      });
     }
 
     activeFilterList.innerHTML = '';
@@ -136,21 +154,42 @@
     filters.forEach(filter => {
       const pill = document.createElement('span');
       pill.className = 'blog-active-pill';
-      pill.textContent = filter.label;
+      pill.dataset.filterType = filter.type;
+      pill.dataset.filterValue = filter.value;
+      
+      const pillContent = document.createElement('span');
+      pillContent.className = 'blog-pill-content';
+      pillContent.textContent = filter.label;
+      
+      const removeButton = document.createElement('button');
+      removeButton.className = 'blog-pill-remove';
+      removeButton.innerHTML = '×';
+      removeButton.setAttribute('aria-label', `Remove ${filter.type} filter`);
+      removeButton.type = 'button';
+      
+      pill.appendChild(pillContent);
+      pill.appendChild(removeButton);
       activeFilterList.appendChild(pill);
     });
 
-    if (filters.length) {
-      activeFilters.classList.remove('hidden');
-    } else {
-      activeFilters.classList.add('hidden');
-    }
+    // Always show active filters section now that we have the featured toggle
+    activeFilters.classList.remove('hidden');
   }
 
   function sortCards() {
     const cards = Array.from(blogGrid.querySelectorAll('.blog-card-wrapper'));
 
     cards.sort(function(a, b) {
+      // Only prioritize featured posts if the toggle is enabled
+      if (featuredEnabled) {
+        const aFeatured = a.dataset.featured === 'true';
+        const bFeatured = b.dataset.featured === 'true';
+        
+        if (aFeatured && !bFeatured) return -1;
+        if (!aFeatured && bFeatured) return 1;
+      }
+      
+      // Then apply the selected sort order
       if (currentSort === 'oldest' || currentSort === 'newest') {
         const aDate = Date.parse(a.dataset.date || '') || 0;
         const bDate = Date.parse(b.dataset.date || '') || 0;
@@ -239,6 +278,57 @@
     };
   }
 
+  // Filter pill removal handlers
+  if (activeFilterList) {
+    activeFilterList.addEventListener('click', function(event) {
+      if (event.target.classList.contains('blog-pill-remove')) {
+        const pill = event.target.closest('.blog-active-pill');
+        if (!pill) return;
+        
+        const filterType = pill.dataset.filterType;
+        const filterValue = pill.dataset.filterValue;
+        
+        switch(filterType) {
+          case 'search':
+            if (searchInput) {
+              searchInput.value = '';
+              currentSearchTerm = '';
+            }
+            break;
+          case 'category':
+            currentCategory = 'all';
+            setSelectUI('category-filter', 'all');
+            break;
+          case 'tag':
+            currentTag = 'all';
+            setSelectUI('tag-filter', 'all');
+            break;
+          case 'sort':
+            currentSort = 'newest';
+            setSelectUI('sort-filter', 'newest');
+            break;
+        }
+        
+        filterPosts();
+      }
+    });
+  }
+
+  // Featured toggle handler
+  if (featuredToggle) {
+    featuredToggle.addEventListener('change', function() {
+      featuredEnabled = this.checked;
+      
+      // Update data-featured-enabled attribute on all blog cards
+      const blogCards = document.querySelectorAll('.blog-card-wrapper');
+      blogCards.forEach(function(card) {
+        card.dataset.featuredEnabled = featuredEnabled ? 'true' : 'false';
+      });
+      
+      filterPosts();
+    });
+  }
+
   // Search input handler
   if (searchInput) {
     var debouncedFilter = debounce(function() {
@@ -305,6 +395,12 @@
       setSelectUI('sort-filter', initialSort);
     }
 
+    // Initialize data-featured-enabled attributes
+    const blogCards = document.querySelectorAll('.blog-card-wrapper');
+    blogCards.forEach(function(card) {
+      card.dataset.featuredEnabled = 'true';
+    });
+
     if (initialCategory || initialTag || initialQuery || initialSort) {
       filterPosts();
     } else {
@@ -318,10 +414,21 @@
       currentCategory = 'all';
       currentTag = 'all';
       currentSort = 'newest';
+      featuredEnabled = true; // Reset to enabled
 
       if (searchInput) {
         searchInput.value = '';
       }
+
+      if (featuredToggle) {
+        featuredToggle.checked = true;
+      }
+
+      // Reset data-featured-enabled attribute on all blog cards
+      const blogCards = document.querySelectorAll('.blog-card-wrapper');
+      blogCards.forEach(function(card) {
+        card.dataset.featuredEnabled = 'true';
+      });
 
       setSelectUI('category-filter', 'all');
       setSelectUI('tag-filter', 'all');

@@ -33,4 +33,74 @@
             @include spacing(mt-xs);
         }
     }
+
+    &.featured {
+        position: relative;
+        
+        .card {
+            border: 2px solid #fbbf24;
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+            transition: all 0.3s ease;
+            
+            &:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 30px rgba(251, 191, 36, 0.4);
+            }
+        }
+    }
+
+    // Hide featured visual indicators when featured is disabled
+    [data-featured-enabled="false"] &.featured {
+        .card {
+            border: none;
+            box-shadow: none;
+            
+            &:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+            }
+        }
+        
+        .featuredBadge {
+            display: none;
+        }
+    }
+
+    .imageContainer {
+        position: relative;
+        overflow: hidden;
+        border-radius: 8px;
+    }
+
+    .featuredBadge {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: linear-gradient(135deg, #f59e0b, #fbbf24);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+        z-index: 10;
+        animation: pulse 2s infinite;
+        
+        span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
 }
