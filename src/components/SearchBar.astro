@@ -43,27 +43,6 @@ if (Array.isArray(videosData.walkthroughs)) {
   });
 }
 
-const haloWars = videosData['halo-wars'] || {};
-Object.values(haloWars).forEach((section: any) => {
-  const sectionTitle = section?.title || 'Halo Wars Guides';
-  (section?.videos || []).forEach((video: any) => {
-    addVideoItem(video, 'Video Guide', [sectionTitle, 'guide']);
-  });
-});
-
-const ageOfEmpires = videosData['age-of-empires'] || {};
-Object.values(ageOfEmpires).forEach((section: any) => {
-  const sectionTitle = section?.title || 'Age of Empires Guides';
-  (section?.videos || []).forEach((video: any) => {
-    addVideoItem(video, 'Video Guide', [sectionTitle, 'guide']);
-  });
-});
-
-if (Array.isArray(videosData['age-of-mythology'])) {
-  videosData['age-of-mythology'].forEach((video: any) => {
-    addVideoItem(video, 'Video Guide', ['Age of Mythology', 'guide']);
-  });
-}
 
 // Build search data from blog posts, videos, and static pages
 const searchData: Array<{ title: string; href: string; category: string; excerpt: string }> = [
