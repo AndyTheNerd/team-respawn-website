@@ -88,6 +88,68 @@
       0 0 0 3px rgba(56, 189, 248, 0.2),
       0 12px 24px rgba(2, 6, 23, 0.55);
   }
+
+  .blog-search-filter [data-filter-active="true"] {
+    border-color: rgba(34, 211, 238, 0.9);
+    box-shadow:
+      inset 0 0 0 1px rgba(34, 211, 238, 0.2),
+      0 0 0 3px rgba(34, 211, 238, 0.2),
+      0 10px 20px rgba(2, 6, 23, 0.45);
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(8, 11, 20, 0.96));
+  }
+
+  .blog-active-filters {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(148, 163, 184, 0.2);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .blog-active-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(148, 163, 184, 0.9);
+  }
+
+  .blog-active-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .blog-active-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #e0f2fe;
+    background: rgba(14, 116, 144, 0.35);
+    border: 1px solid rgba(56, 189, 248, 0.45);
+  }
+
+  .blog-active-clear {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #f8fafc;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(148, 163, 184, 0.4);
+    background: rgba(30, 41, 59, 0.7);
+    transition: border-color 0.2s ease, background 0.2s ease;
+  }
+
+  .blog-active-clear:hover {
+    border-color: rgba(56, 189, 248, 0.8);
+    background: rgba(30, 64, 175, 0.45);
+  }
 }
 
 // Ensure Inter font is applied throughout (exclude Font Awesome icons)

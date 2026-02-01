@@ -9,23 +9,11 @@ import blogPosts from '../../data/blogPosts.js';
 import '../../styles/webcore.scss';
 import '../../styles/blog-overrides.scss';
 
-const pageSize = 12;
 const sortedPosts = [...blogPosts].sort((a, b) => {
   const aDate = a.dateIso ? Date.parse(a.dateIso) : 0;
   const bDate = b.dateIso ? Date.parse(b.dateIso) : 0;
   return bDate - aDate;
 });
-const paginatedPosts = sortedPosts.slice(0, pageSize);
-const totalPages = Math.ceil(sortedPosts.length / pageSize);
-const currentPage = 1;
-
-// Transform posts to webcoreui BlogCardProps format
-const posts = paginatedPosts.map(post => ({
-  href: post.href,
-  img: post.img,
-  title: post.title,
-  text: `<span class="blog-category">${post.category}</span><br/>${post.excerpt}`
-}));
 
 // Get unique categories for filter
 const categories = [...new Set(blogPosts.map(post => post.category))];
@@ -102,13 +90,20 @@ const sortItems = [
             />
           </div>
         </div>
+        <div id="blog-active-filters" class="blog-active-filters hidden">
+          <span class="blog-active-label">Active filters</span>
+          <div id="blog-active-filter-list" class="blog-active-list" aria-live="polite"></div>
+          <button id="blog-clear-filters" class="blog-active-clear" type="button">
+            Clear
+          </button>
+        </div>
       </div>
 
       <!-- Latest Articles Section -->
       <h2 class="text-2xl font-bold text-white mb-8">Latest Articles</h2>
 
       <div id="blog-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {paginatedPosts.map((post, index) => (
+        {sortedPosts.map((post, index) => (
           <div
             class="blog-card-wrapper"
             data-title={post.title.toLowerCase()}
@@ -132,48 +127,6 @@ const sortItems = [
         <p class="text-xl text-gray-400">No articles found matching your criteria.</p>
       </div>
 
-      {totalPages > 1 && (
-        <nav class="mt-12 flex justify-center" aria-label="Blog pagination">
-          <div class="inline-flex flex-wrap items-center gap-2">
-            {currentPage > 1 && (
-              <a
-                href={currentPage === 2 ? '/blog' : `/blog/page/${currentPage - 1}`}
-                class="px-3 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 hover:bg-gray-700"
-                aria-label="Previous page"
-              >
-                Previous
-              </a>
-            )}
-            {Array.from({ length: totalPages }, (_, i) => {
-              const pageNumber = i + 1;
-              const href = pageNumber === 1 ? '/blog' : `/blog/page/${pageNumber}`;
-              const isActive = pageNumber === currentPage;
-              return (
-                <a
-                  href={href}
-                  class={`px-3 py-2 rounded-lg border ${
-                    isActive
-                      ? 'bg-cyan-500 text-white border-cyan-400'
-                      : 'bg-gray-800 text-gray-200 border-gray-700 hover:bg-gray-700'
-                  }`}
-                  aria-current={isActive ? 'page' : undefined}
-                >
-                  {pageNumber}
-                </a>
-              );
-            })}
-            {currentPage < totalPages && (
-              <a
-                href={`/blog/page/${currentPage + 1}`}
-                class="px-3 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 hover:bg-gray-700"
-                aria-label="Next page"
-              >
-                Next
-              </a>
-            )}
-          </div>
-        </nav>
-      )}
 
     </main>
 

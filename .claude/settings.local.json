@@ -5,7 +5,8 @@
       "Bash(npm run build:*)",
       "Bash(dir \"c:\\\\Cloned Repos\\\\team-respawn-website\\\\node_modules\\\\webcoreui\" /b)",
       "Bash(curl:*)",
-      "Bash(npm create:*)"
+      "Bash(npm create:*)",
+      "Bash(cd:*)"
     ]
   }
 }

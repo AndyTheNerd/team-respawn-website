@@ -4,14 +4,148 @@
   const searchInput = document.getElementById('blog-search');
   const categorySelect = document.querySelector('[data-id="w-select-category-filter"]');
   const tagSelect = document.querySelector('[data-id="w-select-tag-filter"]');
+  const sortSelect = document.querySelector('[data-id="w-select-sort-filter"]');
   const blogGrid = document.getElementById('blog-grid');
   const noResults = document.getElementById('no-results');
   const paginationContainer = document.querySelector('.mt-12.flex.justify-center');
+  const activeFilters = document.getElementById('blog-active-filters');
+  const activeFilterList = document.getElementById('blog-active-filter-list');
+  const clearFiltersButton = document.getElementById('blog-clear-filters');
 
   let currentSearchTerm = '';
   let currentCategory = 'all';
   let currentTag = 'all';
   let currentSort = 'newest';
+
+  function normalizeValue(value) {
+    return (value || '').toLowerCase().trim();
+  }
+
+  function getOptionLabel(selectName, value) {
+    const normalized = normalizeValue(value);
+    if (!normalized) {
+      return '';
+    }
+
+    const options = Array.from(
+      document.querySelectorAll(`[data-id="w-options-${selectName}"] [data-value]`)
+    );
+
+    const match = options.find(option => normalizeValue(option.dataset.value) === normalized)
+      || options.find(option => normalizeValue(option.dataset.name) === normalized);
+
+    return (match && (match.dataset.name || match.dataset.value)) || value;
+  }
+
+  function setSelectUI(selectName, value) {
+    const selectInput = document.querySelector(`[data-id="w-select-${selectName}"]`);
+    if (!selectInput) {
+      return;
+    }
+
+    const options = Array.from(
+      document.querySelectorAll(`[data-id="w-options-${selectName}"] [data-value]`)
+    );
+
+    const normalized = normalizeValue(value);
+    const match = options.find(option => normalizeValue(option.dataset.value) === normalized)
+      || options.find(option => normalizeValue(option.dataset.name) === normalized);
+
+    if (match) {
+      selectInput.value = match.dataset.name || match.dataset.value || '';
+      options.forEach(option => option.removeAttribute('data-selected'));
+      match.dataset.selected = 'true';
+    } else if (normalized === '') {
+      selectInput.value = '';
+      options.forEach(option => option.removeAttribute('data-selected'));
+    }
+  }
+
+  function isActiveCategory() {
+    return currentCategory !== 'all' && currentCategory !== 'all categories' && currentCategory !== '';
+  }
+
+  function isActiveTag() {
+    return currentTag !== 'all' && currentTag !== 'all tags' && currentTag !== '';
+  }
+
+  function isActiveSort() {
+    return currentSort !== 'newest' && currentSort !== '';
+  }
+
+  function updateSelectActiveStates() {
+    if (categorySelect) {
+      if (isActiveCategory()) {
+        categorySelect.dataset.filterActive = 'true';
+      } else {
+        categorySelect.removeAttribute('data-filter-active');
+      }
+    }
+
+    if (tagSelect) {
+      if (isActiveTag()) {
+        tagSelect.dataset.filterActive = 'true';
+      } else {
+        tagSelect.removeAttribute('data-filter-active');
+      }
+    }
+
+    if (sortSelect) {
+      if (isActiveSort()) {
+        sortSelect.dataset.filterActive = 'true';
+      } else {
+        sortSelect.removeAttribute('data-filter-active');
+      }
+    }
+
+    if (searchInput) {
+      if (currentSearchTerm !== '') {
+        searchInput.dataset.filterActive = 'true';
+      } else {
+        searchInput.removeAttribute('data-filter-active');
+      }
+    }
+  }
+
+  function renderActiveFilters() {
+    if (!activeFilters || !activeFilterList) {
+      return;
+    }
+
+    const filters = [];
+    const searchValue = searchInput ? searchInput.value.trim() : '';
+
+    if (searchValue) {
+      filters.push({ label: `Search: ${searchValue}` });
+    }
+
+    if (isActiveCategory()) {
+      filters.push({ label: `Category: ${getOptionLabel('category-filter', currentCategory)}` });
+    }
+
+    if (isActiveTag()) {
+      filters.push({ label: `Tag: ${getOptionLabel('tag-filter', currentTag)}` });
+    }
+
+    if (isActiveSort()) {
+      filters.push({ label: `Sort: ${getOptionLabel('sort-filter', currentSort)}` });
+    }
+
+    activeFilterList.innerHTML = '';
+
+    filters.forEach(filter => {
+      const pill = document.createElement('span');
+      pill.className = 'blog-active-pill';
+      pill.textContent = filter.label;
+      activeFilterList.appendChild(pill);
+    });
+
+    if (filters.length) {
+      activeFilters.classList.remove('hidden');
+    } else {
+      activeFilters.classList.add('hidden');
+    }
+  }
 
   function sortCards() {
     const cards = Array.from(blogGrid.querySelectorAll('.blog-card-wrapper'));
@@ -87,6 +221,9 @@
         paginationContainer.style.display = '';
       }
     }
+
+    updateSelectActiveStates();
+    renderActiveFilters();
   }
 
   // Debounce function for search input
@@ -150,10 +287,12 @@
 
     if (initialCategory) {
       currentCategory = initialCategory.toLowerCase();
+      setSelectUI('category-filter', initialCategory);
     }
 
     if (initialTag) {
       currentTag = initialTag.toLowerCase();
+      setSelectUI('tag-filter', initialTag);
     }
 
     if (initialQuery && searchInput) {
@@ -163,10 +302,32 @@
 
     if (initialSort) {
       currentSort = initialSort.toLowerCase();
+      setSelectUI('sort-filter', initialSort);
     }
 
     if (initialCategory || initialTag || initialQuery || initialSort) {
       filterPosts();
+    } else {
+      updateSelectActiveStates();
     }
+  }
+
+  if (clearFiltersButton) {
+    clearFiltersButton.addEventListener('click', function() {
+      currentSearchTerm = '';
+      currentCategory = 'all';
+      currentTag = 'all';
+      currentSort = 'newest';
+
+      if (searchInput) {
+        searchInput.value = '';
+      }
+
+      setSelectUI('category-filter', 'all');
+      setSelectUI('tag-filter', 'all');
+      setSelectUI('sort-filter', 'newest');
+
+      filterPosts();
+    });
   }
 })();
