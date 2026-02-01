@@ -4,12 +4,14 @@ A modern, component-based website showcasing curated gaming content from the Tea
 
 ## Features
 
-- Component-based Astro architecture
+- Component-based Astro architecture with WebcoreUI integration
+- Block-based content system for reusable components
 - Tabbed navigation across game series
 - Home page with hero, stats, carousel, and Twitch embed
 - Side panel navigation with keyboard support
-- Responsive Tailwind-based styling
+- Responsive Tailwind-based styling via WebcoreUI
 - Accessibility and SEO meta tags
+- SCSS support for advanced styling
 
 ## Project Structure
 
@@ -22,38 +24,104 @@ team-respawn-website/
 |   |-- img/
 |   `-- content/
 |-- src/
-|   |-- components/       # Astro components
-|   |-- layouts/          # Shared layouts (head/SEO)
-|   `-- pages/            # File-based routes
-`-- astro.config.mjs
+|   |-- blocks/          # Reusable content blocks (Author, Socials)
+|   |-- components/      # Astro components
+|   |-- data/           # Site data and configuration
+|   |-- layouts/        # Shared layouts (head/SEO)
+|   |-- pages/          # File-based routes
+|   `-- styles/         # Global styles and SCSS files
+|-- astro.config.mjs    # Astro configuration
+|-- package.json        # Dependencies and scripts
+`-- webcore.config.scss # WebcoreUI configuration
 ```
 
 ## Setup & Running Locally
 
-1. Install dependencies:
+### Prerequisites
+
+- Node.js (v18 or higher)
+- npm or yarn package manager
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd team-respawn-website
+```
+
+2. Install dependencies:
 ```bash
 npm install
 ```
 
-2. Start the Astro dev server:
+### Development
+
+1. Start the Astro development server:
 ```bash
 npm run dev
 ```
 
-3. Open your browser:
+2. Open your browser to:
 ```
 http://localhost:4321
 ```
 
+The development server will hot-reload automatically when you save changes to any file in the `src/` directory.
+
+### Build & Preview
+
+1. Build the production version:
+```bash
+npm run build
+```
+
+2. Preview the production build locally:
+```bash
+npm run preview
+```
+
+The preview server will run on `http://localhost:4321` by default.
+
 ## Development
 
-The site uses Astro for layouts/pages and vanilla JavaScript for interactivity. Edit files and the dev server will hot-reload.
+The site uses Astro for layouts/pages with WebcoreUI components and vanilla JavaScript for interactivity. The block system in `src/blocks/` allows for reusable content components.
 
 Key Files:
-- src/pages/index.astro - Main page structure
-- public/data/videos.json - Video data
-- public/js/video-card.js - Video card rendering logic
-- src/components/*.astro - Reusable components
+- `src/pages/index.astro` - Main page structure
+- `src/blocks/` - Reusable content blocks (Author profiles, Social media components)
+- `public/data/` - Static data files
+- `src/components/` - Astro components
+- `astro.config.mjs` - Astro and WebcoreUI configuration
+
+### Working with Blocks
+
+The project uses a block-based architecture in `src/blocks/`:
+- `Author/` - Author profile and bio blocks
+- `Socials/` - Social media link and embed blocks
+
+### Styling
+
+- WebcoreUI provides Tailwind CSS utilities out of the box
+- Custom SCSS files can be added to `src/styles/`
+- Component-specific styles should be included within Astro components
+
+## Technologies Used
+
+- **Astro v5.16.15** - Component and layout framework with file-based routing
+- **WebcoreUI v1.3.0** - Modern UI component library with Tailwind CSS
+- **SCSS** - CSS preprocessor for advanced styling
+- **TypeScript** - Type-safe JavaScript development
+- **HTML5** - Semantic markup
+- **JavaScript (ES6+)** - Vanilla JS for interactivity
+- **Vite** - Build tool and development server
+
+## Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run astro` - Run Astro CLI commands
 
 ## Data Structure
 
