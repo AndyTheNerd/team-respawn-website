@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "astro": "^5.16.15",
+    "cloudinary": "^2.9.0",
     "webcoreui": "^1.3.0"
   },
   "devDependencies": {

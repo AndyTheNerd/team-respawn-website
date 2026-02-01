@@ -1,0 +1,72 @@
+---
+import { getOptimizedImage } from '../utils/cloudinary.js';
+
+interface Props {
+  publicId: string;
+  class?: string;
+  width?: number;
+  height?: number;
+  quality?: string;
+  format?: string;
+  crop?: string;
+  aspectRatio?: string;
+  overlay?: {
+    publicId?: string;
+    text?: string;
+    position?: string;
+    opacity?: number;
+  };
+}
+
+const {
+  publicId,
+  class: className = '',
+  width,
+  height,
+  quality = 'auto',
+  format = 'auto',
+  crop = 'fill',
+  aspectRatio,
+  overlay
+} = Astro.props;
+
+let imageOptions = {
+  width,
+  height,
+  quality,
+  format,
+  crop,
+  aspectRatio
+};
+
+// Add overlay if specified
+if (overlay) {
+  if (overlay.text) {
+    imageOptions.overlay = {
+      text: overlay.text,
+      font_family: 'Arial',
+      font_size: 40,
+      font_weight: 'bold',
+      color: 'white',
+      ...overlay.position && { gravity: overlay.position }
+    };
+  } else if (overlay.publicId) {
+    imageOptions.overlay = overlay.publicId;
+    if (overlay.position) {
+      imageOptions.gravity = overlay.position;
+    }
+  }
+  if (overlay.opacity) {
+    imageOptions.opacity = overlay.opacity;
+  }
+}
+
+const backgroundImageUrl = getOptimizedImage(publicId, imageOptions);
+---
+
+<div 
+  class={className}
+  style={`background-image: url('${backgroundImageUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat;`}
+>
+  <slot />
+</div>

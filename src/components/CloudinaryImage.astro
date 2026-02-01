@@ -1,0 +1,67 @@
+---
+import { getOptimizedImage, getResponsiveImageSet, getArtDirectionImageSet } from '../utils/cloudinary.js';
+
+interface Props {
+  publicId: string;
+  alt: string;
+  width?: number;
+  height?: number;
+  class?: string;
+  loading?: 'lazy' | 'eager';
+  sizes?: string;
+  quality?: string;
+  format?: string;
+  crop?: string;
+  aspectRatio?: string;
+  artDirection?: Array<{
+    media: string;
+    publicId: string;
+    options?: object;
+  }>;
+  fallbackSrc?: string;
+}
+
+const {
+  publicId,
+  alt,
+  width,
+  height,
+  class: className = '',
+  loading = 'lazy',
+  sizes = '(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw',
+  quality = 'auto',
+  format = 'auto',
+  crop = 'fill',
+  aspectRatio,
+  artDirection,
+  fallbackSrc
+} = Astro.props;
+
+const baseOptions = {
+  width,
+  height,
+  quality,
+  format,
+  crop,
+  aspectRatio
+};
+
+const defaultSrc = getOptimizedImage(publicId, baseOptions);
+const srcSet = getResponsiveImageSet(publicId, baseOptions);
+---
+
+<picture>
+  {artDirection && artDirection.map(({ media, srcSet }) => (
+    <source media={media} srcset={srcSet} />
+  ))}
+  <source srcset={srcSet} />
+  <img 
+    src={fallbackSrc || defaultSrc}
+    alt={alt}
+    class={className}
+    loading={loading}
+    sizes={sizes}
+    {width}
+    {height}
+  />
+</picture>
