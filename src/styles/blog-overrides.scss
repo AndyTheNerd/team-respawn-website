@@ -184,6 +184,16 @@
     align-items: center;
   }
 
+  .blog-active-none {
+    color: #6b7280;
+    font-size: 0.875rem;
+    font-style: italic;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    background: rgba(107, 114, 128, 0.1);
+    border: 1px dashed rgba(107, 114, 128, 0.3);
+  }
+
   .blog-active-pill {
     display: inline-flex;
     align-items: center;

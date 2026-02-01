@@ -31,9 +31,9 @@
       "tags": ["Web", "API", "Bots"],
       "cover": "/img/Projects/Halo Quotes.jpg",
       "links": {
-        "website": "https://haloquotes.teamrespawntv.com/",
+        "website": "https://haloquotes.teamrespawn.net/",
         "github": "https://github.com/AndyTheNerd/Halo-Quotes",
-        "api": "https://api.haloquotes.teamrespawntv.com/"
+        "api": "https://api.haloquotes.teamrespawn.net/"
       },
       "color": "blue-400",
       "buttonColor": "blue-500"

@@ -6,7 +6,7 @@
     
     <!-- Homepage -->
     <url>
-        <loc>https://www.teamrespawntv.com/</loc>
+        <loc>https://www.teamrespawn.net/</loc>
         <lastmod>2024-01-01</lastmod>
         <changefreq>weekly</changefreq>
         <priority>1.0</priority>
@@ -14,7 +14,7 @@
     
     <!-- Blog Main Page -->
     <url>
-        <loc>https://www.teamrespawntv.com/blog</loc>
+        <loc>https://www.teamrespawn.net/blog</loc>
         <lastmod>2026-01-28</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
@@ -22,7 +22,7 @@
     
     <!-- Blog Posts -->
     <url>
-        <loc>https://www.teamrespawntv.com/blog/posts/post-1</loc>
+        <loc>https://www.teamrespawn.net/blog/posts/post-1</loc>
         <lastmod>2024-07-25</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
@@ -30,19 +30,19 @@
 
     <!-- Guides Pages -->
     <url>
-        <loc>https://www.teamrespawntv.com/halo-wars-guides</loc>
+        <loc>https://www.teamrespawn.net/halo-wars-guides</loc>
         <lastmod>2026-01-27</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://www.teamrespawntv.com/age-of-empires-guides</loc>
+        <loc>https://www.teamrespawn.net/age-of-empires-guides</loc>
         <lastmod>2026-01-27</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://www.teamrespawntv.com/age-of-mythology-guides</loc>
+        <loc>https://www.teamrespawn.net/age-of-mythology-guides</loc>
         <lastmod>2026-01-27</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
@@ -50,7 +50,7 @@
     
     <!-- Storehaus Info Summary -->
     <url>
-        <loc>https://www.teamrespawntv.com/storehaus-info</loc>
+        <loc>https://www.teamrespawn.net/storehaus-info</loc>
         <lastmod>2026-01-27</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>

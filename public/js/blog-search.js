@@ -151,26 +151,35 @@
 
     activeFilterList.innerHTML = '';
 
-    filters.forEach(filter => {
-      const pill = document.createElement('span');
-      pill.className = 'blog-active-pill';
-      pill.dataset.filterType = filter.type;
-      pill.dataset.filterValue = filter.value;
-      
-      const pillContent = document.createElement('span');
-      pillContent.className = 'blog-pill-content';
-      pillContent.textContent = filter.label;
-      
-      const removeButton = document.createElement('button');
-      removeButton.className = 'blog-pill-remove';
-      removeButton.innerHTML = '×';
-      removeButton.setAttribute('aria-label', `Remove ${filter.type} filter`);
-      removeButton.type = 'button';
-      
-      pill.appendChild(pillContent);
-      pill.appendChild(removeButton);
-      activeFilterList.appendChild(pill);
-    });
+    if (filters.length === 0) {
+      // Show "None" text when no filters are active
+      const noneText = document.createElement('span');
+      noneText.className = 'blog-active-none';
+      noneText.textContent = 'None';
+      activeFilterList.appendChild(noneText);
+    } else {
+      // Show filter pills
+      filters.forEach(filter => {
+        const pill = document.createElement('span');
+        pill.className = 'blog-active-pill';
+        pill.dataset.filterType = filter.type;
+        pill.dataset.filterValue = filter.value;
+        
+        const pillContent = document.createElement('span');
+        pillContent.className = 'blog-pill-content';
+        pillContent.textContent = filter.label;
+        
+        const removeButton = document.createElement('button');
+        removeButton.className = 'blog-pill-remove';
+        removeButton.innerHTML = '×';
+        removeButton.setAttribute('aria-label', `Remove ${filter.type} filter`);
+        removeButton.type = 'button';
+        
+        pill.appendChild(pillContent);
+        pill.appendChild(removeButton);
+        activeFilterList.appendChild(pill);
+      });
+    }
 
     // Always show active filters section now that we have the featured toggle
     activeFilters.classList.remove('hidden');
@@ -405,6 +414,7 @@
       filterPosts();
     } else {
       updateSelectActiveStates();
+      renderActiveFilters(); // Show "None" text on initial load
     }
   }
 

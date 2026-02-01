@@ -26,7 +26,7 @@ function getDropdownHelpers() {
         return { setupNavDropdown: window.setupNavDropdown };
     }
     try {
-        return require('../js/dropdowns.js');
+        return require('../public/js/dropdowns.js');
     } catch (error) {
         return {};
     }

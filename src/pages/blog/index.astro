@@ -49,15 +49,63 @@ const sortItems = [
   { name: 'Title Z-A', value: 'title-desc' }
 ];
 
+// Enhanced meta description
+const metaDescription = `Team Respawn Blog: ${blogPosts.length}+ gaming guides and strategy articles for Halo Wars, Age of Empires, and Age of Mythology. Master your favorite strategy games with expert tips, walkthroughs, and in-depth guides.`;
+
+// Blog structured data
+const blogStructuredData = {
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  "name": "Team Respawn Blog",
+  "description": metaDescription,
+  "url": "https://www.teamrespawn.net/blog",
+  "author": {
+    "@type": "Organization",
+    "name": "Team Respawn",
+    "url": "https://www.teamrespawn.net"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Team Respawn",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.teamrespawn.net/content/Team-Respawn-Full.png"
+    }
+  },
+  "blogPost": sortedPosts.slice(0, 10).map(post => ({
+    "@type": "BlogPosting",
+    "headline": post.title,
+    "description": post.excerpt,
+    "url": `https://www.teamrespawn.net${post.href}`,
+    "datePublished": post.dateIso,
+    "author": {
+      "@type": "Organization",
+      "name": "Team Respawn"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Team Respawn"
+    },
+    "image": post.img.src ? `https://www.teamrespawn.net${post.img.src}` : undefined,
+    "about": post.tags?.map(tag => ({
+      "@type": "Thing",
+      "name": tag
+    }))
+  }))
+};
+
 ---
 <BaseLayout
-  title="Team Respawn Blog | News, Reviews, and Insights"
-  description="The Team Respawn blog covers gaming news, reviews, and deep dives across strategy, FPS, and indie hits."
-  canonical="https://www.teamrespawntv.com/blog"
+  title="Team Respawn Blog | Gaming Guides & Strategy Articles"
+  description={metaDescription}
+  canonical="https://www.teamrespawn.net/blog"
   ogTitle="Team Respawn Blog"
-  ogDescription="Gaming news, reviews, and insights from Team Respawn."
+  ogDescription={metaDescription}
   bodyClass="blog-page"
 >
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(blogStructuredData)} />
+  </Fragment>
   <div class="container mx-auto p-4 sm:p-8">
     <Header />
 

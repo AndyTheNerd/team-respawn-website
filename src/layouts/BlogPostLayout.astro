@@ -32,8 +32,8 @@ const {
 } = Astro.props;
 
 const slug = Astro.url.pathname.split('/').pop();
-const canonical = `https://www.teamrespawntv.com${Astro.url.pathname}`;
-const resolvedOgImage = ogImage ? `https://www.teamrespawntv.com${ogImage}` : undefined;
+const canonical = `https://www.teamrespawn.net${Astro.url.pathname}`;
+const resolvedOgImage = ogImage ? `https://www.teamrespawn.net${ogImage}` : undefined;
 
 // JSON-LD structured data for Article
 const jsonLd = {
@@ -47,14 +47,14 @@ const jsonLd = {
   "author": {
     "@type": "Organization",
     "name": "Team Respawn",
-    "url": "https://www.teamrespawntv.com"
+    "url": "https://www.teamrespawn.net"
   },
   "publisher": {
     "@type": "Organization",
     "name": "Team Respawn",
     "logo": {
       "@type": "ImageObject",
-      "url": "https://www.teamrespawntv.com/content/Team-Respawn-Full.png"
+      "url": "https://www.teamrespawn.net/content/Team-Respawn-Full.png"
     }
   },
   "mainEntityOfPage": {
@@ -111,9 +111,12 @@ if (youtubeId) {
         {tags?.length ? (
           <div class="flex flex-wrap gap-2 mb-6">
             {tags.map(tag => (
-              <span class="text-xs font-semibold uppercase tracking-wide bg-gray-800 text-cyan-200 border border-cyan-500/30 rounded-full px-3 py-1">
+              <a 
+                href={`/blog?tag=${encodeURIComponent(tag.toLowerCase())}`}
+                class="text-xs font-semibold uppercase tracking-wide bg-gray-800 text-cyan-200 border border-cyan-500/30 rounded-full px-3 py-1 inline-block transition-all duration-200 hover:bg-cyan-800 hover:border-cyan-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-gray-900"
+              >
                 {tag}
-              </span>
+              </a>
             ))}
           </div>
         ) : null}
