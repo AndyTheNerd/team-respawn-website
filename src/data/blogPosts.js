@@ -1,5 +1,24 @@
 ﻿const blogPosts = [
   {
+    title: 'Terminus Firefight Halo Wars 2- The Most Effective Leaders',
+    date: 'Published on February 1, 2026',
+    dateIso: '2026-02-01',
+    category: 'Guides',
+    tags: ['Halo Wars 2'],
+    excerpt:
+      'Discover the most effective leaders for Terminus Firefight mode in Halo Wars 2. Learn the best 3v3 combinations, top tier leaders like Johnson and Pavium, and key strategies for survival.',
+    href: '/blog/posts/terminus-firefight-most-effective-leaders',
+    accentClass: 'text-cyan-400',
+    buttonClass: 'bg-cyan-500 hover:bg-cyan-600',
+    img: {
+      src: 'https://img.youtube.com/vi/qmpOIQkLGQA/maxresdefault.jpg',
+      alt: 'Terminus Firefight Halo Wars 2- The Most Effective Leaders',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
     title: 'How to Super Turtle - Halo Wars 2',
     date: 'Published on January 30, 2025',
     dateIso: '2025-01-30',
