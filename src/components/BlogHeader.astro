@@ -1,11 +1,9 @@
 ---
 const {
-  showFilters = false,
-  title = 'Video Game Blog',
-  subtitle = 'News, reviews, and insights from the gaming world.'
+  showFilters = false
 } = Astro.props;
 ---
-<header class="flex justify-between items-center py-6 mb-8">
+<header class="flex justify-between items-center py-2 mb-4">
   {showFilters ? (
     <button
       id="blog-filter-toggle"
@@ -18,15 +16,8 @@ const {
       <i class="fas fa-sliders-h text-2xl text-gray-400" aria-hidden="true"></i>
     </button>
   ) : (
-    <div class="h-8 w-8" aria-hidden="true"></div>
+    <div class="w-8" aria-hidden="true"></div>
   )}
 
-  <div class="flex-grow text-center">
-    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-2">{title}</h1>
-    <p class="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto">
-      {subtitle}
-    </p>
-  </div>
-
-  <div class="h-8 w-8" aria-hidden="true"></div>
+  <div class="w-8" aria-hidden="true"></div>
 </header>
