@@ -9,7 +9,8 @@ const columns = [
       { label: 'Home', href: '/' },
       { label: 'Walkthroughs', href: '/#walkthroughs' },
       { label: 'Guides', href: '/blog?category=Guides' },
-      { label: 'Blog', href: '/blog' }
+      { label: 'Blog', href: '/blog' },
+      { label: 'RSS Feed', href: '/rss.xml' }
     ]
   },
   {
@@ -46,6 +47,17 @@ const legalLinks = [
         <p class="text-sm sm:text-base text-gray-300 leading-relaxed">
           Strategy guides, walkthroughs, and tools for RTS fans. Follow Team Respawn for Halo Wars, Age of Empires, and more.
         </p>
+        <div class="mt-4">
+          <a 
+            href="/rss.xml" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300 text-sm"
+          >
+            <i class="fas fa-rss" aria-hidden="true"></i>
+            Subscribe to Updates
+          </a>
+        </div>
         <div class="pt-2">
           <SocialIcons />
         </div>

@@ -1,5 +1,7 @@
 ---
 import { Breadcrumb, Sidebar } from 'webcoreui/astro'
+import RSSButton from './RSSButton.astro';
+import SocialIcons from './SocialIcons.astro';
 
 export interface Props {
   category: string
@@ -8,7 +10,7 @@ export interface Props {
 
 const { category, title } = Astro.props
 
-const categories = ['Guides', 'Features', 'Reviews', 'Insights', 'Spotlight']
+const categories = ['Guides', 'Reviews', 'Spotlight']
 ---
 
 <aside class="blog-sidebar sticky top-4 space-y-6">
@@ -34,6 +36,18 @@ const categories = ['Guides', 'Features', 'Reviews', 'Insights', 'Spotlight']
     ]}
     className="blog-categories"
   />
+
+  <!-- RSS Subscription -->
+  <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
+    <h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+      <i class="fas fa-rss text-orange-400" aria-hidden="true"></i>
+      Stay Updated
+    </h3>
+    <p class="text-xs text-gray-400 mb-3">
+      Get the latest guides and walkthroughs delivered to your RSS reader.
+    </p>
+    <RSSButton variant="default" text="Subscribe to RSS" />
+  </div>
 
   <slot />
 </aside>

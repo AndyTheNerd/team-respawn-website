@@ -160,7 +160,18 @@ const blogStructuredData = {
       </div>
 
       <!-- Latest Articles Section -->
-      <h2 class="text-2xl font-bold text-white mb-8">Latest Articles</h2>
+      <div class="flex justify-between items-center mb-8">
+        <h2 class="text-2xl font-bold text-white">Latest Articles</h2>
+        <a 
+          href="/rss.xml" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300 text-sm"
+        >
+          <i class="fas fa-rss" aria-hidden="true"></i>
+          Subscribe via RSS
+        </a>
+      </div>
 
       <div id="blog-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {sortedPosts.map((post, index) => (

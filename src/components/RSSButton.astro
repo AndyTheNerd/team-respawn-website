@@ -1,0 +1,31 @@
+---
+interface Props {
+  variant?: 'default' | 'compact' | 'footer';
+  text?: string;
+}
+
+const { variant = 'default', text = 'Subscribe via RSS' } = Astro.props;
+
+const buttonClasses = {
+  default: 'inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300 text-sm',
+  compact: 'inline-flex items-center gap-1 text-orange-400 hover:text-orange-300 transition-colors duration-200',
+  footer: 'inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300 text-sm'
+};
+
+const iconClasses = {
+  default: 'fas fa-rss',
+  compact: 'fas fa-rss text-sm',
+  footer: 'fas fa-rss'
+};
+---
+
+<a 
+  href="/rss.xml" 
+  target="_blank" 
+  rel="noopener noreferrer"
+  class={buttonClasses[variant]}
+  aria-label="Subscribe to Team Respawn RSS feed (opens in new tab)"
+>
+  <i class={iconClasses[variant]} aria-hidden="true"></i>
+  {variant !== 'compact' && text}
+</a>
