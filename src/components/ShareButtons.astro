@@ -1,0 +1,194 @@
+---
+import facebook from '../blocks/Socials/icons/facebook.svg?raw'
+import x from '../blocks/Socials/icons/x.svg?raw'
+import linkedin from '../blocks/Socials/icons/linkedin.svg?raw'
+import reddit from '../blocks/Socials/icons/reddit.svg?raw'
+
+interface Props {
+  url: string
+  title: string
+  class?: string
+}
+
+const { url, title, class: className } = Astro.props
+
+const encodedUrl = encodeURIComponent(url)
+const encodedTitle = encodeURIComponent(title)
+
+const shareLinks = [
+  {
+    name: 'X',
+    icon: x,
+    href: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
+    color: '#000000'
+  },
+  {
+    name: 'Facebook',
+    icon: facebook,
+    href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+    color: '#1877F2'
+  },
+  {
+    name: 'LinkedIn',
+    icon: linkedin,
+    href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+    color: '#0A66C2'
+  },
+  {
+    name: 'Reddit',
+    icon: reddit,
+    href: `https://www.reddit.com/submit?url=${encodedUrl}&title=${encodedTitle}`,
+    color: '#FF4500'
+  }
+]
+---
+
+<div class:list={['share-buttons', className]}>
+  <strong>Share this post</strong>
+  <div class="share-links">
+    {shareLinks.map(link => (
+      <a
+        href={link.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`Share on ${link.name}`}
+        title={`Share on ${link.name}`}
+        data-color={link.color}
+      >
+        <Fragment set:html={link.icon} />
+      </a>
+    ))}
+    <button
+      type="button"
+      class="copy-link"
+      data-url={url}
+      aria-label="Copy link to clipboard"
+      title="Copy link"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+      </svg>
+      <svg class="check-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 6 9 17l-5-5"></path>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<style>
+  .share-buttons {
+    padding: 1rem;
+    background: rgba(30, 41, 59, 0.5);
+    border-radius: 0.5rem;
+    border: 1px solid rgba(148, 163, 184, 0.1);
+  }
+
+  .share-buttons strong {
+    color: #f8fafc;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+    display: block;
+  }
+
+  .share-links {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .share-links a,
+  .share-links button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.5rem;
+    background: rgba(148, 163, 184, 0.1);
+    color: #94a3b8;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+  }
+
+  .share-links a:hover,
+  .share-links button:hover {
+    background: rgba(148, 163, 184, 0.2);
+    color: #f8fafc;
+    transform: translateY(-2px);
+  }
+
+  .share-links a:hover {
+    color: var(--hover-color, #f8fafc);
+  }
+
+  .share-links a[data-color="#1877F2"]:hover {
+    color: #1877F2;
+  }
+
+  .share-links a[data-color="#0A66C2"]:hover {
+    color: #0A66C2;
+  }
+
+  .share-links a[data-color="#FF4500"]:hover {
+    color: #FF4500;
+  }
+
+  .share-links :global(svg) {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .copy-link {
+    position: relative;
+  }
+
+  .copy-link .check-icon {
+    position: absolute;
+    opacity: 0;
+    color: #22c55e;
+    transition: opacity 0.2s ease;
+  }
+
+  .copy-link.copied svg:first-child {
+    opacity: 0;
+  }
+
+  .copy-link.copied .check-icon {
+    opacity: 1;
+  }
+
+  .copy-link.copied {
+    color: #22c55e;
+  }
+</style>
+
+<script>
+  function initShareButtons() {
+    document.querySelectorAll('.copy-link').forEach(button => {
+      button.addEventListener('click', async () => {
+        const url = button.getAttribute('data-url')
+        if (url) {
+          try {
+            await navigator.clipboard.writeText(url)
+            button.classList.add('copied')
+            setTimeout(() => {
+              button.classList.remove('copied')
+            }, 2000)
+          } catch (err) {
+            console.error('Failed to copy:', err)
+          }
+        }
+      })
+    })
+  }
+
+  // Initialize on page load
+  initShareButtons()
+
+  // Re-initialize after Astro page transitions
+  document.addEventListener('astro:after-swap', initShareButtons)
+</script>

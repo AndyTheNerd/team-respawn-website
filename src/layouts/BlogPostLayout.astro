@@ -5,6 +5,7 @@ import BlogSidebar from '../components/BlogSidebar.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import SidePanel from '../components/SidePanel.astro';
+import ShareButtons from '../components/ShareButtons.astro';
 import Author from '../blocks/Author/Author.astro';
 import authorInfo from '../data/authorInfo.js';
 
@@ -95,7 +96,9 @@ if (youtubeId) {
     <div class="max-w-6xl mx-auto flex flex-col lg:flex-row gap-8">
       <!-- Sidebar (appears first on mobile, moves to right on desktop) -->
       <div class="lg:order-2 lg:w-64 lg:flex-shrink-0">
-        <BlogSidebar category={category} title={title} />
+        <BlogSidebar category={category} title={title}>
+          <ShareButtons url={canonical} title={title} />
+        </BlogSidebar>
       </div>
 
       <!-- Main Content -->
