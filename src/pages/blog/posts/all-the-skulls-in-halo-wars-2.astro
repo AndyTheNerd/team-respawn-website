@@ -1,0 +1,352 @@
+---
+import BlogPostLayout from '../../../layouts/BlogPostLayout.astro';
+import CloudinaryImage from '../../../components/CloudinaryImage.astro';
+
+const title = "All the Skulls in Halo Wars 2";
+const description = "Complete guide to all 15 skulls in Halo Wars 2 campaign. Learn how to unlock each skull, their effects, and detailed strategies for finding them in every mission.";
+const category = "Guides";
+const publishedDate = "February 1, 2026";
+const dateIso = "2026-02-01";
+const tags = ["Halo Wars 2"];
+const ogImage = "/img/HW-Guides/Halo-Wars-2-Skulls.jpg";
+---
+
+<BlogPostLayout 
+  title={title} 
+  description={description}
+  category={category}
+  publishedDate={publishedDate}
+  dateIso={dateIso}
+  ogImage={ogImage}
+  tags={tags}
+>
+  <CloudinaryImage 
+    publicId="HW2_Campaign_nxrb8a" 
+    alt="All the Skulls in Halo Wars 2 - Complete Guide" 
+    class="w-full max-w-4xl mx-auto rounded-lg shadow-xl mb-8"
+    width={1200}
+    height={600}
+    loading="eager"
+    fallbackSrc="/img/HW-Guides/Halo-Wars-2-Skulls.jpg"
+  />
+
+  <p class="text-lg text-gray-300 mb-6">
+    <strong>Skulls</strong> are game modifiers featured in Halo Wars 2. When unlocked and activated they can alter gameplay difficulty and add interesting features to your campaign experience. There are fifteen skulls in total, each awarded for completing specific objectives throughout the campaign missions.
+  </p>
+
+  <h2 class="text-3xl font-bold text-cyan-400 mb-4">How to Find Skulls</h2>
+  <p class="text-gray-300 mb-6">
+    Skulls are awarded for completing specific Primary Objectives, Optional Objectives, or unmarked tasks throughout all of the missions in the game with the exception of the Prologue, The Signal. Each skull requires specific conditions to be met, often requiring you to complete optional objectives before or during the main mission progression.
+  </p>
+
+  <h2 class="text-3xl font-bold text-cyan-400 mb-4">Campaign Skulls</h2>
+
+  <div class="space-y-8">
+    <!-- Grunt Birthday Party -->
+    <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6">
+      <h3 class="text-2xl font-semibold text-cyan-300 mb-3">Grunt Birthday Party</h3>
+      <div class="grid md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <p class="text-sm text-gray-400 mb-2"><strong>Level:</strong> A New Enemy</p>
+          <p class="text-gray-300"><strong>Effect:</strong> Killed Grunts explode into a shower of confetti, bringing joy to the battlefield - if you're not a Grunt, that is.</p>
+        </div>
+        <div>
+          <p class="text-gray-300"><strong>How to unlock:</strong> Capture Four of Decimus' Power Nodes.</p>
+        </div>
+      </div>
+      <div class="bg-gray-900/50 rounded p-4">
+        <p class="text-sm text-gray-400"><strong>Strategy:</strong> After building your base, four Power Nodes will be shown around the map, indicated by an energy bolt icon. Move your Infantry Units to each of the Nodes to capture them. Make sure to do this before carrying on with the Primary Objective.</p>
+      </div>
+    </div>
+
+    <!-- Paintball -->
+    <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6">
+      <h3 class="text-2xl font-semibold text-cyan-300 mb-3">Paintball</h3>
+      <div class="grid md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <p class="text-sm text-gray-400 mb-2"><strong>Level:</strong> Ascension</p>
+          <p class="text-gray-300"><strong>Effect:</strong> Marine grenades and Grunt mines splatter the environment with color (as well as deadly shrapnel). Time to paint the town!</p>
+        </div>
+        <div>
+          <p class="text-gray-300"><strong>How to unlock:</strong> Destroy the Banished base.</p>
+        </div>
+      </div>
+      <div class="bg-gray-900/50 rounded p-4">
+        <p class="text-sm text-gray-400"><strong>Strategy:</strong> After building your base, begin building a large army of Hornets and Cyclops. Once you're set, head north, beyond Capture Node B, and you will find the Banished base. Do not capture any of the Capture Nodes until after destroying the base (so you won't face any opposition later). It is best to set up quickly, before the Banished can make its first move to capture a Node.</p>
+      </div>
+    </div>
+
+    <!-- Pain Train -->
+    <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6">
+      <h3 class="text-2xl font-semibold text-cyan-300 mb-3">Pain Train</h3>
+      <div class="grid md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <p class="text-sm text-gray-400 mb-2"><strong>Level:</strong> Ascension</p>
+          <p class="text-gray-300"><strong>Effect:</strong> All player units train 50% faster.</p>
+        </div>
+        <div>
+          <p class="text-gray-300"><strong>How to unlock:</strong> Destroy the hidden facility's four structures.</p>
+        </div>
+      </div>
+      <div class="bg-gray-900/50 rounded p-4">
+        <p class="text-sm text-gray-400"><strong>Strategy:</strong> After building your base, take three or four Hornets and move them to the darkened island south of your base. Here, you will find a hidden Banished base with a few Infantry Units. Use your Hornets to destroy the enemies and the four structures of the base.</p>
+      </div>
+    </div>
+
+    <!-- Bountiful Harvest -->
+    <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6">
+      <h3 class="text-2xl font-semibold text-cyan-300 mb-3">Bountiful Harvest</h3>
+      <div class="grid md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <p class="text-sm text-gray-400 mb-2"><strong>Level:</strong> One Three Zero</p>
+          <p class="text-gray-300"><strong>Effect:</strong> Supplies from supply buildings arrive 25% faster.</p>
+        </div>
+        <div>
+          <p class="text-gray-300"><strong>How to unlock:</strong> Don't let any of the four prison squads die.</p>
+        </div>
+      </div>
+      <div class="bg-gray-900/50 rounded p-4">
+        <p class="text-sm text-gray-400"><strong>Strategy:</strong> During this mission, Alice will be required to rescue four squads of prisoners, the first half of which are Hellbringers and the second half of which are Warthog Units and Cyclopses. Try to keep the Hellbringers in the rear while you focus on controlling/moving Alice throughout the mission. Once your entire squadron reaches the comms building, move your Hellbringers and Warthogs behind the building. Now move Alice and one Cyclops into one of the two garrisons in front of the building and move the other two Cyclops into the other garrison. Hold out like this until extraction arrives, making sure none of the Cyclops or Units behind the building die. It is okay to lose a few units, but do not lose a whole squad.</p>
+      </div>
+    </div>
+
+    <!-- Emperor -->
+    <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6">
+      <h3 class="text-2xl font-semibold text-cyan-300 mb-3">Emperor</h3>
+      <div class="grid md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <p class="text-sm text-gray-400 mb-2"><strong>Level:</strong> The Cartographer</p>
+          <p class="text-gray-300"><strong>Effect:</strong> All player powers recharge in half the time.</p>
+        </div>
+        <div>
+          <p class="text-gray-300"><strong>How to unlock:</strong> Destroy both minibases in the central chamber.</p>
+        </div>
+      </div>
+      <div class="bg-gray-900/50 rounded p-4">
+        <p class="text-sm text-gray-400"><strong>Strategy:</strong> After powering down and passing through the energy barrier, you may notice that in the northern end of the chamber, on both the eastern and western edges, are Banished minibases. Make sure to destroy both bases before moving on with the Primary Objective.</p>
+      </div>
+    </div>
+
+    <!-- Pestilence -->
+    <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6">
+      <h3 class="text-2xl font-semibold text-cyan-300 mb-3">Pestilence</h3>
+      <div class="grid md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <p class="text-sm text-gray-400 mb-2"><strong>Level:</strong> Lights Out</p>
+          <p class="text-gray-300"><strong>Effect:</strong> All player units slowly lose health from the moment they're built.</p>
+        </div>
+        <div>
+          <p class="text-gray-300"><strong>How to unlock:</strong> Release all 10 UNSC Prisoners.</p>
+        </div>
+      </div>
+      <div class="bg-gray-900/50 rounded p-4">
+        <p class="text-sm text-gray-400"><strong>Strategy:</strong> You will find your first set of prisoners just north of the mission start or after the reunion with Douglas. Then, after passing through the portal, you will need to head to the right-hand side of the valley to find three additional cells of prisoners. Make sure to rescue them before dueling with Decimus.</p>
+      </div>
+    </div>
+
+    <!-- Total Annihilation -->
+    <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6">
+      <h3 class="text-2xl font-semibold text-cyan-300 mb-3">Total Annihilation</h3>
+      <div class="grid md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <p class="text-sm text-gray-400 mb-2"><strong>Level:</strong> From the Deep</p>
+          <p class="text-gray-300"><strong>Effect:</strong> Spartan special ability slams create an even more powerful explosion upon landing.</p>
+        </div>
+        <div>
+          <p class="text-gray-300"><strong>How to unlock:</strong> Complete the mission without Spartan Alice being downed.</p>
+        </div>
+      </div>
+      <div class="bg-gray-900/50 rounded p-4">
+        <p class="text-sm text-gray-400"><strong>Strategy:</strong> The best method to employ for this task is to have Alice either hijack a Wraith on the beach or take control of the Scorpion tank on the beach (either works). Make sure Alice is your primary focus throughout the mission; heal her when needed and make sure she doesn't take the brunt of the enemy's attacks. When the Scarab shows up at the end of the mission, you should already have a sizable army of Anti-Tanks (Cyclops and Scorpions) to accompany Alice in taking it down quickly. It's better to have a Nightingale accompany Alice most of the time, to save resources from using Restoration Drones. In addition, you can also do it in conjunction with hijacking a Locust as part of the Bonus Objective and it has more range to allow Alice to build up veterancy without taking too much hits.</p>
+      </div>
+    </div>
+
+    <!-- Sickness -->
+    <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6">
+      <h3 class="text-2xl font-semibold text-cyan-300 mb-3">Sickness</h3>
+      <div class="grid md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <p class="text-sm text-gray-400 mb-2"><strong>Level:</strong> Hold the Line</p>
+          <p class="text-gray-300"><strong>Effect:</strong> All player units have 50% fewer hit points.</p>
+        </div>
+        <div>
+          <p class="text-gray-300"><strong>How to unlock:</strong> Keep the barricades intact.</p>
+        </div>
+      </div>
+      <div class="bg-gray-900/50 rounded p-4">
+        <p class="text-sm text-gray-400"><strong>Strategy:</strong> In this mission, you will need to protect the western and eastern barricades; the former of which is just to the left of your base and the latter of which is a little southeast of your base. The best way to ensure they aren't overwhelmed and destroyed is to build one Anti-Infantry and one Anti-Vehicle turret at each barricade and then place at least three or four Hornets and one Nightingale just ahead of the barricade as the "first line of defense." It's recommended to try doing this on a low difficulty, as the enemy forces become increasingly difficult to keep at bay past the fifteen minute mark. Alternately, create a kill zone with mixed anti-tanks and infantries (Recommended group of Full Upgrade Marines, Cyclops, and Nightingales) for better efficiency. In addition, two siege turrets and two anti-air turrets should be built on the base for defense support.</p>
+      </div>
+    </div>
+
+    <!-- Firestarter -->
+    <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6">
+      <h3 class="text-2xl font-semibold text-cyan-300 mb-3">Firestarter</h3>
+      <div class="grid md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <p class="text-sm text-gray-400 mb-2"><strong>Level:</strong> Hold the Line</p>
+          <p class="text-gray-300"><strong>Effect:</strong> Grunts and Marines explode on death inflicting damage on enemy units.</p>
+        </div>
+        <div>
+          <p class="text-gray-300"><strong>How to unlock:</strong> Particle Cannon stays above 50 percent health.</p>
+        </div>
+      </div>
+      <div class="bg-gray-900/50 rounded p-4">
+        <p class="text-sm text-gray-400"><strong>Strategy:</strong> If you are successful in keeping both barricades intact for the "Sickness" skull, then you shouldn't have to worry about this because no enemy Units would have been able to reach the Particle Cannon.</p>
+      </div>
+    </div>
+
+    <!-- Things That Go Boom -->
+    <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6">
+      <h3 class="text-2xl font-semibold text-cyan-300 mb-3">Things That Go Boom</h3>
+      <div class="grid md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <p class="text-sm text-gray-400 mb-2"><strong>Level:</strong> Under The Dark</p>
+          <p class="text-gray-300"><strong>Effect:</strong> Hero units unleash a nuclear explosion on death.</p>
+        </div>
+        <div>
+          <p class="text-gray-300"><strong>How to unlock:</strong> Eliminate all three Brute Warlords.</p>
+        </div>
+      </div>
+      <div class="bg-gray-900/50 rounded p-4">
+        <p class="text-sm text-gray-400"><strong>Strategy:</strong> You will come into contact with the first Warlord by moving your Units past the first base you build and down the ridge to the Banished's base during Jerome and Allieri's segment. Provided you stick to the right-hand side of the valley/map once you are in Alice's segment of the mission, you will encounter the second Warlord on your way to the first Kodiak deployment position. The last Warlord can be confronted by continuing to travel north on this eastern edge of the valley; once you reach the second red energy barrier, he will attack you. While the Warlords have a large amount of health, Sniper can do the job best since they can take out the Warlords without taking any hits and from long distances.</p>
+      </div>
+    </div>
+
+    <!-- Wuv Woo -->
+    <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6">
+      <h3 class="text-2xl font-semibold text-cyan-300 mb-3">Wuv Woo</h3>
+      <div class="grid md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <p class="text-sm text-gray-400 mb-2"><strong>Level:</strong> The Foundry</p>
+          <p class="text-gray-300"><strong>Effect:</strong> Scarab and Locust beam weapons shoot rainbows made of pure love and hearts. Maybe Atriox isn't such a bad guy after all!</p>
+        </div>
+        <div>
+          <p class="text-gray-300"><strong>How to unlock:</strong> Keep The Scarab Alive During The Entire Mission.</p>
+        </div>
+      </div>
+      <div class="bg-gray-900/50 rounded p-4">
+        <p class="text-sm text-gray-400"><strong>Strategy:</strong> Keeping the Scarab alive through the mission shouldn't be too much of an issue if you're playing on one of the lower difficulties. If you're playing on Heroic or Legendary, though, make sure the Scarab stays at the rear of your squad so it doesn't take too much damage. Move slowly at all times and be smart as to when it's necessary to retreat and heal your Units. Always bring Nightingales to keep the Scarab constantly healed at all times. Have a mix of Kodiak, Snipers, and Wolverines for ground and anti-air support.</p>
+      </div>
+    </div>
+
+    <!-- Sugar Cookies -->
+    <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6">
+      <h3 class="text-2xl font-semibold text-cyan-300 mb-3">Sugar Cookies</h3>
+      <div class="grid md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <p class="text-sm text-gray-400 mb-2"><strong>Level:</strong> The Foundry</p>
+          <p class="text-gray-300"><strong>Effect:</strong> All player units have 50% more hitpoints.</p>
+        </div>
+        <div>
+          <p class="text-gray-300"><strong>How to unlock:</strong> Keep the Scarab's health above 25%.</p>
+        </div>
+      </div>
+      <div class="bg-gray-900/50 rounded p-4">
+        <p class="text-sm text-gray-400"><strong>Strategy:</strong> If you are attempting to unlock the "Wuv Woo" skull in this mission, this will likely mean your Scarab should have no issue staying above 25% of its health. As mentioned, just take the mission and its objectives slowly and keep your Scarab at the rear. It's recommended to bring some Nightingales as an escort.</p>
+      </div>
+    </div>
+
+    <!-- After Party -->
+    <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6">
+      <h3 class="text-2xl font-semibold text-cyan-300 mb-3">After Party</h3>
+      <div class="grid md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <p class="text-sm text-gray-400 mb-2"><strong>Level:</strong> The Halo</p>
+          <p class="text-gray-300"><strong>Effect:</strong> Any time a base or minibase is destroyed, the player who owned it gets a tank and infantry unit.</p>
+        </div>
+        <div>
+          <p class="text-gray-300"><strong>How to unlock:</strong> Rescue Bravo Base.</p>
+        </div>
+      </div>
+      <div class="bg-gray-900/50 rounded p-4">
+        <p class="text-sm text-gray-400"><strong>Strategy:</strong> When the mission starts, you should notice a Power Node just ahead. Capture that Node and then Captain Cutter will inform you of Bravo Base; they are under attack and need your help. Move your Units to Bravo Base and repel the Banished's assault as quickly as possible. This can only be done once you've repelled the Retriever Sentinel's on first attack.</p>
+      </div>
+    </div>
+
+    <!-- Nightmare -->
+    <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6">
+      <h3 class="text-2xl font-semibold text-cyan-300 mb-3">Nightmare</h3>
+      <div class="grid md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <p class="text-sm text-gray-400 mb-2"><strong>Level:</strong> Last Stand</p>
+          <p class="text-gray-300"><strong>Effect:</strong> No checkpoints or saves on any difficulty. Campaign only.</p>
+        </div>
+        <div>
+          <p class="text-gray-300"><strong>How to unlock:</strong> Keep the Control Room Shield over 50%.</p>
+        </div>
+      </div>
+      <div class="bg-gray-900/50 rounded p-4">
+        <p class="text-sm text-gray-400"><strong>Strategy:</strong> Since you do not have access to base-building during this mission, you will need to rely on the Units that Captain Cutter periodically provides. To start, make sure to build and upgrades turrets around the edges of the central chamber. Focus on building Anti-Infantry and Anti-Vehicle turrets. Next, you'll want to make sure each of the four entryways of the chamber are appropriately defended. Split your focuses intelligently; you'll have access to Hellbringers, Snipers, Spartans, Nightingales, Warthogs, Wolverines, Scorpions...you name it. Spread them out evenly and make use of your Leader Powers as often as possible. Always drop ODSTs every time a leader power is ready, since you get an endless population to strengthen defenses further.</p>
+      </div>
+    </div>
+
+    <!-- Shadow -->
+    <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6">
+      <h3 class="text-2xl font-semibold text-cyan-300 mb-3">Shadow</h3>
+      <div class="grid md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <p class="text-sm text-gray-400 mb-2"><strong>Level:</strong> Last Stand</p>
+          <p class="text-gray-300"><strong>Effect:</strong> Player core infantry units start cloaked.</p>
+        </div>
+        <div>
+          <p class="text-gray-300"><strong>How to unlock:</strong> Kill the two Brute Warlords and stop their reinforcements.</p>
+        </div>
+      </div>
+      <div class="bg-gray-900/50 rounded p-4">
+        <p class="text-sm text-gray-400"><strong>Strategy:</strong> At the beginning of the mission, you will be informed that Brute Warlords are converging on your position. They will both be displayed on your mini-map, but they don't necessarily storm your position; rather, they will remain far away, under the cover of the Fog of War, with their army of reinforcements. Once you have a sizable and formidable squadron of mixed units (Snipers, Spartans, Scorpions, Cyclopses, etc.), storm each Warlord's position to take them and their reinforcements out. Try to complete it in less than ten minutes after the mission starts, or the first batch of reinforcements arrived (8 Marines and 8 Cyclops), since the more time you take, the heavier the Banished's attack will get, and you have less of a chance to defeat the Warlords. Use every Leader Power if possible, as you'll need more numbers to defend the Control Room.</p>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="text-3xl font-bold text-cyan-400 mb-4 mt-8">Unused Skulls</h2>
+  <p class="text-gray-300 mb-6">
+    The following skulls were developed but not included in the final game. They can sometimes be found in game files or through modding:
+  </p>
+
+  <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="bg-gray-800/30 border border-gray-700 rounded p-4">
+      <h4 class="font-semibold text-cyan-300 mb-2">Vampire</h4>
+      <p class="text-sm text-gray-400">Every UNSC & Banished units would be granted the siphon passive.</p>
+    </div>
+    <div class="bg-gray-800/30 border border-gray-700 rounded p-4">
+      <h4 class="font-semibold text-cyan-300 mb-2">What's in the Box</h4>
+      <p class="text-sm text-gray-400">Every 5 minutes, boxes are deployed around the map, upon touching these boxes will grant the player a random unit.</p>
+    </div>
+    <div class="bg-gray-800/30 border border-gray-700 rounded p-4">
+      <h4 class="font-semibold text-cyan-300 mb-2">Moon Gravity</h4>
+      <p class="text-sm text-gray-400">Reduces the gravity and explosions, launches victims much further.</p>
+    </div>
+    <div class="bg-gray-800/30 border border-gray-700 rounded p-4">
+      <h4 class="font-semibold text-cyan-300 mb-2">Fog</h4>
+      <p class="text-sm text-gray-400">The hud would be disabled.</p>
+    </div>
+    <div class="bg-gray-800/30 border border-gray-700 rounded p-4">
+      <h4 class="font-semibold text-cyan-300 mb-2">Iron</h4>
+      <p class="text-sm text-gray-400">When you failed in a mission you will restart all the to the start of the mission.</p>
+    </div>
+    <div class="bg-gray-800/30 border border-gray-700 rounded p-4">
+      <h4 class="font-semibold text-cyan-300 mb-2">Look Daddy</h4>
+      <p class="text-sm text-gray-400">Whenever a Grunt unit dies, their gas tanks will send them flying around.</p>
+    </div>
+    <div class="bg-gray-800/30 border border-gray-700 rounded p-4">
+      <h4 class="font-semibold text-cyan-300 mb-2">Clear Skies</h4>
+      <p class="text-sm text-gray-400">Removes fog.</p>
+    </div>
+    <div class="bg-gray-800/30 border border-gray-700 rounded p-4">
+      <h4 class="font-semibold text-cyan-300 mb-2">Cowbell</h4>
+      <p class="text-sm text-gray-400">Explosions would be increased.</p>
+    </div>
+  </div>
+
+  <div class="mt-8 p-6 bg-gradient-to-r from-cyan-900/30 to-blue-900/30 border border-cyan-500/30 rounded-lg">
+    <h3 class="text-xl font-bold text-cyan-300 mb-3">Tips for Skull Hunting</h3>
+    <ul class="list-disc list-inside text-gray-300 space-y-2">
+      <li>Save frequently before attempting skull objectives</li>
+      <li>Some skulls require completing optional objectives before main objectives</li>
+      <li>Consider playing on easier difficulties for difficult skull challenges</li>
+      <li>Skulls are permanently unlocked once obtained</li>
+      <li>You can activate/deactivate skulls from the campaign menu after unlocking</li>
+      <li>Some skull combinations can make the game significantly harder or more fun</li>
+    </ul>
+  </div>
+</BlogPostLayout>

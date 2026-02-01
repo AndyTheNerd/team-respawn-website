@@ -1,5 +1,25 @@
 ﻿const blogPosts = [
   {
+    title: 'All the Skulls in Halo Wars 2',
+    date: 'Published on February 1, 2026',
+    dateIso: '2026-02-01',
+    category: 'Guides',
+    tags: ['Halo Wars 2'],
+    featured: true,
+    excerpt:
+      'Complete guide to all 15 skulls in Halo Wars 2 campaign. Learn how to unlock each skull, their effects, and detailed strategies for finding them in every mission.',
+    href: '/blog/posts/all-the-skulls-in-halo-wars-2',
+    accentClass: 'text-cyan-400',
+    buttonClass: 'bg-cyan-500 hover:bg-cyan-600',
+    img: {
+      src: 'https://res.cloudinary.com/damu0vqmp/image/upload/v1769973137/HW2_Campaign_nxrb8a.webp',
+      alt: 'All the Skulls in Halo Wars 2',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
     title: 'Terminus Firefight Halo Wars 2- The Most Effective Leaders',
     date: 'Published on February 1, 2026',
     dateIso: '2026-02-01',
