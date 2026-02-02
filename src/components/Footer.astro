@@ -18,7 +18,7 @@ const columns = [
     links: [
       { label: 'Storehaus RTS Bot', href: '/storehaus-info' },
       { label: 'Storehaus Invite Link', href: '/storehaus', newTab: true },
-      { label: 'Halo Quotes', href: 'https://haloquotes.teamrespawn.net/' }
+      { label: 'Halo Quotes', href: 'https://haloquotes.teamrespawntv.com/' }
     ]
   },
   {
@@ -41,24 +41,27 @@ const legalLinks = [
   <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
     <div class="grid gap-10 lg:grid-cols-[1.2fr_2fr]">
       <div class="space-y-4">
-        <a href="/" aria-label="Team Respawn home" class="inline-flex items-center gap-3">
-          <img src="/content/Team-Respawn-Full.png" alt="Team Respawn logo" class="h-10 w-auto" loading="lazy" />
+        <a href="/" aria-label="Team Respawn home" class="inline-flex items-center gap-3 group">
+          <img 
+            src="/content/Team-Respawn-Full.png" 
+            alt="Team Respawn logo" 
+            class="h-10 w-auto cursor-pointer transition-all duration-300 group-hover:scale-105 group-hover:drop-shadow-[0_0_12px_rgba(168,85,247,0.6)]" 
+            loading="lazy" 
+          />
         </a>
         <p class="text-sm sm:text-base text-gray-300 leading-relaxed">
           Strategy guides, walkthroughs, and tools for RTS fans. Follow Team Respawn for Halo Wars, Age of Empires, and more.
         </p>
-        <div class="mt-4">
-          <a 
-            href="/rss.xml" 
-            target="_blank" 
+        <div class="mt-4 flex flex-wrap items-center gap-4">
+          <a
+            href="/rss.xml"
+            target="_blank"
             rel="noopener noreferrer"
             class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300 text-sm"
           >
             <i class="fas fa-rss" aria-hidden="true"></i>
             Subscribe to Updates
           </a>
-        </div>
-        <div class="pt-2">
           <SocialIcons />
         </div>
       </div>
