@@ -6,7 +6,7 @@ const authorInfo = {
   },
   name: 'Team Respawn',
   role: '',
-  description: 'Team Respawn creates guides, walkthroughs, and strategy content for games like Halo Wars 2, Age of Empires, and Age of Mythology.',
+  description: 'Team Respawn creates guides, walkthroughs, and strategy content for RTS games like Halo Wars 2, Age of Empires, and Age of Mythology.',
   socials: {
     links: [
       'https://www.youtube.com/@TeamRespawn',
