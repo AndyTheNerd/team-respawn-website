@@ -9,11 +9,13 @@ import blogPosts from '../../data/blogPosts.js';
 import '../../styles/webcore.scss';
 import '../../styles/blog-overrides.scss';
 
+// Pagination settings (handled client-side)
+const pageSize = 12;
 const sortedPosts = [...blogPosts].sort((a, b) => {
   // Featured posts always come first
   if (a.featured && !b.featured) return -1;
   if (!a.featured && b.featured) return 1;
-  
+
   // Then sort by date (newest first)
   const aDate = a.dateIso ? Date.parse(a.dateIso) : 0;
   const bDate = b.dateIso ? Date.parse(b.dateIso) : 0;
@@ -201,6 +203,11 @@ const blogStructuredData = {
         <p class="text-xl text-gray-400">No articles found matching your criteria.</p>
       </div>
 
+      <!-- Pagination (rendered client-side) -->
+      <nav id="blog-pagination" class="mt-12 flex justify-center" aria-label="Blog pagination">
+        <div id="pagination-controls" class="inline-flex flex-wrap items-center gap-2"></div>
+      </nav>
+
 
     </main>
 
@@ -214,9 +221,11 @@ const blogStructuredData = {
   <script src="/js/side-panel.js" is:inline></script>
   <script src="/js/secondary-init.js" is:inline></script>
 
-  <!-- Blog post data for client-side filtering -->
-  <script define:vars={{ blogPosts }}>
+  <!-- Blog post data for client-side filtering and pagination -->
+  <script define:vars={{ blogPosts, pageSize }}>
     window.blogPostsData = blogPosts;
+    window.blogPageSize = pageSize;
   </script>
   <script src="/js/blog-search.js" is:inline></script>
+  
 </BaseLayout>

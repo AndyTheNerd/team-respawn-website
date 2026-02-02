@@ -7,7 +7,8 @@
   const sortSelect = document.querySelector('[data-id="w-select-sort-filter"]');
   const blogGrid = document.getElementById('blog-grid');
   const noResults = document.getElementById('no-results');
-  const paginationContainer = document.querySelector('.mt-12.flex.justify-center');
+  const paginationNav = document.getElementById('blog-pagination');
+  const paginationControls = document.getElementById('pagination-controls');
   const activeFilters = document.getElementById('blog-active-filters');
   const activeFilterList = document.getElementById('blog-active-filter-list');
   const clearFiltersButton = document.getElementById('blog-clear-filters');
@@ -18,6 +19,8 @@
   let currentTag = 'all';
   let currentSort = 'newest';
   let featuredEnabled = true; // Default to enabled
+  let currentPage = 1;
+  const pageSize = window.blogPageSize || 12;
 
   function normalizeValue(value) {
     return (value || '').toLowerCase().trim();
@@ -217,12 +220,11 @@
     });
   }
 
-  function filterPosts() {
+  function getFilteredCards() {
     sortCards();
-    const cards = blogGrid.querySelectorAll('.blog-card-wrapper');
-    let visibleCount = 0;
+    const cards = Array.from(blogGrid.querySelectorAll('.blog-card-wrapper'));
 
-    cards.forEach(function(card) {
+    return cards.filter(function(card) {
       const title = (card.dataset.title || '').toLowerCase();
       const category = (card.dataset.category || '').toLowerCase();
       const excerpt = (card.dataset.excerpt || '').toLowerCase();
@@ -240,16 +242,100 @@
         currentTag === 'all tags' ||
         tags.includes(currentTag);
 
-      if (matchesSearch && matchesCategory && matchesTag) {
-        card.style.display = '';
-        visibleCount++;
-      } else {
-        card.style.display = 'none';
+      return matchesSearch && matchesCategory && matchesTag;
+    });
+  }
+
+  function renderPagination(totalItems) {
+    if (!paginationControls) return;
+
+    const totalPages = Math.ceil(totalItems / pageSize);
+    paginationControls.innerHTML = '';
+
+    if (totalPages <= 1) {
+      if (paginationNav) paginationNav.style.display = 'none';
+      return;
+    }
+
+    if (paginationNav) paginationNav.style.display = '';
+
+    // Previous button
+    if (currentPage > 1) {
+      const prevBtn = document.createElement('button');
+      prevBtn.className = 'px-3 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 hover:bg-gray-700';
+      prevBtn.textContent = 'Previous';
+      prevBtn.setAttribute('aria-label', 'Previous page');
+      prevBtn.addEventListener('click', function() {
+        goToPage(currentPage - 1);
+      });
+      paginationControls.appendChild(prevBtn);
+    }
+
+    // Page numbers
+    for (let i = 1; i <= totalPages; i++) {
+      const pageBtn = document.createElement('button');
+      pageBtn.className = i === currentPage
+        ? 'px-3 py-2 rounded-lg border bg-cyan-500 text-white border-cyan-400'
+        : 'px-3 py-2 rounded-lg border bg-gray-800 text-gray-200 border-gray-700 hover:bg-gray-700';
+      pageBtn.textContent = i;
+      if (i === currentPage) {
+        pageBtn.setAttribute('aria-current', 'page');
       }
+      pageBtn.addEventListener('click', function() {
+        goToPage(i);
+      });
+      paginationControls.appendChild(pageBtn);
+    }
+
+    // Next button
+    if (currentPage < totalPages) {
+      const nextBtn = document.createElement('button');
+      nextBtn.className = 'px-3 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 hover:bg-gray-700';
+      nextBtn.textContent = 'Next';
+      nextBtn.setAttribute('aria-label', 'Next page');
+      nextBtn.addEventListener('click', function() {
+        goToPage(currentPage + 1);
+      });
+      paginationControls.appendChild(nextBtn);
+    }
+  }
+
+  function goToPage(page) {
+    currentPage = page;
+    filterPosts();
+    // Scroll to top of blog grid
+    if (blogGrid) {
+      blogGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  function filterPosts() {
+    const filteredCards = getFilteredCards();
+    const totalFiltered = filteredCards.length;
+
+    // Calculate pagination
+    const totalPages = Math.ceil(totalFiltered / pageSize);
+    // Reset to page 1 if current page is out of bounds
+    if (currentPage > totalPages) {
+      currentPage = 1;
+    }
+
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+
+    // Hide all cards first
+    const allCards = blogGrid.querySelectorAll('.blog-card-wrapper');
+    allCards.forEach(function(card) {
+      card.style.display = 'none';
+    });
+
+    // Show only cards for current page
+    filteredCards.slice(startIndex, endIndex).forEach(function(card) {
+      card.style.display = '';
     });
 
     // Show/hide no results message
-    if (visibleCount === 0) {
+    if (totalFiltered === 0) {
       noResults.classList.remove('hidden');
       blogGrid.classList.add('hidden');
     } else {
@@ -257,18 +343,8 @@
       blogGrid.classList.remove('hidden');
     }
 
-    // Hide pagination when filtering
-    if (paginationContainer) {
-      if (
-        currentSearchTerm !== '' ||
-        (currentCategory !== 'all' && currentCategory !== 'all categories') ||
-        (currentTag !== 'all' && currentTag !== 'all tags')
-      ) {
-        paginationContainer.style.display = 'none';
-      } else {
-        paginationContainer.style.display = '';
-      }
-    }
+    // Render pagination
+    renderPagination(totalFiltered);
 
     updateSelectActiveStates();
     renderActiveFilters();
@@ -293,10 +369,9 @@
       if (event.target.classList.contains('blog-pill-remove')) {
         const pill = event.target.closest('.blog-active-pill');
         if (!pill) return;
-        
+
         const filterType = pill.dataset.filterType;
-        const filterValue = pill.dataset.filterValue;
-        
+
         switch(filterType) {
           case 'search':
             if (searchInput) {
@@ -317,7 +392,8 @@
             setSelectUI('sort-filter', 'newest');
             break;
         }
-        
+
+        currentPage = 1; // Reset to first page
         filterPosts();
       }
     });
@@ -327,13 +403,14 @@
   if (featuredToggle) {
     featuredToggle.addEventListener('change', function() {
       featuredEnabled = this.checked;
-      
+      currentPage = 1; // Reset to first page
+
       // Update data-featured-enabled attribute on all blog cards
       const blogCards = document.querySelectorAll('.blog-card-wrapper');
       blogCards.forEach(function(card) {
         card.dataset.featuredEnabled = featuredEnabled ? 'true' : 'false';
       });
-      
+
       filterPosts();
     });
   }
@@ -342,6 +419,7 @@
   if (searchInput) {
     var debouncedFilter = debounce(function() {
       currentSearchTerm = searchInput.value.toLowerCase().trim();
+      currentPage = 1; // Reset to first page on search
       filterPosts();
     }, 200);
 
@@ -351,6 +429,7 @@
     searchInput.addEventListener('search', function() {
       if (searchInput.value === '') {
         currentSearchTerm = '';
+        currentPage = 1;
         filterPosts();
       }
     });
@@ -361,16 +440,19 @@
     document.addEventListener('selectOnChange', function(event) {
       if (event.detail && event.detail.select === 'category-filter') {
         currentCategory = (event.detail.value || event.detail.name || 'all').toLowerCase();
+        currentPage = 1; // Reset to first page on filter change
         filterPosts();
       }
 
       if (event.detail && event.detail.select === 'tag-filter') {
         currentTag = (event.detail.value || event.detail.name || 'all').toLowerCase();
+        currentPage = 1; // Reset to first page on filter change
         filterPosts();
       }
 
       if (event.detail && event.detail.select === 'sort-filter') {
         currentSort = (event.detail.value || event.detail.name || 'newest').toLowerCase();
+        currentPage = 1; // Reset to first page on sort change
         filterPosts();
       }
     });
@@ -410,12 +492,8 @@
       card.dataset.featuredEnabled = 'true';
     });
 
-    if (initialCategory || initialTag || initialQuery || initialSort) {
-      filterPosts();
-    } else {
-      updateSelectActiveStates();
-      renderActiveFilters(); // Show "None" text on initial load
-    }
+    // Always call filterPosts on init to set up pagination
+    filterPosts();
   }
 
   if (clearFiltersButton) {
@@ -424,20 +502,21 @@
       currentCategory = 'all';
       currentTag = 'all';
       currentSort = 'newest';
-      featuredEnabled = true; // Reset to enabled
+      featuredEnabled = false; // Turn off featured prioritization
+      currentPage = 1; // Reset to first page
 
       if (searchInput) {
         searchInput.value = '';
       }
 
       if (featuredToggle) {
-        featuredToggle.checked = true;
+        featuredToggle.checked = false;
       }
 
-      // Reset data-featured-enabled attribute on all blog cards
+      // Update data-featured-enabled attribute on all blog cards
       const blogCards = document.querySelectorAll('.blog-card-wrapper');
       blogCards.forEach(function(card) {
-        card.dataset.featuredEnabled = 'true';
+        card.dataset.featuredEnabled = 'false';
       });
 
       setSelectUI('category-filter', 'all');
