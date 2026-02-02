@@ -1,7 +1,7 @@
 import blogPosts from '../data/blogPosts.js';
 import { SITE_URL } from '../config.js';
 
-const siteUrl = SITE_URL || 'https://www.teamrespawntv.com';
+const siteUrl = SITE_URL || 'https://www.teamrespawn.net';
 
 // Get the 20 most recent posts
 const recentPosts = blogPosts.slice(0, 20);
