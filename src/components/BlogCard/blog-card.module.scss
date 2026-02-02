@@ -86,21 +86,11 @@
         letter-spacing: 0.5px;
         box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
         z-index: 10;
-        animation: pulse 2s infinite;
-        
+
         span {
             display: flex;
             align-items: center;
             gap: 4px;
         }
-    }
-}
-
-@keyframes pulse {
-    0%, 100% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.05);
     }
 }
