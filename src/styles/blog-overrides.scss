@@ -56,6 +56,11 @@
     gap: 1.5rem;
   }
 
+  // Ensure blog cards fill full height of grid cells
+  .blog-card-wrapper {
+    height: 100%;
+  }
+
   // Container spacing
   .container {
     padding-left: 1.5rem;

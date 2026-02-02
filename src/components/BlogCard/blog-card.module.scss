@@ -2,10 +2,21 @@
 
 .link {
     @include typography(none);
+    display: flex;
+    height: 100%;
+
+    .card {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        width: 100%;
+    }
 
     .card .body {
         @include layout(flex, sm);
         @include spacing(p-sm);
+        flex: 1;
+        display: flex;
 
         &.secondary {
             img,
@@ -17,6 +28,7 @@
 
         &:not(.secondary) {
             @include layout(column);
+            flex-direction: column;
         }
 
         img {
@@ -31,6 +43,12 @@
         strong + div {
             @include typography(hmd);
             @include spacing(mt-xs);
+            flex: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            line-clamp: 4;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
     }
 
