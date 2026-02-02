@@ -4,4 +4,4 @@ cache
 webcoreui
 nul
 .env
-.claude/settings.local.json
+.claude/
