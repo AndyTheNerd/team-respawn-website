@@ -1,4 +1,11 @@
 ---
+export function getStaticPaths() {
+  // Generate redirects for old paginated URLs (e.g., /blog/page/1, /blog/page/2, etc.)
+  return [1, 2, 3, 4, 5].map((page) => ({
+    params: { page: String(page) },
+  }));
+}
+
 // All pagination is now handled client-side on /blog
 // Redirect any old paginated URLs to the main blog page
 return Astro.redirect('/blog', 301);
