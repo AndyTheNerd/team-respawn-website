@@ -131,7 +131,7 @@ async function loadAndRenderProjects() {
         
         // Render projects if function exists
         if (typeof renderProjectGrid === 'function' && data.projects.length > 0) {
-            renderProjectGrid(data.projects, 'other-projects-content');
+            renderProjectGrid(data.projects, 'other-projects-grid');
         }
     } catch (error) {
         // Silently fail if there's an error

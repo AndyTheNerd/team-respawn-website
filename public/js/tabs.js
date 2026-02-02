@@ -117,6 +117,16 @@ function switchTab(activeTabId) {
             twitchContainer.classList.add('hidden', 'opacity-0', 'invisible', '-translate-y-2', 'pointer-events-none');
         }
     }
+
+    // Control home-only content visibility (e.g., Storehaus CTA on home page)
+    const homeFeaturedContent = document.getElementById('home-featured-content');
+    if (homeFeaturedContent) {
+        if (activeTabId === 'home-tab') {
+            homeFeaturedContent.classList.remove('hidden');
+        } else {
+            homeFeaturedContent.classList.add('hidden');
+        }
+    }
     
     // Announce tab change to screen readers
     const announcement = document.getElementById('tab-announcement');

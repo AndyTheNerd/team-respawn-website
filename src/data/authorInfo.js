@@ -2,7 +2,7 @@ const authorInfo = {
   img: {
     src: '/content/Team Respawn Logo Full.png',
     alt: 'Team Respawn',
-    size: 64
+    size: 32
   },
   name: 'Team Respawn',
   role: '',
