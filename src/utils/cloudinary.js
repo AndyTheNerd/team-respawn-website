@@ -63,5 +63,3 @@ export function getArtDirectionImageSet(imageSources, defaultOptions = {}) {
     };
   });
 }
-
-export default cloudinary;

@@ -1,23 +1,6 @@
 ---
-const {
-  showFilters = false
-} = Astro.props;
 ---
 <header class="flex justify-between items-center py-2 mb-4">
-  {showFilters ? (
-    <button
-      id="blog-filter-toggle"
-      class="p-2 rounded-full hover:bg-gray-800 transition-colors duration-200 lg:hidden"
-      aria-label="Open blog filters"
-      aria-expanded="false"
-      aria-controls="blog-filter-panel"
-      type="button"
-    >
-      <i class="fas fa-sliders-h text-2xl text-gray-400" aria-hidden="true"></i>
-    </button>
-  ) : (
-    <div class="w-8" aria-hidden="true"></div>
-  )}
-
+  <div class="w-8" aria-hidden="true"></div>
   <div class="w-8" aria-hidden="true"></div>
 </header>
