@@ -1,5 +1,119 @@
 ﻿const blogPosts = [
   {
+    title: 'Terminus Firefight Review - Halo Wars 2',
+    date: 'Published on February 2, 2026',
+    dateIso: '2026-02-02',
+    category: 'Reviews',
+    tags: ['Halo Wars 2'],
+    excerpt:
+      'A comprehensive review of Terminus Firefight mode in Halo Wars 2. Discover the strategic depth, leader synergies, and what makes this mode worth playing.',
+    href: '/blog/posts/terminus-firefight-review-halo-wars-2',
+    accentClass: 'text-cyan-400',
+    buttonClass: 'bg-cyan-500 hover:bg-cyan-600',
+    img: {
+      src: '/content/blog/reviews-placeholder.svg',
+      alt: 'Terminus Firefight Review - Halo Wars 2',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
+    title: 'Halo Wars 2 Review After 1,000 Hours',
+    date: 'Published on February 2, 2026',
+    dateIso: '2026-02-02',
+    category: 'Reviews',
+    tags: ['Halo Wars 2'],
+    excerpt:
+      'A comprehensive review of Halo Wars 2 after playing for over 1,000 hours. Discover the pros, cons, and whether this RTS is worth your time in 2026.',
+    href: '/blog/posts/halo-wars-2-review-after-1000-hours',
+    accentClass: 'text-cyan-400',
+    buttonClass: 'bg-cyan-500 hover:bg-cyan-600',
+    img: {
+      src: '/content/blog/reviews-placeholder.svg',
+      alt: 'Halo Wars 2 Review After 1,000 Hours',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
+    title: 'Ranking Every Halo Wars 2 Leader - 2026 Edition',
+    date: 'Published on February 2, 2026',
+    dateIso: '2026-02-02',
+    category: 'Reviews',
+    tags: ['Halo Wars 2'],
+    excerpt:
+      'Annual leader tier list for 2026. A subjective ranking of all Halo Wars 2 leaders from S-tier powerhouses like Atriox and Colony to the situational picks.',
+    href: '/blog/posts/ranking-every-halo-wars-2-leader-2026-edition',
+    accentClass: 'text-cyan-400',
+    buttonClass: 'bg-cyan-500 hover:bg-cyan-600',
+    img: {
+      src: '/content/blog/reviews-placeholder.svg',
+      alt: 'Ranking Every Halo Wars 2 Leader - 2026 Edition',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
+    title: 'Ranking Every Halo Wars 2 Map',
+    date: 'Published on February 2, 2026',
+    dateIso: '2026-02-02',
+    category: 'Reviews',
+    tags: ['Halo Wars 2'],
+    excerpt:
+      'A comprehensive tier list ranking of all multiplayer maps in Halo Wars 2, from S-tier Sentry to F-tier Fort Jordan. Includes Blitz and Terminus Firefight maps.',
+    href: '/blog/posts/ranking-every-halo-wars-2-map',
+    accentClass: 'text-cyan-400',
+    buttonClass: 'bg-cyan-500 hover:bg-cyan-600',
+    img: {
+      src: '/content/blog/reviews-placeholder.svg',
+      alt: 'Ranking Every Halo Wars 2 Map',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
+    title: 'Top 10 UNSC Leader Powers Ranked - Halo Wars 2',
+    date: 'Published on February 2, 2026',
+    dateIso: '2026-02-02',
+    category: 'Reviews',
+    tags: ['Halo Wars 2'],
+    excerpt:
+      'A subjective ranking of the top 10 active UNSC leader powers in Halo Wars 2. From Johnson\'s Bunker to Ghost in the Machine, discover which powers dominate the battlefield.',
+    href: '/blog/posts/top-10-unsc-leader-powers-ranked-halo-wars-2',
+    accentClass: 'text-cyan-400',
+    buttonClass: 'bg-cyan-500 hover:bg-cyan-600',
+    img: {
+      src: '/content/blog/reviews-placeholder.svg',
+      alt: 'Top 10 UNSC Leader Powers Ranked - Halo Wars 2',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
+    title: 'Top 10 Banished Leader Powers Ranked - Halo Wars 2',
+    date: 'Published on February 1, 2026',
+    dateIso: '2026-02-01',
+    category: 'Reviews',
+    tags: ['Halo Wars 2'],
+    excerpt:
+      'A subjective ranking of the top 10 active Banished leader powers in Halo Wars 2. From Grunt Dome to Cataclysm, discover which powers dominate the battlefield.',
+    href: '/blog/posts/top-10-banished-leader-powers-ranked-halo-wars-2',
+    accentClass: 'text-cyan-400',
+    buttonClass: 'bg-cyan-500 hover:bg-cyan-600',
+    img: {
+      src: '/content/blog/reviews-placeholder.svg',
+      alt: 'Top 10 Banished Leader Powers Ranked - Halo Wars 2',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
     title: 'All the Skulls in Halo Wars 2',
     date: 'Published on February 1, 2026',
     dateIso: '2026-02-01',
@@ -682,42 +796,6 @@
     img: {
       src: '/img/AOM-Guides/New Player Guide.jpg',
       alt: 'Best Practices for Relics - Age of Mythology',
-      width: 400,
-      height: 225,
-      lazy: true
-    }
-  },
-  {
-    title: 'Elden Ring DLC: Shadow of the Erdtree',
-    date: 'Published on June 21, 2024',
-    dateIso: '2024-06-21',
-    category: 'Reviews',
-    excerpt:
-      'Our in-depth review of the highly anticipated Elden Ring expansion. Is it worth returning to the Lands Between?',
-    href: '#',
-    accentClass: 'text-purple-400',
-    buttonClass: 'bg-purple-500 hover:bg-purple-600',
-    img: {
-      src: '/content/blog/reviews-placeholder.svg',
-      alt: 'Elden Ring DLC: Shadow of the Erdtree',
-      width: 400,
-      height: 225,
-      lazy: true
-    }
-  },
-  {
-    title: 'Indie Spotlight: The Next Big Thing',
-    date: 'Published on April 28, 2024',
-    dateIso: '2024-04-28',
-    category: 'Spotlight',
-    excerpt:
-      'Don\'t miss out on these hidden gems! We highlight three fantastic indie games you need to play right now.',
-    href: '#',
-    accentClass: 'text-teal-400',
-    buttonClass: 'bg-teal-500 hover:bg-teal-600',
-    img: {
-      src: '/content/blog/spotlight-placeholder.svg',
-      alt: 'Indie Spotlight: The Next Big Thing',
       width: 400,
       height: 225,
       lazy: true
