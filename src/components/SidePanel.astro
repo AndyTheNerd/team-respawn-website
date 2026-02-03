@@ -6,6 +6,9 @@ const isHome = pathname === '/' || pathname === '/index.html';
 const isBlog = pathname.startsWith('/blog');
 const guideCategory = Astro.url?.searchParams?.get('category')?.toLowerCase();
 const isGuides = isBlog && guideCategory === 'guides';
+const isStorehausInfo = pathname === '/storehaus-info' || pathname === '/storehaus-info/';
+const isStorehausPrivacy = pathname === '/storehaus/privacy-policy' || pathname === '/storehaus/privacy-policy/';
+const isStorehausTerms = pathname === '/storehaus/terms-of-service' || pathname === '/storehaus/terms-of-service/';
 ---
 <aside
   id="side-panel"
@@ -91,21 +94,21 @@ const isGuides = isBlog && guideCategory === 'guides';
       <p class="text-xs uppercase tracking-wider text-gray-500 px-3 pt-4">Storehaus Bot</p>
       <a
         href="/storehaus-info"
-        class="text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50"
+        class={`text-lg font-semibold transition-all duration-200 py-2 px-3 rounded-lg ${isStorehausInfo ? 'side-panel-tab-active' : 'text-gray-400 hover:text-white hover:bg-gray-800/50'}`}
       >
         <i class="fas fa-info-circle mr-2" aria-hidden="true"></i>
         Summary
       </a>
       <a
         href="/storehaus/privacy-policy"
-        class="text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50"
+        class={`text-lg font-semibold transition-all duration-200 py-2 px-3 rounded-lg ${isStorehausPrivacy ? 'side-panel-tab-active' : 'text-gray-400 hover:text-white hover:bg-gray-800/50'}`}
       >
         <i class="fas fa-shield-alt mr-2" aria-hidden="true"></i>
         Privacy Policy
       </a>
       <a
         href="/storehaus/terms-of-service"
-        class="text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50"
+        class={`text-lg font-semibold transition-all duration-200 py-2 px-3 rounded-lg ${isStorehausTerms ? 'side-panel-tab-active' : 'text-gray-400 hover:text-white hover:bg-gray-800/50'}`}
       >
         <i class="fas fa-file-contract mr-2" aria-hidden="true"></i>
         Terms of Service

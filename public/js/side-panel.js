@@ -108,9 +108,21 @@ function initSidePanel() {
      * @param {string} activeTabId - ID of the active tab
      */
     function updateSidePanelActiveTab(activeTabId) {
+        // Only update tab active states on the home page
+        // On other pages, the active state is set server-side by Astro
+        const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index.html';
+        if (!isHomePage) {
+            return;
+        }
+
         const tabLinks = sidePanel.querySelectorAll('.side-panel-tab-link');
         tabLinks.forEach(link => {
             const linkTabId = link.getAttribute('data-tab-id');
+            // Skip links without data-tab-id (navigation links like Blog, All Guides)
+            // Their active state is set server-side by Astro
+            if (!linkTabId) {
+                return;
+            }
             if (linkTabId === activeTabId) {
                 link.classList.remove('side-panel-tab-inactive');
                 link.classList.add('side-panel-tab-active');
