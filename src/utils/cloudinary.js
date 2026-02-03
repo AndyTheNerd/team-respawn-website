@@ -41,14 +41,13 @@ export function getOptimizedImage(publicId, options = {}) {
 // Helper function for responsive image sets
 export function getResponsiveImageSet(publicId, baseOptions = {}) {
   const breakpoints = [320, 640, 768, 1024, 1280, 1536];
-  
+
   return breakpoints.map(width => {
     const srcSet = getOptimizedImage(publicId, {
       ...baseOptions,
-      width,
-      crop: 'fill'
+      width
     });
-    
+
     return `${srcSet} ${width}w`;
   }).join(', ');
 }

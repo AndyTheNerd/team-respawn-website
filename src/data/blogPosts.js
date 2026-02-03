@@ -12,6 +12,7 @@
     buttonClass: 'bg-cyan-500 hover:bg-cyan-600',
     img: {
       src: '/content/blog/reviews-placeholder.svg',
+      cloudinaryId: 'Terminus_FF_Review_2024_pyprp9',
       alt: 'Terminus Firefight Review - Halo Wars 2',
       width: 400,
       height: 225,
@@ -31,6 +32,7 @@
     buttonClass: 'bg-cyan-500 hover:bg-cyan-600',
     img: {
       src: '/content/blog/reviews-placeholder.svg',
+      cloudinaryId: 'Review_2023_u0rg8q',
       alt: 'Halo Wars 2 Review After 1,000 Hours',
       width: 400,
       height: 225,
@@ -50,6 +52,7 @@
     buttonClass: 'bg-cyan-500 hover:bg-cyan-600',
     img: {
       src: '/content/blog/reviews-placeholder.svg',
+      cloudinaryId: 'Rankings_2026_v2_ecxhg1',
       alt: 'Ranking Every Halo Wars 2 Leader - 2026 Edition',
       width: 400,
       height: 225,
@@ -69,6 +72,7 @@
     buttonClass: 'bg-cyan-500 hover:bg-cyan-600',
     img: {
       src: '/content/blog/reviews-placeholder.svg',
+      cloudinaryId: 'Project_v3.01_20_31_49.Still335_dqs7yl',
       alt: 'Ranking Every Halo Wars 2 Map',
       width: 400,
       height: 225,
@@ -88,6 +92,7 @@
     buttonClass: 'bg-cyan-500 hover:bg-cyan-600',
     img: {
       src: '/content/blog/reviews-placeholder.svg',
+      cloudinaryId: 'UNSC_Leader_Powers_wbk6cl',
       alt: 'Top 10 UNSC Leader Powers Ranked - Halo Wars 2',
       width: 400,
       height: 225,
@@ -107,6 +112,7 @@
     buttonClass: 'bg-cyan-500 hover:bg-cyan-600',
     img: {
       src: '/content/blog/reviews-placeholder.svg',
+      cloudinaryId: 'Banished_Leader_Powers_qe3zdl',
       alt: 'Top 10 Banished Leader Powers Ranked - Halo Wars 2',
       width: 400,
       height: 225,
@@ -127,6 +133,7 @@
     buttonClass: 'bg-cyan-500 hover:bg-cyan-600',
     img: {
       src: 'https://res.cloudinary.com/damu0vqmp/image/upload/v1769973137/HW2_Campaign_nxrb8a.webp',
+      cloudinaryId: 'HW2_Campaign_nxrb8a',
       alt: 'All the Skulls in Halo Wars 2',
       width: 400,
       height: 225,
