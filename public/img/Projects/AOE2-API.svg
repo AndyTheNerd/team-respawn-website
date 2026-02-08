@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">AOE2 API</title>
+  <desc id="desc">Placeholder image for AOE2 API project</desc>
+  <rect width="1200" height="675" fill="#4b5563"/>
+  <rect x="40" y="40" width="1120" height="595" fill="#6b7280" stroke="#9ca3af" stroke-width="4"/>
+  <text x="600" y="350" text-anchor="middle" fill="#f9fafb" font-family="Arial, Helvetica, sans-serif" font-size="96" font-weight="700">
+    AOE2 API
+  </text>
+</svg>

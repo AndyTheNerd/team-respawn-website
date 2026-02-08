@@ -37,6 +37,24 @@
       },
       "color": "blue-400",
       "buttonColor": "blue-500"
+    },
+    {
+      "name": "AOE2 API",
+      "description": "A self-hosted Age of Empires II API that serves game metadata like civilizations, units, technologies, and structures.",
+      "features": [
+        "REST API for AOE2 game data",
+        "Metadata endpoints for units, civs, and structures",
+        "Built for easy self-hosting"
+      ],
+      "status": "Active",
+      "tags": ["API", "AOE2", "Open Source"],
+      "cover": "/img/Projects/AOE2-API.svg",
+      "links": {
+        "github": "https://github.com/AndyTheNerd/age-of-empires-II-api",
+        "api": "https://aoe2api.teamrespawntv.com/"
+      },
+      "color": "green-400",
+      "buttonColor": "green-500"
     }
   ]
 }
