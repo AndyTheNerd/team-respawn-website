@@ -1,5 +1,25 @@
 ﻿const blogPosts = [
   {
+    title: 'Halo Wars DE Full Campaign Walkthrough (Co-op Legendary)',
+    date: 'Published on February 7, 2026',
+    dateIso: '2026-02-07',
+    category: 'Walkthroughs',
+    tags: ['Halo Wars 1'],
+    featured: true,
+    excerpt:
+      'A complete co-op Legendary walkthrough of the Halo Wars Definitive Edition campaign. Mission highlights, skull and black box locations, co-op tips, and unit priorities for every mission.',
+    href: '/blog/posts/halo-wars-de-full-campaign-coop-legendary',
+    accentClass: 'text-orange-400',
+    buttonClass: 'bg-orange-500 hover:bg-orange-600',
+    img: {
+      src: 'https://img.youtube.com/vi/BYBLYmBIS2A/maxresdefault.jpg',
+      alt: 'Halo Wars DE Full Campaign Walkthrough (Co-op Legendary)',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
     title: 'Terminus Firefight Review - Halo Wars 2',
     date: 'Published on February 2, 2026',
     dateIso: '2026-02-02',
