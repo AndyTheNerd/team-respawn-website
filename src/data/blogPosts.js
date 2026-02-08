@@ -145,7 +145,7 @@
     dateIso: '2026-02-01',
     category: 'Guides',
     tags: ['Halo Wars 2'],
-    featured: true,
+    featured: false,
     excerpt:
       'Complete guide to all 15 skulls in Halo Wars 2 campaign. Learn how to unlock each skull, their effects, and detailed strategies for finding them in every mission.',
     href: '/blog/posts/all-the-skulls-in-halo-wars-2',
