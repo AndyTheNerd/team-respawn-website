@@ -271,8 +271,8 @@ if (youtubeId) {
           </section>
         )}
 
-        <!-- Storehaus Promo for Walkthroughs -->
-        {category === 'Walkthroughs' && (
+        <!-- Storehaus Promo for Walkthroughs (only when no tag-specific promo is shown) -->
+        {category === 'Walkthroughs' && !tags?.includes('Halo Wars 2') && !tags?.includes('Age of Empires II') && !tags?.includes('Age of Empires IV') && (
           <section class="mt-8 bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-xl p-6 border border-purple-500/30">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
               <div class="flex items-center gap-3">
