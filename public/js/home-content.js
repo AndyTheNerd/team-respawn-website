@@ -160,11 +160,11 @@ function renderFeaturedCarousel(allVideos) {
             const safeColor = video.color || 'gray-400';
             const safeButtonColor = video.buttonColor || 'gray-500';
 
-            // Support blog URL override
-            const hasBlogUrl = video.blogUrl && typeof video.blogUrl === 'string';
-            const btnHref = hasBlogUrl ? escapeHtml(video.blogUrl) : safeYoutubeUrl;
-            const btnTarget = hasBlogUrl ? '' : ' target="_blank" rel="noopener noreferrer"';
-            const btnText = hasBlogUrl ? escapeHtml(video.buttonText || 'Watch Walkthrough') : 'Watch on YouTube';
+            // Support custom link override (internal/relative paths)
+            const hasCustomLink = video.linkUrl && typeof video.linkUrl === 'string' && video.linkUrl.startsWith('/');
+            const btnHref = hasCustomLink ? escapeHtml(video.linkUrl) : safeYoutubeUrl;
+            const btnTarget = hasCustomLink ? '' : ' target="_blank" rel="noopener noreferrer"';
+            const btnText = hasCustomLink && video.linkText ? escapeHtml(video.linkText) : 'Watch on YouTube';
 
             cardContent = `
                 <div class="video-card bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300 flex flex-col">

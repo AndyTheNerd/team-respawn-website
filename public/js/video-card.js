@@ -99,13 +99,13 @@ function renderVideoCard(videoData) {
         title,
         description,
         youtubeUrl,
-        blogUrl,
-        buttonText,
         imageSrc,
         iframeSrc,
         color = 'gray-400',
         buttonColor = 'gray-500',
-        alt = ''
+        alt = '',
+        linkUrl,
+        linkText
     } = videoData;
 
     // Sanitize all user inputs
@@ -113,27 +113,17 @@ function renderVideoCard(videoData) {
     const safeDescription = escapeHtml(description || '');
     const safeAlt = escapeHtml(alt || title || '');
 
-    // Determine link URL and behavior
-    let linkHref = '';
-    let linkTarget = '';
-    let linkRel = '';
-    let safeBtnText = 'Watch on YouTube';
-
-    if (blogUrl && typeof blogUrl === 'string') {
-        // Internal blog link - no target="_blank", no rel
-        linkHref = escapeHtml(blogUrl);
-        safeBtnText = escapeHtml(buttonText || 'Watch Walkthrough');
-    } else {
-        // Validate YouTube URL
-        const safeYoutubeUrl = sanitizeUrl(youtubeUrl);
-        if (!safeYoutubeUrl || !isValidYouTubeUrl(safeYoutubeUrl)) {
-            console.error('Invalid YouTube URL:', youtubeUrl);
-            return ''; // Return empty string if URL is invalid
-        }
-        linkHref = escapeHtml(safeYoutubeUrl);
-        linkTarget = ' target="_blank"';
-        linkRel = ' rel="noopener noreferrer"';
+    // Validate URLs
+    const safeYoutubeUrl = sanitizeUrl(youtubeUrl);
+    if (!safeYoutubeUrl || !isValidYouTubeUrl(safeYoutubeUrl)) {
+        console.error('Invalid YouTube URL:', youtubeUrl);
+        return ''; // Return empty string if URL is invalid
     }
+
+    // Check for custom link override (internal/relative paths allowed)
+    const hasCustomLink = linkUrl && typeof linkUrl === 'string' && linkUrl.startsWith('/');
+    const safeLinkUrl = hasCustomLink ? escapeHtml(linkUrl) : null;
+    const safeLinkText = hasCustomLink && linkText ? escapeHtml(linkText) : null;
 
     // Validate iframe source (should be YouTube embed URL)
     let safeIframeSrc = null;
@@ -207,9 +197,9 @@ function renderVideoCard(videoData) {
             <p class="text-gray-300 mb-4 flex-grow">
                 ${safeDescription}
             </p>
-            <a href="${linkHref}"${linkTarget}${linkRel} class="inline-flex items-center justify-center gap-2 bg-${safeButtonColor} text-white font-bold py-2 px-6 rounded-full hover:bg-${hoverColor} transition-colors duration-300 mt-auto">
+            <a href="${safeLinkUrl || escapeHtml(safeYoutubeUrl)}"${safeLinkUrl ? '' : ' target="_blank" rel="noopener noreferrer"'} class="inline-flex items-center justify-center gap-2 bg-${safeButtonColor} text-white font-bold py-2 px-6 rounded-full hover:bg-${hoverColor} transition-colors duration-300 mt-auto">
                 <i class="fas fa-play" aria-hidden="true"></i>
-                ${safeBtnText}
+                ${safeLinkText || 'Watch on YouTube'}
             </a>
         </div>
     `;

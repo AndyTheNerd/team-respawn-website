@@ -5,6 +5,7 @@ import {
     ConditionalWrapper
 } from 'webcoreui/astro'
 
+import CloudinaryImage from '../CloudinaryImage.astro'
 import type { BlogCardProps } from './blogCard'
 import styles from './blog-card.module.scss'
 
@@ -31,13 +32,25 @@ const {
         secondary={true}
     >
         <div class={styles.imageContainer}>
-            <img
-                src={img.src}
-                alt={img.alt}
-                width={img.width}
-                height={img.height}
-                loading={img.lazy ? 'lazy' : undefined}
-            />
+            {img.cloudinaryId ? (
+                <CloudinaryImage
+                    publicId={img.cloudinaryId}
+                    alt={img.alt}
+                    width={img.width}
+                    loading={img.lazy ? 'lazy' : 'eager'}
+                    fallbackSrc={img.src}
+                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 400px"
+                    crop="scale"
+                />
+            ) : (
+                <img
+                    src={img.src}
+                    alt={img.alt}
+                    width={img.width}
+                    height={img.height}
+                    loading={img.lazy ? 'lazy' : undefined}
+                />
+            )}
             {featured && (
                 <div class={styles.featuredBadge}>
                     <span>⭐ Featured</span>

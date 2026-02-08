@@ -9,6 +9,7 @@ export type BlogCardProps = {
         width: number
         height: number
         lazy?: boolean
+        cloudinaryId?: string
     }
     title?: string
     text?: string

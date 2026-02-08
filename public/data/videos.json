@@ -87,7 +87,9 @@
       "buttonColor": "cyan-500",
       "alt": "A screenshot from Halo Wars",
       "releaseDate": "2009-02-26",
-      "series": "Halo Wars"
+      "series": "Halo Wars",
+      "linkUrl": "/blog/posts/halo-wars-de-full-campaign-coop-legendary/",
+      "linkText": "Watch Walkthrough"
     },
     {
       "title": "Halo Wars 2",
@@ -105,8 +107,8 @@
       "title": "Halo Wars 2: Operation Spearbreaker",
       "description": "An ODST team, Sunray 1-1, drops in to stop a Banished plan to destroy the Spirit of Fire.",
       "youtubeUrl": "https://youtu.be/WxWnwAIB2Ak",
-      "blogUrl": "/blog/posts/hw2-operation-spearbreaker-walkthrough",
-      "buttonText": "Watch Walkthrough",
+      "linkUrl": "/blog/posts/hw2-operation-spearbreaker-walkthrough",
+      "linkText": "Watch Walkthrough",
       "imageSrc": "img/Spearbreaker-Walkthrough.jpg",
       "color": "amber-400",
       "buttonColor": "amber-500",

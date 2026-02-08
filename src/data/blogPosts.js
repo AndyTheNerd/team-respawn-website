@@ -3,7 +3,7 @@
     title: 'Halo Wars 2 - Operation Spearkbreaker Walkthrough',
     date: 'Published on February 8, 2026',
     dateIso: '2026-02-08',
-    category: 'Walkthrough',
+    category: 'Walkthroughs',
     tags: ['Halo Wars 2'],
     excerpt:
       'Complete walkthrough for Operation Spearbreaker DLC in Halo Wars 2. Covers strategies, unit usage, and mission objectives for both missions on Heroic difficulty.',
@@ -13,6 +13,26 @@
     img: {
       src: 'https://img.youtube.com/vi/WxWnwAIB2Ak/maxresdefault.jpg',
       alt: 'Halo Wars 2 - Operation Spearkbreaker Walkthrough',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
+    title: 'Halo Wars Definitive Edition Full Campaign Walkthrough (Co-op Legendary)',
+    date: 'Published on February 7, 2026',
+    dateIso: '2026-02-07',
+    category: 'Walkthroughs',
+    tags: ['Halo Wars 1'],
+    featured: true,
+    excerpt:
+      'A complete co-op Legendary walkthrough of the Halo Wars Definitive Edition campaign. Mission highlights, skull and black box locations, co-op tips, and unit priorities for every mission.',
+    href: '/blog/posts/halo-wars-de-full-campaign-coop-legendary',
+    accentClass: 'text-orange-400',
+    buttonClass: 'bg-orange-500 hover:bg-orange-600',
+    img: {
+      src: 'https://img.youtube.com/vi/BYBLYmBIS2A/maxresdefault.jpg',
+      alt: 'Halo Wars Definitive Edition Full Campaign Walkthrough (Co-op Legendary)',
       width: 400,
       height: 225,
       lazy: true
@@ -31,6 +51,7 @@
     buttonClass: 'bg-cyan-500 hover:bg-cyan-600',
     img: {
       src: '/content/blog/reviews-placeholder.svg',
+      cloudinaryId: 'Terminus_FF_Review_2024_pyprp9',
       alt: 'Terminus Firefight Review - Halo Wars 2',
       width: 400,
       height: 225,
@@ -50,6 +71,7 @@
     buttonClass: 'bg-cyan-500 hover:bg-cyan-600',
     img: {
       src: '/content/blog/reviews-placeholder.svg',
+      cloudinaryId: 'Review_2023_u0rg8q',
       alt: 'Halo Wars 2 Review After 1,000 Hours',
       width: 400,
       height: 225,
@@ -69,6 +91,7 @@
     buttonClass: 'bg-cyan-500 hover:bg-cyan-600',
     img: {
       src: '/content/blog/reviews-placeholder.svg',
+      cloudinaryId: 'Rankings_2026_v2_ecxhg1',
       alt: 'Ranking Every Halo Wars 2 Leader - 2026 Edition',
       width: 400,
       height: 225,
@@ -88,6 +111,7 @@
     buttonClass: 'bg-cyan-500 hover:bg-cyan-600',
     img: {
       src: '/content/blog/reviews-placeholder.svg',
+      cloudinaryId: 'Project_v3.01_20_31_49.Still335_dqs7yl',
       alt: 'Ranking Every Halo Wars 2 Map',
       width: 400,
       height: 225,
@@ -107,6 +131,7 @@
     buttonClass: 'bg-cyan-500 hover:bg-cyan-600',
     img: {
       src: '/content/blog/reviews-placeholder.svg',
+      cloudinaryId: 'UNSC_Leader_Powers_wbk6cl',
       alt: 'Top 10 UNSC Leader Powers Ranked - Halo Wars 2',
       width: 400,
       height: 225,
@@ -126,6 +151,7 @@
     buttonClass: 'bg-cyan-500 hover:bg-cyan-600',
     img: {
       src: '/content/blog/reviews-placeholder.svg',
+      cloudinaryId: 'Banished_Leader_Powers_qe3zdl',
       alt: 'Top 10 Banished Leader Powers Ranked - Halo Wars 2',
       width: 400,
       height: 225,
@@ -138,7 +164,7 @@
     dateIso: '2026-02-01',
     category: 'Guides',
     tags: ['Halo Wars 2'],
-    featured: true,
+    featured: false,
     excerpt:
       'Complete guide to all 15 skulls in Halo Wars 2 campaign. Learn how to unlock each skull, their effects, and detailed strategies for finding them in every mission.',
     href: '/blog/posts/all-the-skulls-in-halo-wars-2',
@@ -146,6 +172,7 @@
     buttonClass: 'bg-cyan-500 hover:bg-cyan-600',
     img: {
       src: 'https://res.cloudinary.com/damu0vqmp/image/upload/v1769973137/HW2_Campaign_nxrb8a.webp',
+      cloudinaryId: 'HW2_Campaign_nxrb8a',
       alt: 'All the Skulls in Halo Wars 2',
       width: 400,
       height: 225,
