@@ -1,5 +1,24 @@
 ﻿const blogPosts = [
   {
+    title: 'Halo Wars 2 - Operation Spearkbreaker Walkthrough',
+    date: 'Published on February 8, 2026',
+    dateIso: '2026-02-08',
+    category: 'Walkthrough',
+    tags: ['Halo Wars 2'],
+    excerpt:
+      'Complete walkthrough for Operation Spearbreaker DLC in Halo Wars 2. Covers strategies, unit usage, and mission objectives for both missions on Heroic difficulty.',
+    href: '/blog/posts/hw2-operation-spearbreaker-walkthrough',
+    accentClass: 'text-amber-400',
+    buttonClass: 'bg-amber-500 hover:bg-amber-600',
+    img: {
+      src: 'https://img.youtube.com/vi/WxWnwAIB2Ak/maxresdefault.jpg',
+      alt: 'Halo Wars 2 - Operation Spearkbreaker Walkthrough',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
     title: 'Terminus Firefight Review - Halo Wars 2',
     date: 'Published on February 2, 2026',
     dateIso: '2026-02-02',

@@ -160,6 +160,12 @@ function renderFeaturedCarousel(allVideos) {
             const safeColor = video.color || 'gray-400';
             const safeButtonColor = video.buttonColor || 'gray-500';
 
+            // Support blog URL override
+            const hasBlogUrl = video.blogUrl && typeof video.blogUrl === 'string';
+            const btnHref = hasBlogUrl ? escapeHtml(video.blogUrl) : safeYoutubeUrl;
+            const btnTarget = hasBlogUrl ? '' : ' target="_blank" rel="noopener noreferrer"';
+            const btnText = hasBlogUrl ? escapeHtml(video.buttonText || 'Watch Walkthrough') : 'Watch on YouTube';
+
             cardContent = `
                 <div class="video-card bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300 flex flex-col">
                     <h2 class="text-xl sm:text-2xl font-bold mb-4 text-${safeColor}">${safeTitle}</h2>
@@ -167,8 +173,8 @@ function renderFeaturedCarousel(allVideos) {
                         <img src="${safeImageSrc}" alt="${safeTitle}" loading="lazy" class="w-full h-full object-cover">
                     </div>
                     <p class="text-gray-300 mb-4 flex-grow">${safeDescription}</p>
-                    <a href="${safeYoutubeUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 bg-${safeButtonColor} text-white font-bold py-2 px-6 rounded-full hover:opacity-90 transition-colors duration-300 mt-auto">
-                        Watch on YouTube
+                    <a href="${btnHref}"${btnTarget} class="inline-flex items-center justify-center gap-2 bg-${safeButtonColor} text-white font-bold py-2 px-6 rounded-full hover:opacity-90 transition-colors duration-300 mt-auto">
+                        ${btnText}
                     </a>
                 </div>
             `;
