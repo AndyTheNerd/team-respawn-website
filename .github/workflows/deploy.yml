@@ -29,6 +29,9 @@ jobs:
           CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
           CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
           CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+          PUBLIC_HW2_API_KEY_1: ${{ secrets.PUBLIC_HW2_API_KEY_1 }}
+          PUBLIC_HW2_API_KEY_2: ${{ secrets.PUBLIC_HW2_API_KEY_2 }}
+          PUBLIC_HW2_API_KEY_3: ${{ secrets.PUBLIC_HW2_API_KEY_3 }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
