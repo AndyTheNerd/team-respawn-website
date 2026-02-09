@@ -35,7 +35,7 @@ async function fetchWithKeyFallback<T>(url: string): Promise<ApiResult<T>> {
         return { ok: true, data: data as T };
       }
 
-      if (response.status === 401 || response.status === 403) {
+      if (response.status === 401 || response.status === 403 || response.status === 429) {
         if (i < API_KEYS.length - 1) continue;
         return { ok: false, error: parseApiError(response.status) };
       }
