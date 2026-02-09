@@ -117,6 +117,7 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
               <div class="h-16 bg-slate-700/50 rounded animate-pulse"></div>
               <div class="h-16 bg-slate-700/50 rounded animate-pulse"></div>
               <div class="h-16 bg-slate-700/50 rounded animate-pulse"></div>
+              <div class="h-16 bg-slate-700/50 rounded animate-pulse"></div>
             </div>
           </div>
           <div id="overview-content" class="hidden">
@@ -137,6 +138,10 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
               <div class="bg-slate-800/40 rounded-lg p-4 border border-cyan-500/10">
                 <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Win Rate</p>
                 <p id="stat-winrate" class="text-xl font-bold font-mono text-cyan-300">-</p>
+              </div>
+              <div class="bg-slate-800/40 rounded-lg p-4 border border-cyan-500/10">
+                <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">TR Viewer Rating</p>
+                <p id="stat-winrate-label" class="text-xl font-bold font-mono text-white">-</p>
               </div>
               <div class="bg-slate-800/40 rounded-lg p-4 border border-cyan-500/10">
                 <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Time Played (MM)</p>
@@ -221,7 +226,7 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
   <script src="/js/dropdowns.js" is:inline></script>
 
   <script>
-    import { getPlayerStats, getPlayerSeasonStats, getPlayerMatches, getMatchResult } from '../../utils/haloApi';
+    import { getPlayerStats, getPlayerSeasonStats, getPlayerMatches, getMatchResult, getLeaderPowerMap } from '../../utils/haloApi';
     import { getCsrTier } from '../../data/haloWars2/csr';
     import { getLeaderName } from '../../data/haloWars2/leaders';
     import { getMapName, getMapImage } from '../../data/haloWars2/maps';
@@ -238,6 +243,85 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
     const STORAGE_KEY = 'hw2-recent-searches';
     const MAX_RECENT = 5;
     const CURRENT_SEASON = [...seasonData].sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0];
+    let leaderPowerMapCache: Record<string, string> | null = null;
+    let leaderPowerNormalizedMap: Map<string, string> | null = null;
+    let leaderPowerMapLoading: Promise<Record<string, string> | null> | null = null;
+
+    async function ensureLeaderPowerMap(): Promise<Record<string, string> | null> {
+      if (leaderPowerMapCache) return leaderPowerMapCache;
+      if (leaderPowerMapLoading) return leaderPowerMapLoading;
+      leaderPowerMapLoading = (async () => {
+        const result = await getLeaderPowerMap();
+        if (result.ok) {
+          leaderPowerMapCache = result.data;
+          leaderPowerNormalizedMap = new Map<string, string>();
+          Object.entries(result.data).forEach(([id, name]) => {
+            leaderPowerNormalizedMap!.set(normalizeLeaderPowerId(id), name);
+          });
+          return leaderPowerMapCache;
+        }
+        leaderPowerMapLoading = null;
+        return null;
+      })();
+      return leaderPowerMapLoading;
+    }
+
+    function normalizeLeaderPowerId(powerId: string): string {
+      return powerId.toLowerCase().replace(/[^a-z0-9]/g, '');
+    }
+
+    function humanizeLeaderPowerId(powerId: string): string {
+      if (!powerId) return '';
+      const normalized = powerId
+        .replace(/_MP$/i, '')
+        .replace(/_Proc$/i, '')
+        .replace(/_/g, ' ')
+        .replace(/([a-z])([A-Z])/g, '$1 $2')
+        .replace(/([A-Z])([A-Z][a-z])/g, '$1 $2')
+        .replace(/([a-zA-Z])(\d)\b/g, '$1 $2')
+        .replace(/\s+/g, ' ')
+        .trim();
+      return normalized.replace(/\b(\d)\b/g, (match) => {
+        switch (match) {
+          case '1': return 'I';
+          case '2': return 'II';
+          case '3': return 'III';
+          case '4': return 'IV';
+          case '5': return 'V';
+          default: return match;
+        }
+      });
+    }
+
+    function getLeaderPowerDisplayName(powerId: string, map?: Record<string, string> | null): string {
+      if (!powerId) return '';
+      if (map?.[powerId]) return map[powerId];
+
+      const candidates = [
+        powerId,
+        powerId.replace(/_MP$/i, ''),
+        powerId.replace(/_Proc$/i, ''),
+      ];
+      if (!/_MP$/i.test(powerId)) candidates.push(`${powerId}_MP`);
+      if (!/_Proc$/i.test(powerId)) candidates.push(`${powerId}_Proc`);
+
+      for (const candidate of candidates) {
+        if (map?.[candidate]) return map[candidate];
+        const normalized = normalizeLeaderPowerId(candidate);
+        const normalizedHit = leaderPowerNormalizedMap?.get(normalized);
+        if (normalizedHit) return normalizedHit;
+        if (normalized.endsWith('mp')) {
+          const noMp = normalized.slice(0, -2);
+          const mpHit = leaderPowerNormalizedMap?.get(noMp);
+          if (mpHit) return mpHit;
+        } else {
+          const mpHit = leaderPowerNormalizedMap?.get(`${normalized}mp`);
+          if (mpHit) return mpHit;
+        }
+      }
+
+      return humanizeLeaderPowerId(powerId);
+    }
 
     function getRecentSearches(): string[] {
       try {
@@ -517,18 +601,26 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
       const allTotals = allSummaries.length > 0 ? sumSummaryTotals(allSummaries) : mmTotals;
       const mmLosses = Math.max(0, mmTotals.matches - mmTotals.wins);
 
-      const winRate = mmTotals.matches > 0 ? ((mmTotals.wins / mmTotals.matches) * 100).toFixed(1) : '0.0';
-      const timeStr = mmTotals.time >= 1 ? `${Math.round(mmTotals.time)}h` : '<1h';
-      const allTimeStr = allTotals.time >= 1 ? `${Math.round(allTotals.time)}h` : '<1h';
-      const avgMatchSeconds = mmTotals.matches > 0 ? Math.round((mmTotals.time / mmTotals.matches) * 3600) : 0;
-      const avgMatchStr = avgMatchSeconds > 0 ? parseDuration(`PT${avgMatchSeconds}S`) : '-';
-      const terminusWave = getHighestTerminusWave(stats);
+        const winRateValue = mmTotals.matches > 0 ? (mmTotals.wins / mmTotals.matches) * 100 : 0;
+        const winRate = winRateValue.toFixed(1);
+        const timeStr = mmTotals.time >= 1 ? `${Math.round(mmTotals.time)}h` : '<1h';
+        const allTimeStr = allTotals.time >= 1 ? `${Math.round(allTotals.time)}h` : '<1h';
+        const avgMatchSeconds = mmTotals.matches > 0 ? Math.round((mmTotals.time / mmTotals.matches) * 3600) : 0;
+        const avgMatchStr = avgMatchSeconds > 0 ? parseDuration(`PT${avgMatchSeconds}S`) : '-';
+        const terminusWave = getHighestTerminusWave(stats);
+        const winRateLabel =
+          winRateValue >= 80
+            ? 'Sweaty Pro Player'
+            : winRateValue > 45
+              ? 'Average TR viewer'
+              : 'Cringe worthy bad';
 
       document.getElementById('stat-matches')!.textContent = mmTotals.matches.toLocaleString();
       document.getElementById('stat-wins')!.textContent = mmTotals.wins.toLocaleString();
-      document.getElementById('stat-losses')!.textContent = mmLosses.toLocaleString();
-      document.getElementById('stat-winrate')!.textContent = `${winRate}%`;
-      document.getElementById('stat-time')!.textContent = timeStr;
+        document.getElementById('stat-losses')!.textContent = mmLosses.toLocaleString();
+        document.getElementById('stat-winrate')!.textContent = `${winRate}%`;
+        document.getElementById('stat-winrate-label')!.textContent = winRateLabel;
+        document.getElementById('stat-time')!.textContent = timeStr;
       document.getElementById('stat-time-all')!.textContent = `All modes: ${allTimeStr}`;
       document.getElementById('stat-avg-match')!.textContent = avgMatchStr;
       document.getElementById('stat-terminus-wave')!.textContent = terminusWave > 0 ? String(terminusWave) : '-';
@@ -782,7 +874,8 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
             ? Object.values(playersRaw)
             : [];
 
-        const teamMap = new Map<number, Array<{ name: string; leader: string; destroyed: number; lost: number }>>();
+        const leaderPowerMap = await ensureLeaderPowerMap();
+        const teamMap = new Map<number, { members: Array<{ name: string; leader: string; destroyed: number; lost: number; powerEntries: Array<{ name: string; times: number }> }>; totals: { destroyed: number; lost: number; powers: number } }>();
         players.forEach((p: any) => {
           const teamId = p.TeamId;
           const leaderId = p.LeaderId;
@@ -803,9 +896,30 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
               lost += u?.TotalLost || 0;
             });
           }
-          const list = teamMap.get(teamId) || [];
-          list.push({ name: gamertag, leader: leaderName, destroyed, lost });
-          teamMap.set(teamId, list);
+          const powerEntries: Array<{ name: string; times: number }> = [];
+          let powerCount = 0;
+          const leaderPowerStats = p?.LeaderPowerStats;
+          if (leaderPowerStats && typeof leaderPowerStats === 'object') {
+            const entries = Object.entries(leaderPowerStats)
+              .map(([powerId, stats]) => {
+                const times = typeof stats === 'number'
+                  ? stats
+                  : (stats as any)?.TimesCast ?? (stats as any)?.TotalPlays ?? 0;
+                return { powerId, times };
+              })
+              .filter((pwr) => pwr.times > 0)
+              .sort((a, b) => b.times - a.times);
+            entries.forEach((pwr) => {
+              powerEntries.push({ name: getLeaderPowerDisplayName(pwr.powerId, leaderPowerMap), times: pwr.times });
+              powerCount += pwr.times;
+            });
+          }
+          const team = teamMap.get(teamId) || { members: [], totals: { destroyed: 0, lost: 0, powers: 0 } };
+          team.members.push({ name: gamertag, leader: leaderName, destroyed, lost, powerEntries });
+          team.totals.destroyed += destroyed;
+          team.totals.lost += lost;
+          team.totals.powers += powerCount;
+          teamMap.set(teamId, team);
         });
 
         if (teamMap.size === 0) {
@@ -815,12 +929,23 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
 
         const teamCards = [...teamMap.entries()]
           .sort((a, b) => a[0] - b[0])
-          .map(([teamId, members]) => {
-            const rows = members.map((m) => `
+          .map(([teamId, team]) => {
+            const rows = team.members.map((m) => `
               <span class="text-gray-200 truncate">${m.name}</span>
               <span class="text-cyan-300 truncate">${m.leader}</span>
               <span class="text-xs text-gray-400 text-right">${m.destroyed} / ${m.lost}</span>
             `).join('');
+            const powerRows = team.members.map((m) => {
+              const powerText = m.powerEntries.length
+                ? m.powerEntries.map((pwr) => `${pwr.name} x${pwr.times}`).join(', ')
+                : '-';
+              return `
+                <div class="grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-3 text-xs">
+                  <span class="text-gray-300 truncate">${m.name}</span>
+                  <span class="text-gray-400">${powerText}</span>
+                </div>
+              `;
+            }).join('');
             return `
               <div class="rounded-lg border border-slate-700/40 bg-slate-800/40 p-3">
                 <p class="text-[10px] uppercase tracking-wider text-gray-400 mb-2">Team ${teamId}</p>
@@ -829,6 +954,17 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
                   <span class="text-[10px] uppercase tracking-wider text-gray-500">Leader</span>
                   <span class="text-[10px] uppercase tracking-wider text-gray-500 text-right">Units Destroyed / Units Lost</span>
                   ${rows}
+                </div>
+                <div class="mt-3 border-t border-slate-700/40 pt-3">
+                  <p class="text-[10px] uppercase tracking-wider text-gray-500 mb-2">Leader Powers by Player</p>
+                  <div class="space-y-2">
+                    ${powerRows}
+                  </div>
+                </div>
+                <div class="mt-3 border-t border-slate-700/40 pt-3 flex flex-wrap gap-4 text-[10px] uppercase tracking-wider text-gray-500">
+                  <span>Units Destroyed: <span class="text-gray-300">${team.totals.destroyed}</span></span>
+                  <span>Units Lost: <span class="text-gray-300">${team.totals.lost}</span></span>
+                  <span>Leader Powers Used: <span class="text-gray-300">${team.totals.powers}</span></span>
                 </div>
               </div>
             `;
