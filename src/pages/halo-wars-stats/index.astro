@@ -710,45 +710,133 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
         const bgClass = i % 2 === 0 ? 'bg-slate-800/20' : '';
 
           return `
-            <div class="flex items-center gap-4 p-4 ${bgClass} hover:bg-slate-700/20 transition-colors" style="border-left: 4px solid ${borderColor};">
-            ${mapImg
-              ? `<img src="${mapImg}" alt="${mapName}" class="w-16 h-10 sm:w-20 sm:h-12 rounded object-cover flex-shrink-0 border border-slate-600/30" loading="lazy" />`
-              : `<div class="w-16 h-10 sm:w-20 sm:h-12 rounded bg-slate-700/50 flex-shrink-0 flex items-center justify-center text-xs text-gray-500">${mapName}</div>`
-            }
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-2 flex-wrap">
-                <span class="font-semibold ${resultColor} text-sm">${resultText}</span>
-                <span class="text-gray-400 text-xs">on</span>
-                <span class="text-white text-sm truncate">${mapName}</span>
+            <div class="${bgClass} hover:bg-slate-700/20 transition-colors" style="border-left: 4px solid ${borderColor};">
+              <div class="flex items-start gap-4 p-4">
+                ${mapImg
+                  ? `<img src="${mapImg}" alt="${mapName}" class="w-16 h-10 sm:w-20 sm:h-12 rounded object-cover flex-shrink-0 border border-slate-600/30" loading="lazy" />`
+                  : `<div class="w-16 h-10 sm:w-20 sm:h-12 rounded bg-slate-700/50 flex-shrink-0 flex items-center justify-center text-xs text-gray-500">${mapName}</div>`
+                }
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span class="font-semibold ${resultColor} text-sm">${resultText}</span>
+                    <span class="text-gray-400 text-xs">on</span>
+                    <span class="text-white text-sm truncate">${mapName}</span>
+                  </div>
+                  <div class="flex items-center gap-3 text-xs text-gray-400 mt-1 flex-wrap">
+                    <span>${leaderName}</span>
+                    ${dateStr ? `<span>${dateStr}</span>` : ''}
+                    ${durationStr ? `<span>• ${durationStr}</span>` : ''}
+                    ${teamSizeLabel ? `<span>• ${teamSizeLabel}</span>` : ''}
+                    ${completionTag ? `<span>• ${completionTag}</span>` : ''}
+                    ${playlistLabel ? `<span class="text-cyan-300">• ${playlistLabel}</span>` : ''}
+                    ${csrDeltaText ? `<span class="${csrDeltaClass}">• CSR ${csrDeltaText}</span>` : ''}
+                    ${unitsText ? `<span>• Units ${unitsText}</span>` : ''}
+                  </div>
+                  ${matchId ? `
+                    <button
+                      type="button"
+                      class="match-details-toggle w-full mt-3 flex items-center justify-between rounded-md border border-cyan-500/20 bg-slate-800/40 px-3 py-2 text-xs text-cyan-300 hover:text-cyan-200 hover:border-cyan-400/40 transition-colors"
+                      data-match-id="${matchId}"
+                      aria-controls="${detailsId}"
+                      aria-expanded="false"
+                    >
+                      <span>Team compositions</span>
+                      <span class="match-details-chevron transition-transform duration-200" aria-hidden="true">&#x25BC;</span>
+                    </button>
+                    <div id="${detailsId}" class="match-details mt-3 hidden" data-loaded="false"></div>
+                  ` : ''}
+                </div>
               </div>
-              <div class="flex items-center gap-3 text-xs text-gray-400 mt-1 flex-wrap">
-                <span>${leaderName}</span>
-                ${dateStr ? `<span>${dateStr}</span>` : ''}
-                ${durationStr ? `<span>• ${durationStr}</span>` : ''}
-                ${teamSizeLabel ? `<span>• ${teamSizeLabel}</span>` : ''}
-                ${completionTag ? `<span>• ${completionTag}</span>` : ''}
-                ${playlistLabel ? `<span class="text-cyan-300">• ${playlistLabel}</span>` : ''}
-                ${csrDeltaText ? `<span class="${csrDeltaClass}">• CSR ${csrDeltaText}</span>` : ''}
-                ${unitsText ? `<span>• Units ${unitsText}</span>` : ''}
-              </div>
-              ${matchId ? `
-                <button
-                  type="button"
-                  class="match-details-toggle inline-flex items-center gap-2 text-xs text-cyan-300 hover:text-cyan-200 mt-2"
-                  data-match-id="${matchId}"
-                  aria-controls="${detailsId}"
-                  aria-expanded="false"
-                >
-                  <span class="match-details-chevron transition-transform duration-200" aria-hidden="true">&#x25BC;</span>
-                  <span>Team compositions</span>
-                </button>
-                <div id="${detailsId}" class="mt-2 text-xs text-gray-500 hidden" data-loaded="false"></div>
-              ` : ''}
             </div>
-          </div>
         `;
       }).join('') + '</div>';
       matchesContent.classList.remove('hidden');
+
+      const loadMatchDetails = async (matchId: string, detailsEl: HTMLElement) => {
+        if (detailsEl.getAttribute('data-loading') === 'true') return;
+        detailsEl.setAttribute('data-loading', 'true');
+        detailsEl.innerHTML = 'Loading team compositions...';
+
+        const result = await getMatchResult(matchId);
+        detailsEl.removeAttribute('data-loading');
+
+        if (!result.ok) {
+          const message = result.error?.message || 'Unable to load team compositions.';
+          detailsEl.innerHTML = `
+            <div class="flex items-center gap-3 text-red-300">
+              <span>${message}</span>
+              <button type="button" class="match-details-retry text-xs text-cyan-300 hover:text-cyan-200 underline" data-match-id="${matchId}">Retry</button>
+            </div>
+          `;
+          const retryBtn = detailsEl.querySelector('.match-details-retry') as HTMLButtonElement | null;
+          if (retryBtn) {
+            retryBtn.addEventListener('click', () => loadMatchDetails(matchId, detailsEl));
+          }
+          return;
+        }
+
+        const playersRaw = result.data?.Players;
+        const players = Array.isArray(playersRaw)
+          ? playersRaw
+          : (playersRaw && typeof playersRaw === 'object')
+            ? Object.values(playersRaw)
+            : [];
+
+        const teamMap = new Map<number, Array<{ name: string; leader: string; destroyed: number; lost: number }>>();
+        players.forEach((p: any) => {
+          const teamId = p.TeamId;
+          const leaderId = p.LeaderId;
+          if (teamId == null || leaderId == null) return;
+          const gamertag = p?.HumanPlayerId?.Gamertag
+            || p?.Gamertag
+            || (p?.HumanPlayerId && typeof p.HumanPlayerId === 'string' ? p.HumanPlayerId : '')
+            || (p?.IsHuman === false ? 'AI' : '')
+            || (p?.ComputerPlayerId != null ? `AI ${p.ComputerPlayerId}` : '')
+            || 'Unknown';
+          const leaderName = getLeaderName(leaderId);
+          let destroyed = 0;
+          let lost = 0;
+          const unitStats = p?.UnitStats;
+          if (unitStats && typeof unitStats === 'object') {
+            Object.values(unitStats).forEach((u: any) => {
+              destroyed += u?.TotalDestroyed || 0;
+              lost += u?.TotalLost || 0;
+            });
+          }
+          const list = teamMap.get(teamId) || [];
+          list.push({ name: gamertag, leader: leaderName, destroyed, lost });
+          teamMap.set(teamId, list);
+        });
+
+        if (teamMap.size === 0) {
+          detailsEl.innerHTML = 'Team composition data not available.';
+          return;
+        }
+
+        const teamCards = [...teamMap.entries()]
+          .sort((a, b) => a[0] - b[0])
+          .map(([teamId, members]) => {
+            const rows = members.map((m) => `
+              <span class="text-gray-200 truncate">${m.name}</span>
+              <span class="text-cyan-300 truncate">${m.leader}</span>
+              <span class="text-xs text-gray-400 text-right">${m.destroyed} / ${m.lost}</span>
+            `).join('');
+            return `
+              <div class="rounded-lg border border-slate-700/40 bg-slate-800/40 p-3">
+                <p class="text-[10px] uppercase tracking-wider text-gray-400 mb-2">Team ${teamId}</p>
+                <div class="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-3 text-xs">
+                  <span class="text-[10px] uppercase tracking-wider text-gray-500">Player</span>
+                  <span class="text-[10px] uppercase tracking-wider text-gray-500">Leader</span>
+                  <span class="text-[10px] uppercase tracking-wider text-gray-500 text-right">Units Destroyed / Units Lost</span>
+                  ${rows}
+                </div>
+              </div>
+            `;
+          });
+
+        detailsEl.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">${teamCards.join('')}</div>`;
+        detailsEl.setAttribute('data-loaded', 'true');
+      };
 
       matchesContent.querySelectorAll('.match-details-toggle').forEach(btn => {
         btn.addEventListener('click', async () => {
@@ -766,45 +854,7 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
           if (isExpanded) return;
 
           if (detailsEl.getAttribute('data-loaded') === 'true') return;
-          detailsEl.innerHTML = 'Loading team compositions...';
-
-          const result = await getMatchResult(matchId);
-          if (!result.ok) {
-            detailsEl.innerHTML = 'Unable to load team compositions.';
-            return;
-          }
-
-          const playersRaw = result.data?.Players;
-          const players = Array.isArray(playersRaw)
-            ? playersRaw
-            : (playersRaw && typeof playersRaw === 'object')
-              ? Object.values(playersRaw)
-              : [];
-
-          const teamMap = new Map<number, string[]>();
-          players.forEach((p: any) => {
-            const teamId = p.TeamId;
-            const leaderId = p.LeaderId;
-            if (teamId == null || leaderId == null) return;
-            const gamertag = p?.HumanPlayerId?.Gamertag || p?.Gamertag || p?.HumanPlayerId || p?.PlayerId || '';
-            const leaderName = getLeaderName(leaderId);
-            const label = gamertag ? `${gamertag} (${leaderName})` : leaderName;
-            const list = teamMap.get(teamId) || [];
-            list.push(label);
-            teamMap.set(teamId, list);
-          });
-
-          if (teamMap.size === 0) {
-            detailsEl.innerHTML = 'Team composition data not available.';
-            return;
-          }
-
-          const teamLines = [...teamMap.entries()]
-            .sort((a, b) => a[0] - b[0])
-            .map(([teamId, leaders]) => `<span class="text-gray-400">Team ${teamId}: <span class="text-gray-300">${leaders.join(', ')}</span></span>`);
-
-          detailsEl.innerHTML = teamLines.join(' • ');
-          detailsEl.setAttribute('data-loaded', 'true');
+          await loadMatchDetails(matchId, detailsEl);
         });
       });
     }
