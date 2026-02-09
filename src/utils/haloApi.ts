@@ -2,6 +2,7 @@ import type { ApiResult, ApiError, PlayerStatsSummaryResponse, SeasonStatsRespon
 
 const HALO_API_URL = 'https://www.haloapi.com/stats/hw2';
 const SUMMARY_API_URL = 'https://s3publicapis.azure-api.net/stats/hw2';
+const METADATA_API_URL = 'https://s3publicapis.azure-api.net/metadata/hw2';
 
 const API_KEYS = [
   import.meta.env.PUBLIC_HW2_API_KEY_1,
@@ -23,11 +24,11 @@ function parseApiError(status: number): ApiError {
   }
 }
 
-async function fetchWithKeyFallback<T>(url: string): Promise<ApiResult<T>> {
+async function fetchWithKeyFallback<T>(url: string, extraHeaders: Record<string, string> = {}): Promise<ApiResult<T>> {
   for (let i = 0; i < API_KEYS.length; i++) {
     try {
       const response = await fetch(url, {
-        headers: { 'Ocp-Apim-Subscription-Key': API_KEYS[i] },
+        headers: { 'Ocp-Apim-Subscription-Key': API_KEYS[i], ...extraHeaders },
       });
 
       if (response.ok) {
@@ -76,4 +77,62 @@ export async function getPlayerMatches(gamertag: string, count = 10): Promise<Ap
   return fetchWithKeyFallback<{ Results: MatchResult[] }>(
     `${HALO_API_URL}/players/${encoded}/matches?start=0&count=${count}`
   );
+}
+
+let leaderPowerMapCache: Record<string, string> | null = null;
+let leaderPowerMapPromise: Promise<ApiResult<Record<string, string>>> | null = null;
+
+export async function getLeaderPowerMap(): Promise<ApiResult<Record<string, string>>> {
+  if (leaderPowerMapCache) {
+    return { ok: true, data: leaderPowerMapCache };
+  }
+
+  if (leaderPowerMapPromise) {
+    return leaderPowerMapPromise;
+  }
+
+  leaderPowerMapPromise = (async () => {
+    const map: Record<string, string> = {};
+    let startAt = 0;
+    let totalCount = Infinity;
+
+    while (startAt < totalCount) {
+      const pageResult = await fetchWithKeyFallback<any>(
+        `${METADATA_API_URL}/leader-powers?startAt=${startAt}`,
+        { 'Accept-Language': 'en-US' }
+      );
+      if (!pageResult.ok) {
+        return pageResult as ApiResult<Record<string, string>>;
+      }
+
+      const data = pageResult.data;
+      const items = Array.isArray(data?.ContentItems) ? data.ContentItems : [];
+      items.forEach((item: any) => {
+        const objId = item?.View?.HW2LeaderPower?.ObjectTypeId;
+        const name =
+          item?.View?.HW2LeaderPower?.DisplayInfo?.View?.HW2LeaderPowerDisplayInfo?.Name
+          || item?.View?.HW2LeaderPower?.DisplayInfo?.View?.Title
+          || item?.View?.Title;
+        if (objId && name) {
+          map[String(objId)] = String(name);
+        }
+      });
+
+      const paging = data?.Paging || {};
+      const inlineCount = typeof paging.InlineCount === 'number' ? paging.InlineCount : items.length;
+      totalCount = typeof paging.TotalCount === 'number' ? paging.TotalCount : startAt + inlineCount;
+      startAt = (typeof paging.StartAt === 'number' ? paging.StartAt : startAt) + inlineCount;
+
+      if (inlineCount === 0) break;
+    }
+
+    leaderPowerMapCache = map;
+    return { ok: true, data: map };
+  })();
+
+  const result = await leaderPowerMapPromise;
+  if (!result.ok) {
+    leaderPowerMapPromise = null;
+  }
+  return result;
 }
