@@ -626,7 +626,7 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
     import { getPlayerStats, getPlayerSeasonStats, getPlayerMatches, getMatchResult, getLeaderPowerMap } from '../../utils/haloApi';
     import { getCsrTier } from '../../data/haloWars2/csr';
     import { getLeaderName } from '../../data/haloWars2/leaders';
-    import { getMapName, getMapImage } from '../../data/haloWars2/maps';
+    import { getMapName, getMapImage, getMapImageFallback } from '../../data/haloWars2/maps';
     import { getPlaylistName } from '../../data/haloWars2/playlists';
     import { seasonData, getSeasonName } from '../../data/haloWars2/seasons';
     import { PLAYLIST_1V1_RANKED, PLAYLIST_2V2_RANKED, PLAYLIST_3V3_RANKED } from '../../data/haloWars2/playlistMappings';
@@ -664,6 +664,7 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
       resultClass: 'win' | 'loss' | 'draw';
       mapName: string;
       mapImage: string;
+      mapImageFallback: string;
       leaderName: string;
       dateStr: string;
       durationStr: string;
@@ -1101,6 +1102,10 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
         getMapImage(match.MapId || '')
         || (typeof match.MapImageUrl === 'string' ? match.MapImageUrl : '')
         || (typeof match.MapImage === 'string' ? match.MapImage : '');
+      const mapImageFallback =
+        getMapImageFallback(match.MapId || '')
+        || (typeof match.MapImageUrl === 'string' ? match.MapImageUrl : '')
+        || (typeof match.MapImage === 'string' ? match.MapImage : '');
       const dateStr = match.MatchStartDate?.ISO8601Date
         ? new Date(match.MatchStartDate.ISO8601Date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
         : '';
@@ -1156,6 +1161,7 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
         resultClass,
         mapName,
         mapImage,
+        mapImageFallback,
         leaderName,
         dateStr,
         durationStr,
@@ -1241,23 +1247,41 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
       }
     }
 
-    async function setShareMapImage(url: string) {
+    async function setShareMapImage(url: string, fallbackUrl = '') {
       if (!shareHeroEl) return;
       const requestId = ++mapImageRequestId;
+      const primaryUrl = url || '';
+      const backupUrl = fallbackUrl || '';
       shareMapImageDataUrl = null;
-      shareMapImageUrl = url || null;
+      shareMapImageUrl = primaryUrl || backupUrl || null;
       shareMapImagePromise = null;
-      if (url) {
-        shareHeroEl.style.backgroundImage = `url('${url}')`;
+
+      if (primaryUrl) {
+        shareHeroEl.style.backgroundImage = `url('${primaryUrl}')`;
+      } else if (backupUrl) {
+        shareHeroEl.style.backgroundImage = `url('${backupUrl}')`;
       } else {
         shareHeroEl.style.backgroundImage = SHARE_HERO_GRADIENT;
       }
-      shareMapImagePromise = resolveShareMapImage(url);
+
+      shareMapImagePromise = (async () => {
+        if (primaryUrl) {
+          const primaryData = await resolveShareMapImage(primaryUrl);
+          if (primaryData) return primaryData;
+        }
+        if (backupUrl) {
+          return await resolveShareMapImage(backupUrl);
+        }
+        return null;
+      })();
+
       const dataUrl = await shareMapImagePromise;
       if (requestId !== mapImageRequestId) return;
       if (dataUrl) {
         shareMapImageDataUrl = dataUrl;
         shareHeroEl.style.backgroundImage = `url('${dataUrl}')`;
+      } else if (backupUrl) {
+        shareHeroEl.style.backgroundImage = `url('${backupUrl}')`;
       }
     }
 
@@ -1271,7 +1295,7 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
       shareModal.setAttribute('aria-hidden', 'false');
       document.body.classList.add('match-share-open');
       setShareStatus('');
-      setShareMapImage(data.mapImage);
+      setShareMapImage(data.mapImage, data.mapImageFallback);
       shareCopyLinkBtn?.focus();
     }
 
@@ -1426,7 +1450,7 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
       updateShareCard(updated);
       updateShareLinks(updated);
       if (shareCopyLinkBtn) shareCopyLinkBtn.setAttribute('data-url', updated.shareUrl);
-      setShareMapImage(updated.mapImage);
+      setShareMapImage(updated.mapImage, updated.mapImageFallback);
       setShareStatus('Match details loaded.', 'ok');
     }
 
@@ -1470,7 +1494,7 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
         const avgMatchStr = avgMatchSeconds > 0 ? parseDuration(`PT${avgMatchSeconds}S`) : '-';
         const terminusWave = getHighestTerminusWave(stats);
         const winRateLabel =
-          winRateValue >= 80
+          winRateValue >= 60
             ? 'Sweaty Pro Player'
             : winRateValue > 45
               ? 'Average TR viewer'
@@ -1621,6 +1645,8 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
         const leaderName = leaderId != null ? getLeaderName(leaderId) : 'Unknown';
         const mapName = getMapName(match.MapId || '');
         const mapImg = getMapImage(match.MapId || '');
+        const mapFallback = getMapImageFallback(match.MapId || '');
+        const fallbackAttr = mapFallback ? ` data-fallback="${mapFallback}"` : '';
         const dateStr = match.MatchStartDate?.ISO8601Date
           ? new Date(match.MatchStartDate.ISO8601Date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
           : '';
@@ -1673,7 +1699,7 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
             <div class="${bgClass} hover:bg-slate-700/20 transition-colors" style="border-left: 4px solid ${borderColor};">
               <div class="flex items-start gap-4 p-4">
                 ${mapImg
-                  ? `<img src="${mapImg}" alt="${mapName}" class="w-16 h-10 sm:w-20 sm:h-12 rounded object-cover flex-shrink-0 border border-slate-600/30" loading="lazy" />`
+                  ? `<img src="${mapImg}" alt="${mapName}"${fallbackAttr} class="w-16 h-10 sm:w-20 sm:h-12 rounded object-cover flex-shrink-0 border border-slate-600/30" loading="lazy" />`
                   : `<div class="w-16 h-10 sm:w-20 sm:h-12 rounded bg-slate-700/50 flex-shrink-0 flex items-center justify-center text-xs text-gray-500">${mapName}</div>`
                 }
                 <div class="flex-1 min-w-0">
@@ -1730,6 +1756,15 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
         `;
       }).join('') + '</div>';
       matchesContent.classList.remove('hidden');
+      matchesContent.querySelectorAll('img[data-fallback]').forEach((node) => {
+        const img = node as HTMLImageElement;
+        img.addEventListener('error', () => {
+          const fallback = img.getAttribute('data-fallback') || '';
+          if (fallback && img.getAttribute('src') !== fallback) {
+            img.setAttribute('src', fallback);
+          }
+        }, { once: true });
+      });
 
       const loadMatchDetails = async (matchId: string, detailsEl: HTMLElement) => {
         if (detailsEl.getAttribute('data-loading') === 'true') return;
