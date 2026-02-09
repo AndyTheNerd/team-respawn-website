@@ -6,6 +6,7 @@ const isHome = pathname === '/' || pathname === '/index.html';
 const isBlog = pathname.startsWith('/blog');
 const guideCategory = Astro.url?.searchParams?.get('category')?.toLowerCase();
 const isGuides = isBlog && guideCategory === 'guides';
+const isHw2Stats = pathname === '/halo-wars-stats' || pathname === '/halo-wars-stats/';
 const isStorehausInfo = pathname === '/storehaus-info' || pathname === '/storehaus-info/';
 const isStorehausPrivacy = pathname === '/storehaus/privacy-policy' || pathname === '/storehaus/privacy-policy/';
 const isStorehausTerms = pathname === '/storehaus/terms-of-service' || pathname === '/storehaus/terms-of-service/';
@@ -58,6 +59,14 @@ const isStorehausTerms = pathname === '/storehaus/terms-of-service' || pathname 
       >
         <i class="fas fa-blog mr-2" aria-hidden="true"></i>
         Blog
+      </a>
+      <a
+        href="/halo-wars-stats"
+        class={`side-panel-tab-link ${isHw2Stats ? 'side-panel-tab-active' : 'side-panel-tab-inactive'} text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50`}
+        role="menuitem"
+      >
+        <i class="fas fa-chart-bar mr-2" aria-hidden="true"></i>
+        HW2 Stats
       </a>
       <button
         data-tab-id="other-projects-tab"
