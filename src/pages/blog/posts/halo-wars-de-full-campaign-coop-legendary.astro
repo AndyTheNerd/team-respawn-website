@@ -1,5 +1,6 @@
 ---
 import BlogPostLayout from '../../../layouts/BlogPostLayout.astro';
+import CloudinaryImage from '../../../components/CloudinaryImage.astro';
 ---
 <BlogPostLayout
   title="Halo Wars Definitive Edition Full Campaign Walkthrough (Co-op Legendary)"
@@ -8,8 +9,18 @@ import BlogPostLayout from '../../../layouts/BlogPostLayout.astro';
   tags={['Halo Wars 1']}
   publishedDate="Published on February 7, 2026"
   dateIso="2026-02-07"
+  ogImage="https://res.cloudinary.com/damu0vqmp/image/upload/2023_Walkthrough_v3_yasjym"
   youtubeId="BYBLYmBIS2A"
 >
+  <CloudinaryImage
+    publicId="2023_Walkthrough_v3_yasjym"
+    alt="Halo Wars Definitive Edition Full Campaign Walkthrough"
+    class="w-full max-w-4xl mx-auto rounded-lg shadow-xl mb-8"
+    width={1200}
+    height={600}
+    loading="eager"
+  />
+
   <p class="text-lg leading-relaxed mb-6">
     This is a full Legendary co-op run of Halo Wars: Definitive Edition. The walkthrough focuses on clearing every mission while collecting skulls and black boxes, with practical commentary on unit choices, base defense, and mission pacing.
   </p>
