@@ -3,6 +3,7 @@ import type { ApiResult, ApiError, PlayerStatsSummaryResponse, SeasonStatsRespon
 const HALO_API_URL = 'https://www.haloapi.com/stats/hw2';
 const SUMMARY_API_URL = 'https://s3publicapis.azure-api.net/stats/hw2';
 const METADATA_API_URL = 'https://s3publicapis.azure-api.net/metadata/hw2';
+const PAGES_API_BASE = '/api/hw2';
 
 const API_KEYS = [
   import.meta.env.PUBLIC_HW2_API_KEY_1,
@@ -14,13 +15,47 @@ function parseApiError(status: number): ApiError {
   switch (status) {
     case 401:
     case 403:
-      return { type: 'auth', message: 'API key issue — stats may be temporarily unavailable.' };
+      return { type: 'auth', message: 'API key issue - stats may be temporarily unavailable.' };
     case 404:
       return { type: 'not_found', message: 'Gamertag not found. Check spelling and try again.' };
     case 429:
       return { type: 'rate_limit', message: 'Rate limit reached. Please wait a moment and try again.' };
     default:
       return { type: 'unknown', message: `Unexpected error (${status}). Please try again later.` };
+  }
+}
+
+async function fetchFromPagesFunction<T>(
+  url: string,
+  options: RequestInit,
+  fallback?: () => Promise<ApiResult<T>>
+): Promise<ApiResult<T>> {
+  try {
+    const response = await fetch(url, options);
+    const contentType = response.headers.get('content-type') || '';
+    const isJson = contentType.includes('application/json');
+    const data = isJson ? await response.json().catch(() => null) : null;
+    if (response.ok) {
+      return { ok: true, data: data as T };
+    }
+
+    if (!isJson && response.status === 404 && fallback) {
+      return fallback();
+    }
+
+    if (data?.error?.type && data?.error?.message) {
+      return { ok: false, error: data.error as ApiError };
+    }
+
+    return { ok: false, error: parseApiError(response.status) };
+  } catch {
+    if (fallback) {
+      return fallback();
+    }
+    return {
+      ok: false,
+      error: { type: 'network', message: 'Unable to connect to Halo servers. Check your connection.' },
+    };
   }
 }
 
@@ -69,13 +104,26 @@ export async function getPlayerSeasonStats(gamertag: string, seasonId: string): 
 
 export async function getMatchResult(matchId: string): Promise<ApiResult<any>> {
   const encoded = encodeURIComponent(matchId);
-  return fetchWithKeyFallback<any>(`${HALO_API_URL}/matches/${encoded}`);
+  return fetchFromPagesFunction<any>(
+    `${PAGES_API_BASE}/match?matchId=${encoded}`,
+    { method: 'GET' },
+    () => fetchWithKeyFallback<any>(`${HALO_API_URL}/matches/${encoded}`)
+  );
 }
 
 export async function getPlayerMatches(gamertag: string, count = 10): Promise<ApiResult<{ Results: MatchResult[] }>> {
   const encoded = encodeURIComponent(gamertag);
-  return fetchWithKeyFallback<{ Results: MatchResult[] }>(
-    `${HALO_API_URL}/players/${encoded}/matches?start=0&count=${count}`
+  return fetchFromPagesFunction<{ Results: MatchResult[] }>(
+    `${PAGES_API_BASE}/matches`,
+    {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ gamertag, count }),
+    },
+    () =>
+      fetchWithKeyFallback<{ Results: MatchResult[] }>(
+        `${HALO_API_URL}/players/${encoded}/matches?start=0&count=${count}`
+      )
   );
 }
 
@@ -136,3 +184,4 @@ export async function getLeaderPowerMap(): Promise<ApiResult<Record<string, stri
   }
   return result;
 }
+

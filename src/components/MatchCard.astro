@@ -1,0 +1,343 @@
+---
+import { getMapName, getMapImage } from '../data/haloWars2/maps';
+import { getLeaderName } from '../data/haloWars2/leaders';
+import { getPlaylistName } from '../data/haloWars2/playlists';
+
+interface Props {
+  match: any;
+  gamertag: string;
+  showFullDetails?: boolean;
+}
+
+const { match, gamertag, showFullDetails = false } = Astro.props;
+
+// Extract match data
+const gtLower = gamertag.toLowerCase();
+const player = match.Players?.find((p: any) => {
+  const id = p.HumanPlayerId || p.Gamertag || p.PlayerId;
+  return id && String(id).toLowerCase() === gtLower;
+}) || match.Players?.[0] || null;
+
+const rawOutcome = player?.MatchOutcome
+  ?? player?.PlayerMatchOutcome
+  ?? match.PlayerMatchOutcome
+  ?? match.MatchOutcome
+  ?? match.MatchResult;
+const outcome = typeof rawOutcome === 'string' ? rawOutcome.toLowerCase() : rawOutcome;
+const isWin = outcome === 1 || outcome === 'win' || outcome === 'victory';
+const isLoss = outcome === 2 || outcome === 'loss' || outcome === 'defeat';
+const resultText = isWin ? 'Victory' : isLoss ? 'Defeat' : 'Draw';
+const resultColor = isWin ? '#22c55e' : isLoss ? '#ef4444' : '#6b7280';
+
+const leaderId = player?.LeaderId ?? match.LeaderId;
+const leaderName = leaderId != null ? getLeaderName(leaderId) : 'Unknown';
+const mapName = getMapName(match.MapId || '');
+const mapImg = getMapImage(match.MapId || '');
+const dateStr = match.MatchStartDate?.ISO8601Date
+  ? new Date(match.MatchStartDate.ISO8601Date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  : '';
+const durationIso = match.PlayerMatchDuration || match.MatchDuration;
+
+const playlistName = match.PlaylistId ? getPlaylistName(match.PlaylistId) : '';
+const teamSizeLabel = match.Teams && typeof match.Teams === 'object' 
+  ? (() => {
+      const sizes = Object.values(match.Teams).map((t: any) => t?.TeamSize).filter((s: any) => typeof s === 'number');
+      if (sizes.length >= 2) return `${sizes[0]}v${sizes[1]}`;
+      if (sizes.length === 1) return `${sizes[0]}v${sizes[0]}`;
+      return '';
+    })()
+  : '';
+
+const unitStats = player?.UnitStats || match.UnitStats;
+let unitsDestroyed = 0;
+let unitsLost = 0;
+if (unitStats && typeof unitStats === 'object') {
+  Object.values(unitStats).forEach((u: any) => {
+    unitsDestroyed += u?.TotalDestroyed || 0;
+    unitsLost += u?.TotalLost || 0;
+  });
+}
+
+const csrDelta = match.RatingProgress?.UpdatedCsr?.Raw - match.RatingProgress?.PreviousCsr?.Raw;
+const csrDeltaText = csrDelta ? `${csrDelta > 0 ? '+' : ''}${Math.round(csrDelta)}` : '';
+
+function parseDuration(iso?: string): string {
+  if (!iso) return '';
+  const match = iso.match(/P(?:(\d+)W)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?)?/);
+  if (!match) return '';
+  const hours = parseInt(match[3] || '0');
+  const minutes = parseInt(match[4] || '0');
+  const seconds = parseFloat(match[5] || '0');
+  
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  if (minutes > 0) return `${minutes}m`;
+  return '<1m';
+}
+
+const durationStr = durationIso ? parseDuration(durationIso) : '';
+---
+
+<div class="match-card" data-result={isWin ? 'win' : isLoss ? 'loss' : 'draw'}>
+  <!-- Header with result and player info -->
+  <div class="card-header">
+    <div class="result-badge" style="background-color: {resultColor};">
+      {resultText}
+    </div>
+    <div class="player-info">
+      <div class="gamertag">{gamertag}</div>
+      <div class="leader">{leaderName}</div>
+    </div>
+    <div class="team-respawn-logo">
+      <img src="/content/Team-Respawn-Full.png" alt="Team Respawn" />
+    </div>
+  </div>
+
+  <!-- Match details -->
+  <div class="match-details">
+    <div class="map-section">
+      {mapImg ? (
+        <img src={mapImg} alt={mapName} class="map-image" />
+      ) : (
+        <div class="map-placeholder">{mapName}</div>
+      )}
+      <div class="map-info">
+        <div class="map-name">{mapName}</div>
+        <div class="match-meta">
+          {dateStr && <span class="date">{dateStr}</span>}
+          {durationStr && <span class="duration">• {durationStr}</span>}
+          {teamSizeLabel && <span class="team-size">• {teamSizeLabel}</span>}
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats section -->
+    <div class="stats-section">
+      <div class="stat-row">
+        <div class="stat-item">
+          <span class="stat-label">Units</span>
+          <span class="stat-value">{unitsDestroyed} / {unitsLost}</span>
+        </div>
+        {csrDeltaText && (
+          <div class="stat-item">
+            <span class="stat-label">CSR</span>
+            <span class="stat-value" style:color={csrDelta > 0 ? '#22c55e' : csrDelta < 0 ? '#ef4444' : '#6b7280'}>
+              {csrDeltaText}
+            </span>
+          </div>
+        )}
+      </div>
+      {playlistName && (
+        <div class="playlist-info">
+          <span class="playlist-label">{playlistName}</span>
+        </div>
+      )}
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="card-footer">
+    <div class="game-title">Halo Wars 2</div>
+    <div class="website">teamrespawn.net</div>
+  </div>
+</div>
+
+<style>
+  .match-card {
+    width: 500px;
+    min-height: 280px;
+    background: linear-gradient(135deg, #0a1628 0%, #0c2942 40%, #0a1628 100%);
+    border: 2px solid #06b6d4;
+    border-radius: 12px;
+    padding: 20px;
+    color: white;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .match-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.15), transparent);
+    animation: scanline 4s linear infinite;
+  }
+
+  @keyframes scanline {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+  }
+
+  .result-badge {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .player-info {
+    flex: 1;
+    text-align: center;
+    margin: 0 16px;
+  }
+
+  .gamertag {
+    font-size: 18px;
+    font-weight: bold;
+    color: #06b6d4;
+    margin-bottom: 4px;
+  }
+
+  .leader {
+    font-size: 14px;
+    color: #94a3b8;
+  }
+
+  .team-respawn-logo {
+    width: 80px;
+    height: 30px;
+  }
+
+  .team-respawn-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .match-details {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .map-section {
+    display: flex;
+    gap: 12px;
+    flex: 1;
+  }
+
+  .map-image {
+    width: 80px;
+    height: 60px;
+    border-radius: 6px;
+    object-fit: cover;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+  }
+
+  .map-placeholder {
+    width: 80px;
+    height: 60px;
+    border-radius: 6px;
+    background: rgba(148, 163, 184, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: #64748b;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+  }
+
+  .map-info {
+    flex: 1;
+  }
+
+  .map-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 4px;
+  }
+
+  .match-meta {
+    font-size: 12px;
+    color: #64748b;
+    line-height: 1.4;
+  }
+
+  .stats-section {
+    flex: 1;
+  }
+
+  .stat-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .stat-value {
+    font-size: 14px;
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+  }
+
+  .playlist-info {
+    margin-top: 8px;
+  }
+
+  .playlist-label {
+    font-size: 12px;
+    color: #06b6d4;
+    background: rgba(6, 182, 212, 0.1);
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
+  }
+
+  .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(148, 163, 184, 0.1);
+    font-size: 11px;
+    color: #64748b;
+  }
+
+  .game-title {
+    font-weight: 600;
+  }
+
+  /* Responsive adjustments for smaller screens */
+  @media (max-width: 540px) {
+    .match-card {
+      width: 100%;
+      min-width: 320px;
+    }
+    
+    .match-details {
+      flex-direction: column;
+    }
+    
+    .map-section {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+  }
+</style>

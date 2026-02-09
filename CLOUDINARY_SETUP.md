@@ -168,6 +168,10 @@ Ensure your environment variables are set in your hosting environment:
 
 ## Troubleshooting
 
+### Share card map images missing in exports
+- Ensure `CLOUDINARY_CLOUD_NAME` is set so map images can be routed through Cloudinary.
+- Optionally add `cloudinaryId` or `cloudinaryUrl` to entries in `src/data/haloWars2/maps.ts` to use your uploaded assets directly.
+
 ### Images not loading
 - Check your environment variables are set correctly
 - Verify the public IDs match your Cloudinary Media Library

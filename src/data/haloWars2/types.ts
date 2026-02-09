@@ -20,6 +20,8 @@ export interface HaloMap {
   id: string;
   name: string;
   imageUrl: string;
+  cloudinaryId?: string;
+  cloudinaryUrl?: string;
 }
 
 export interface Playlist {

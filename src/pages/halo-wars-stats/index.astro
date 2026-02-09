@@ -50,6 +50,324 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
         50% { box-shadow: 0 0 30px rgba(6, 182, 212, 0.5); }
       }
       .csr-glow { animation: csr-glow 3s ease-in-out infinite; }
+
+      body.match-share-open {
+        overflow: hidden;
+      }
+
+      .match-share-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 70;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+
+      .match-share-modal.hidden {
+        display: none;
+      }
+
+      .match-share-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(2, 6, 23, 0.75);
+        backdrop-filter: blur(2px);
+      }
+
+      .match-share-panel {
+        position: relative;
+        z-index: 1;
+        width: min(900px, 95vw);
+        background: rgba(15, 23, 42, 0.96);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 14px;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.45);
+        padding: 18px 20px 22px;
+        color: #e2e8f0;
+      }
+
+      .match-share-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .match-share-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #f8fafc;
+      }
+
+      .match-share-close {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        background: rgba(148, 163, 184, 0.12);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        color: #cbd5f5;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .match-share-close:hover {
+        background: rgba(148, 163, 184, 0.2);
+        color: #f8fafc;
+      }
+
+      .match-share-content {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .match-share-card {
+        width: min(640px, 100%);
+        border-radius: 14px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        background: linear-gradient(135deg, rgba(10, 22, 40, 0.95), rgba(11, 42, 66, 0.95));
+        padding: 16px;
+        color: #f8fafc;
+        box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.05);
+      }
+
+      .match-share-card-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .match-share-result {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 10px;
+        font-weight: 700;
+        border: 1px solid transparent;
+      }
+
+      .match-share-result.win {
+        color: #22c55e;
+        background: rgba(34, 197, 94, 0.15);
+        border-color: rgba(34, 197, 94, 0.35);
+      }
+
+      .match-share-result.loss {
+        color: #f87171;
+        background: rgba(248, 113, 113, 0.15);
+        border-color: rgba(248, 113, 113, 0.35);
+      }
+
+      .match-share-result.draw {
+        color: #94a3b8;
+        background: rgba(148, 163, 184, 0.2);
+        border-color: rgba(148, 163, 184, 0.3);
+      }
+
+      .match-share-gamertag {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-top: 6px;
+      }
+
+      .match-share-subtitle {
+        font-size: 0.8rem;
+        color: rgba(148, 163, 184, 0.9);
+      }
+
+      .match-share-logo {
+        width: 120px;
+        height: auto;
+        opacity: 0.9;
+      }
+
+      .match-share-hero {
+        margin-top: 12px;
+        height: 150px;
+        border-radius: 12px;
+        background: linear-gradient(120deg, rgba(2, 6, 23, 0.85), rgba(6, 40, 64, 0.85));
+        background-size: cover;
+        background-position: center;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(148, 163, 184, 0.15);
+      }
+
+      .match-share-hero-overlay {
+        position: absolute;
+        inset: 0;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        gap: 4px;
+        background: linear-gradient(180deg, rgba(2, 6, 23, 0.1) 0%, rgba(2, 6, 23, 0.85) 100%);
+      }
+
+      .match-share-map {
+        font-size: 1.05rem;
+        font-weight: 600;
+      }
+
+      .match-share-leader {
+        font-size: 0.75rem;
+        color: rgba(226, 232, 240, 0.7);
+      }
+
+      .match-share-stats {
+        margin-top: 12px;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .match-share-stat {
+        background: rgba(15, 23, 42, 0.65);
+        border: 1px solid rgba(148, 163, 184, 0.15);
+        border-radius: 10px;
+        padding: 8px;
+      }
+
+      .match-share-stat span {
+        display: block;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: rgba(148, 163, 184, 0.9);
+      }
+
+      .match-share-stat strong {
+        display: block;
+        font-size: 14px;
+        color: #f8fafc;
+        margin-top: 4px;
+      }
+
+      .match-share-footer {
+        margin-top: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        font-size: 11px;
+        color: rgba(148, 163, 184, 0.9);
+      }
+
+      .match-share-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .match-share-actions button {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: rgba(148, 163, 184, 0.12);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        color: #e2e8f0;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .match-share-actions button:hover {
+        background: rgba(148, 163, 184, 0.2);
+        color: #f8fafc;
+        transform: translateY(-1px);
+      }
+
+      .match-share-links {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .match-share-link {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(148, 163, 184, 0.12);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        color: #94a3b8;
+        transition: all 0.2s ease;
+        text-decoration: none;
+      }
+
+      .match-share-link:hover {
+        background: rgba(148, 163, 184, 0.2);
+        color: var(--hover-color, #f8fafc);
+        transform: translateY(-1px);
+      }
+
+      .match-share-link[data-color="#1877F2"]:hover {
+        color: #1877F2;
+      }
+
+      .match-share-link[data-color="#0A66C2"]:hover {
+        color: #0A66C2;
+      }
+
+      .match-share-link[data-color="#FF4500"]:hover {
+        color: #FF4500;
+      }
+
+      .match-share-link[data-color="#000000"]:hover {
+        color: #000000;
+      }
+
+      .match-share-link svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .match-share-status {
+        min-height: 16px;
+        font-size: 12px;
+        color: rgba(148, 163, 184, 0.9);
+      }
+
+      .match-share-status.ok {
+        color: #22c55e;
+      }
+
+      .match-share-status.error {
+        color: #f87171;
+      }
+
+      @media (max-width: 640px) {
+        .match-share-panel {
+          padding: 16px;
+        }
+
+        .match-share-card {
+          padding: 14px;
+        }
+
+        .match-share-stats {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .match-share-logo {
+          width: 90px;
+        }
+      }
     </style>
   </Fragment>
 
@@ -86,7 +404,7 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
               type="text"
               placeholder="Enter gamertag..."
               autocomplete="off"
-              class="w-full pl-11 pr-4 py-3 rounded-lg bg-slate-800/60 border border-cyan-500/30 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 font-mono text-base backdrop-blur-sm transition-colors duration-200"
+              class="w-full pl-11 pr-4 py-3 rounded-lg bg-slate-800/60 border border-cyan-500/30 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 font-mono text-base transition-colors duration-200"
               aria-label="Gamertag search"
             />
           </div>
@@ -210,6 +528,85 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
         </section>
       </div>
 
+      <!-- Match Share Modal -->
+      <div id="match-share-modal" class="match-share-modal hidden" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="match-share-title">
+        <div class="match-share-backdrop" data-close="true"></div>
+        <div class="match-share-panel" role="document">
+          <div class="match-share-header">
+            <h3 id="match-share-title" class="match-share-title">Share Match</h3>
+            <button type="button" class="match-share-close" data-close="true" aria-label="Close share dialog">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+          <div class="match-share-content">
+            <div id="match-share-card" class="match-share-card" aria-label="Match share card preview">
+              <div class="match-share-card-top">
+                <div>
+                  <span id="match-share-result" class="match-share-result draw">Draw</span>
+                  <div id="match-share-gamertag" class="match-share-gamertag">Gamertag</div>
+                  <div id="match-share-subtitle" class="match-share-subtitle">Match summary</div>
+                </div>
+                <img id="match-share-logo" class="match-share-logo" src="/content/Team-Respawn-Full.png" alt="Team Respawn" loading="eager" />
+              </div>
+              <div id="match-share-hero" class="match-share-hero">
+                <div class="match-share-hero-overlay">
+                  <div id="match-share-map" class="match-share-map">Unknown Map</div>
+                  <div id="match-share-leader" class="match-share-leader">Unknown Leader</div>
+                </div>
+              </div>
+              <div class="match-share-stats">
+                <div class="match-share-stat">
+                  <span>Duration</span>
+                  <strong id="match-share-duration">-</strong>
+                </div>
+                <div class="match-share-stat">
+                  <span>Leader Powers Used</span>
+                  <strong id="match-share-powers">-</strong>
+                </div>
+                <div class="match-share-stat">
+                  <span>Units Destroyed</span>
+                  <strong id="match-share-units">-</strong>
+                </div>
+                <div class="match-share-stat">
+                  <span>Team</span>
+                  <strong id="match-share-team">-</strong>
+                </div>
+              </div>
+              <div class="match-share-footer">
+                <span id="match-share-playlist">Matchmaking</span>
+                <span id="match-share-date"></span>
+              </div>
+            </div>
+
+            <div class="match-share-actions">
+              <button type="button" id="match-share-copy-link">Copy Link</button>
+              <button type="button" id="match-share-download">Download Image</button>
+              <button type="button" id="match-share-copy-image">Copy Image</button>
+            </div>
+
+            <div class="match-share-links" id="match-share-links">
+              <a class="match-share-link" data-share="x" data-color="#000000" href="#" target="_blank" rel="noopener noreferrer" aria-label="Share on X" title="Share on X">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10.053,7.988l5.631,8.024h-1.497L8.566,7.988H10.053z M21,6v12 c0,1.657-1.343,3-3,3H6c-1.657,0-3-1.343-3-3V6c0-1.657,1.343-3,3-3h12C19.657,3,21,4.343,21,6z M17.538,17l-4.186-5.99L16.774,7 h-1.311l-2.704,3.16L10.552,7H6.702l3.941,5.633L6.906,17h1.333l3.001-3.516L13.698,17H17.538z" fill="currentColor"/></svg>
+              </a>
+              <a class="match-share-link" data-share="facebook" data-color="#1877F2" href="#" target="_blank" rel="noopener noreferrer" aria-label="Share on Facebook" title="Share on Facebook">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19,3H5C3.895,3,3,3.895,3,5v14c0,1.105,0.895,2,2,2h7.621v-6.961h-2.343v-2.725h2.343V9.309 c0-2.324,1.421-3.591,3.495-3.591c0.699-0.002,1.397,0.034,2.092,0.105v2.43h-1.428c-1.13,0-1.35,0.534-1.35,1.322v1.735h2.7 l-0.351,2.725h-2.365V21H19c1.105,0,2-0.895,2-2V5C21,3.895,20.105,3,19,3z" fill="currentColor"/></svg>
+              </a>
+              <a class="match-share-link" data-share="linkedin" data-color="#0A66C2" href="#" target="_blank" rel="noopener noreferrer" aria-label="Share on LinkedIn" title="Share on LinkedIn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19,3H5C3.895,3,3,3.895,3,5v14c0,1.105,0.895,2,2,2h14c1.105,0,2-0.895,2-2V5C21,3.895,20.105,3,19,3z M9,17H6.477v-7H9 V17z M7.694,8.717c-0.771,0-1.286-0.514-1.286-1.2s0.514-1.2,1.371-1.2c0.771,0,1.286,0.514,1.286,1.2S8.551,8.717,7.694,8.717z M18,17h-2.442v-3.826c0-1.058-0.651-1.302-0.895-1.302s-1.058,0.163-1.058,1.302c0,0.163,0,3.826,0,3.826h-2.523v-7h2.523v0.977 C13.93,10.407,14.581,10,15.802,10C17.023,10,18,10.977,18,13.174V17z" fill="currentColor"/></svg>
+              </a>
+              <a class="match-share-link" data-share="reddit" data-color="#FF4500" href="#" target="_blank" rel="noopener noreferrer" aria-label="Share on Reddit" title="Share on Reddit">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M 14 3 C 12.300781 3 11 4.414063 11 6 L 11 8.03125 C 8.882813 8.175781 6.976563 8.785156 5.4375 9.71875 C 4.878906 9.28125 4.21875 9.03125 3.5625 9.03125 C 2.835938 9.03125 2.128906 9.308594 1.625 9.875 C 0.667969 11.070313 0.753906 13.023438 2.09375 14.03125 C 2.03125 14.347656 2 14.667969 2 15 C 2 17.054688 3.242188 18.84375 5.0625 20.0625 C 6.882813 21.28125 9.320313 22 12 22 C 14.679688 22 17.117188 21.28125 18.9375 20.0625 C 20.757813 18.84375 22 17.054688 22 15 C 22 14.667969 21.9375 14.347656 21.875 14.03125 C 23.238281 12.945313 23.378906 11.003906 22.375 9.875 C 21.871094 9.308594 21.164063 9.03125 20.4375 9.03125 C 19.78125 9.03125 19.121094 9.28125 18.5625 9.71875 C 17.023438 8.785156 15.117188 8.175781 13 8.03125 L 13 6 C 13 5.386719 13.300781 5 14 5 C 14.320313 5 14.773438 5.171875 15.53125 5.4375 C 16.203125 5.671875 17.09375 5.914063 18.25 5.96875 C 18.589844 6.585938 19.25 7 20 7 C 21.101563 7 22 6.101563 22 5 C 22 3.898438 21.101563 3 20 3 C 19.273438 3 18.632813 3.382813 18.28125 3.96875 C 17.394531 3.925781 16.769531 3.765625 16.1875 3.5625 C 15.519531 3.328125 14.878906 3 14 3 Z M 20 4 C 20.601563 4 21 4.398438 21 5 C 21 5.601563 20.601563 6 20 6 C 19.398438 6 19 5.601563 19 5 C 19 4.398438 19.398438 4 20 4 Z M 12 10 C 14.320313 10 16.382813 10.636719 17.8125 11.59375 C 19.242188 12.550781 20 13.753906 20 15 C 20 16.246094 19.242188 17.449219 17.8125 18.40625 C 16.382813 19.363281 14.320313 20 12 20 C 9.679688 20 7.617188 19.363281 6.1875 18.40625 C 4.757813 17.449219 4 16.246094 4 15 C 4 13.753906 4.757813 12.550781 6.1875 11.59375 C 7.617188 10.636719 9.679688 10 12 10 Z M 3.59375 10.03125 C 3.925781 10.03125 4.277344 10.101563 4.59375 10.28125 C 3.628906 11.023438 2.878906 11.9375 2.4375 12.96875 C 1.855469 12.28125 1.867188 11.191406 2.375 10.53125 C 2.671875 10.195313 3.121094 10.03125 3.59375 10.03125 Z M 20.40625 10.03125 C 20.878906 10.03125 21.328125 10.195313 21.625 10.53125 C 22.117188 11.085938 22.15625 12.175781 21.5625 12.9375 C 21.121094 11.914063 20.363281 11.019531 19.40625 10.28125 C 19.722656 10.101563 20.074219 10.03125 20.40625 10.03125 Z M 9 12 C 8.171875 12 7.5 12.671875 7.5 13.5 C 7.5 14.328125 8.171875 15 9 15 C 9.828125 15 10.5 14.328125 10.5 13.5 C 10.5 12.671875 9.828125 12 9 12 Z M 15 12 C 14.171875 12 13.5 12.671875 13.5 13.5 C 13.5 14.328125 14.171875 15 15 15 C 15.828125 15 16.5 14.328125 16.5 13.5 C 16.5 12.671875 15.828125 12 15 12 Z M 16.09375 16.40625 C 15.195313 17.207031 13.699219 17.6875 12 17.6875 C 10.300781 17.6875 8.804688 17.199219 7.90625 16.5 C 8.40625 17.800781 10 19 12 19 C 14 19 15.59375 17.804688 16.09375 16.40625 Z" fill="currentColor"/></svg>
+              </a>
+            </div>
+
+            <p id="match-share-status" class="match-share-status" role="status" aria-live="polite"></p>
+          </div>
+        </div>
+      </div>
+
       <!-- Global Error Area -->
       <div id="global-error" class="hidden max-w-2xl mx-auto"></div>
 
@@ -239,6 +636,45 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
     const resultsContainer = document.getElementById('results-container')!;
     const globalError = document.getElementById('global-error')!;
     const recentSearchesEl = document.getElementById('recent-searches')!;
+    const shareModal = document.getElementById('match-share-modal') as HTMLElement | null;
+    const shareCard = document.getElementById('match-share-card') as HTMLElement | null;
+    const shareResultEl = document.getElementById('match-share-result') as HTMLElement | null;
+    const shareGamertagEl = document.getElementById('match-share-gamertag') as HTMLElement | null;
+    const shareSubtitleEl = document.getElementById('match-share-subtitle') as HTMLElement | null;
+    const shareMapEl = document.getElementById('match-share-map') as HTMLElement | null;
+    const shareLeaderEl = document.getElementById('match-share-leader') as HTMLElement | null;
+    const shareDurationEl = document.getElementById('match-share-duration') as HTMLElement | null;
+    const sharePowersEl = document.getElementById('match-share-powers') as HTMLElement | null;
+    const shareUnitsEl = document.getElementById('match-share-units') as HTMLElement | null;
+    const shareTeamEl = document.getElementById('match-share-team') as HTMLElement | null;
+    const sharePlaylistEl = document.getElementById('match-share-playlist') as HTMLElement | null;
+    const shareDateEl = document.getElementById('match-share-date') as HTMLElement | null;
+    const shareHeroEl = document.getElementById('match-share-hero') as HTMLElement | null;
+    const shareStatusEl = document.getElementById('match-share-status') as HTMLElement | null;
+    const shareCopyLinkBtn = document.getElementById('match-share-copy-link') as HTMLButtonElement | null;
+    const shareDownloadBtn = document.getElementById('match-share-download') as HTMLButtonElement | null;
+    const shareCopyImageBtn = document.getElementById('match-share-copy-image') as HTMLButtonElement | null;
+    const shareLinks = document.querySelectorAll('.match-share-link');
+    const SHARE_HERO_GRADIENT = 'linear-gradient(120deg, rgba(2, 6, 23, 0.85), rgba(6, 40, 64, 0.85))';
+
+    type ShareData = {
+      matchId: string;
+      gamertag: string;
+      resultText: string;
+      resultClass: 'win' | 'loss' | 'draw';
+      mapName: string;
+      mapImage: string;
+      leaderName: string;
+      dateStr: string;
+      durationStr: string;
+      playlistLabel: string;
+      teamSizeLabel: string;
+      powersText: string;
+      unitsText: string;
+      shareUrl: string;
+      shareTitle: string;
+      shareText: string;
+    };
 
     const STORAGE_KEY = 'hw2-recent-searches';
     const MAX_RECENT = 5;
@@ -246,6 +682,18 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
     let leaderPowerMapCache: Record<string, string> | null = null;
     let leaderPowerNormalizedMap: Map<string, string> | null = null;
     let leaderPowerMapLoading: Promise<Record<string, string> | null> | null = null;
+    let currentMatches: any[] = [];
+    let currentGamertag = '';
+    let matchLookup = new Map<string, any>();
+    let activeShareData: ShareData | null = null;
+    let shareStatusTimeout: number | null = null;
+    let html2canvasPromise: Promise<any> | null = null;
+    let mapImageRequestId = 0;
+    let pendingShareMatchId: string | null = null;
+    let shareMapImageDataUrl: string | null = null;
+    let shareRequestId = 0;
+    let shareMapImageUrl: string | null = null;
+    let shareMapImagePromise: Promise<string | null> | null = null;
 
     async function ensureLeaderPowerMap(): Promise<Record<string, string> | null> {
       if (leaderPowerMapCache) return leaderPowerMapCache;
@@ -345,8 +793,17 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
       recentSearchesEl.classList.remove('hidden');
       recentSearchesEl.innerHTML = '<span class="text-xs text-gray-400 self-center">Recent:</span>' +
         searches.map(s =>
-          `<button type="button" class="recent-search-tag text-xs px-3 py-1 rounded-full bg-slate-700/60 text-cyan-300 border border-cyan-500/20 hover:border-cyan-400/40 hover:bg-slate-600/60 transition-colors cursor-pointer font-mono" data-gamertag="${s.replace(/"/g, '&quot;')}">${s}</button>`
+          `<div class="recent-search-wrapper inline-flex items-center gap-1 text-xs px-3 py-1 rounded-full bg-slate-700/60 text-cyan-300 border border-cyan-500/20 hover:border-cyan-400/40 hover:bg-slate-600/60 transition-colors font-mono">
+            <button type="button" class="recent-search-tag hover:text-cyan-200 transition-colors" data-gamertag="${s.replace(/"/g, '&quot;')}">${s}</button>
+            <button type="button" class="recent-search-remove text-gray-400 hover:text-red-400 transition-colors ml-1" data-gamertag="${s.replace(/"/g, '&quot;')}" aria-label="Remove ${s} from recent searches">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>`
         ).join('');
+      
       recentSearchesEl.querySelectorAll('.recent-search-tag').forEach(btn => {
         btn.addEventListener('click', () => {
           const gt = (btn as HTMLElement).dataset.gamertag || '';
@@ -354,6 +811,25 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
           performSearch(gt);
         });
       });
+      
+      recentSearchesEl.querySelectorAll('.recent-search-remove').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const gt = (btn as HTMLElement).dataset.gamertag || '';
+          removeRecentSearch(gt);
+        });
+      });
+    }
+
+    function removeRecentSearch(gamertagToRemove: string) {
+      try {
+        const searches = getRecentSearches();
+        const filteredSearches = searches.filter(s => s.toLowerCase() !== gamertagToRemove.toLowerCase());
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(filteredSearches));
+        renderRecentSearches();
+      } catch {
+        // Silently fail if localStorage is not available
+      }
     }
 
     function showError(container: HTMLElement, error: { type: string; message: string }) {
@@ -585,6 +1061,391 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
       }
     }
 
+    function findMatchPlayer(match: any, gamertag: string) {
+      const gtLower = gamertag.toLowerCase();
+      const rawPlayers = match?.Players;
+      const players = Array.isArray(rawPlayers)
+        ? rawPlayers
+        : (rawPlayers && typeof rawPlayers === 'object')
+          ? Object.values(rawPlayers)
+          : [];
+      const player = players.find((p: any) => {
+        const id =
+          p?.HumanPlayerId?.Gamertag
+          || (typeof p?.HumanPlayerId === 'string' ? p.HumanPlayerId : '')
+          || p?.Gamertag
+          || p?.PlayerId;
+        return id && String(id).toLowerCase() === gtLower;
+      }) || players[0] || null;
+      return player;
+    }
+
+    function buildMatchShareData(match: any, gamertag: string): ShareData {
+      const player = findMatchPlayer(match, gamertag);
+
+      const rawOutcome = player?.MatchOutcome
+        ?? player?.PlayerMatchOutcome
+        ?? match.PlayerMatchOutcome
+        ?? match.MatchOutcome
+        ?? match.MatchResult;
+      const outcome = typeof rawOutcome === 'string' ? rawOutcome.toLowerCase() : rawOutcome;
+      const isWin = outcome === 1 || outcome === 'win' || outcome === 'victory';
+      const isLoss = outcome === 2 || outcome === 'loss' || outcome === 'defeat';
+      const resultText = isWin ? 'Victory' : isLoss ? 'Defeat' : 'Draw';
+      const resultClass: ShareData['resultClass'] = isWin ? 'win' : isLoss ? 'loss' : 'draw';
+
+      const leaderId = player?.LeaderId ?? match.LeaderId;
+      const leaderName = leaderId != null ? getLeaderName(leaderId) : 'Unknown';
+      const mapName = getMapName(match.MapId || '');
+      const mapImage =
+        getMapImage(match.MapId || '')
+        || (typeof match.MapImageUrl === 'string' ? match.MapImageUrl : '')
+        || (typeof match.MapImage === 'string' ? match.MapImage : '');
+      const dateStr = match.MatchStartDate?.ISO8601Date
+        ? new Date(match.MatchStartDate.ISO8601Date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+        : '';
+      const durationIso = match.PlayerMatchDuration || match.MatchDuration;
+      const durationStr = durationIso ? parseDuration(durationIso) : '';
+
+      const playlistName = match.PlaylistId ? getPlaylistName(match.PlaylistId) : '';
+      const fallbackLabel = getGameModeName(match.GameMode) || (match.MatchType === 3 ? 'Matchmaking' : match.MatchType === 2 ? 'Custom' : match.MatchType === 1 ? 'Campaign' : 'Unknown');
+      const playlistLabel = playlistName || fallbackLabel;
+
+      let powersUsed = 0;
+      const leaderPowerStats = player?.LeaderPowerStats;
+      if (leaderPowerStats && typeof leaderPowerStats === 'object') {
+        Object.values(leaderPowerStats).forEach((stats: any) => {
+          if (typeof stats === 'number') {
+            powersUsed += stats;
+          } else if (stats && typeof stats === 'object') {
+            powersUsed += stats.TimesCast ?? stats.TotalPlays ?? 0;
+          }
+        });
+      }
+      const powersText = String(powersUsed);
+
+      const unitStats = player?.UnitStats || match.UnitStats;
+      let unitsDestroyed = 0;
+      if (unitStats && typeof unitStats === 'object') {
+        Object.values(unitStats).forEach((u: any) => {
+          unitsDestroyed += u?.TotalDestroyed || 0;
+        });
+      }
+      const unitsText = String(unitsDestroyed);
+
+      let teamSizeLabel = '';
+      if (match.Teams && typeof match.Teams === 'object') {
+        const sizes = Object.values(match.Teams).map((t: any) => t?.TeamSize).filter((s: any) => typeof s === 'number');
+        if (sizes.length >= 2) {
+          teamSizeLabel = `${sizes[0]}v${sizes[1]}`;
+        } else if (sizes.length === 1) {
+          teamSizeLabel = `${sizes[0]}v${sizes[0]}`;
+        }
+      }
+
+      const matchId = match.MatchId || '';
+      const baseUrl = `${window.location.origin}/halo-wars-stats`;
+      const shareUrl = `${baseUrl}?gamertag=${encodeURIComponent(gamertag)}${matchId ? `&matchId=${encodeURIComponent(matchId)}` : ''}`;
+      const shareTitle = `${gamertag} - ${resultText} as ${leaderName} on ${mapName} | Halo Wars 2 Stats`;
+      const shareText = `${gamertag} - ${resultText} on ${mapName} as ${leaderName}${durationStr ? ` | ${durationStr}` : ''}${teamSizeLabel ? ` | ${teamSizeLabel}` : ''}`;
+
+      return {
+        matchId,
+        gamertag,
+        resultText,
+        resultClass,
+        mapName,
+        mapImage,
+        leaderName,
+        dateStr,
+        durationStr,
+        playlistLabel,
+        teamSizeLabel: teamSizeLabel || '-',
+        powersText,
+        unitsText,
+        shareUrl,
+        shareTitle,
+        shareText,
+      };
+    }
+
+    function setShareStatus(message: string, tone: 'ok' | 'error' | 'info' = 'info') {
+      if (!shareStatusEl) return;
+      shareStatusEl.textContent = message;
+      shareStatusEl.classList.remove('ok', 'error');
+      if (tone !== 'info') shareStatusEl.classList.add(tone);
+      if (shareStatusTimeout) {
+        window.clearTimeout(shareStatusTimeout);
+      }
+      if (message) {
+        shareStatusTimeout = window.setTimeout(() => {
+          if (shareStatusEl) {
+            shareStatusEl.textContent = '';
+            shareStatusEl.classList.remove('ok', 'error');
+          }
+        }, 3000);
+      }
+    }
+
+    function updateShareCard(data: ShareData) {
+      if (shareResultEl) {
+        shareResultEl.textContent = data.resultText;
+        shareResultEl.classList.remove('win', 'loss', 'draw');
+        shareResultEl.classList.add(data.resultClass);
+      }
+      if (shareGamertagEl) shareGamertagEl.textContent = data.gamertag;
+      if (shareSubtitleEl) shareSubtitleEl.textContent = `${data.leaderName} | ${data.mapName}`;
+      if (shareMapEl) shareMapEl.textContent = data.mapName;
+      if (shareLeaderEl) shareLeaderEl.textContent = data.leaderName;
+      if (shareDurationEl) shareDurationEl.textContent = data.durationStr || '-';
+      if (sharePowersEl) sharePowersEl.textContent = data.powersText || '-';
+      if (shareUnitsEl) shareUnitsEl.textContent = data.unitsText || '-';
+      if (shareTeamEl) shareTeamEl.textContent = data.teamSizeLabel || '-';
+      if (sharePlaylistEl) sharePlaylistEl.textContent = data.playlistLabel || 'Matchmaking';
+      if (shareDateEl) shareDateEl.textContent = data.dateStr || '';
+    }
+
+    function updateShareLinks(data: ShareData) {
+      const encodedUrl = encodeURIComponent(data.shareUrl);
+      const encodedTitle = encodeURIComponent(data.shareTitle);
+      const encodedText = encodeURIComponent(data.shareText);
+      const linkMap: Record<string, string> = {
+        x: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedText}`,
+        facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+        linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+        reddit: `https://www.reddit.com/submit?url=${encodedUrl}&title=${encodedTitle}`,
+      };
+
+      shareLinks.forEach((link) => {
+        const key = link.getAttribute('data-share') || '';
+        if (key && linkMap[key]) {
+          link.setAttribute('href', linkMap[key]);
+        }
+      });
+    }
+
+    async function resolveShareMapImage(url: string): Promise<string | null> {
+      if (!url) return null;
+      try {
+        const response = await fetch(url, { mode: 'cors' });
+        if (!response.ok) return null;
+        const blob = await response.blob();
+        return await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(String(reader.result || ''));
+          reader.onerror = () => reject(new Error('Failed to read image.'));
+          reader.readAsDataURL(blob);
+        });
+      } catch {
+        return null;
+      }
+    }
+
+    async function setShareMapImage(url: string) {
+      if (!shareHeroEl) return;
+      const requestId = ++mapImageRequestId;
+      shareMapImageDataUrl = null;
+      shareMapImageUrl = url || null;
+      shareMapImagePromise = null;
+      if (url) {
+        shareHeroEl.style.backgroundImage = `url('${url}')`;
+      } else {
+        shareHeroEl.style.backgroundImage = SHARE_HERO_GRADIENT;
+      }
+      shareMapImagePromise = resolveShareMapImage(url);
+      const dataUrl = await shareMapImagePromise;
+      if (requestId !== mapImageRequestId) return;
+      if (dataUrl) {
+        shareMapImageDataUrl = dataUrl;
+        shareHeroEl.style.backgroundImage = `url('${dataUrl}')`;
+      }
+    }
+
+    function openShareModal(data: ShareData) {
+      if (!shareModal) return;
+      activeShareData = data;
+      updateShareCard(data);
+      updateShareLinks(data);
+      if (shareCopyLinkBtn) shareCopyLinkBtn.setAttribute('data-url', data.shareUrl);
+      shareModal.classList.remove('hidden');
+      shareModal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('match-share-open');
+      setShareStatus('');
+      setShareMapImage(data.mapImage);
+      shareCopyLinkBtn?.focus();
+    }
+
+    function closeShareModal() {
+      if (!shareModal) return;
+      shareModal.classList.add('hidden');
+      shareModal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('match-share-open');
+      activeShareData = null;
+      setShareStatus('');
+    }
+
+    async function ensureHtml2canvas(): Promise<any> {
+      const existing = (window as any).html2canvas;
+      if (existing) return existing;
+      if (html2canvasPromise) return html2canvasPromise;
+      html2canvasPromise = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+        script.async = true;
+        script.onload = () => resolve((window as any).html2canvas);
+        script.onerror = () => reject(new Error('Failed to load image capture library.'));
+        document.head.appendChild(script);
+      });
+      return html2canvasPromise;
+    }
+
+    function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
+      return new Promise((resolve, reject) => {
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error('Unable to generate image.'));
+        }, 'image/png');
+      });
+    }
+
+    async function renderShareCardCanvas(): Promise<HTMLCanvasElement> {
+      if (!shareCard) throw new Error('Share card not found.');
+      const html2canvas = await ensureHtml2canvas();
+      const previousBg = shareHeroEl?.style.backgroundImage;
+      if (shareHeroEl) {
+        if (shareMapImageDataUrl) {
+          shareHeroEl.style.backgroundImage = `url('${shareMapImageDataUrl}')`;
+        } else if (shareMapImageUrl) {
+          if (shareMapImagePromise) {
+            const dataUrl = await shareMapImagePromise;
+            if (dataUrl) {
+              shareMapImageDataUrl = dataUrl;
+              shareHeroEl.style.backgroundImage = `url('${dataUrl}')`;
+            }
+          }
+        }
+      }
+      try {
+        return await html2canvas(shareCard, {
+          backgroundColor: null,
+          scale: 2,
+          useCORS: true,
+        });
+      } finally {
+        if (shareHeroEl && typeof previousBg === 'string') {
+          shareHeroEl.style.backgroundImage = previousBg;
+        }
+      }
+    }
+
+    async function copyShareLink() {
+      if (!activeShareData) return;
+      try {
+        await navigator.clipboard.writeText(activeShareData.shareUrl);
+        setShareStatus('Link copied to clipboard.', 'ok');
+      } catch {
+        setShareStatus('Failed to copy link.', 'error');
+      }
+    }
+
+    async function downloadShareImage() {
+      if (!activeShareData) return;
+      try {
+        const mapWarning = !!activeShareData.mapImage && !shareMapImageDataUrl;
+        setShareStatus(mapWarning ? 'Preparing map art for export...' : 'Generating image...', 'info');
+        const canvas = await renderShareCardCanvas();
+        const blob = await canvasToBlob(canvas);
+        const safeGamertag = activeShareData.gamertag.replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '');
+        const safeMatch = activeShareData.matchId ? activeShareData.matchId.slice(0, 8) : 'match';
+        const fileName = `hw2-${safeGamertag || 'player'}-${safeMatch}.png`;
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        link.click();
+        URL.revokeObjectURL(url);
+        setShareStatus('Image downloaded.', 'ok');
+      } catch (err) {
+        setShareStatus('Unable to generate image.', 'error');
+      }
+    }
+
+    async function copyShareImage() {
+      if (!activeShareData) return;
+      if (!navigator.clipboard || !(window as any).ClipboardItem) {
+        setShareStatus('Copy image is not supported in this browser.', 'error');
+        return;
+      }
+      if (!window.isSecureContext) {
+        setShareStatus('Copy image requires HTTPS.', 'error');
+        return;
+      }
+      try {
+        const mapWarning = !!activeShareData.mapImage && !shareMapImageDataUrl;
+        setShareStatus(mapWarning ? 'Preparing map art for export...' : 'Generating image...', 'info');
+        const canvas = await renderShareCardCanvas();
+        const blob = await canvasToBlob(canvas);
+        const item = new (window as any).ClipboardItem({ 'image/png': blob });
+        await navigator.clipboard.write([item]);
+        setShareStatus('Image copied to clipboard.', 'ok');
+      } catch {
+        setShareStatus('Unable to copy image.', 'error');
+      }
+    }
+
+    async function showShareModal(matchId: string, gamertag: string) {
+      if (!matchId) return;
+      const match = matchLookup.get(matchId) || currentMatches.find((m: any) => m.MatchId === matchId);
+      if (!match) {
+        showError(globalError, { type: 'not_found', message: 'Match not found in recent history.' });
+        return;
+      }
+      const requestId = ++shareRequestId;
+      const data = buildMatchShareData(match, gamertag);
+      openShareModal(data);
+
+      const player = findMatchPlayer(match, gamertag);
+      const needsDetails = !player || (!player?.UnitStats && !player?.LeaderPowerStats);
+      if (!needsDetails) return;
+
+      setShareStatus('Fetching match details...', 'info');
+      const result = await getMatchResult(matchId);
+      if (requestId !== shareRequestId) return;
+      if (!result.ok || !result.data) {
+        setShareStatus('Match details unavailable.', 'error');
+        return;
+      }
+
+      const mergedMatch = {
+        ...match,
+        ...result.data,
+        Players: result.data?.Players ?? match.Players,
+      };
+      const updated = buildMatchShareData(mergedMatch, gamertag);
+      activeShareData = updated;
+      updateShareCard(updated);
+      updateShareLinks(updated);
+      if (shareCopyLinkBtn) shareCopyLinkBtn.setAttribute('data-url', updated.shareUrl);
+      setShareMapImage(updated.mapImage);
+      setShareStatus('Match details loaded.', 'ok');
+    }
+
+    if (shareModal) {
+      shareModal.querySelectorAll('[data-close="true"]').forEach((el) => {
+        el.addEventListener('click', closeShareModal);
+      });
+    }
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && shareModal && !shareModal.classList.contains('hidden')) {
+        closeShareModal();
+      }
+    });
+
+    shareCopyLinkBtn?.addEventListener('click', copyShareLink);
+    shareDownloadBtn?.addEventListener('click', downloadShareImage);
+    shareCopyImageBtn?.addEventListener('click', copyShareImage);
+
     function renderOverview(stats: any) {
       hideSkeleton('overview');
       const overviewContent = document.getElementById('overview-content')!;
@@ -723,6 +1584,13 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
     function renderMatches(matches: any[], gamertag: string) {
       hideSkeleton('matches');
       const matchesContent = document.getElementById('matches-content')!;
+      currentMatches = Array.isArray(matches) ? matches : [];
+      currentGamertag = gamertag;
+      matchLookup = new Map<string, any>();
+      currentMatches.forEach((m: any) => {
+        const id = m?.MatchId;
+        if (id) matchLookup.set(id, m);
+      });
 
       if (!matches || matches.length === 0) {
         matchesContent.innerHTML = '<p class="text-gray-500 text-sm text-center py-6">No recent matches found.</p>';
@@ -825,16 +1693,35 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
                     ${unitsText ? `<span>• Units ${unitsText}</span>` : ''}
                   </div>
                   ${matchId ? `
-                    <button
-                      type="button"
-                      class="match-details-toggle w-full mt-3 flex items-center justify-between rounded-md border border-cyan-500/20 bg-slate-800/40 px-3 py-2 text-xs text-cyan-300 hover:text-cyan-200 hover:border-cyan-400/40 transition-colors"
-                      data-match-id="${matchId}"
-                      aria-controls="${detailsId}"
-                      aria-expanded="false"
-                    >
-                      <span>Team compositions</span>
-                      <span class="match-details-chevron transition-transform duration-200" aria-hidden="true">&#x25BC;</span>
-                    </button>
+                    <div class="flex gap-2 mt-3">
+                      <button
+                        type="button"
+                        class="match-details-toggle flex-[4] flex items-center justify-between rounded-md border border-cyan-500/20 bg-slate-800/40 px-3 py-2 text-xs text-cyan-300 hover:text-cyan-200 hover:border-cyan-400/40 transition-colors"
+                        data-match-id="${matchId}"
+                        aria-controls="${detailsId}"
+                        aria-expanded="false"
+                      >
+                        <span>Team compositions</span>
+                        <span class="match-details-chevron transition-transform duration-200" aria-hidden="true">&#x25BC;</span>
+                      </button>
+                      <button
+                        type="button"
+                        class="match-share-toggle flex-[1] inline-flex items-center justify-center rounded-md border border-cyan-500/20 bg-slate-800/40 px-3 py-2 text-xs text-cyan-300 hover:text-cyan-200 hover:border-cyan-400/40 transition-colors"
+                        aria-label="Share match"
+                        title="Share match"
+                        data-match-id="${matchId}"
+                        data-gamertag="${gamertag}"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="18" cy="5" r="3"></circle>
+                          <circle cx="6" cy="12" r="3"></circle>
+                          <circle cx="18" cy="19" r="3"></circle>
+                          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                          <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                        </svg>
+                        <span class="hidden sm:inline">Share</span>
+                      </button>
+                    </div>
                     <div id="${detailsId}" class="match-details mt-3 hidden" data-loaded="false"></div>
                   ` : ''}
                 </div>
@@ -993,6 +1880,17 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
           await loadMatchDetails(matchId, detailsEl);
         });
       });
+
+      // Add event listeners for share buttons
+      matchesContent.querySelectorAll('.match-share-toggle').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const matchId = (btn as HTMLElement).getAttribute('data-match-id') || '';
+          const gamertag = (btn as HTMLElement).getAttribute('data-gamertag') || '';
+          if (!matchId || !gamertag) return;
+
+          await showShareModal(matchId, gamertag);
+        });
+      });
     }
 
     async function performSearch(gamertag: string) {
@@ -1037,6 +1935,11 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
       if (matchesResult.ok) {
         renderMatches(matchesList, gamertag);
         renderLeaderUsage(matchesList);
+        if (pendingShareMatchId) {
+          const targetMatchId = pendingShareMatchId;
+          pendingShareMatchId = null;
+          await showShareModal(targetMatchId, gamertag);
+        }
       } else {
         hideSkeleton('matches');
         showError(document.getElementById('matches-error')!, matchesResult.error);
@@ -1054,6 +1957,10 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
 
     const urlParams = new URLSearchParams(window.location.search);
     const gamertagParam = urlParams.get('gamertag');
+    const matchIdParam = urlParams.get('matchId');
+    if (matchIdParam) {
+      pendingShareMatchId = matchIdParam;
+    }
     if (gamertagParam) {
       searchInput.value = gamertagParam;
       performSearch(gamertagParam);

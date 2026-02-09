@@ -1,0 +1,260 @@
+---
+import facebook from '../blocks/Socials/icons/facebook.svg?raw'
+import x from '../blocks/Socials/icons/x.svg?raw'
+import linkedin from '../blocks/Socials/icons/linkedin.svg?raw'
+import reddit from '../blocks/Socials/icons/reddit.svg?raw'
+
+interface Props {
+  match: any;
+  gamertag: string;
+  onShareImage?: () => Promise<void>;
+  onCopyLink?: () => Promise<void>;
+}
+
+const { match, gamertag, onShareImage, onCopyLink } = Astro.props;
+
+// Generate share text
+const gtLower = gamertag.toLowerCase();
+const player = match.Players?.find((p: any) => {
+  const id = p.HumanPlayerId || p.Gamertag || p.PlayerId;
+  return id && String(id).toLowerCase() === gtLower;
+}) || match.Players?.[0] || null;
+
+const rawOutcome = player?.MatchOutcome
+  ?? player?.PlayerMatchOutcome
+  ?? match.PlayerMatchOutcome
+  ?? match.MatchOutcome
+  ?? match.MatchResult;
+const outcome = typeof rawOutcome === 'string' ? rawOutcome.toLowerCase() : rawOutcome;
+const isWin = outcome === 1 || outcome === 'win' || outcome === 'victory';
+const isLoss = outcome === 2 || outcome === 'loss' || outcome === 'defeat';
+const resultText = isWin ? 'Victory' : isLoss ? 'Defeat' : 'Draw';
+
+const leaderId = player?.LeaderId ?? match.LeaderId;
+const { getLeaderName } = await import('../data/haloWars2/leaders');
+const leaderName = leaderId != null ? getLeaderName(leaderId) : 'Unknown';
+
+const { getMapName } = await import('../data/haloWars2/maps');
+const mapName = getMapName(match.MapId || '');
+
+const shareTitle = `${gamertag} - ${resultText} as ${leaderName} on ${mapName} | Halo Wars 2 Stats`;
+const shareUrl = `https://www.teamrespawn.net/halo-wars-stats?gamertag=${encodeURIComponent(gamertag)}`;
+const encodedUrl = encodeURIComponent(shareUrl);
+const encodedTitle = encodeURIComponent(shareTitle);
+
+const shareLinks = [
+  {
+    name: 'X',
+    icon: x,
+    href: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
+    color: '#000000'
+  },
+  {
+    name: 'Facebook',
+    icon: facebook,
+    href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+    color: '#1877F2'
+  },
+  {
+    name: 'LinkedIn',
+    icon: linkedin,
+    href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+    color: '#0A66C2'
+  },
+  {
+    name: 'Reddit',
+    icon: reddit,
+    href: `https://www.reddit.com/submit?url=${encodedUrl}&title=${encodedTitle}`,
+    color: '#FF4500'
+  }
+];
+---
+
+<div class="match-share-buttons">
+  <button
+    type="button"
+    class="share-btn share-image"
+    onclick={onShareImage}
+    title="Generate shareable image"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+      <circle cx="8.5" cy="8.5" r="1.5"></circle>
+      <polyline points="21 15 16 10 5 21"></polyline>
+    </svg>
+    <span>Image</span>
+  </button>
+  
+  <button
+    type="button"
+    class="share-btn copy-link"
+    onclick={onCopyLink}
+    title="Copy match link"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+    </svg>
+    <span>Link</span>
+  </button>
+
+  <div class="social-share-links">
+    {shareLinks.map(link => (
+      <a
+        href={link.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`Share on ${link.name}`}
+        title={`Share on ${link.name}`}
+        class="social-share-link"
+        data-color={link.color}
+      >
+        <Fragment set:html={link.icon} />
+      </a>
+    ))}
+  </div>
+</div>
+
+<style>
+  .match-share-buttons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: rgba(30, 41, 59, 0.8);
+    border-radius: 6px;
+    border: 1px solid rgba(148, 163, 184, 0.1);
+    backdrop-filter: blur(4px);
+  }
+
+  .share-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: rgba(148, 163, 184, 0.1);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 4px;
+    color: #94a3b8;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .share-btn:hover {
+    background: rgba(148, 163, 184, 0.2);
+    color: #f8fafc;
+    transform: translateY(-1px);
+  }
+
+  .share-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .social-share-links {
+    display: flex;
+    gap: 4px;
+    margin-left: auto;
+  }
+
+  .social-share-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    background: rgba(148, 163, 184, 0.1);
+    color: #94a3b8;
+    transition: all 0.2s ease;
+    border: none;
+    text-decoration: none;
+  }
+
+  .social-share-link:hover {
+    background: rgba(148, 163, 184, 0.2);
+    color: var(--hover-color, #f8fafc);
+    transform: translateY(-1px);
+  }
+
+  .social-share-link[data-color="#1877F2"]:hover {
+    color: #1877F2;
+  }
+
+  .social-share-link[data-color="#0A66C2"]:hover {
+    color: #0A66C2;
+  }
+
+  .social-share-link[data-color="#FF4500"]:hover {
+    color: #FF4500;
+  }
+
+  .social-share-link[data-color="#000000"]:hover {
+    color: #000000;
+  }
+
+  .social-share-link svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .copy-link.copied {
+    color: #22c55e;
+    background: rgba(34, 197, 94, 0.1);
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 640px) {
+    .match-share-buttons {
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    
+    .share-btn {
+      font-size: 11px;
+      padding: 4px 8px;
+    }
+    
+    .social-share-links {
+      margin-left: 0;
+      margin-top: 4px;
+    }
+  }
+</style>
+
+<script>
+  // Handle copy link functionality
+  export function initMatchShareButtons() {
+    document.querySelectorAll('.match-share-buttons .copy-link').forEach(button => {
+      button.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const url = button.getAttribute('data-url') || window.location.href;
+        
+        try {
+          await navigator.clipboard.writeText(url);
+          button.classList.add('copied');
+          const originalText = button.querySelector('span')?.textContent;
+          if (button.querySelector('span')) {
+            button.querySelector('span').textContent = 'Copied!';
+          }
+          
+          setTimeout(() => {
+            button.classList.remove('copied');
+            if (button.querySelector('span') && originalText) {
+              button.querySelector('span').textContent = originalText;
+            }
+          }, 2000);
+        } catch (err) {
+          console.error('Failed to copy link:', err);
+        }
+      });
+    });
+  }
+
+  // Initialize on page load
+  document.addEventListener('DOMContentLoaded', initMatchShareButtons);
+  
+  // Re-initialize after Astro page transitions
+  document.addEventListener('astro:after-swap', initMatchShareButtons);
+</script>
