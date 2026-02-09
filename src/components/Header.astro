@@ -8,6 +8,7 @@ const isHome = pathname === '/' || pathname === '/index.html';
 const isBlog = pathname.startsWith('/blog');
 const isGuides = isBlog && Astro.url?.searchParams?.get('category')?.toLowerCase() === 'guides';
 const isStorehaus = pathname.startsWith('/storehaus');
+const isHw2Stats = pathname.startsWith('/halo-wars-stats');
 ---
 
 <header class="compact-header relative w-full mb-6">
@@ -109,6 +110,12 @@ const isStorehaus = pathname.startsWith('/storehaus');
           class={`nav-link ${isBlog ? 'nav-link-active' : ''}`}
         >
           Blog
+        </a>
+        <a
+          href="/halo-wars-stats"
+          class={`nav-link ${isHw2Stats ? 'nav-link-active' : ''}`}
+        >
+          HW2 Stats
         </a>
         <button
           id="other-projects-tab"

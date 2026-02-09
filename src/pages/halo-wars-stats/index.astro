@@ -1,0 +1,760 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import SidePanel from '../../components/SidePanel.astro';
+import StorehausPromo from '../../components/StorehausPromo.astro';
+---
+<BaseLayout
+  title="Halo Wars 2 Stats - Team Respawn"
+  description="Search for any gamertag and view Halo Wars 2 player stats, ranked CSR, leader usage, and recent match history."
+  keywords="Halo Wars 2 stats, HW2 stats, Halo Wars 2 ranked, CSR lookup, gamertag search, Halo Wars 2 leaderboard"
+  canonical="https://www.teamrespawn.net/halo-wars-stats/"
+  ogTitle="Halo Wars 2 Stats Lookup - Team Respawn"
+  ogDescription="Search any gamertag to view Halo Wars 2 player stats, ranked CSR, leader usage, and match history."
+  ogImage="https://www.teamrespawn.net/content/Team-Respawn-Full.png"
+>
+  <Fragment slot="head">
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Halo Wars 2 Stats Lookup",
+        "description": "Search for any gamertag and view Halo Wars 2 player stats, ranked CSR, leader usage, and recent match history.",
+        "url": "https://www.teamrespawn.net/halo-wars-stats/",
+        "isPartOf": {
+          "@type": "WebSite",
+          "name": "Team Respawn",
+          "url": "https://www.teamrespawn.net"
+        }
+      }
+    </script>
+    <style>
+      @keyframes scanline {
+        0% { transform: translateY(-100%); }
+        100% { transform: translateY(100%); }
+      }
+      .scan-line::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.15), transparent);
+        animation: scanline 4s linear infinite;
+        pointer-events: none;
+      }
+      @keyframes csr-glow {
+        0%, 100% { box-shadow: 0 0 15px rgba(6, 182, 212, 0.3); }
+        50% { box-shadow: 0 0 30px rgba(6, 182, 212, 0.5); }
+      }
+      .csr-glow { animation: csr-glow 3s ease-in-out infinite; }
+    </style>
+  </Fragment>
+
+  <a
+    href="#main-content"
+    class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-white focus:text-black focus:px-4 focus:py-2 focus:rounded"
+  >
+    Skip to main content
+  </a>
+
+  <div class="container mx-auto p-4 sm:p-8">
+    <Header />
+
+    <main id="main-content" role="main" aria-label="Halo Wars 2 Stats">
+      <!-- Hero Banner -->
+      <section class="relative mb-8 rounded-xl overflow-hidden border border-cyan-500/20 scan-line" style="background: linear-gradient(135deg, #0a1628 0%, #0c2942 40%, #0a1628 100%);">
+        <div class="relative z-10 px-6 py-10 sm:py-14 text-center">
+          <h1 class="text-3xl sm:text-5xl font-bold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-cyan-400 to-teal-300">
+            Halo Wars 2 Stats
+          </h1>
+          <p class="text-cyan-200/70 text-base sm:text-lg max-w-2xl mx-auto">
+            Search for a gamertag to view player stats, ranked CSR, leader usage, and recent match history.
+          </p>
+        </div>
+      </section>
+
+      <!-- Search Bar -->
+      <section class="mb-8">
+        <div class="flex flex-col sm:flex-row gap-3 max-w-2xl mx-auto">
+          <div class="relative flex-1">
+            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400/60" aria-hidden="true"></i>
+            <input
+              id="gamertag-input"
+              type="text"
+              placeholder="Enter gamertag..."
+              autocomplete="off"
+              class="w-full pl-11 pr-4 py-3 rounded-lg bg-slate-800/60 border border-cyan-500/30 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 font-mono text-base backdrop-blur-sm transition-colors duration-200"
+              aria-label="Gamertag search"
+            />
+          </div>
+          <button
+            id="search-btn"
+            type="button"
+            class="px-6 py-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white font-semibold transition-colors duration-200 flex items-center justify-center gap-2 whitespace-nowrap"
+          >
+            <i class="fas fa-search" aria-hidden="true"></i>
+            Search
+          </button>
+        </div>
+        <!-- Recent Searches -->
+        <div id="recent-searches" class="max-w-2xl mx-auto mt-3 flex flex-wrap gap-2 hidden"></div>
+      </section>
+
+      <!-- Results Container -->
+      <div id="results-container" class="hidden space-y-6">
+        <!-- Player Overview Card -->
+        <section id="player-overview" class="rounded-xl p-6 backdrop-blur-sm border border-cyan-500/20" style="background: rgba(30, 41, 59, 0.4);">
+          <div id="overview-skeleton" class="space-y-4">
+            <div class="h-8 w-64 bg-slate-700/50 rounded animate-pulse"></div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div class="h-16 bg-slate-700/50 rounded animate-pulse"></div>
+              <div class="h-16 bg-slate-700/50 rounded animate-pulse"></div>
+              <div class="h-16 bg-slate-700/50 rounded animate-pulse"></div>
+              <div class="h-16 bg-slate-700/50 rounded animate-pulse"></div>
+              <div class="h-16 bg-slate-700/50 rounded animate-pulse"></div>
+            </div>
+          </div>
+          <div id="overview-content" class="hidden">
+            <h2 id="player-gamertag" class="text-2xl sm:text-3xl font-bold text-cyan-300 mb-4 font-mono"></h2>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div class="bg-slate-800/40 rounded-lg p-4 border border-cyan-500/10">
+                <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Matches</p>
+                <p id="stat-matches" class="text-xl font-bold font-mono text-white">-</p>
+              </div>
+              <div class="bg-slate-800/40 rounded-lg p-4 border border-cyan-500/10">
+                <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Wins</p>
+                <p id="stat-wins" class="text-xl font-bold font-mono text-green-400">-</p>
+              </div>
+              <div class="bg-slate-800/40 rounded-lg p-4 border border-cyan-500/10">
+                <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Win Rate</p>
+                <p id="stat-winrate" class="text-xl font-bold font-mono text-cyan-300">-</p>
+              </div>
+              <div class="bg-slate-800/40 rounded-lg p-4 border border-cyan-500/10">
+                <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Time Played (MM)</p>
+                <p id="stat-time" class="text-xl font-bold font-mono text-white">-</p>
+                <p id="stat-time-all" class="text-xs text-gray-400 mt-1">All modes: -</p>
+              </div>
+              <div class="bg-slate-800/40 rounded-lg p-4 border border-cyan-500/10">
+                <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Terminus Wave (All)</p>
+                <p id="stat-terminus-wave" class="text-xl font-bold font-mono text-white">-</p>
+              </div>
+            </div>
+          </div>
+          <div id="overview-error" class="hidden"></div>
+        </section>
+
+        <!-- Ranked Stats Grid -->
+        <section id="ranked-stats">
+          <h2 class="text-xl font-bold text-cyan-300 mb-4">
+            <i class="fas fa-trophy text-cyan-400 mr-2" aria-hidden="true"></i>Ranked Stats
+          </h2>
+          <div id="ranked-skeleton" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="rounded-xl p-6 border border-cyan-500/20 h-52 animate-pulse" style="background: rgba(30, 41, 59, 0.4);"><div class="h-6 w-24 bg-slate-700/50 rounded mb-4"></div><div class="h-20 w-20 bg-slate-700/50 rounded-full mx-auto mb-3"></div><div class="h-4 w-32 bg-slate-700/50 rounded mx-auto"></div></div>
+            <div class="rounded-xl p-6 border border-cyan-500/20 h-52 animate-pulse" style="background: rgba(30, 41, 59, 0.4);"><div class="h-6 w-24 bg-slate-700/50 rounded mb-4"></div><div class="h-20 w-20 bg-slate-700/50 rounded-full mx-auto mb-3"></div><div class="h-4 w-32 bg-slate-700/50 rounded mx-auto"></div></div>
+            <div class="rounded-xl p-6 border border-cyan-500/20 h-52 animate-pulse" style="background: rgba(30, 41, 59, 0.4);"><div class="h-6 w-24 bg-slate-700/50 rounded mb-4"></div><div class="h-20 w-20 bg-slate-700/50 rounded-full mx-auto mb-3"></div><div class="h-4 w-32 bg-slate-700/50 rounded mx-auto"></div></div>
+          </div>
+          <div id="ranked-content" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+          <div id="ranked-error" class="hidden"></div>
+        </section>
+
+        <!-- Leader Usage -->
+        <section id="leader-usage">
+          <h2 class="text-xl font-bold text-cyan-300 mb-4">
+            <i class="fas fa-users text-cyan-400 mr-2" aria-hidden="true"></i>Leader Usage
+          </h2>
+          <div id="leaders-skeleton" class="rounded-xl p-6 border border-cyan-500/20 space-y-3" style="background: rgba(30, 41, 59, 0.4);">
+            <div class="h-8 bg-slate-700/50 rounded animate-pulse"></div>
+            <div class="h-8 bg-slate-700/50 rounded animate-pulse w-5/6"></div>
+            <div class="h-8 bg-slate-700/50 rounded animate-pulse w-4/6"></div>
+            <div class="h-8 bg-slate-700/50 rounded animate-pulse w-3/6"></div>
+          </div>
+          <div id="leaders-content" class="hidden rounded-xl p-6 border border-cyan-500/20" style="background: rgba(30, 41, 59, 0.4);"></div>
+          <div id="leaders-error" class="hidden"></div>
+        </section>
+
+        <!-- Recent Matches -->
+        <section id="recent-matches">
+          <h2 class="text-xl font-bold text-cyan-300 mb-4">
+            <i class="fas fa-history text-cyan-400 mr-2" aria-hidden="true"></i>Recent Matches
+          </h2>
+          <div id="matches-skeleton" class="rounded-xl border border-cyan-500/20 overflow-hidden" style="background: rgba(30, 41, 59, 0.4);">
+            <div class="space-y-0">
+              <div class="p-4 border-b border-slate-700/30 animate-pulse"><div class="flex gap-4 items-center"><div class="h-12 w-20 bg-slate-700/50 rounded"></div><div class="flex-1 space-y-2"><div class="h-4 bg-slate-700/50 rounded w-1/3"></div><div class="h-3 bg-slate-700/50 rounded w-1/4"></div></div></div></div>
+              <div class="p-4 border-b border-slate-700/30 animate-pulse"><div class="flex gap-4 items-center"><div class="h-12 w-20 bg-slate-700/50 rounded"></div><div class="flex-1 space-y-2"><div class="h-4 bg-slate-700/50 rounded w-1/3"></div><div class="h-3 bg-slate-700/50 rounded w-1/4"></div></div></div></div>
+              <div class="p-4 border-b border-slate-700/30 animate-pulse"><div class="flex gap-4 items-center"><div class="h-12 w-20 bg-slate-700/50 rounded"></div><div class="flex-1 space-y-2"><div class="h-4 bg-slate-700/50 rounded w-1/3"></div><div class="h-3 bg-slate-700/50 rounded w-1/4"></div></div></div></div>
+            </div>
+          </div>
+          <div id="matches-content" class="hidden rounded-xl border border-cyan-500/20 overflow-hidden" style="background: rgba(30, 41, 59, 0.4);"></div>
+          <div id="matches-error" class="hidden"></div>
+        </section>
+      </div>
+
+      <!-- Global Error Area -->
+      <div id="global-error" class="hidden max-w-2xl mx-auto"></div>
+
+      <!-- Storehaus Promo -->
+      <StorehausPromo class="mt-10" />
+    </main>
+
+    <Footer />
+  </div>
+
+  <SidePanel />
+
+  <script src="/js/side-panel.js" is:inline></script>
+  <script src="/js/dropdowns.js" is:inline></script>
+
+  <script>
+    import { getPlayerStats, getPlayerSeasonStats, getPlayerMatches } from '../../utils/haloApi';
+    import { getCsrTier } from '../../data/haloWars2/csr';
+    import { getLeaderName } from '../../data/haloWars2/leaders';
+    import { getMapName, getMapImage } from '../../data/haloWars2/maps';
+    import { getPlaylistName } from '../../data/haloWars2/playlists';
+    import { seasonData, getSeasonName } from '../../data/haloWars2/seasons';
+    import { PLAYLIST_1V1_RANKED, PLAYLIST_2V2_RANKED, PLAYLIST_3V3_RANKED } from '../../data/haloWars2/playlistMappings';
+
+    const searchInput = document.getElementById('gamertag-input') as HTMLInputElement;
+    const searchBtn = document.getElementById('search-btn') as HTMLButtonElement;
+    const resultsContainer = document.getElementById('results-container')!;
+    const globalError = document.getElementById('global-error')!;
+    const recentSearchesEl = document.getElementById('recent-searches')!;
+
+    const STORAGE_KEY = 'hw2-recent-searches';
+    const MAX_RECENT = 5;
+    const CURRENT_SEASON = [...seasonData].sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0];
+
+    function getRecentSearches(): string[] {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      } catch { return []; }
+    }
+
+    function addRecentSearch(gt: string) {
+      const searches = getRecentSearches().filter(s => s.toLowerCase() !== gt.toLowerCase());
+      searches.unshift(gt);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(searches.slice(0, MAX_RECENT)));
+      renderRecentSearches();
+    }
+
+    function renderRecentSearches() {
+      const searches = getRecentSearches();
+      if (searches.length === 0) {
+        recentSearchesEl.classList.add('hidden');
+        return;
+      }
+      recentSearchesEl.classList.remove('hidden');
+      recentSearchesEl.innerHTML = '<span class="text-xs text-gray-400 self-center">Recent:</span>' +
+        searches.map(s =>
+          `<button type="button" class="recent-search-tag text-xs px-3 py-1 rounded-full bg-slate-700/60 text-cyan-300 border border-cyan-500/20 hover:border-cyan-400/40 hover:bg-slate-600/60 transition-colors cursor-pointer font-mono" data-gamertag="${s.replace(/"/g, '&quot;')}">${s}</button>`
+        ).join('');
+      recentSearchesEl.querySelectorAll('.recent-search-tag').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const gt = (btn as HTMLElement).dataset.gamertag || '';
+          searchInput.value = gt;
+          performSearch(gt);
+        });
+      });
+    }
+
+    function showError(container: HTMLElement, error: { type: string; message: string }) {
+      const colorMap: Record<string, string> = {
+        not_found: 'border-red-500/40 bg-red-900/20 text-red-300',
+        rate_limit: 'border-amber-500/40 bg-amber-900/20 text-amber-300',
+        auth: 'border-blue-500/40 bg-blue-900/20 text-blue-300',
+        network: 'border-blue-500/40 bg-blue-900/20 text-blue-300',
+        unknown: 'border-red-500/40 bg-red-900/20 text-red-300',
+      };
+      const iconMap: Record<string, string> = {
+        not_found: 'fa-user-slash',
+        rate_limit: 'fa-clock',
+        auth: 'fa-exclamation-triangle',
+        network: 'fa-wifi',
+        unknown: 'fa-exclamation-circle',
+      };
+      const classes = colorMap[error.type] || colorMap.unknown;
+      const icon = iconMap[error.type] || iconMap.unknown;
+      container.innerHTML = `
+        <div class="rounded-lg border p-4 flex items-start gap-3 ${classes}">
+          <i class="fas ${icon} mt-0.5" aria-hidden="true"></i>
+          <div>
+            <p class="font-medium">${error.message}</p>
+          </div>
+        </div>
+      `;
+      container.classList.remove('hidden');
+    }
+
+    function showSkeleton(sectionId: string) {
+      const skeleton = document.getElementById(`${sectionId}-skeleton`);
+      const content = document.getElementById(`${sectionId}-content`);
+      const error = document.getElementById(`${sectionId}-error`);
+      if (skeleton) skeleton.classList.remove('hidden');
+      if (content) content.classList.add('hidden');
+      if (error) { error.classList.add('hidden'); error.innerHTML = ''; }
+    }
+
+    function hideSkeleton(sectionId: string) {
+      const skeleton = document.getElementById(`${sectionId}-skeleton`);
+      if (skeleton) skeleton.classList.add('hidden');
+    }
+
+    function parseDurationParts(iso?: string) {
+      if (!iso) return { weeks: 0, days: 0, hours: 0, minutes: 0, seconds: 0 };
+      const match = iso.match(/P(?:(\d+)W)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?)?/);
+      if (!match) return { weeks: 0, days: 0, hours: 0, minutes: 0, seconds: 0 };
+      return {
+        weeks: parseInt(match[1] || '0'),
+        days: parseInt(match[2] || '0'),
+        hours: parseInt(match[3] || '0'),
+        minutes: parseInt(match[4] || '0'),
+        seconds: parseFloat(match[5] || '0'),
+      };
+    }
+
+    function parseDuration(iso: string): string {
+      const parts = parseDurationParts(iso);
+      const totalDays = parts.weeks * 7 + parts.days;
+      if (totalDays > 0) {
+        return parts.hours > 0 ? `${totalDays}d ${parts.hours}h` : `${totalDays}d`;
+      }
+      if (parts.hours > 0) return `${parts.hours}h ${parts.minutes}m`;
+      if (parts.minutes > 0) return `${parts.minutes}m`;
+      return '0h';
+    }
+
+    function parseDurationHours(iso?: string): number {
+      const parts = parseDurationParts(iso);
+      return (parts.weeks * 7 + parts.days) * 24
+        + parts.hours
+        + parts.minutes / 60
+        + parts.seconds / 3600;
+    }
+
+    function getMatchmakingSummaries(statsData: any): any[] {
+      if (Array.isArray(statsData)) {
+        return statsData.filter((s: any) => s && s.PlaylistId);
+      }
+      const mm = statsData?.MatchmakingSummary;
+      if (!mm) return [];
+      const social = Array.isArray(mm.SocialPlaylistStats) ? mm.SocialPlaylistStats : [];
+      const ranked = Array.isArray(mm.RankedPlaylistStats) ? mm.RankedPlaylistStats : [];
+      return [...social, ...ranked];
+    }
+
+    function getCustomSummaries(statsData: any): any[] {
+      const custom = statsData?.CustomSummary;
+      if (!custom) return [];
+      const summaries = [];
+      if (custom.CustomStats) summaries.push(custom.CustomStats);
+      const skirmish = custom.SkirmishStats;
+      if (skirmish?.SinglePlayerStats) summaries.push(skirmish.SinglePlayerStats);
+      if (skirmish?.MultiplayerStats) summaries.push(skirmish.MultiplayerStats);
+      return summaries;
+    }
+
+    function sumSummaryTotals(summaries: any[]) {
+      let matches = 0;
+      let wins = 0;
+      let time = 0;
+      summaries.forEach((s: any) => {
+        matches += getMatchesStarted(s);
+        wins += getMatchesWon(s);
+        time += parseDurationHours(getTotalTimePlayed(s));
+      });
+      return { matches, wins, time };
+    }
+
+
+    function buildLeaderStatsFromMatches(matches: any[]): Map<number, { matches: number; wins: number }> {
+      const map = new Map<number, { matches: number; wins: number }>();
+      if (!Array.isArray(matches)) return map;
+      matches.forEach((match: any) => {
+        if (match.MatchType != null && match.MatchType !== 3) return;
+        const leaderId = match.LeaderId
+          ?? match.Players?.[match.PlayerIndex || 0]?.LeaderId
+          ?? match.Players?.[0]?.LeaderId;
+        if (leaderId == null) return;
+        const rawOutcome = match.PlayerMatchOutcome
+          ?? match.MatchOutcome
+          ?? match.MatchResult
+          ?? match.Players?.[match.PlayerIndex || 0]?.MatchOutcome
+          ?? match.Players?.[0]?.MatchOutcome;
+        const outcome = typeof rawOutcome === 'string' ? rawOutcome.toLowerCase() : rawOutcome;
+        const isWin = outcome === 1 || outcome === 'win' || outcome === 'victory';
+        const prev = map.get(leaderId) || { matches: 0, wins: 0 };
+        map.set(leaderId, { matches: prev.matches + 1, wins: prev.wins + (isWin ? 1 : 0) });
+      });
+      return map;
+    }
+
+
+    function renderLeaderRows(entries: Array<[number, { matches: number; wins: number }]>, maxCount: number, leaderColorMap?: Map<number, string>, showSwatch = false) {
+      return entries.map(([leaderId, data]) => {
+        const name = getLeaderName(leaderId);
+        const pct = maxCount > 0 ? (data.matches / maxCount) * 100 : 0;
+        const winRateValue = data.matches > 0 ? (data.wins / data.matches) * 100 : 0;
+        const winRate = winRateValue.toFixed(1);
+        const winPct = Math.min(100, Math.max(0, winRateValue));
+        const leaderColor = leaderColorMap?.get(leaderId) || '#64748b';
+
+        return `
+          <div class="flex items-center gap-3">
+            <div class="w-28 sm:w-36 flex items-center gap-2 flex-shrink-0">
+              ${showSwatch ? `<span class="inline-block w-2.5 h-2.5 rounded-sm" style="background: ${leaderColor};"></span>` : ''}
+              <span class="text-sm text-white truncate">${name}</span>
+            </div>
+            <div class="flex-1 h-6 bg-slate-700/30 rounded-full overflow-hidden">
+              <div class="h-full rounded-full transition-all duration-500" style="width: ${pct}%; background: linear-gradient(90deg, rgba(34,197,94,0.85) 0%, rgba(34,197,94,0.85) ${winPct}%, rgba(239,68,68,0.85) ${winPct}%, rgba(239,68,68,0.85) 100%);"></div>
+            </div>
+            <span class="text-sm font-mono text-gray-300 w-10 text-right flex-shrink-0">${data.matches}</span>
+            <span class="text-xs font-mono text-cyan-300 w-12 text-right flex-shrink-0">${winRate}%</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function getHighestTerminusWave(statsData: any): number {
+      const mm = statsData?.MatchmakingSummary;
+      const socialMode = Array.isArray(mm?.SocialModeStats) ? mm.SocialModeStats : [];
+      const rankedMode = Array.isArray(mm?.RankedModeStats) ? mm.RankedModeStats : [];
+      const custom = statsData?.CustomSummary;
+      const customMode = Array.isArray(custom?.CustomModeStats) ? custom.CustomModeStats : [];
+      const skirmish = custom?.SkirmishStats;
+      const skirmishSingle = Array.isArray(skirmish?.SinglePlayerModeStats) ? skirmish.SinglePlayerModeStats : [];
+      const skirmishMulti = Array.isArray(skirmish?.MultiplayerModeStats) ? skirmish.MultiplayerModeStats : [];
+      const modeStats = [
+        ...socialMode,
+        ...rankedMode,
+        ...customMode,
+        ...skirmishSingle,
+        ...skirmishMulti,
+      ];
+
+      let maxWave = 0;
+      modeStats.forEach((s: any) => {
+        if (s?.GameMode !== 10) return;
+        const wave = s?.HighestWaveCompleted ?? 0;
+        if (wave > maxWave) maxWave = wave;
+      });
+
+      return maxWave;
+    }
+
+    function getMatchesStarted(stat: any): number {
+      return stat?.TotalMatchesStarted ?? stat?.MatchesStarted ?? 0;
+    }
+
+    function getMatchesWon(stat: any): number {
+      return stat?.TotalMatchesWon ?? stat?.MatchesWon ?? 0;
+    }
+
+    function getMatchesLost(stat: any): number {
+      return stat?.TotalMatchesLost ?? stat?.MatchesLost ?? 0;
+    }
+
+    function getMatchesCompleted(stat: any): number {
+      return stat?.TotalMatchesCompleted ?? stat?.MatchesCompleted ?? 0;
+    }
+
+    function getTotalTimePlayed(stat: any): string {
+      return stat?.TotalTimePlayed || 'PT0S';
+    }
+
+    function getGameModeName(mode?: number): string {
+      switch (mode) {
+        case 1: return 'Campaign Solo';
+        case 2: return 'Campaign Co-op';
+        case 3: return 'Deathmatch';
+        case 4: return 'Domination';
+        case 5: return 'Strongholds';
+        case 6: return 'Blitz';
+        case 7: return 'Firefight';
+        case 8: return 'Tutorial';
+        case 9: return 'Blitz Tutorial';
+        case 10: return 'Terminus Firefight';
+        default: return '';
+      }
+    }
+
+    function renderOverview(stats: any) {
+      hideSkeleton('overview');
+      const overviewContent = document.getElementById('overview-content')!;
+      const overviewError = document.getElementById('overview-error')!;
+
+      const summaries = getMatchmakingSummaries(stats);
+      const allSummaries = [...summaries, ...getCustomSummaries(stats)];
+      if (summaries.length === 0) {
+        showError(overviewError, { type: 'not_found', message: 'No matchmaking stats found for this player.' });
+        return;
+      }
+
+      const mmTotals = sumSummaryTotals(summaries);
+      const allTotals = allSummaries.length > 0 ? sumSummaryTotals(allSummaries) : mmTotals;
+
+      const winRate = mmTotals.matches > 0 ? ((mmTotals.wins / mmTotals.matches) * 100).toFixed(1) : '0.0';
+      const timeStr = mmTotals.time >= 1 ? `${Math.round(mmTotals.time)}h` : '<1h';
+      const allTimeStr = allTotals.time >= 1 ? `${Math.round(allTotals.time)}h` : '<1h';
+      const terminusWave = getHighestTerminusWave(stats);
+
+      document.getElementById('stat-matches')!.textContent = mmTotals.matches.toLocaleString();
+      document.getElementById('stat-wins')!.textContent = mmTotals.wins.toLocaleString();
+      document.getElementById('stat-winrate')!.textContent = `${winRate}%`;
+      document.getElementById('stat-time')!.textContent = timeStr;
+      document.getElementById('stat-time-all')!.textContent = `All modes: ${allTimeStr}`;
+      document.getElementById('stat-terminus-wave')!.textContent = terminusWave > 0 ? String(terminusWave) : '-';
+      overviewContent.classList.remove('hidden');
+    }
+
+    function renderRankedStats(stats: any, seasonStats?: any) {
+      hideSkeleton('ranked');
+      const rankedContent = document.getElementById('ranked-content')!;
+      const rankedError = document.getElementById('ranked-error')!;
+
+      const playlistIds = [
+        { id: PLAYLIST_1V1_RANKED, label: '1v1 Ranked' },
+        { id: PLAYLIST_2V2_RANKED, label: '2v2 Ranked' },
+        { id: PLAYLIST_3V3_RANKED, label: '3v3 Ranked' },
+      ];
+
+      const summaries = getMatchmakingSummaries(stats);
+      const rankedStats = summaries.filter((s: any) => s.PlaylistId && playlistIds.some(p => p.id === s.PlaylistId));
+
+      if (rankedStats.length === 0) {
+        rankedContent.innerHTML = playlistIds.map(p => `
+          <div class="rounded-xl p-6 border border-cyan-500/20 text-center" style="background: rgba(30, 41, 59, 0.4);">
+            <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">${p.label}</h3>
+            <p class="text-gray-500 text-sm">No ranked data</p>
+          </div>
+        `).join('');
+        rankedContent.classList.remove('hidden');
+        return;
+      }
+
+      const seasonRanked = seasonStats?.RankedPlaylistStats || [];
+
+      rankedContent.innerHTML = playlistIds.map(p => {
+        const stat = rankedStats.find((s: any) => s.PlaylistId === p.id);
+        const seasonStat = seasonRanked.find((s: any) => s.PlaylistId === p.id);
+        if (!stat) {
+          return `
+            <div class="rounded-xl p-6 border border-cyan-500/20 text-center" style="background: rgba(30, 41, 59, 0.4);">
+              <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">${p.label}</h3>
+              <p class="text-gray-500 text-sm">No ranked data</p>
+            </div>
+          `;
+        }
+
+        const csr = stat.CurrentCsr || stat.HighestCsr || { Designation: 0, Tier: 0 };
+        const tier = getCsrTier(csr.Designation, csr.Tier);
+        const wins = getMatchesWon(stat);
+        const losses = getMatchesLost(stat);
+        const total = getMatchesCompleted(stat) || (wins + losses);
+        const wr = total > 0 ? ((wins / total) * 100).toFixed(1) : '0.0';
+        const seasonCsr = seasonStat?.HighestCsr || { Designation: 0, Tier: 0 };
+        const seasonTier = getCsrTier(seasonCsr.Designation, seasonCsr.Tier);
+        const seasonText = seasonStat ? seasonTier.title : 'No season data';
+
+        return `
+          <div class="rounded-xl p-6 border border-cyan-500/20 text-center" style="background: rgba(30, 41, 59, 0.4);">
+            <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">${p.label}</h3>
+            <div class="csr-glow rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center bg-slate-800/60 border border-cyan-500/30">
+              ${tier.imageUrl
+                ? `<img src="${tier.imageUrl}" alt="${tier.title}" class="w-16 h-16 object-contain" loading="lazy" />`
+                : `<span class="text-cyan-400 text-xs font-mono">${tier.title}</span>`
+              }
+            </div>
+            <p class="text-cyan-300 font-semibold font-mono text-sm mb-1">${tier.title}</p>
+            ${csr.Raw ? `<p class="text-xs text-gray-400 font-mono mb-2">CSR: ${Math.round(csr.Raw)}</p>` : ''}
+            <div class="flex justify-center gap-4 text-xs">
+              <span class="text-green-400 font-mono">${wins}W</span>
+              <span class="text-red-400 font-mono">${losses}L</span>
+              <span class="text-cyan-300 font-mono">${wr}%</span>
+            </div>
+            <div class="mt-3 text-xs text-gray-400 font-mono">
+              ${CURRENT_SEASON ? `${getSeasonName(CURRENT_SEASON.id)}: ${seasonText}` : 'Current season: N/A'}
+            </div>
+          </div>
+        `;
+      }).join('');
+      rankedContent.classList.remove('hidden');
+    }
+
+    function renderLeaderUsage(matches?: any[]) {
+      hideSkeleton('leaders');
+      const leadersContent = document.getElementById('leaders-content')!;
+
+      const recentMatches = Array.isArray(matches) ? matches : [];
+      const recentMatchCount = recentMatches.filter((m: any) => m.MatchType == null || m.MatchType === 3).length;
+      const recentMap = buildLeaderStatsFromMatches(recentMatches);
+      const recentEntries = [...recentMap.entries()].filter(([, data]) => data.matches > 0).sort((a, b) => b[1].matches - a[1].matches);
+      const recentMax = recentEntries.length ? recentEntries[0][1].matches : 0;
+
+      const headerHtml = `
+        <div class="flex items-baseline justify-between mb-3">
+          <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Recent Leader Usage</h3>
+          <span class="text-xs text-gray-500">Last ${recentMatchCount} matches</span>
+        </div>
+      `;
+
+      leadersContent.innerHTML = recentEntries.length
+        ? headerHtml + `<div class="space-y-3">${renderLeaderRows(recentEntries, recentMax)}</div>`
+        : headerHtml + '<p class="text-gray-500 text-sm text-center py-4">No recent leader data.</p>';
+      leadersContent.classList.remove('hidden');
+    }
+
+    function renderMatches(matches: any[], gamertag: string) {
+      hideSkeleton('matches');
+      const matchesContent = document.getElementById('matches-content')!;
+
+      if (!matches || matches.length === 0) {
+        matchesContent.innerHTML = '<p class="text-gray-500 text-sm text-center py-6">No recent matches found.</p>';
+        matchesContent.classList.remove('hidden');
+        return;
+      }
+
+      matchesContent.innerHTML = '<div class="divide-y divide-slate-700/30">' + matches.map((match: any, i: number) => {
+        const gtLower = gamertag.toLowerCase();
+        const player = match.Players?.find((p: any) => {
+          const id = p.HumanPlayerId || p.Gamertag || p.PlayerId;
+          return id && String(id).toLowerCase() === gtLower;
+        }) || match.Players?.[0] || null;
+
+        const rawOutcome = player?.MatchOutcome
+          ?? player?.PlayerMatchOutcome
+          ?? match.PlayerMatchOutcome
+          ?? match.MatchOutcome
+          ?? match.MatchResult;
+        const outcome = typeof rawOutcome === 'string' ? rawOutcome.toLowerCase() : rawOutcome;
+        const isWin = outcome === 1 || outcome === 'win' || outcome === 'victory';
+        const isLoss = outcome === 2 || outcome === 'loss' || outcome === 'defeat';
+        const resultText = isWin ? 'Victory' : isLoss ? 'Defeat' : 'Draw';
+        const resultColor = isWin ? 'text-green-400' : isLoss ? 'text-red-400' : 'text-gray-400';
+        const borderColor = isWin ? '#22c55e' : isLoss ? '#ef4444' : '#6b7280';
+
+        const leaderId = player?.LeaderId ?? match.LeaderId;
+        const leaderName = leaderId != null ? getLeaderName(leaderId) : 'Unknown';
+        const mapName = getMapName(match.MapId || '');
+        const mapImg = getMapImage(match.MapId || '');
+        const dateStr = match.MatchStartDate?.ISO8601Date
+          ? new Date(match.MatchStartDate.ISO8601Date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+          : '';
+        const durationIso = match.PlayerMatchDuration || match.MatchDuration;
+        const durationStr = durationIso ? parseDuration(durationIso) : '';
+
+        const playlistName = match.PlaylistId ? getPlaylistName(match.PlaylistId) : '';
+        const fallbackLabel = getGameModeName(match.GameMode) || (match.MatchType === 3 ? 'Matchmaking' : match.MatchType === 2 ? 'Custom' : match.MatchType === 1 ? 'Campaign' : 'Unknown');
+        const playlistLabel = playlistName || fallbackLabel;
+
+        const prevCsr = match.RatingProgress?.PreviousCsr?.Raw;
+        const nextCsr = match.RatingProgress?.UpdatedCsr?.Raw;
+        const csrDelta = (typeof prevCsr === 'number' && typeof nextCsr === 'number') ? Math.round(nextCsr - prevCsr) : null;
+        const csrDeltaText = csrDelta != null ? `${csrDelta > 0 ? '+' : ''}${csrDelta}` : '';
+        const csrDeltaClass = csrDelta == null ? 'text-gray-500' : csrDelta > 0 ? 'text-green-400' : csrDelta < 0 ? 'text-red-400' : 'text-gray-400';
+
+        const unitStats = player?.UnitStats || match.UnitStats;
+        let unitsDestroyed = 0;
+        let unitsLost = 0;
+        if (unitStats && typeof unitStats === 'object') {
+          Object.values(unitStats).forEach((u: any) => {
+            unitsDestroyed += u?.TotalDestroyed || 0;
+            unitsLost += u?.TotalLost || 0;
+          });
+        }
+        const unitsText = (unitsDestroyed || unitsLost) ? `${unitsDestroyed}D / ${unitsLost}L` : '';
+        const bgClass = i % 2 === 0 ? 'bg-slate-800/20' : '';
+
+          return `
+            <div class="flex items-center gap-4 p-4 ${bgClass} hover:bg-slate-700/20 transition-colors" style="border-left: 4px solid ${borderColor};">
+            ${mapImg
+              ? `<img src="${mapImg}" alt="${mapName}" class="w-16 h-10 sm:w-20 sm:h-12 rounded object-cover flex-shrink-0 border border-slate-600/30" loading="lazy" />`
+              : `<div class="w-16 h-10 sm:w-20 sm:h-12 rounded bg-slate-700/50 flex-shrink-0 flex items-center justify-center text-xs text-gray-500">${mapName}</div>`
+            }
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-semibold ${resultColor} text-sm">${resultText}</span>
+                <span class="text-gray-400 text-xs">on</span>
+                <span class="text-white text-sm truncate">${mapName}</span>
+              </div>
+              <div class="flex items-center gap-3 text-xs text-gray-400 mt-1 flex-wrap">
+                <span>${leaderName}</span>
+                ${dateStr ? `<span>${dateStr}</span>` : ''}
+                ${durationStr ? `<span>• ${durationStr}</span>` : ''}
+                ${playlistLabel ? `<span class="text-cyan-300">• ${playlistLabel}</span>` : ''}
+                ${csrDeltaText ? `<span class="${csrDeltaClass}">• CSR ${csrDeltaText}</span>` : ''}
+                ${unitsText ? `<span>• Units ${unitsText}</span>` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('') + '</div>';
+      matchesContent.classList.remove('hidden');
+    }
+
+    async function performSearch(gamertag: string) {
+      if (!gamertag.trim()) return;
+
+      globalError.classList.add('hidden');
+      globalError.innerHTML = '';
+      resultsContainer.classList.remove('hidden');
+
+      document.getElementById('player-gamertag')!.textContent = gamertag;
+
+      showSkeleton('overview');
+      showSkeleton('ranked');
+      showSkeleton('leaders');
+      showSkeleton('matches');
+
+      document.getElementById('overview-content')!.classList.add('hidden');
+      document.getElementById('ranked-content')!.classList.add('hidden');
+      document.getElementById('leaders-content')!.classList.add('hidden');
+      document.getElementById('matches-content')!.classList.add('hidden');
+
+      addRecentSearch(gamertag);
+
+      const [statsResult, matchesResult, seasonResult] = await Promise.all([
+        getPlayerStats(gamertag),
+        getPlayerMatches(gamertag),
+        CURRENT_SEASON ? getPlayerSeasonStats(gamertag, CURRENT_SEASON.id) : Promise.resolve({ ok: false, error: { type: 'unknown', message: 'No season configured.' } }),
+      ]);
+
+      const matchesList = matchesResult.ok ? (matchesResult.data.Results || []) : [];
+
+      if (statsResult.ok) {
+        renderOverview(statsResult.data);
+        renderRankedStats(statsResult.data, seasonResult.ok ? seasonResult.data : undefined);
+      } else {
+        hideSkeleton('overview');
+        hideSkeleton('ranked');
+        hideSkeleton('leaders');
+        showError(document.getElementById('overview-error')!, statsResult.error);
+      }
+
+      if (matchesResult.ok) {
+        renderMatches(matchesList, gamertag);
+        renderLeaderUsage(matchesList);
+      } else {
+        hideSkeleton('matches');
+        showError(document.getElementById('matches-error')!, matchesResult.error);
+        hideSkeleton('leaders');
+        showError(document.getElementById('leaders-error')!, matchesResult.error);
+      }
+    }
+
+    searchBtn.addEventListener('click', () => performSearch(searchInput.value));
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') performSearch(searchInput.value);
+    });
+
+    renderRecentSearches();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const gamertagParam = urlParams.get('gamertag');
+    if (gamertagParam) {
+      searchInput.value = gamertagParam;
+      performSearch(gamertagParam);
+    }
+  </script>
+</BaseLayout>
