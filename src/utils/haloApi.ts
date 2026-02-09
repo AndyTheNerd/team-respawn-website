@@ -66,6 +66,11 @@ export async function getPlayerSeasonStats(gamertag: string, seasonId: string): 
   return fetchWithKeyFallback<SeasonStatsResponse>(`${SUMMARY_API_URL}/players/${encoded}/stats/seasons/${seasonId}`);
 }
 
+export async function getMatchResult(matchId: string): Promise<ApiResult<any>> {
+  const encoded = encodeURIComponent(matchId);
+  return fetchWithKeyFallback<any>(`${HALO_API_URL}/matches/${encoded}`);
+}
+
 export async function getPlayerMatches(gamertag: string, count = 10): Promise<ApiResult<{ Results: MatchResult[] }>> {
   const encoded = encodeURIComponent(gamertag);
   return fetchWithKeyFallback<{ Results: MatchResult[] }>(

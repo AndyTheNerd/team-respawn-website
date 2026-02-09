@@ -115,6 +115,8 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
               <div class="h-16 bg-slate-700/50 rounded animate-pulse"></div>
               <div class="h-16 bg-slate-700/50 rounded animate-pulse"></div>
               <div class="h-16 bg-slate-700/50 rounded animate-pulse"></div>
+              <div class="h-16 bg-slate-700/50 rounded animate-pulse"></div>
+              <div class="h-16 bg-slate-700/50 rounded animate-pulse"></div>
             </div>
           </div>
           <div id="overview-content" class="hidden">
@@ -129,6 +131,10 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
                 <p id="stat-wins" class="text-xl font-bold font-mono text-green-400">-</p>
               </div>
               <div class="bg-slate-800/40 rounded-lg p-4 border border-cyan-500/10">
+                <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Losses</p>
+                <p id="stat-losses" class="text-xl font-bold font-mono text-red-400">-</p>
+              </div>
+              <div class="bg-slate-800/40 rounded-lg p-4 border border-cyan-500/10">
                 <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Win Rate</p>
                 <p id="stat-winrate" class="text-xl font-bold font-mono text-cyan-300">-</p>
               </div>
@@ -138,7 +144,11 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
                 <p id="stat-time-all" class="text-xs text-gray-400 mt-1">All modes: -</p>
               </div>
               <div class="bg-slate-800/40 rounded-lg p-4 border border-cyan-500/10">
-                <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Terminus Wave (All)</p>
+                <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Avg Match (MM)</p>
+                <p id="stat-avg-match" class="text-xl font-bold font-mono text-white">-</p>
+              </div>
+              <div class="bg-slate-800/40 rounded-lg p-4 border border-cyan-500/10">
+                <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Terminus Wave (All Modes)</p>
                 <p id="stat-terminus-wave" class="text-xl font-bold font-mono text-white">-</p>
               </div>
             </div>
@@ -152,9 +162,12 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
             <i class="fas fa-trophy text-cyan-400 mr-2" aria-hidden="true"></i>Ranked Stats
           </h2>
           <div id="ranked-skeleton" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="rounded-xl p-6 border border-cyan-500/20 h-52 animate-pulse" style="background: rgba(30, 41, 59, 0.4);"><div class="h-6 w-24 bg-slate-700/50 rounded mb-4"></div><div class="h-20 w-20 bg-slate-700/50 rounded-full mx-auto mb-3"></div><div class="h-4 w-32 bg-slate-700/50 rounded mx-auto"></div></div>
-            <div class="rounded-xl p-6 border border-cyan-500/20 h-52 animate-pulse" style="background: rgba(30, 41, 59, 0.4);"><div class="h-6 w-24 bg-slate-700/50 rounded mb-4"></div><div class="h-20 w-20 bg-slate-700/50 rounded-full mx-auto mb-3"></div><div class="h-4 w-32 bg-slate-700/50 rounded mx-auto"></div></div>
-            <div class="rounded-xl p-6 border border-cyan-500/20 h-52 animate-pulse" style="background: rgba(30, 41, 59, 0.4);"><div class="h-6 w-24 bg-slate-700/50 rounded mb-4"></div><div class="h-20 w-20 bg-slate-700/50 rounded-full mx-auto mb-3"></div><div class="h-4 w-32 bg-slate-700/50 rounded mx-auto"></div></div>
+            <div class="rounded-xl p-6 border border-cyan-500/20 h-52 animate-pulse" style="background: rgba(30, 41, 59, 0.4);"><div class="h-4 w-24 bg-slate-700/50 rounded mb-2"></div><div class="h-3 w-20 bg-slate-700/50 rounded mb-4"></div><div class="h-20 w-20 bg-slate-700/50 rounded-full mx-auto mb-3"></div><div class="h-4 w-32 bg-slate-700/50 rounded mx-auto"></div></div>
+            <div class="rounded-xl p-6 border border-cyan-500/20 h-52 animate-pulse" style="background: rgba(30, 41, 59, 0.4);"><div class="h-4 w-24 bg-slate-700/50 rounded mb-2"></div><div class="h-3 w-20 bg-slate-700/50 rounded mb-4"></div><div class="h-20 w-20 bg-slate-700/50 rounded-full mx-auto mb-3"></div><div class="h-4 w-32 bg-slate-700/50 rounded mx-auto"></div></div>
+            <div class="rounded-xl p-6 border border-cyan-500/20 h-52 animate-pulse" style="background: rgba(30, 41, 59, 0.4);"><div class="h-4 w-24 bg-slate-700/50 rounded mb-2"></div><div class="h-3 w-20 bg-slate-700/50 rounded mb-4"></div><div class="h-20 w-20 bg-slate-700/50 rounded-full mx-auto mb-3"></div><div class="h-4 w-32 bg-slate-700/50 rounded mx-auto"></div></div>
+            <div class="rounded-xl p-6 border border-cyan-500/20 h-52 animate-pulse" style="background: rgba(30, 41, 59, 0.4);"><div class="h-4 w-24 bg-slate-700/50 rounded mb-2"></div><div class="h-3 w-20 bg-slate-700/50 rounded mb-4"></div><div class="h-20 w-20 bg-slate-700/50 rounded-full mx-auto mb-3"></div><div class="h-4 w-32 bg-slate-700/50 rounded mx-auto"></div></div>
+            <div class="rounded-xl p-6 border border-cyan-500/20 h-52 animate-pulse" style="background: rgba(30, 41, 59, 0.4);"><div class="h-4 w-24 bg-slate-700/50 rounded mb-2"></div><div class="h-3 w-20 bg-slate-700/50 rounded mb-4"></div><div class="h-20 w-20 bg-slate-700/50 rounded-full mx-auto mb-3"></div><div class="h-4 w-32 bg-slate-700/50 rounded mx-auto"></div></div>
+            <div class="rounded-xl p-6 border border-cyan-500/20 h-52 animate-pulse" style="background: rgba(30, 41, 59, 0.4);"><div class="h-4 w-24 bg-slate-700/50 rounded mb-2"></div><div class="h-3 w-20 bg-slate-700/50 rounded mb-4"></div><div class="h-20 w-20 bg-slate-700/50 rounded-full mx-auto mb-3"></div><div class="h-4 w-32 bg-slate-700/50 rounded mx-auto"></div></div>
           </div>
           <div id="ranked-content" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4"></div>
           <div id="ranked-error" class="hidden"></div>
@@ -208,7 +221,7 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
   <script src="/js/dropdowns.js" is:inline></script>
 
   <script>
-    import { getPlayerStats, getPlayerSeasonStats, getPlayerMatches } from '../../utils/haloApi';
+    import { getPlayerStats, getPlayerSeasonStats, getPlayerMatches, getMatchResult } from '../../utils/haloApi';
     import { getCsrTier } from '../../data/haloWars2/csr';
     import { getLeaderName } from '../../data/haloWars2/leaders';
     import { getMapName, getMapImage } from '../../data/haloWars2/maps';
@@ -316,13 +329,22 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
 
     function parseDuration(iso: string): string {
       const parts = parseDurationParts(iso);
-      const totalDays = parts.weeks * 7 + parts.days;
-      if (totalDays > 0) {
-        return parts.hours > 0 ? `${totalDays}d ${parts.hours}h` : `${totalDays}d`;
-      }
-      if (parts.hours > 0) return `${parts.hours}h ${parts.minutes}m`;
-      if (parts.minutes > 0) return `${parts.minutes}m`;
-      return '0h';
+      let totalSeconds = parts.seconds
+        + parts.minutes * 60
+        + parts.hours * 3600
+        + (parts.days + parts.weeks * 7) * 86400;
+      if (totalSeconds <= 0) return '0h';
+
+      const totalDays = Math.floor(totalSeconds / 86400);
+      totalSeconds -= totalDays * 86400;
+      const hours = Math.floor(totalSeconds / 3600);
+      totalSeconds -= hours * 3600;
+      const minutes = Math.round(totalSeconds / 60);
+
+      if (totalDays > 0) return hours > 0 ? `${totalDays}d ${hours}h` : `${totalDays}d`;
+      if (hours > 0) return `${hours}h ${minutes}m`;
+      if (minutes > 0) return `${minutes}m`;
+      return '<1m';
     }
 
     function parseDurationHours(iso?: string): number {
@@ -493,17 +515,22 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
 
       const mmTotals = sumSummaryTotals(summaries);
       const allTotals = allSummaries.length > 0 ? sumSummaryTotals(allSummaries) : mmTotals;
+      const mmLosses = Math.max(0, mmTotals.matches - mmTotals.wins);
 
       const winRate = mmTotals.matches > 0 ? ((mmTotals.wins / mmTotals.matches) * 100).toFixed(1) : '0.0';
       const timeStr = mmTotals.time >= 1 ? `${Math.round(mmTotals.time)}h` : '<1h';
       const allTimeStr = allTotals.time >= 1 ? `${Math.round(allTotals.time)}h` : '<1h';
+      const avgMatchSeconds = mmTotals.matches > 0 ? Math.round((mmTotals.time / mmTotals.matches) * 3600) : 0;
+      const avgMatchStr = avgMatchSeconds > 0 ? parseDuration(`PT${avgMatchSeconds}S`) : '-';
       const terminusWave = getHighestTerminusWave(stats);
 
       document.getElementById('stat-matches')!.textContent = mmTotals.matches.toLocaleString();
       document.getElementById('stat-wins')!.textContent = mmTotals.wins.toLocaleString();
+      document.getElementById('stat-losses')!.textContent = mmLosses.toLocaleString();
       document.getElementById('stat-winrate')!.textContent = `${winRate}%`;
       document.getElementById('stat-time')!.textContent = timeStr;
       document.getElementById('stat-time-all')!.textContent = `All modes: ${allTimeStr}`;
+      document.getElementById('stat-avg-match')!.textContent = avgMatchStr;
       document.getElementById('stat-terminus-wave')!.textContent = terminusWave > 0 ? String(terminusWave) : '-';
       overviewContent.classList.remove('hidden');
     }
@@ -522,27 +549,16 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
       const summaries = getMatchmakingSummaries(stats);
       const rankedStats = summaries.filter((s: any) => s.PlaylistId && playlistIds.some(p => p.id === s.PlaylistId));
 
-      if (rankedStats.length === 0) {
-        rankedContent.innerHTML = playlistIds.map(p => `
-          <div class="rounded-xl p-6 border border-cyan-500/20 text-center" style="background: rgba(30, 41, 59, 0.4);">
-            <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">${p.label}</h3>
-            <p class="text-gray-500 text-sm">No ranked data</p>
-          </div>
-        `).join('');
-        rankedContent.classList.remove('hidden');
-        return;
-      }
-
       const seasonRanked = seasonStats?.RankedPlaylistStats || [];
+      const seasonLabel = CURRENT_SEASON ? getSeasonName(CURRENT_SEASON.id) : 'Current Season';
 
-      rankedContent.innerHTML = playlistIds.map(p => {
-        const stat = rankedStats.find((s: any) => s.PlaylistId === p.id);
-        const seasonStat = seasonRanked.find((s: any) => s.PlaylistId === p.id);
+      const buildCard = (stat: any, label: string, subLabel: string, emptyText: string) => {
         if (!stat) {
           return `
             <div class="rounded-xl p-6 border border-cyan-500/20 text-center" style="background: rgba(30, 41, 59, 0.4);">
-              <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">${p.label}</h3>
-              <p class="text-gray-500 text-sm">No ranked data</p>
+              <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">${label}</h3>
+              <p class="text-[10px] text-gray-500 uppercase tracking-wider mb-4">${subLabel}</p>
+              <p class="text-gray-500 text-sm">${emptyText}</p>
             </div>
           `;
         }
@@ -553,13 +569,11 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
         const losses = getMatchesLost(stat);
         const total = getMatchesCompleted(stat) || (wins + losses);
         const wr = total > 0 ? ((wins / total) * 100).toFixed(1) : '0.0';
-        const seasonCsr = seasonStat?.HighestCsr || { Designation: 0, Tier: 0 };
-        const seasonTier = getCsrTier(seasonCsr.Designation, seasonCsr.Tier);
-        const seasonText = seasonStat ? seasonTier.title : 'No season data';
 
         return `
           <div class="rounded-xl p-6 border border-cyan-500/20 text-center" style="background: rgba(30, 41, 59, 0.4);">
-            <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">${p.label}</h3>
+            <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">${label}</h3>
+            <p class="text-[10px] text-gray-500 uppercase tracking-wider mb-4">${subLabel}</p>
             <div class="csr-glow rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center bg-slate-800/60 border border-cyan-500/30">
               ${tier.imageUrl
                 ? `<img src="${tier.imageUrl}" alt="${tier.title}" class="w-16 h-16 object-contain" loading="lazy" />`
@@ -573,12 +587,21 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
               <span class="text-red-400 font-mono">${losses}L</span>
               <span class="text-cyan-300 font-mono">${wr}%</span>
             </div>
-            <div class="mt-3 text-xs text-gray-400 font-mono">
-              ${CURRENT_SEASON ? `${getSeasonName(CURRENT_SEASON.id)}: ${seasonText}` : 'Current season: N/A'}
-            </div>
           </div>
         `;
-      }).join('');
+      };
+
+      const lifetimeCards = playlistIds.map(p => {
+        const stat = rankedStats.find((s: any) => s.PlaylistId === p.id);
+        return buildCard(stat, p.label, 'All-Time High', 'No ranked data');
+      });
+
+      const seasonCards = playlistIds.map(p => {
+        const stat = seasonRanked.find((s: any) => s.PlaylistId === p.id);
+        return buildCard(stat, p.label, seasonLabel, 'No season data');
+      });
+
+      rankedContent.innerHTML = [...lifetimeCards, ...seasonCards].join('');
       rankedContent.classList.remove('hidden');
     }
 
@@ -664,6 +687,26 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
           });
         }
         const unitsText = (unitsDestroyed || unitsLost) ? `${unitsDestroyed}D / ${unitsLost}L` : '';
+
+        const completed = player?.PlayerCompletedMatch ?? match.PlayerCompletedMatch;
+        const completionTag = completed == null
+          ? ''
+          : completed
+            ? '<span class="text-green-400">Completed</span>'
+            : '<span class="text-red-400">Left Early</span>';
+
+        let teamSizeLabel = '';
+        if (match.Teams && typeof match.Teams === 'object') {
+          const sizes = Object.values(match.Teams).map((t: any) => t?.TeamSize).filter((s: any) => typeof s === 'number');
+          if (sizes.length >= 2) {
+            teamSizeLabel = `${sizes[0]}v${sizes[1]}`;
+          } else if (sizes.length === 1) {
+            teamSizeLabel = `${sizes[0]}v${sizes[0]}`;
+          }
+        }
+
+        const matchId = match.MatchId || '';
+        const detailsId = matchId ? `match-details-${matchId}` : '';
         const bgClass = i % 2 === 0 ? 'bg-slate-800/20' : '';
 
           return `
@@ -682,15 +725,88 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
                 <span>${leaderName}</span>
                 ${dateStr ? `<span>${dateStr}</span>` : ''}
                 ${durationStr ? `<span>• ${durationStr}</span>` : ''}
+                ${teamSizeLabel ? `<span>• ${teamSizeLabel}</span>` : ''}
+                ${completionTag ? `<span>• ${completionTag}</span>` : ''}
                 ${playlistLabel ? `<span class="text-cyan-300">• ${playlistLabel}</span>` : ''}
                 ${csrDeltaText ? `<span class="${csrDeltaClass}">• CSR ${csrDeltaText}</span>` : ''}
                 ${unitsText ? `<span>• Units ${unitsText}</span>` : ''}
               </div>
+              ${matchId ? `
+                <button
+                  type="button"
+                  class="match-details-toggle inline-flex items-center gap-2 text-xs text-cyan-300 hover:text-cyan-200 mt-2"
+                  data-match-id="${matchId}"
+                  aria-controls="${detailsId}"
+                  aria-expanded="false"
+                >
+                  <span class="match-details-chevron transition-transform duration-200" aria-hidden="true">&#x25BC;</span>
+                  <span>Team compositions</span>
+                </button>
+                <div id="${detailsId}" class="mt-2 text-xs text-gray-500 hidden" data-loaded="false"></div>
+              ` : ''}
             </div>
           </div>
         `;
       }).join('') + '</div>';
       matchesContent.classList.remove('hidden');
+
+      matchesContent.querySelectorAll('.match-details-toggle').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const matchId = (btn as HTMLElement).getAttribute('data-match-id') || '';
+          if (!matchId) return;
+          const detailsId = `match-details-${matchId}`;
+          const detailsEl = document.getElementById(detailsId);
+          const chevron = (btn as HTMLElement).querySelector('.match-details-chevron') as HTMLElement | null;
+          if (!detailsEl) return;
+
+          const isExpanded = (btn as HTMLElement).getAttribute('aria-expanded') === 'true';
+          (btn as HTMLElement).setAttribute('aria-expanded', isExpanded ? 'false' : 'true');
+          detailsEl.classList.toggle('hidden', isExpanded);
+          if (chevron) chevron.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
+          if (isExpanded) return;
+
+          if (detailsEl.getAttribute('data-loaded') === 'true') return;
+          detailsEl.innerHTML = 'Loading team compositions...';
+
+          const result = await getMatchResult(matchId);
+          if (!result.ok) {
+            detailsEl.innerHTML = 'Unable to load team compositions.';
+            return;
+          }
+
+          const playersRaw = result.data?.Players;
+          const players = Array.isArray(playersRaw)
+            ? playersRaw
+            : (playersRaw && typeof playersRaw === 'object')
+              ? Object.values(playersRaw)
+              : [];
+
+          const teamMap = new Map<number, string[]>();
+          players.forEach((p: any) => {
+            const teamId = p.TeamId;
+            const leaderId = p.LeaderId;
+            if (teamId == null || leaderId == null) return;
+            const gamertag = p?.HumanPlayerId?.Gamertag || p?.Gamertag || p?.HumanPlayerId || p?.PlayerId || '';
+            const leaderName = getLeaderName(leaderId);
+            const label = gamertag ? `${gamertag} (${leaderName})` : leaderName;
+            const list = teamMap.get(teamId) || [];
+            list.push(label);
+            teamMap.set(teamId, list);
+          });
+
+          if (teamMap.size === 0) {
+            detailsEl.innerHTML = 'Team composition data not available.';
+            return;
+          }
+
+          const teamLines = [...teamMap.entries()]
+            .sort((a, b) => a[0] - b[0])
+            .map(([teamId, leaders]) => `<span class="text-gray-400">Team ${teamId}: <span class="text-gray-300">${leaders.join(', ')}</span></span>`);
+
+          detailsEl.innerHTML = teamLines.join(' • ');
+          detailsEl.setAttribute('data-loaded', 'true');
+        });
+      });
     }
 
     async function performSearch(gamertag: string) {
