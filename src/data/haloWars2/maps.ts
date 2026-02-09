@@ -94,10 +94,10 @@ export const mapData: Record<string, HaloMap> = {
 };
 
 const CLOUDINARY_CLOUD_NAME = (() => {
-  const envName = import.meta.env.CLOUDINARY_CLOUD_NAME;
+  const envName = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME;
   if (envName) return envName;
   if (typeof window !== 'undefined') {
-    const globalName = (window as any).__CLOUDINARY_CLOUD_NAME__;
+    const globalName = (window as typeof window & { __CLOUDINARY_CLOUD_NAME__?: string }).__CLOUDINARY_CLOUD_NAME__;
     if (typeof globalName === 'string' && globalName.length > 0) return globalName;
   }
   return '';

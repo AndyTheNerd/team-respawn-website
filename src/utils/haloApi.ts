@@ -39,12 +39,20 @@ async function fetchFromPagesFunction<T>(
       return { ok: true, data: data as T };
     }
 
-    if (!isJson && response.status === 404 && fallback) {
+    if (fallback && (response.status === 404 || response.status === 405)) {
+      return fallback();
+    }
+
+    if (!isJson && fallback) {
       return fallback();
     }
 
     if (data?.error?.type && data?.error?.message) {
       return { ok: false, error: data.error as ApiError };
+    }
+
+    if (fallback) {
+      return fallback();
     }
 
     return { ok: false, error: parseApiError(response.status) };

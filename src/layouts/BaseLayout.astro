@@ -21,7 +21,7 @@ const resolvedTwitterImage = twitterImage ?? ogImage;
 const isBlogRoute = Astro.url?.pathname?.startsWith('/blog');
 const rawBodyClasses = [bodyClass, isBlogRoute ? 'blog-page' : ''].filter(Boolean).join(' ');
 const resolvedBodyClass = Array.from(new Set(rawBodyClasses.split(/\s+/).filter(Boolean))).join(' ');
-const cloudinaryCloudName = import.meta.env.CLOUDINARY_CLOUD_NAME || '';
+const cloudinaryCloudName = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME || import.meta.env.CLOUDINARY_CLOUD_NAME || '';
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -60,7 +60,7 @@ const cloudinaryCloudName = import.meta.env.CLOUDINARY_CLOUD_NAME || '';
   <link rel="stylesheet" href="/css/styles.css" />
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" crossorigin="anonymous"></script>
     {cloudinaryCloudName && (
-      <script is:inline>{`window.__CLOUDINARY_CLOUD_NAME__ = ${JSON.stringify(cloudinaryCloudName)};`}</script>
+      <script is:inline set:html={`window.__CLOUDINARY_CLOUD_NAME__ = ${JSON.stringify(cloudinaryCloudName)};`}></script>
     )}
     <slot name="head" />
   </head>
