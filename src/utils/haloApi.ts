@@ -119,6 +119,15 @@ export async function getMatchResult(matchId: string): Promise<ApiResult<any>> {
   );
 }
 
+export async function getMatchEvents(matchId: string): Promise<ApiResult<any>> {
+  const encoded = encodeURIComponent(matchId);
+  return fetchFromPagesFunction<any>(
+    `${PAGES_API_BASE}/events?matchId=${encoded}`,
+    { method: 'GET' },
+    () => fetchWithKeyFallback<any>(`${SUMMARY_API_URL}/matches/${encoded}/events`)
+  );
+}
+
 export async function getPlayerMatches(gamertag: string, count = 10): Promise<ApiResult<{ Results: MatchResult[] }>> {
   const encoded = encodeURIComponent(gamertag);
   return fetchFromPagesFunction<{ Results: MatchResult[] }>(
@@ -193,3 +202,137 @@ export async function getLeaderPowerMap(): Promise<ApiResult<Record<string, stri
   return result;
 }
 
+let gameObjectMapCache: Record<string, string> | null = null;
+let gameObjectMapPromise: Promise<ApiResult<Record<string, string>>> | null = null;
+
+export async function getGameObjectMap(): Promise<ApiResult<Record<string, string>>> {
+  if (gameObjectMapCache) {
+    return { ok: true, data: gameObjectMapCache };
+  }
+
+  if (gameObjectMapPromise) {
+    return gameObjectMapPromise;
+  }
+
+  gameObjectMapPromise = (async () => {
+    const map: Record<string, string> = {};
+    let startAt = 0;
+    let totalCount = Infinity;
+
+    while (startAt < totalCount) {
+      const pageResult = await fetchWithKeyFallback<any>(
+        `${METADATA_API_URL}/game-objects?startAt=${startAt}`,
+        { 'Accept-Language': 'en-US' }
+      );
+      if (!pageResult.ok) {
+        return pageResult as ApiResult<Record<string, string>>;
+      }
+
+      const data = pageResult.data;
+      const items = Array.isArray(data?.ContentItems) ? data.ContentItems : [];
+      items.forEach((item: any) => {
+        const view = item?.View || {};
+        const obj = view?.HW2Object || view?.HW2GameObject || view?.GameObject || view;
+        const objId = obj?.ObjectTypeId || view?.HW2Object?.ObjectTypeId || view?.ObjectTypeId;
+        const displayInfo =
+          obj?.DisplayInfo
+          || view?.HW2Object?.DisplayInfo
+          || view?.DisplayInfo;
+        const displayView = displayInfo?.View || displayInfo;
+        const name =
+          displayView?.HW2ObjectDisplayInfo?.Name
+          || displayView?.HW2GameObjectDisplayInfo?.Name
+          || displayView?.Name
+          || displayView?.Title
+          || view?.Title
+          || obj?.Name;
+        if (objId && name) {
+          map[String(objId)] = String(name);
+        }
+      });
+
+      const paging = data?.Paging || {};
+      const inlineCount = typeof paging.InlineCount === 'number' ? paging.InlineCount : items.length;
+      totalCount = typeof paging.TotalCount === 'number' ? paging.TotalCount : startAt + inlineCount;
+      startAt = (typeof paging.StartAt === 'number' ? paging.StartAt : startAt) + inlineCount;
+
+      if (inlineCount === 0) break;
+    }
+
+    gameObjectMapCache = map;
+    return { ok: true, data: map };
+  })();
+
+  const result = await gameObjectMapPromise;
+  if (!result.ok) {
+    gameObjectMapPromise = null;
+  }
+  return result;
+}
+
+let techMapCache: Record<string, string> | null = null;
+let techMapPromise: Promise<ApiResult<Record<string, string>>> | null = null;
+
+export async function getTechMap(): Promise<ApiResult<Record<string, string>>> {
+  if (techMapCache) {
+    return { ok: true, data: techMapCache };
+  }
+
+  if (techMapPromise) {
+    return techMapPromise;
+  }
+
+  techMapPromise = (async () => {
+    const map: Record<string, string> = {};
+    let startAt = 0;
+    let totalCount = Infinity;
+
+    while (startAt < totalCount) {
+      const pageResult = await fetchWithKeyFallback<any>(
+        `${METADATA_API_URL}/techs?startAt=${startAt}`,
+        { 'Accept-Language': 'en-US' }
+      );
+      if (!pageResult.ok) {
+        return pageResult as ApiResult<Record<string, string>>;
+      }
+
+      const data = pageResult.data;
+      const items = Array.isArray(data?.ContentItems) ? data.ContentItems : [];
+      items.forEach((item: any) => {
+        const view = item?.View || {};
+        const tech = view?.HW2Tech || view?.Tech || view;
+        const techId = tech?.TechId || tech?.ObjectTypeId || view?.HW2Tech?.TechId || view?.HW2Tech?.ObjectTypeId || view?.TechId;
+        const displayInfo =
+          tech?.DisplayInfo
+          || view?.HW2Tech?.DisplayInfo
+          || view?.DisplayInfo;
+        const displayView = displayInfo?.View || displayInfo;
+        const name =
+          displayView?.HW2TechDisplayInfo?.Name
+          || displayView?.Name
+          || displayView?.Title
+          || view?.Title
+          || tech?.Name;
+        if (techId && name) {
+          map[String(techId)] = String(name);
+        }
+      });
+
+      const paging = data?.Paging || {};
+      const inlineCount = typeof paging.InlineCount === 'number' ? paging.InlineCount : items.length;
+      totalCount = typeof paging.TotalCount === 'number' ? paging.TotalCount : startAt + inlineCount;
+      startAt = (typeof paging.StartAt === 'number' ? paging.StartAt : startAt) + inlineCount;
+
+      if (inlineCount === 0) break;
+    }
+
+    techMapCache = map;
+    return { ok: true, data: map };
+  })();
+
+  const result = await techMapPromise;
+  if (!result.ok) {
+    techMapPromise = null;
+  }
+  return result;
+}

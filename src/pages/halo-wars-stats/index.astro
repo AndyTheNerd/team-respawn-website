@@ -640,7 +640,7 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
   <script src="/js/dropdowns.js" is:inline></script>
 
   <script>
-    import { getPlayerStats, getPlayerSeasonStats, getPlayerMatches, getMatchResult, getLeaderPowerMap } from '../../utils/haloApi';
+    import { getPlayerStats, getPlayerSeasonStats, getPlayerMatches, getMatchResult, getMatchEvents, getLeaderPowerMap, getGameObjectMap, getTechMap } from '../../utils/haloApi';
     import { getCsrTier } from '../../data/haloWars2/csr';
     import { getLeaderName } from '../../data/haloWars2/leaders';
     import { getMapName, getMapImage, getMapImageFallback } from '../../data/haloWars2/maps';
@@ -812,15 +812,38 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
       shareText: string;
     };
 
+    type TimelineEntry = {
+      timeMs: number;
+      playerIndex: number | null;
+      playerName: string;
+      teamId: number | null;
+      label: string;
+      kind: 'building' | 'upgrade' | 'unit' | 'unit_upgrade' | 'power' | 'veterancy';
+      detail?: string;
+    };
+
+    type PlayerInfo = {
+      name: string;
+      teamId: number | null;
+      playerType: number | null;
+    };
+
     const STORAGE_KEY = 'hw2-recent-searches';
     const MAX_RECENT = 5;
     const CURRENT_SEASON = [...seasonData].sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0];
     let leaderPowerMapCache: Record<string, string> | null = null;
     let leaderPowerNormalizedMap: Map<string, string> | null = null;
     let leaderPowerMapLoading: Promise<Record<string, string> | null> | null = null;
+    let gameObjectMapCache: Record<string, string> | null = null;
+    let gameObjectNormalizedMap: Map<string, string> | null = null;
+    let gameObjectMapLoading: Promise<Record<string, string> | null> | null = null;
+    let techMapCache: Record<string, string> | null = null;
+    let techNormalizedMap: Map<string, string> | null = null;
+    let techMapLoading: Promise<Record<string, string> | null> | null = null;
     let currentMatches: any[] = [];
     let currentGamertag = '';
     let matchLookup = new Map<string, any>();
+    let matchEventsCache = new Map<string, any>();
     let activeShareData: ShareData | null = null;
     let shareStatusTimeout: number | null = null;
     let html2canvasPromise: Promise<any> | null = null;
@@ -905,6 +928,98 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
       }
 
       return humanizeLeaderPowerId(powerId);
+    }
+
+    async function ensureGameObjectMap(): Promise<Record<string, string> | null> {
+      if (gameObjectMapCache) return gameObjectMapCache;
+      if (gameObjectMapLoading) return gameObjectMapLoading;
+      gameObjectMapLoading = (async () => {
+        const result = await getGameObjectMap();
+        if (result.ok) {
+          gameObjectMapCache = result.data;
+          gameObjectNormalizedMap = new Map<string, string>();
+          Object.entries(result.data).forEach(([id, name]) => {
+            gameObjectNormalizedMap!.set(normalizeGameObjectId(id), name);
+          });
+          return gameObjectMapCache;
+        }
+        gameObjectMapLoading = null;
+        return null;
+      })();
+      return gameObjectMapLoading;
+    }
+
+    function normalizeGameObjectId(objectId: string): string {
+      return objectId.toLowerCase().replace(/[^a-z0-9]/g, '');
+    }
+
+    function humanizeGameObjectId(objectId: string): string {
+      if (!objectId) return '';
+      const normalized = objectId
+        .replace(/_MP$/i, '')
+        .replace(/_Proc$/i, '')
+        .replace(/_/g, ' ')
+        .replace(/([a-z])([A-Z])/g, '$1 $2')
+        .replace(/([A-Z])([A-Z][a-z])/g, '$1 $2')
+        .replace(/([a-zA-Z])(\d)\b/g, '$1 $2')
+        .replace(/\s+/g, ' ')
+        .trim();
+      return normalized;
+    }
+
+    function getGameObjectDisplayName(objectId: string, map?: Record<string, string> | null): string {
+      if (!objectId) return '';
+      if (map?.[objectId]) return map[objectId];
+      const normalized = normalizeGameObjectId(objectId);
+      const normalizedHit = gameObjectNormalizedMap?.get(normalized);
+      if (normalizedHit) return normalizedHit;
+      return humanizeGameObjectId(objectId);
+    }
+
+    async function ensureTechMap(): Promise<Record<string, string> | null> {
+      if (techMapCache) return techMapCache;
+      if (techMapLoading) return techMapLoading;
+      techMapLoading = (async () => {
+        const result = await getTechMap();
+        if (result.ok) {
+          techMapCache = result.data;
+          techNormalizedMap = new Map<string, string>();
+          Object.entries(result.data).forEach(([id, name]) => {
+            techNormalizedMap!.set(normalizeTechId(id), name);
+          });
+          return techMapCache;
+        }
+        techMapLoading = null;
+        return null;
+      })();
+      return techMapLoading;
+    }
+
+    function normalizeTechId(techId: string): string {
+      return techId.toLowerCase().replace(/[^a-z0-9]/g, '');
+    }
+
+    function humanizeTechId(techId: string): string {
+      if (!techId) return '';
+      const normalized = techId
+        .replace(/_MP$/i, '')
+        .replace(/_Proc$/i, '')
+        .replace(/_/g, ' ')
+        .replace(/([a-z])([A-Z])/g, '$1 $2')
+        .replace(/([A-Z])([A-Z][a-z])/g, '$1 $2')
+        .replace(/([a-zA-Z])(\d)\b/g, '$1 $2')
+        .replace(/\s+/g, ' ')
+        .trim();
+      return normalized;
+    }
+
+    function getTechDisplayName(techId: string, map?: Record<string, string> | null): string {
+      if (!techId) return '';
+      if (map?.[techId]) return map[techId];
+      const normalized = normalizeTechId(techId);
+      const normalizedHit = techNormalizedMap?.get(normalized);
+      if (normalizedHit) return normalizedHit;
+      return humanizeTechId(techId);
     }
 
     function getRecentSearches(): string[] {
@@ -1049,6 +1164,18 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
         + parts.hours
         + parts.minutes / 60
         + parts.seconds / 3600;
+    }
+
+    function formatMatchClock(ms?: number): string {
+      if (typeof ms !== 'number' || !Number.isFinite(ms)) return '';
+      const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      if (hours > 0) {
+        return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      }
+      return `${minutes}:${String(seconds).padStart(2, '0')}`;
     }
 
     function getMatchmakingSummaries(statsData: any): any[] {
@@ -1828,6 +1955,7 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
 
         const matchId = match.MatchId || '';
         const detailsId = matchId ? `match-details-${matchId}` : '';
+        const timelineId = matchId ? `match-timeline-${matchId}` : '';
         const bgClass = i % 2 === 0 ? 'bg-slate-800/20' : '';
 
           return `
@@ -1854,7 +1982,7 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
                     ${unitsText ? `<span>• Units ${unitsText}</span>` : ''}
                   </div>
                   ${matchId ? `
-                    <div class="flex gap-2 mt-3">
+                    <div class="flex flex-wrap gap-2 mt-3">
                       <button
                         type="button"
                         class="match-details-toggle flex-[4] flex items-center justify-between rounded-md border border-cyan-500/20 bg-slate-800/40 px-3 py-2 text-xs text-cyan-300 hover:text-cyan-200 hover:border-cyan-400/40 transition-colors"
@@ -1864,6 +1992,16 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
                       >
                         <span>Team Compositions and Stats</span>
                         <span class="match-details-chevron transition-transform duration-200" aria-hidden="true">&#x25BC;</span>
+                      </button>
+                      <button
+                        type="button"
+                        class="match-timeline-toggle flex-[3] flex items-center justify-between rounded-md border border-cyan-500/20 bg-slate-800/40 px-3 py-2 text-xs text-cyan-300 hover:text-cyan-200 hover:border-cyan-400/40 transition-colors"
+                        data-match-id="${matchId}"
+                        aria-controls="${timelineId}"
+                        aria-expanded="false"
+                      >
+                        <span>Build Timeline</span>
+                        <span class="match-timeline-chevron transition-transform duration-200" aria-hidden="true">&#x25BC;</span>
                       </button>
                       <button
                         type="button"
@@ -1884,6 +2022,7 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
                       </button>
                     </div>
                     <div id="${detailsId}" class="match-details mt-3 hidden" data-loaded="false"></div>
+                    <div id="${timelineId}" class="match-timeline mt-3 hidden" data-loaded="false"></div>
                   ` : ''}
                 </div>
               </div>
@@ -2031,6 +2170,473 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
         detailsEl.setAttribute('data-loaded', 'true');
       };
 
+      const loadMatchTimeline = async (matchId: string, timelineEl: HTMLElement) => {
+        if (timelineEl.getAttribute('data-loading') === 'true') return;
+        timelineEl.setAttribute('data-loading', 'true');
+        timelineEl.innerHTML = 'Loading build timeline...';
+
+        let payload = matchEventsCache.get(matchId);
+        if (!payload) {
+          const result = await getMatchEvents(matchId);
+          if (!result.ok) {
+            const message = result.error?.message || 'Unable to load match events.';
+            timelineEl.removeAttribute('data-loading');
+            timelineEl.innerHTML = `
+              <div class="flex items-center gap-3 text-red-300">
+                <span>${message}</span>
+                <button type="button" class="match-timeline-retry text-xs text-cyan-300 hover:text-cyan-200 underline" data-match-id="${matchId}">Retry</button>
+              </div>
+            `;
+            const retryBtn = timelineEl.querySelector('.match-timeline-retry') as HTMLButtonElement | null;
+            if (retryBtn) {
+              retryBtn.addEventListener('click', () => loadMatchTimeline(matchId, timelineEl));
+            }
+            return;
+          }
+          payload = result.data;
+          matchEventsCache.set(matchId, payload);
+        }
+
+        const eventsRaw = payload?.GameEvents;
+        const events = Array.isArray(eventsRaw) ? eventsRaw : [];
+        const isCompleteSet = payload?.IsCompleteSetOfEvents;
+        if (events.length === 0) {
+          timelineEl.removeAttribute('data-loading');
+          timelineEl.innerHTML = 'No build events available for this match.';
+          timelineEl.setAttribute('data-loaded', 'true');
+          return;
+        }
+
+        const playersByIndex = new Map<number, PlayerInfo>();
+        events.forEach((event: any) => {
+          if (event?.EventName !== 'PlayerJoinedMatch') return;
+          const index = event?.PlayerIndex;
+          if (typeof index !== 'number') return;
+          const humanId = event?.HumanPlayerId;
+          const name =
+            (typeof humanId === 'string' && humanId) ||
+            (typeof humanId === 'object' && humanId?.Gamertag) ||
+            (event?.PlayerType === 2 && event?.ComputerPlayerId != null ? `AI ${event.ComputerPlayerId}` : '') ||
+            (event?.PlayerType === 3 ? 'NPC' : '') ||
+            'Unknown';
+          const teamId = typeof event?.TeamId === 'number' ? event.TeamId : null;
+          const playerType = typeof event?.PlayerType === 'number' ? event.PlayerType : null;
+          playersByIndex.set(index, { name, teamId, playerType });
+        });
+
+        const [leaderPowerMap, gameObjectMap, techMap] = await Promise.all([
+          ensureLeaderPowerMap(),
+          ensureGameObjectMap(),
+          ensureTechMap(),
+        ]);
+
+        const buildingInstanceMap = new Map<number, string>();
+        const entries: TimelineEntry[] = [];
+        const resolveBuildingInstanceName = (instanceId?: number) => {
+          if (typeof instanceId !== 'number') return '';
+          const buildingId = buildingInstanceMap.get(instanceId);
+          if (!buildingId) return `Instance ${instanceId}`;
+          const buildingName = getGameObjectDisplayName(buildingId, gameObjectMap);
+          return buildingName ? `${buildingName} (Instance ${instanceId})` : `Instance ${instanceId}`;
+        };
+        events.forEach((event: any) => {
+          const instanceId = event?.InstanceId;
+          if (typeof instanceId === 'number') {
+            if (event?.EventName === 'BuildingConstructionQueued' && event?.BuildingId) {
+              buildingInstanceMap.set(instanceId, String(event.BuildingId));
+            }
+          }
+
+          const timeMs = event?.TimeSinceStartMilliseconds;
+          if (typeof timeMs !== 'number') return;
+          const playerIndex = typeof event?.PlayerIndex === 'number' ? event.PlayerIndex : null;
+          const playerInfo = playerIndex != null ? playersByIndex.get(playerIndex) : null;
+          const playerName = playerInfo?.name || (playerIndex != null ? `Player ${playerIndex}` : 'Unknown');
+          const teamId = playerInfo?.teamId ?? null;
+
+          if (event?.EventName === 'BuildingConstructionCompleted') {
+            const buildingId = buildingInstanceMap.get(event?.InstanceId) || event?.BuildingId;
+            const buildingName = buildingId ? getGameObjectDisplayName(String(buildingId), gameObjectMap) : 'Unknown Building';
+            const detail = buildingId ? `ID: ${buildingId}` : (event?.InstanceId != null ? `Instance ${event.InstanceId}` : '');
+            entries.push({
+              timeMs,
+              playerIndex,
+              playerName,
+              teamId,
+              label: `Completed ${buildingName}`,
+              kind: 'building',
+              detail: detail || undefined,
+            });
+          }
+
+          if (event?.EventName === 'BuildingUpgraded') {
+            const currentId = typeof instanceId === 'number' ? buildingInstanceMap.get(instanceId) : undefined;
+            const nextId = event?.NewBuildingId ? String(event.NewBuildingId) : '';
+            const fromName = currentId ? getGameObjectDisplayName(currentId, gameObjectMap) : '';
+            const toName = nextId ? getGameObjectDisplayName(nextId, gameObjectMap) : 'Unknown Building';
+            const label = fromName ? `Upgraded ${fromName} -> ${toName}` : `Upgraded to ${toName}`;
+            const detail = nextId ? `ID: ${nextId}` : (event?.InstanceId != null ? `Instance ${event.InstanceId}` : '');
+            entries.push({
+              timeMs,
+              playerIndex,
+              playerName,
+              teamId,
+              label,
+              kind: 'upgrade',
+              detail: detail || undefined,
+            });
+            if (typeof instanceId === 'number' && nextId) {
+              buildingInstanceMap.set(instanceId, nextId);
+            }
+          }
+
+          if (event?.EventName === 'UnitTrained') {
+            const squadId = event?.SquadId;
+            const unitName = squadId ? getGameObjectDisplayName(String(squadId), gameObjectMap) : 'Unknown Unit';
+            const detailBits = [];
+            if (event?.IsClone) detailBits.push('Clone');
+            if (event?.ProvidedByScenario) detailBits.push('Scenario');
+            if (event?.CreatorInstanceId) {
+              const source = resolveBuildingInstanceName(event.CreatorInstanceId);
+              detailBits.push(`From ${source || `Instance ${event.CreatorInstanceId}`}`);
+            }
+            entries.push({
+              timeMs,
+              playerIndex,
+              playerName,
+              teamId,
+              label: `Trained ${unitName}`,
+              kind: 'unit',
+              detail: detailBits.length ? detailBits.join(' | ') : undefined,
+            });
+          }
+
+          if (event?.EventName === 'UnitPromoted') {
+            const squadId = event?.SquadId;
+            const unitName = squadId ? getGameObjectDisplayName(String(squadId), gameObjectMap) : 'Unknown Unit';
+            const detail = event?.InstanceId != null ? `Instance ${event.InstanceId}` : '';
+            entries.push({
+              timeMs,
+              playerIndex,
+              playerName,
+              teamId,
+              label: `Veterancy: ${unitName}`,
+              kind: 'veterancy',
+              detail: detail || undefined,
+            });
+          }
+
+          if (event?.EventName === 'TechResearched') {
+            const techId = event?.TechId;
+            const techName = techId ? getTechDisplayName(String(techId), techMap) : 'Unknown Tech';
+            const detailBits = [];
+            if (event?.SupplyCost) detailBits.push(`Supply ${event.SupplyCost}`);
+            if (event?.EnergyCost) detailBits.push(`Energy ${event.EnergyCost}`);
+            if (event?.ResearcherInstanceId) {
+              const source = resolveBuildingInstanceName(event.ResearcherInstanceId);
+              detailBits.push(`From ${source || `Instance ${event.ResearcherInstanceId}`}`);
+            }
+            if (event?.ProvidedByScenario) detailBits.push('Scenario');
+            entries.push({
+              timeMs,
+              playerIndex,
+              playerName,
+              teamId,
+              label: `Researched ${techName}`,
+              kind: 'unit_upgrade',
+              detail: detailBits.length ? detailBits.join(' | ') : undefined,
+            });
+          }
+
+          if (event?.EventName === 'LeaderPowerCast') {
+            const powerId = event?.PowerId;
+            const powerName = powerId ? getLeaderPowerDisplayName(String(powerId), leaderPowerMap) : 'Unknown Power';
+            entries.push({
+              timeMs,
+              playerIndex,
+              playerName,
+              teamId,
+              label: `Cast ${powerName}`,
+              kind: 'power',
+            });
+          }
+        });
+
+        if (entries.length === 0) {
+          timelineEl.removeAttribute('data-loading');
+          timelineEl.innerHTML = 'No build events available for this match.';
+          timelineEl.setAttribute('data-loaded', 'true');
+          return;
+        }
+
+        const completionTag = isCompleteSet === false
+          ? '<span class="text-amber-300">Event feed incomplete</span>'
+          : '<span class="text-emerald-300">Event feed complete</span>';
+
+        const maxTimeMs = entries.reduce((max, entry) => Math.max(max, entry.timeMs), 0);
+        const maxMinutes = Math.max(1, Math.ceil(maxTimeMs / 60000));
+        const playerOptions = [...playersByIndex.entries()]
+          .filter(([, info]) => info.playerType !== 3)
+          .sort((a, b) => a[0] - b[0])
+          .map(([index, info]) => {
+            const teamLabel = typeof info.teamId === 'number' ? `Team ${info.teamId}` : 'Team ?';
+            return `<option value="${index}">${info.name} (${teamLabel})</option>`;
+          })
+          .join('');
+
+        timelineEl.innerHTML = `
+          <div class="flex flex-wrap items-center justify-between gap-2 text-[11px] uppercase tracking-wider text-gray-500 mb-3">
+            <span>Build timeline by team</span>
+            <span class="flex items-center gap-3">
+              <span data-timeline-count="${matchId}">0 events</span>
+              ${completionTag}
+            </span>
+          </div>
+          <div class="rounded-lg border border-slate-700/40 bg-slate-800/30 p-3 mb-3">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+              <label class="flex flex-col gap-1">
+                <span class="text-[10px] uppercase tracking-wider text-gray-400">Player</span>
+                <select class="timeline-player-filter w-full rounded-md border border-slate-700/60 bg-slate-900/60 px-2 py-1 text-gray-200">
+                  <option value="all">All players</option>
+                  ${playerOptions}
+                </select>
+              </label>
+              <div>
+                <span class="block text-[10px] uppercase tracking-wider text-gray-400 mb-1">Event types</span>
+                <div class="flex flex-wrap gap-2">
+                  <label class="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1">
+                    <input type="checkbox" name="timeline-type" value="building" checked class="accent-emerald-400" />
+                    <span class="text-[10px] uppercase tracking-wider text-emerald-200">Buildings</span>
+                  </label>
+                  <label class="inline-flex items-center gap-2 rounded-full border border-orange-400/30 bg-orange-400/10 px-3 py-1">
+                    <input type="checkbox" name="timeline-type" value="upgrade" checked class="accent-orange-400" />
+                    <span class="text-[10px] uppercase tracking-wider text-orange-200">Building Upgrades</span>
+                  </label>
+                  <label class="inline-flex items-center gap-2 rounded-full border border-sky-400/30 bg-sky-400/10 px-3 py-1">
+                    <input type="checkbox" name="timeline-type" value="unit" checked class="accent-sky-400" />
+                    <span class="text-[10px] uppercase tracking-wider text-sky-200">Units</span>
+                  </label>
+                  <label class="inline-flex items-center gap-2 rounded-full border border-teal-400/30 bg-teal-400/10 px-3 py-1">
+                    <input type="checkbox" name="timeline-type" value="unit_upgrade" checked class="accent-teal-400" />
+                    <span class="text-[10px] uppercase tracking-wider text-teal-200">Unit Upgrades</span>
+                  </label>
+                  <label class="inline-flex items-center gap-2 rounded-full border border-rose-400/30 bg-rose-400/10 px-3 py-1">
+                    <input type="checkbox" name="timeline-type" value="veterancy" checked class="accent-rose-400" />
+                    <span class="text-[10px] uppercase tracking-wider text-rose-200">Veterancy</span>
+                  </label>
+                  <label class="inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1">
+                    <input type="checkbox" name="timeline-type" value="power" checked class="accent-amber-400" />
+                    <span class="text-[10px] uppercase tracking-wider text-amber-200">Powers</span>
+                  </label>
+                </div>
+              </div>
+              <label class="flex flex-col gap-1">
+                <span class="text-[10px] uppercase tracking-wider text-gray-400">Start (min)</span>
+                <input type="number" min="0" max="${maxMinutes}" step="1" value="0" class="timeline-start w-full rounded-md border border-slate-700/60 bg-slate-900/60 px-2 py-1 text-gray-200" />
+              </label>
+              <label class="flex flex-col gap-1">
+                <span class="text-[10px] uppercase tracking-wider text-gray-400">End (min)</span>
+                <input type="number" min="0" max="${maxMinutes}" step="1" value="${maxMinutes}" class="timeline-end w-full rounded-md border border-slate-700/60 bg-slate-900/60 px-2 py-1 text-gray-200" />
+                <span class="text-[10px] text-gray-500">Max ${formatMatchClock(maxTimeMs)}</span>
+              </label>
+            </div>
+          </div>
+          <div class="match-timeline-list grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
+        `;
+
+        const listEl = timelineEl.querySelector('.match-timeline-list') as HTMLElement | null;
+        const playerFilter = timelineEl.querySelector('.timeline-player-filter') as HTMLSelectElement | null;
+        const typeInputs = Array.from(timelineEl.querySelectorAll('input[name="timeline-type"]')) as HTMLInputElement[];
+        const startInput = timelineEl.querySelector('.timeline-start') as HTMLInputElement | null;
+        const endInput = timelineEl.querySelector('.timeline-end') as HTMLInputElement | null;
+        const countEl = timelineEl.querySelector(`[data-timeline-count="${matchId}"]`) as HTMLElement | null;
+
+          const filterState = {
+          player: 'all',
+          types: new Set(['building', 'upgrade', 'unit', 'unit_upgrade', 'power', 'veterancy']),
+          startMin: 0,
+          endMin: maxMinutes,
+        };
+
+        const resolveTag = (kind: TimelineEntry['kind']) => {
+          switch (kind) {
+            case 'building':
+              return { className: 'border-emerald-400/40 text-emerald-200 bg-emerald-400/10', label: 'Building' };
+            case 'upgrade':
+              return { className: 'border-orange-400/40 text-orange-200 bg-orange-400/10', label: 'Building Upgrade' };
+            case 'unit':
+              return { className: 'border-sky-400/40 text-sky-200 bg-sky-400/10', label: 'Unit' };
+            case 'unit_upgrade':
+              return { className: 'border-teal-400/40 text-teal-200 bg-teal-400/10', label: 'Unit Upgrade' };
+            case 'veterancy':
+              return { className: 'border-rose-400/40 text-rose-200 bg-rose-400/10', label: 'Veterancy' };
+            default:
+              return { className: 'border-amber-400/40 text-amber-200 bg-amber-400/10', label: 'Power' };
+          }
+        };
+
+        const renderTimelineList = () => {
+          if (!listEl) return;
+          const startMs = Math.max(0, filterState.startMin) * 60000;
+          const endMs = Math.max(0, filterState.endMin) * 60000;
+          const filtered = entries.filter((entry) => {
+            if (filterState.player !== 'all' && String(entry.playerIndex) !== filterState.player) return false;
+            if (!filterState.types.has(entry.kind)) return false;
+            if (entry.timeMs < startMs || entry.timeMs > endMs) return false;
+            return true;
+          });
+
+          if (countEl) {
+            countEl.textContent = `${filtered.length} events`;
+          }
+
+          if (filtered.length === 0) {
+            listEl.innerHTML = '<div class="text-sm text-gray-400">No events in this filter window.</div>';
+            return;
+          }
+
+          const teamGroups = new Map<number, TimelineEntry[]>();
+          const unassigned: TimelineEntry[] = [];
+
+          filtered.forEach((entry) => {
+            if (typeof entry.teamId === 'number') {
+              const group = teamGroups.get(entry.teamId) || [];
+              group.push(entry);
+              teamGroups.set(entry.teamId, group);
+            } else {
+              unassigned.push(entry);
+            }
+          });
+
+          teamGroups.forEach((group) => group.sort((a, b) => a.timeMs - b.timeMs));
+          unassigned.sort((a, b) => a.timeMs - b.timeMs);
+
+          const teamCards = [...teamGroups.entries()]
+            .sort((a, b) => a[0] - b[0])
+            .map(([teamId, group]) => {
+              const headerLabel = teamId === 0 ? 'Neutral' : `Team ${teamId}`;
+              const counts = { building: 0, unit: 0, power: 0 };
+              group.forEach((entry) => {
+                if (entry.kind === 'building') counts.building += 1;
+                if (entry.kind === 'unit') counts.unit += 1;
+                if (entry.kind === 'power') counts.power += 1;
+              });
+              const rows = group.map((entry) => {
+                const timeLabel = formatMatchClock(entry.timeMs);
+                const tag = resolveTag(entry.kind);
+                return `
+                  <div class="grid grid-cols-[72px_minmax(0,1fr)] gap-3 items-start text-xs">
+                    <span class="font-mono text-cyan-300">${timeLabel}</span>
+                    <div>
+                      <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-gray-200 truncate">${entry.playerName}</span>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full border text-[10px] uppercase tracking-wider ${tag.className}">${tag.label}</span>
+                        <span class="text-gray-300">${entry.label}</span>
+                      </div>
+                      ${entry.detail ? `<div class="text-[10px] text-gray-500 mt-1">${entry.detail}</div>` : ''}
+                    </div>
+                  </div>
+                `;
+              }).join('');
+
+              return `
+                <div class="rounded-lg border border-slate-700/40 bg-slate-800/40 p-3">
+                  <div class="flex items-center justify-between mb-2">
+                    <p class="text-[10px] uppercase tracking-wider text-gray-400">${headerLabel}</p>
+                    <span class="text-[10px] uppercase tracking-wider text-gray-500">${group.length} events</span>
+                  </div>
+                  <div class="flex flex-wrap gap-3 text-[10px] uppercase tracking-wider text-gray-500 mb-3">
+                    <span>Buildings <span class="text-emerald-200">${counts.building}</span></span>
+                    <span>Units <span class="text-sky-200">${counts.unit}</span></span>
+                    <span>Powers <span class="text-amber-200">${counts.power}</span></span>
+                  </div>
+                  <div class="space-y-3">
+                    ${rows}
+                  </div>
+                </div>
+              `;
+            });
+
+          if (unassigned.length > 0) {
+            const counts = { building: 0, unit: 0, power: 0 };
+            unassigned.forEach((entry) => {
+              if (entry.kind === 'building') counts.building += 1;
+              if (entry.kind === 'unit') counts.unit += 1;
+              if (entry.kind === 'power') counts.power += 1;
+            });
+            const rows = unassigned.map((entry) => {
+              const timeLabel = formatMatchClock(entry.timeMs);
+              const tag = resolveTag(entry.kind);
+              return `
+                <div class="grid grid-cols-[72px_minmax(0,1fr)] gap-3 items-start text-xs">
+                  <span class="font-mono text-cyan-300">${timeLabel}</span>
+                  <div>
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span class="text-gray-200 truncate">${entry.playerName}</span>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full border text-[10px] uppercase tracking-wider ${tag.className}">${tag.label}</span>
+                      <span class="text-gray-300">${entry.label}</span>
+                    </div>
+                    ${entry.detail ? `<div class="text-[10px] text-gray-500 mt-1">${entry.detail}</div>` : ''}
+                  </div>
+                </div>
+              `;
+            }).join('');
+
+            teamCards.push(`
+              <div class="rounded-lg border border-slate-700/40 bg-slate-800/40 p-3">
+                <div class="flex items-center justify-between mb-2">
+                  <p class="text-[10px] uppercase tracking-wider text-gray-400">Unknown Team</p>
+                  <span class="text-[10px] uppercase tracking-wider text-gray-500">${unassigned.length} events</span>
+                </div>
+                <div class="flex flex-wrap gap-3 text-[10px] uppercase tracking-wider text-gray-500 mb-3">
+                  <span>Buildings <span class="text-emerald-200">${counts.building}</span></span>
+                  <span>Units <span class="text-sky-200">${counts.unit}</span></span>
+                  <span>Powers <span class="text-amber-200">${counts.power}</span></span>
+                </div>
+                <div class="space-y-3">
+                  ${rows}
+                </div>
+              </div>
+            `);
+          }
+
+          listEl.innerHTML = teamCards.join('');
+        };
+
+        const updateFilter = () => {
+          if (playerFilter) {
+            filterState.player = playerFilter.value;
+          }
+          const selected = new Set<string>();
+          typeInputs.forEach((input) => {
+            if (input.checked) selected.add(input.value);
+          });
+          filterState.types = selected;
+          if (startInput) {
+            const value = Number(startInput.value);
+            filterState.startMin = Number.isFinite(value) ? Math.max(0, value) : 0;
+          }
+          if (endInput) {
+            const value = Number(endInput.value);
+            filterState.endMin = Number.isFinite(value) ? Math.max(0, value) : maxMinutes;
+          }
+          if (filterState.startMin > filterState.endMin) {
+            filterState.endMin = filterState.startMin;
+            if (endInput) endInput.value = String(filterState.endMin);
+          }
+          renderTimelineList();
+        };
+
+        if (playerFilter) playerFilter.addEventListener('change', updateFilter);
+        typeInputs.forEach((input) => input.addEventListener('change', updateFilter));
+        if (startInput) startInput.addEventListener('change', updateFilter);
+        if (endInput) endInput.addEventListener('change', updateFilter);
+        renderTimelineList();
+
+        timelineEl.removeAttribute('data-loading');
+        timelineEl.setAttribute('data-loaded', 'true');
+      };
+
       matchesContent.querySelectorAll('.match-details-toggle').forEach(btn => {
         btn.addEventListener('click', async () => {
           const matchId = (btn as HTMLElement).getAttribute('data-match-id') || '';
@@ -2048,6 +2654,26 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
 
           if (detailsEl.getAttribute('data-loaded') === 'true') return;
           await loadMatchDetails(matchId, detailsEl);
+        });
+      });
+
+      matchesContent.querySelectorAll('.match-timeline-toggle').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const matchId = (btn as HTMLElement).getAttribute('data-match-id') || '';
+          if (!matchId) return;
+          const timelineId = `match-timeline-${matchId}`;
+          const timelineEl = document.getElementById(timelineId);
+          const chevron = (btn as HTMLElement).querySelector('.match-timeline-chevron') as HTMLElement | null;
+          if (!timelineEl) return;
+
+          const isExpanded = (btn as HTMLElement).getAttribute('aria-expanded') === 'true';
+          (btn as HTMLElement).setAttribute('aria-expanded', isExpanded ? 'false' : 'true');
+          timelineEl.classList.toggle('hidden', isExpanded);
+          if (chevron) chevron.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
+          if (isExpanded) return;
+
+          if (timelineEl.getAttribute('data-loaded') === 'true') return;
+          await loadMatchTimeline(matchId, timelineEl);
         });
       });
 
