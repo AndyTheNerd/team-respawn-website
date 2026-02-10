@@ -510,7 +510,10 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
                   <i class="fas fa-users text-cyan-400 mr-2" aria-hidden="true"></i>
                   Leader Usage
                 </span>
-                <span class="leaders-chevron transition-transform duration-200" aria-hidden="true">&#x25BC;</span>
+                <span class="flex items-center gap-1 text-xs text-cyan-300/80">
+                  <span>Collapse</span>
+                  <span class="leaders-chevron transition-transform duration-200" aria-hidden="true">&#x25BC;</span>
+                </span>
               </button>
             </h2>
             <div id="leaders-panel">
@@ -673,7 +676,7 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
     const leadersPanel = document.getElementById('leaders-panel') as HTMLElement | null;
     const leadersChevron = leadersToggle?.querySelector('.leaders-chevron') as HTMLElement | null;
     const defaultSearchPlaceholder = 'Enter gamertag...';
-    const rotatingGamertags = ['xandy92', 'btc hosticide', 'American Sklz', 'Slashstorm', 'Jolly Sine', 'Powermoes114', 'TheCommander158', 'Nakamura RTS', 'KGB Officer', 'Blackandfan', 'TR AndrUwU', 'PatrossDev'];
+    const rotatingGamertags = ['xandy92', 'btc hosticide', 'American Sklz', 'Slashstorm', 'Jolly Sine', 'Powermoes114', 'TheCommander158', 'Nakamura RTS', 'KGB Officer', 'Blackandfan', 'TR AndrUwU', 'PatrossDev', 'TiberiusCN', 'Frcnzied', 'nvxHa', 'Gandalf The Fat', 'OwO senpai4668'];
     const SHARE_HERO_GRADIENT = 'linear-gradient(120deg, rgba(2, 6, 23, 0.85), rgba(6, 40, 64, 0.85))';
 
     if (leadersToggle && leadersPanel) {
@@ -688,32 +691,105 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
       });
     }
 
-    let placeholderIndex = 0;
-    let placeholderIntervalId: number | null = null;
+    let placeholderTimeoutId: number | null = null;
+    let placeholderRunId = 0;
+    let placeholderTarget = '';
+    let placeholderRendered = '';
+    let isDeletingPlaceholder = false;
+    let scriptedPlaceholderIndex = 0;
+    const scriptedPlaceholderGamertags = ['xandy92', 'American Sklz', 'btc hosticide'];
+    let lastPlaceholderGamertag = '';
     const isSearchInputIdle = () => searchInput.value.trim() === '' && document.activeElement !== searchInput;
 
     function stopSearchPlaceholderRotation(reset = false) {
-      if (placeholderIntervalId !== null) {
-        window.clearInterval(placeholderIntervalId);
-        placeholderIntervalId = null;
+      placeholderRunId += 1;
+      if (placeholderTimeoutId !== null) {
+        window.clearTimeout(placeholderTimeoutId);
+        placeholderTimeoutId = null;
       }
+      placeholderTarget = '';
+      placeholderRendered = '';
+      isDeletingPlaceholder = false;
       if (reset && searchInput.value.trim() === '') {
         searchInput.placeholder = defaultSearchPlaceholder;
       }
     }
 
-    function startSearchPlaceholderRotation() {
-      if (!isSearchInputIdle()) return;
-      stopSearchPlaceholderRotation();
-      searchInput.placeholder = `Try: ${rotatingGamertags[placeholderIndex]}`;
-      placeholderIntervalId = window.setInterval(() => {
+    function getRandomGamertag(): string {
+      if (rotatingGamertags.length === 0) return '';
+      while (scriptedPlaceholderIndex < scriptedPlaceholderGamertags.length) {
+        const scripted = scriptedPlaceholderGamertags[scriptedPlaceholderIndex];
+        scriptedPlaceholderIndex += 1;
+        if (rotatingGamertags.includes(scripted)) {
+          lastPlaceholderGamertag = scripted;
+          return scripted;
+        }
+      }
+      if (rotatingGamertags.length === 1) {
+        lastPlaceholderGamertag = rotatingGamertags[0];
+        return rotatingGamertags[0];
+      }
+
+      let next = lastPlaceholderGamertag;
+      while (next === lastPlaceholderGamertag) {
+        const index = Math.floor(Math.random() * rotatingGamertags.length);
+        next = rotatingGamertags[index];
+      }
+      lastPlaceholderGamertag = next;
+      return next;
+    }
+
+    function schedulePlaceholderTick(runId: number, delayMs: number) {
+      placeholderTimeoutId = window.setTimeout(() => {
+        if (runId !== placeholderRunId) return;
         if (!isSearchInputIdle()) {
           stopSearchPlaceholderRotation(true);
           return;
         }
-        placeholderIndex = (placeholderIndex + 1) % rotatingGamertags.length;
-        searchInput.placeholder = `Try: ${rotatingGamertags[placeholderIndex]}`;
-      }, 2200);
+
+        if (!placeholderTarget) {
+          placeholderTarget = getRandomGamertag();
+          placeholderRendered = '';
+          isDeletingPlaceholder = false;
+          if (!placeholderTarget) {
+            searchInput.placeholder = defaultSearchPlaceholder;
+            return;
+          }
+        }
+
+        if (!isDeletingPlaceholder) {
+          placeholderRendered = placeholderTarget.slice(0, placeholderRendered.length + 1);
+          searchInput.placeholder = placeholderRendered;
+          if (placeholderRendered === placeholderTarget) {
+            isDeletingPlaceholder = true;
+            schedulePlaceholderTick(runId, 2000);
+            return;
+          }
+          schedulePlaceholderTick(runId, 70 + Math.floor(Math.random() * 70));
+          return;
+        }
+
+        placeholderRendered = placeholderRendered.slice(0, -1);
+        if (placeholderRendered.length > 0) {
+          searchInput.placeholder = placeholderRendered;
+          schedulePlaceholderTick(runId, 35 + Math.floor(Math.random() * 45));
+          return;
+        }
+
+        searchInput.placeholder = defaultSearchPlaceholder;
+        placeholderTarget = '';
+        isDeletingPlaceholder = false;
+        schedulePlaceholderTick(runId, 2000);
+      }, delayMs);
+    }
+
+    function startSearchPlaceholderRotation() {
+      if (!isSearchInputIdle() || rotatingGamertags.length === 0) return;
+      stopSearchPlaceholderRotation();
+      placeholderRunId += 1;
+      const runId = placeholderRunId;
+      searchInput.placeholder = defaultSearchPlaceholder;
+      schedulePlaceholderTick(runId, 300);
     }
 
     type ShareData = {
