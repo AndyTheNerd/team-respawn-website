@@ -147,14 +147,19 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
       .match-share-result {
         display: inline-flex;
         align-items: center;
+        justify-content: center;
         gap: 6px;
         padding: 4px 10px;
+        min-height: 20px;
+        min-width: 72px;
         border-radius: 999px;
         text-transform: uppercase;
         letter-spacing: 0.08em;
         font-size: 10px;
         font-weight: 700;
         border: 1px solid transparent;
+        line-height: 1;
+        text-align: center;
       }
 
       .match-share-result.win {
@@ -349,6 +354,36 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
 
       .match-share-status.error {
         color: #f87171;
+      }
+
+      @keyframes share-skeleton {
+        0% { background-position: -200px 0; }
+        100% { background-position: calc(200px + 100%) 0; }
+      }
+
+      .share-skeleton {
+        position: relative;
+        display: inline-block;
+        min-width: var(--skeleton-width, 80px);
+        min-height: 1em;
+      }
+
+      .match-share-card.share-loading .share-skeleton {
+        color: transparent !important;
+      }
+
+      .match-share-gamertag.share-skeleton {
+        display: block;
+      }
+
+      .match-share-card.share-loading .share-skeleton::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 6px;
+        background: linear-gradient(90deg, rgba(148, 163, 184, 0.12), rgba(148, 163, 184, 0.28), rgba(148, 163, 184, 0.12));
+        background-size: 200px 100%;
+        animation: share-skeleton 1.2s ease-in-out infinite;
       }
 
       @media (max-width: 640px) {
@@ -562,39 +597,39 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
             <div id="match-share-card" class="match-share-card" aria-label="Match share card preview">
               <div class="match-share-card-top">
                 <div>
-                  <span id="match-share-result" class="match-share-result draw">Draw</span>
-                  <div id="match-share-gamertag" class="match-share-gamertag">Gamertag</div>
-                  <div id="match-share-subtitle" class="match-share-subtitle">Match summary</div>
+                  <span id="match-share-result" class="match-share-result draw share-skeleton" style="--skeleton-width: 64px;">Draw</span>
+                  <div id="match-share-gamertag" class="match-share-gamertag share-skeleton" style="--skeleton-width: 140px;">Gamertag</div>
+                  <div id="match-share-subtitle" class="match-share-subtitle share-skeleton" style="--skeleton-width: 160px;">Match summary</div>
                 </div>
                 <img id="match-share-logo" class="match-share-logo" src="/content/Team-Respawn-Full.png" alt="Team Respawn" loading="eager" />
               </div>
               <div id="match-share-hero" class="match-share-hero">
                 <div class="match-share-hero-overlay">
-                  <div id="match-share-map" class="match-share-map">Unknown Map</div>
-                  <div id="match-share-leader" class="match-share-leader">Unknown Leader</div>
+                  <div id="match-share-map" class="match-share-map share-skeleton" style="--skeleton-width: 120px;">Unknown Map</div>
+                  <div id="match-share-leader" class="match-share-leader share-skeleton" style="--skeleton-width: 110px;">Unknown Leader</div>
                 </div>
               </div>
               <div class="match-share-stats">
                 <div class="match-share-stat">
                   <span>Duration</span>
-                  <strong id="match-share-duration">-</strong>
+                  <strong id="match-share-duration" class="share-skeleton" style="--skeleton-width: 48px;">-</strong>
                 </div>
                 <div class="match-share-stat">
                   <span>Leader Powers Used</span>
-                  <strong id="match-share-powers">-</strong>
+                  <strong id="match-share-powers" class="share-skeleton" style="--skeleton-width: 48px;">-</strong>
                 </div>
                 <div class="match-share-stat">
                   <span>Units Destroyed</span>
-                  <strong id="match-share-units">-</strong>
+                  <strong id="match-share-units" class="share-skeleton" style="--skeleton-width: 48px;">-</strong>
                 </div>
                 <div class="match-share-stat">
-                  <span>Team</span>
-                  <strong id="match-share-team">-</strong>
+                  <span>Team Size</span>
+                  <strong id="match-share-team" class="share-skeleton" style="--skeleton-width: 48px;">-</strong>
                 </div>
               </div>
               <div class="match-share-footer">
-                <span id="match-share-playlist">Matchmaking</span>
-                <span id="match-share-date"></span>
+                <span id="match-share-playlist" class="share-skeleton" style="--skeleton-width: 90px;">Matchmaking</span>
+                <span id="match-share-date" class="share-skeleton" style="--skeleton-width: 80px;"></span>
               </div>
             </div>
 
@@ -1477,6 +1512,11 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
       }
     }
 
+    function setShareCardLoading(isLoading: boolean) {
+      if (!shareCard) return;
+      shareCard.classList.toggle('share-loading', isLoading);
+    }
+
     function updateShareCard(data: ShareData) {
       if (shareResultEl) {
         shareResultEl.textContent = data.resultText;
@@ -1569,11 +1609,37 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
       }
     }
 
+    function preloadShareImage(src: string): Promise<boolean> {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve(true);
+        img.onerror = () => resolve(false);
+        img.src = src;
+      });
+    }
+
+    async function ensureShareMapImageReady(): Promise<string | null> {
+      if (shareMapImageDataUrl) {
+        await preloadShareImage(shareMapImageDataUrl);
+        return shareMapImageDataUrl;
+      }
+      if (shareMapImagePromise) {
+        const dataUrl = await shareMapImagePromise;
+        if (dataUrl) {
+          shareMapImageDataUrl = dataUrl;
+          await preloadShareImage(dataUrl);
+          return dataUrl;
+        }
+      }
+      return null;
+    }
+
     function openShareModal(data: ShareData) {
       if (!shareModal) return;
       activeShareData = data;
       updateShareCard(data);
       updateShareLinks(data);
+      setShareCardLoading(false);
       if (shareCopyLinkBtn) shareCopyLinkBtn.setAttribute('data-url', data.shareUrl);
       shareModal.classList.remove('hidden');
       shareModal.setAttribute('aria-hidden', 'false');
@@ -1621,16 +1687,11 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
       const html2canvas = await ensureHtml2canvas();
       const previousBg = shareHeroEl?.style.backgroundImage;
       if (shareHeroEl) {
-        if (shareMapImageDataUrl) {
-          shareHeroEl.style.backgroundImage = `url('${shareMapImageDataUrl}')`;
-        } else if (shareMapImageUrl) {
-          if (shareMapImagePromise) {
-            const dataUrl = await shareMapImagePromise;
-            if (dataUrl) {
-              shareMapImageDataUrl = dataUrl;
-              shareHeroEl.style.backgroundImage = `url('${dataUrl}')`;
-            }
-          }
+        const dataUrl = await ensureShareMapImageReady();
+        if (dataUrl) {
+          shareHeroEl.style.backgroundImage = `url('${dataUrl}')`;
+        } else if (!shareHeroEl.style.backgroundImage) {
+          shareHeroEl.style.backgroundImage = SHARE_HERO_GRADIENT;
         }
       }
       try {
@@ -1714,6 +1775,7 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
 
       const player = findMatchPlayer(match, gamertag);
       const needsDetails = !player || (!player?.UnitStats && !player?.LeaderPowerStats);
+      setShareCardLoading(needsDetails);
       if (!needsDetails) return;
 
       setShareStatus('Fetching match details...', 'info');
@@ -1721,6 +1783,7 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
       if (requestId !== shareRequestId) return;
       if (!result.ok || !result.data) {
         setShareStatus('Match details unavailable.', 'error');
+        setShareCardLoading(false);
         return;
       }
 
@@ -1736,6 +1799,7 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
       if (shareCopyLinkBtn) shareCopyLinkBtn.setAttribute('data-url', updated.shareUrl);
       setShareMapImage(updated.mapImage, updated.mapImageFallback);
       setShareStatus('Match details loaded.', 'ok');
+      setShareCardLoading(false);
     }
 
     if (shareModal) {
@@ -2082,181 +2146,22 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
         }, { once: true });
       });
 
-      const loadMatchDetails = async (matchId: string, detailsEl: HTMLElement) => {
-        if (detailsEl.getAttribute('data-loading') === 'true') return;
-        detailsEl.setAttribute('data-loading', 'true');
-        detailsEl.innerHTML = 'Loading team compositions...';
-
-        const result = await getMatchResult(matchId);
-        detailsEl.removeAttribute('data-loading');
-
-        if (!result.ok) {
-          const message = result.error?.message || 'Unable to load team compositions.';
-          detailsEl.innerHTML = `
-            <div class="flex items-center gap-3 text-red-300">
-              <span>${message}</span>
-              <button type="button" class="match-details-retry text-xs text-cyan-300 hover:text-cyan-200 underline" data-match-id="${matchId}">Retry</button>
-            </div>
-          `;
-          const retryBtn = detailsEl.querySelector('.match-details-retry') as HTMLButtonElement | null;
-          if (retryBtn) {
-            retryBtn.addEventListener('click', () => loadMatchDetails(matchId, detailsEl));
-          }
-          return;
+      const fetchMatchEventsPayload = async (matchId: string) => {
+        const cached = matchEventsCache.get(matchId);
+        if (cached) {
+          return { ok: true, data: cached } as const;
         }
-
-        const playersRaw = result.data?.Players;
-        const players = Array.isArray(playersRaw)
-          ? playersRaw
-          : (playersRaw && typeof playersRaw === 'object')
-            ? Object.values(playersRaw)
-            : [];
-
-        const leaderPowerMap = await ensureLeaderPowerMap();
-        const teamMap = new Map<number, { members: Array<{ name: string; leader: string; destroyed: number; lost: number; powerEntries: Array<{ name: string; times: number }> }>; totals: { destroyed: number; lost: number; powers: number } }>();
-        players.forEach((p: any) => {
-          const teamId = p.TeamId;
-          const leaderId = p.LeaderId;
-          if (teamId == null || leaderId == null) return;
-          const gamertag = p?.HumanPlayerId?.Gamertag
-            || p?.Gamertag
-            || (p?.HumanPlayerId && typeof p.HumanPlayerId === 'string' ? p.HumanPlayerId : '')
-            || (p?.IsHuman === false ? 'AI' : '')
-            || (p?.ComputerPlayerId != null ? `AI ${p.ComputerPlayerId}` : '')
-            || 'Unknown';
-          const leaderName = getLeaderName(leaderId);
-          let destroyed = 0;
-          let lost = 0;
-          const unitStats = p?.UnitStats;
-          if (unitStats && typeof unitStats === 'object') {
-            Object.values(unitStats).forEach((u: any) => {
-              destroyed += u?.TotalDestroyed || 0;
-              lost += u?.TotalLost || 0;
-            });
-          }
-          const powerEntries: Array<{ name: string; times: number }> = [];
-          let powerCount = 0;
-          const leaderPowerStats = p?.LeaderPowerStats;
-          if (leaderPowerStats && typeof leaderPowerStats === 'object') {
-            const entries = Object.entries(leaderPowerStats)
-              .map(([powerId, stats]) => {
-                const times = typeof stats === 'number'
-                  ? stats
-                  : (stats as any)?.TimesCast ?? (stats as any)?.TotalPlays ?? 0;
-                return { powerId, times };
-              })
-              .filter((pwr) => pwr.times > 0)
-              .sort((a, b) => b.times - a.times);
-            entries.forEach((pwr) => {
-              powerEntries.push({ name: getLeaderPowerDisplayName(pwr.powerId, leaderPowerMap), times: pwr.times });
-              powerCount += pwr.times;
-            });
-          }
-          const team = teamMap.get(teamId) || { members: [], totals: { destroyed: 0, lost: 0, powers: 0 } };
-          team.members.push({ name: gamertag, leader: leaderName, destroyed, lost, powerEntries });
-          team.totals.destroyed += destroyed;
-          team.totals.lost += lost;
-          team.totals.powers += powerCount;
-          teamMap.set(teamId, team);
-        });
-
-        if (teamMap.size === 0) {
-          detailsEl.innerHTML = 'Team composition data not available.';
-          return;
+        const result = await getMatchEvents(matchId);
+        if (result.ok) {
+          matchEventsCache.set(matchId, result.data);
         }
-
-        const teamCards = [...teamMap.entries()]
-          .sort((a, b) => a[0] - b[0])
-          .map(([teamId, team]) => {
-            const rows = team.members.map((m) => `
-              <span class="text-gray-200 truncate">${m.name}</span>
-              <span class="text-cyan-300 truncate">${m.leader}</span>
-              <span class="text-xs text-gray-400 text-right">${m.destroyed} / ${m.lost}</span>
-            `).join('');
-            const powerRows = team.members.map((m) => {
-              const powerText = m.powerEntries.length
-                ? m.powerEntries.map((pwr) => `${pwr.name} x${pwr.times}`).join(', ')
-                : '-';
-              return `
-                <div class="grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-3 text-xs">
-                  <span class="text-gray-300 truncate">${m.name}</span>
-                  <span class="text-gray-400">${powerText}</span>
-                </div>
-              `;
-            }).join('');
-            return `
-              <div class="rounded-lg border border-slate-700/40 bg-slate-800/40 p-3">
-                <p class="text-[10px] uppercase tracking-wider text-gray-400 mb-2">Team ${teamId}</p>
-                <div class="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-3 text-xs">
-                  <span class="text-[10px] uppercase tracking-wider text-gray-500">Player</span>
-                  <span class="text-[10px] uppercase tracking-wider text-gray-500">Leader</span>
-                  <span class="text-[10px] uppercase tracking-wider text-gray-500 text-right">Units Destroyed / Units Lost</span>
-                  ${rows}
-                </div>
-                <div class="mt-3 border-t border-slate-700/40 pt-3">
-                  <p class="text-[10px] uppercase tracking-wider text-gray-500 mb-2">Leader Powers by Player</p>
-                  <div class="space-y-2">
-                    ${powerRows}
-                  </div>
-                </div>
-                <div class="mt-3 border-t border-slate-700/40 pt-3 flex flex-wrap gap-4 text-[10px] uppercase tracking-wider text-gray-500">
-                  <span>Units Destroyed: <span class="text-gray-300">${team.totals.destroyed}</span></span>
-                  <span>Units Lost: <span class="text-gray-300">${team.totals.lost}</span></span>
-                  <span>Leader Powers Used: <span class="text-gray-300">${team.totals.powers}</span></span>
-                </div>
-              </div>
-            `;
-          });
-
-        detailsEl.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">${teamCards.join('')}</div>`;
-        detailsEl.setAttribute('data-loaded', 'true');
+        return result;
       };
 
-      const loadMatchTimeline = async (matchId: string, timelineEl: HTMLElement) => {
-        if (timelineEl.getAttribute('data-loading') === 'true') return;
-        timelineEl.setAttribute('data-loading', 'true');
-        timelineEl.innerHTML = 'Loading build timeline...';
-
-        let payload = matchEventsCache.get(matchId);
-        if (!payload) {
-          const result = await getMatchEvents(matchId);
-          if (!result.ok) {
-            const message = result.error?.message || 'Unable to load match events.';
-            timelineEl.removeAttribute('data-loading');
-            timelineEl.innerHTML = `
-              <div class="flex items-center gap-3 text-red-300">
-                <span>${message}</span>
-                <button type="button" class="match-timeline-retry text-xs text-cyan-300 hover:text-cyan-200 underline" data-match-id="${matchId}">Retry</button>
-              </div>
-            `;
-            const retryBtn = timelineEl.querySelector('.match-timeline-retry') as HTMLButtonElement | null;
-            if (retryBtn) {
-              retryBtn.addEventListener('click', () => loadMatchTimeline(matchId, timelineEl));
-            }
-            return;
-          }
-          payload = result.data;
-          matchEventsCache.set(matchId, payload);
-        }
-
+      const buildEventEntries = async (payload: any) => {
         const eventsRaw = payload?.GameEvents;
         const events = Array.isArray(eventsRaw) ? eventsRaw : [];
         const isCompleteSet = payload?.IsCompleteSetOfEvents;
-        if (events.length === 0) {
-          timelineEl.removeAttribute('data-loading');
-          timelineEl.innerHTML = `
-            <div class="text-sm text-gray-400">
-              No event data available for this match.
-              <button type="button" class="match-timeline-retry ml-2 text-xs text-cyan-300 hover:text-cyan-200 underline" data-match-id="${matchId}">Retry</button>
-            </div>
-          `;
-          const retryBtn = timelineEl.querySelector('.match-timeline-retry') as HTMLButtonElement | null;
-          if (retryBtn) {
-            retryBtn.addEventListener('click', () => loadMatchTimeline(matchId, timelineEl));
-          }
-          timelineEl.setAttribute('data-loaded', 'true');
-          return;
-        }
 
         const playersByIndex = new Map<number, PlayerInfo>();
         events.forEach((event: any) => {
@@ -2290,6 +2195,7 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
           const buildingName = getGameObjectDisplayName(buildingId, gameObjectMap);
           return buildingName ? `${buildingName} (Instance ${instanceId})` : `Instance ${instanceId}`;
         };
+
         events.forEach((event: any) => {
           const instanceId = event?.InstanceId;
           if (typeof instanceId === 'number') {
@@ -2413,25 +2319,14 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
           }
         });
 
-        if (entries.length === 0) {
-          timelineEl.removeAttribute('data-loading');
-          timelineEl.innerHTML = `
-            <div class="text-sm text-gray-400">
-              No event data available for this match.
-              <button type="button" class="match-timeline-retry ml-2 text-xs text-cyan-300 hover:text-cyan-200 underline" data-match-id="${matchId}">Retry</button>
-            </div>
-          `;
-          const retryBtn = timelineEl.querySelector('.match-timeline-retry') as HTMLButtonElement | null;
-          if (retryBtn) {
-            retryBtn.addEventListener('click', () => loadMatchTimeline(matchId, timelineEl));
-          }
-          timelineEl.setAttribute('data-loaded', 'true');
-          return;
-        }
+        return { entries, playersByIndex, isCompleteSet };
+      };
 
+      const buildEventSummarySections = (entries: TimelineEntry[], playersByIndex: Map<number, PlayerInfo>) => {
         const playerCounts = new Map<number, { playerIndex: number; name: string; teamId: number | null; units: number; techs: number; powers: number }>();
         const buildOrderEntries = new Map<number, { playerIndex: number; name: string; teamId: number | null; entries: TimelineEntry[] }>();
         const buildOrderKinds = new Set<TimelineEntry['kind']>(['building', 'unit', 'upgrade', 'unit_upgrade']);
+
         entries.forEach((entry) => {
           if (entry.playerIndex == null) return;
           const playerInfo = playersByIndex.get(entry.playerIndex);
@@ -2572,6 +2467,311 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
             `;
           });
 
+        return {
+          summaryCards,
+          buildOrderCards,
+        };
+      };
+
+      const getSummarySkeleton = () => `
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div class="rounded-lg border border-slate-700/40 bg-slate-800/40 p-3 animate-pulse">
+            <div class="h-3 w-24 bg-slate-700/60 rounded mb-3"></div>
+            <div class="space-y-2">
+              <div class="h-3 bg-slate-700/50 rounded"></div>
+              <div class="h-3 bg-slate-700/50 rounded w-5/6"></div>
+              <div class="h-3 bg-slate-700/50 rounded w-4/6"></div>
+            </div>
+          </div>
+          <div class="rounded-lg border border-slate-700/40 bg-slate-800/40 p-3 animate-pulse">
+            <div class="h-3 w-28 bg-slate-700/60 rounded mb-3"></div>
+            <div class="space-y-2">
+              <div class="h-3 bg-slate-700/50 rounded"></div>
+              <div class="h-3 bg-slate-700/50 rounded w-5/6"></div>
+              <div class="h-3 bg-slate-700/50 rounded w-4/6"></div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div class="rounded-lg border border-slate-700/40 bg-slate-800/40 p-3 animate-pulse">
+            <div class="h-3 w-32 bg-slate-700/60 rounded mb-3"></div>
+            <div class="space-y-2">
+              <div class="h-3 bg-slate-700/50 rounded"></div>
+              <div class="h-3 bg-slate-700/50 rounded w-5/6"></div>
+              <div class="h-3 bg-slate-700/50 rounded w-4/6"></div>
+            </div>
+          </div>
+          <div class="rounded-lg border border-slate-700/40 bg-slate-800/40 p-3 animate-pulse">
+            <div class="h-3 w-28 bg-slate-700/60 rounded mb-3"></div>
+            <div class="space-y-2">
+              <div class="h-3 bg-slate-700/50 rounded"></div>
+              <div class="h-3 bg-slate-700/50 rounded w-5/6"></div>
+              <div class="h-3 bg-slate-700/50 rounded w-4/6"></div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const loadMatchSummary = async (matchId: string, summaryContentEl: HTMLElement, options: { reveal?: boolean } = {}) => {
+        if (summaryContentEl.getAttribute('data-loading') === 'true') return;
+        summaryContentEl.setAttribute('data-loading', 'true');
+        if (options.reveal) {
+          summaryContentEl.classList.remove('hidden');
+        }
+        summaryContentEl.innerHTML = getSummarySkeleton();
+
+        const eventResult = await fetchMatchEventsPayload(matchId);
+        if (!eventResult.ok) {
+          summaryContentEl.removeAttribute('data-loading');
+          summaryContentEl.innerHTML = `
+            <div class="rounded-lg border border-slate-700/40 bg-slate-900/40 p-3 text-sm text-gray-400">
+              Match summary unavailable.
+              <button type="button" class="match-summary-retry ml-2 text-xs text-cyan-300 hover:text-cyan-200 underline" data-match-id="${matchId}">Retry</button>
+            </div>
+          `;
+          const retryBtn = summaryContentEl.querySelector('.match-summary-retry') as HTMLButtonElement | null;
+          if (retryBtn) {
+            retryBtn.addEventListener('click', () => {
+              summaryContentEl.setAttribute('data-loaded', 'false');
+              loadMatchSummary(matchId, summaryContentEl, { reveal: true });
+            });
+          }
+          return;
+        }
+
+        const { entries, playersByIndex, isCompleteSet } = await buildEventEntries(eventResult.data);
+        if (entries.length === 0) {
+          summaryContentEl.removeAttribute('data-loading');
+          summaryContentEl.innerHTML = `
+            <div class="rounded-lg border border-slate-700/40 bg-slate-900/40 p-3 text-sm text-gray-400">
+              No event data available for this match.
+              <button type="button" class="match-summary-retry ml-2 text-xs text-cyan-300 hover:text-cyan-200 underline" data-match-id="${matchId}">Retry</button>
+            </div>
+          `;
+          const retryBtn = summaryContentEl.querySelector('.match-summary-retry') as HTMLButtonElement | null;
+          if (retryBtn) {
+            retryBtn.addEventListener('click', () => {
+              summaryContentEl.setAttribute('data-loaded', 'false');
+              loadMatchSummary(matchId, summaryContentEl, { reveal: true });
+            });
+          }
+          return;
+        }
+
+        const { summaryCards, buildOrderCards } = buildEventSummarySections(entries, playersByIndex);
+        const completionTag = isCompleteSet === false
+          ? '<span class="text-amber-300">Event feed incomplete</span>'
+          : '<span class="text-emerald-300">Event feed complete</span>';
+        summaryContentEl.innerHTML = `
+          <div class="flex flex-wrap items-center justify-between gap-2 text-[11px] uppercase tracking-wider text-gray-500 mb-2">
+            <span>Match Summary</span>
+            ${completionTag}
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            ${summaryCards.join('')}
+          </div>
+          <div class="mt-4">
+            <div class="flex flex-wrap items-center justify-between gap-2 text-[11px] uppercase tracking-wider text-gray-500 mb-2">
+              <span>Build Order Highlights</span>
+              <span class="text-[10px] uppercase tracking-wider text-gray-500">First 5</span>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              ${buildOrderCards.join('')}
+            </div>
+          </div>
+        `;
+        summaryContentEl.removeAttribute('data-loading');
+        summaryContentEl.setAttribute('data-loaded', 'true');
+      };
+
+      const loadMatchDetails = async (matchId: string, detailsEl: HTMLElement) => {
+        if (detailsEl.getAttribute('data-loading') === 'true') return;
+        detailsEl.setAttribute('data-loading', 'true');
+        detailsEl.innerHTML = 'Loading team compositions...';
+
+        const result = await getMatchResult(matchId);
+        detailsEl.removeAttribute('data-loading');
+
+        if (!result.ok) {
+          const message = result.error?.message || 'Unable to load team compositions.';
+          detailsEl.innerHTML = `
+            <div class="flex items-center gap-3 text-red-300">
+              <span>${message}</span>
+              <button type="button" class="match-details-retry text-xs text-cyan-300 hover:text-cyan-200 underline" data-match-id="${matchId}">Retry</button>
+            </div>
+          `;
+          const retryBtn = detailsEl.querySelector('.match-details-retry') as HTMLButtonElement | null;
+          if (retryBtn) {
+            retryBtn.addEventListener('click', () => loadMatchDetails(matchId, detailsEl));
+          }
+          return;
+        }
+
+        const playersRaw = result.data?.Players;
+        const players = Array.isArray(playersRaw)
+          ? playersRaw
+          : (playersRaw && typeof playersRaw === 'object')
+            ? Object.values(playersRaw)
+            : [];
+
+        const leaderPowerMap = await ensureLeaderPowerMap();
+        const teamMap = new Map<number, { members: Array<{ name: string; leader: string; destroyed: number; lost: number; powerEntries: Array<{ name: string; times: number }> }>; totals: { destroyed: number; lost: number; powers: number } }>();
+        players.forEach((p: any) => {
+          const teamId = p.TeamId;
+          const leaderId = p.LeaderId;
+          if (teamId == null || leaderId == null) return;
+          const gamertag = p?.HumanPlayerId?.Gamertag
+            || p?.Gamertag
+            || (p?.HumanPlayerId && typeof p.HumanPlayerId === 'string' ? p.HumanPlayerId : '')
+            || (p?.IsHuman === false ? 'AI' : '')
+            || (p?.ComputerPlayerId != null ? `AI ${p.ComputerPlayerId}` : '')
+            || 'Unknown';
+          const leaderName = getLeaderName(leaderId);
+          let destroyed = 0;
+          let lost = 0;
+          const unitStats = p?.UnitStats;
+          if (unitStats && typeof unitStats === 'object') {
+            Object.values(unitStats).forEach((u: any) => {
+              destroyed += u?.TotalDestroyed || 0;
+              lost += u?.TotalLost || 0;
+            });
+          }
+          const powerEntries: Array<{ name: string; times: number }> = [];
+          let powerCount = 0;
+          const leaderPowerStats = p?.LeaderPowerStats;
+          if (leaderPowerStats && typeof leaderPowerStats === 'object') {
+            const entries = Object.entries(leaderPowerStats)
+              .map(([powerId, stats]) => {
+                const times = typeof stats === 'number'
+                  ? stats
+                  : (stats as any)?.TimesCast ?? (stats as any)?.TotalPlays ?? 0;
+                return { powerId, times };
+              })
+              .filter((pwr) => pwr.times > 0)
+              .sort((a, b) => b.times - a.times);
+            entries.forEach((pwr) => {
+              powerEntries.push({ name: getLeaderPowerDisplayName(pwr.powerId, leaderPowerMap), times: pwr.times });
+              powerCount += pwr.times;
+            });
+          }
+          const team = teamMap.get(teamId) || { members: [], totals: { destroyed: 0, lost: 0, powers: 0 } };
+          team.members.push({ name: gamertag, leader: leaderName, destroyed, lost, powerEntries });
+          team.totals.destroyed += destroyed;
+          team.totals.lost += lost;
+          team.totals.powers += powerCount;
+          teamMap.set(teamId, team);
+        });
+
+        if (teamMap.size === 0) {
+          detailsEl.innerHTML = 'Team composition data not available.';
+          return;
+        }
+
+        const teamCards = [...teamMap.entries()]
+          .sort((a, b) => a[0] - b[0])
+          .map(([teamId, team]) => {
+            const rows = team.members.map((m) => `
+              <span class="text-gray-200 truncate">${m.name}</span>
+              <span class="text-cyan-300 truncate">${m.leader}</span>
+              <span class="text-xs text-gray-400 text-right">${m.destroyed} / ${m.lost}</span>
+            `).join('');
+            const powerRows = team.members.map((m) => {
+              const powerText = m.powerEntries.length
+                ? m.powerEntries.map((pwr) => `${pwr.name} x${pwr.times}`).join(', ')
+                : '-';
+              return `
+                <div class="grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-3 text-xs">
+                  <span class="text-gray-300 truncate">${m.name}</span>
+                  <span class="text-gray-400">${powerText}</span>
+                </div>
+              `;
+            }).join('');
+            return `
+              <div class="rounded-lg border border-slate-700/40 bg-slate-800/40 p-3">
+                <p class="text-[10px] uppercase tracking-wider text-gray-400 mb-2">Team ${teamId}</p>
+                <div class="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-3 text-xs">
+                  <span class="text-[10px] uppercase tracking-wider text-gray-500">Player</span>
+                  <span class="text-[10px] uppercase tracking-wider text-gray-500">Leader</span>
+                  <span class="text-[10px] uppercase tracking-wider text-gray-500 text-right">Units Destroyed / Units Lost</span>
+                  ${rows}
+                </div>
+                <div class="mt-3 border-t border-slate-700/40 pt-3">
+                  <p class="text-[10px] uppercase tracking-wider text-gray-500 mb-2">Leader Powers by Player</p>
+                  <div class="space-y-2">
+                    ${powerRows}
+                  </div>
+                </div>
+                <div class="mt-3 border-t border-slate-700/40 pt-3 flex flex-wrap gap-4 text-[10px] uppercase tracking-wider text-gray-500">
+                  <span>Units Destroyed: <span class="text-gray-300">${team.totals.destroyed}</span></span>
+                  <span>Units Lost: <span class="text-gray-300">${team.totals.lost}</span></span>
+                  <span>Leader Powers Used: <span class="text-gray-300">${team.totals.powers}</span></span>
+                </div>
+              </div>
+            `;
+          });
+
+        detailsEl.innerHTML = `
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">${teamCards.join('')}</div>
+          <div class="mt-4 rounded-lg border border-slate-700/40 bg-slate-900/40 p-3">
+            <div>
+              <p class="text-[11px] uppercase tracking-wider text-gray-400">Match Summary + Build Order</p>
+              <p class="text-xs text-gray-500">Loads with event data for this match.</p>
+            </div>
+            <div id="match-summary-${matchId}" class="match-summary-content mt-3" data-loaded="false"></div>
+          </div>
+        `;
+
+        const summaryContent = detailsEl.querySelector('.match-summary-content') as HTMLElement | null;
+        if (summaryContent && summaryContent.getAttribute('data-loaded') !== 'true') {
+          loadMatchSummary(matchId, summaryContent, { reveal: true });
+        }
+        detailsEl.setAttribute('data-loaded', 'true');
+      };
+
+      const loadMatchTimeline = async (matchId: string, timelineEl: HTMLElement) => {
+        if (timelineEl.getAttribute('data-loading') === 'true') return;
+        timelineEl.setAttribute('data-loading', 'true');
+        timelineEl.innerHTML = 'Loading build timeline...';
+
+        let payload = matchEventsCache.get(matchId);
+        if (!payload) {
+          const result = await getMatchEvents(matchId);
+          if (!result.ok) {
+            const message = result.error?.message || 'Unable to load match events.';
+            timelineEl.removeAttribute('data-loading');
+            timelineEl.innerHTML = `
+              <div class="flex items-center gap-3 text-red-300">
+                <span>${message}</span>
+                <button type="button" class="match-timeline-retry text-xs text-cyan-300 hover:text-cyan-200 underline" data-match-id="${matchId}">Retry</button>
+              </div>
+            `;
+            const retryBtn = timelineEl.querySelector('.match-timeline-retry') as HTMLButtonElement | null;
+            if (retryBtn) {
+              retryBtn.addEventListener('click', () => loadMatchTimeline(matchId, timelineEl));
+            }
+            return;
+          }
+          payload = result.data;
+          matchEventsCache.set(matchId, payload);
+        }
+
+        const { entries, playersByIndex, isCompleteSet } = await buildEventEntries(payload);
+        if (entries.length === 0) {
+          timelineEl.removeAttribute('data-loading');
+          timelineEl.innerHTML = `
+            <div class="text-sm text-gray-400">
+              No event data available for this match.
+              <button type="button" class="match-timeline-retry ml-2 text-xs text-cyan-300 hover:text-cyan-200 underline" data-match-id="${matchId}">Retry</button>
+            </div>
+          `;
+          const retryBtn = timelineEl.querySelector('.match-timeline-retry') as HTMLButtonElement | null;
+          if (retryBtn) {
+            retryBtn.addEventListener('click', () => loadMatchTimeline(matchId, timelineEl));
+          }
+          timelineEl.setAttribute('data-loaded', 'true');
+          return;
+        }
+
         const completionTag = isCompleteSet === false
           ? '<span class="text-amber-300">Event feed incomplete</span>'
           : '<span class="text-emerald-300">Event feed complete</span>';
@@ -2595,22 +2795,6 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
               ${completionTag}
             </span>
           </div>
-          ${summaryCards.length ? `
-            <div class="mb-4">
-              <p class="text-[11px] uppercase tracking-wider text-gray-500 mb-2">Match Summary</p>
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                ${summaryCards.join('')}
-              </div>
-            </div>
-          ` : ''}
-          ${buildOrderCards.length ? `
-            <div class="mb-4">
-              <p class="text-[11px] uppercase tracking-wider text-gray-500 mb-2">Build Order Highlights</p>
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                ${buildOrderCards.join('')}
-              </div>
-            </div>
-          ` : ''}
           <div class="rounded-lg border border-slate-700/40 bg-slate-800/30 p-3 mb-3">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
               <label class="flex flex-col gap-1">
