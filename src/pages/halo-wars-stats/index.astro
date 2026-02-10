@@ -829,6 +829,7 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
     };
 
     const STORAGE_KEY = 'hw2-recent-searches';
+    const PINNED_MATCHES_KEY = 'hw2-pinned-matches';
     const MAX_RECENT = 5;
     const CURRENT_SEASON = [...seasonData].sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0];
     let leaderPowerMapCache: Record<string, string> | null = null;
@@ -1033,6 +1034,27 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
       searches.unshift(gt);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(searches.slice(0, MAX_RECENT)));
       renderRecentSearches();
+    }
+
+    function getPinnedMatches(): string[] {
+      try {
+        return JSON.parse(localStorage.getItem(PINNED_MATCHES_KEY) || '[]');
+      } catch { return []; }
+    }
+
+    function setPinnedMatches(ids: string[]) {
+      localStorage.setItem(PINNED_MATCHES_KEY, JSON.stringify(ids));
+    }
+
+    function togglePinnedMatch(matchId: string): boolean {
+      const pinned = new Set(getPinnedMatches());
+      if (pinned.has(matchId)) {
+        pinned.delete(matchId);
+      } else {
+        pinned.add(matchId);
+      }
+      setPinnedMatches([...pinned]);
+      return pinned.has(matchId);
     }
 
     function renderRecentSearches() {
@@ -1884,7 +1906,12 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
         return;
       }
 
-      matchesContent.innerHTML = '<div class="divide-y divide-slate-700/30">' + matches.map((match: any, i: number) => {
+      const pinnedSet = new Set(getPinnedMatches());
+      const pinnedMatches = currentMatches.filter((m: any) => m?.MatchId && pinnedSet.has(m.MatchId));
+      const unpinnedMatches = currentMatches.filter((m: any) => !m?.MatchId || !pinnedSet.has(m.MatchId));
+      const displayMatches = [...pinnedMatches, ...unpinnedMatches];
+
+      matchesContent.innerHTML = '<div class="divide-y divide-slate-700/30">' + displayMatches.map((match: any, i: number) => {
         const gtLower = gamertag.toLowerCase();
         const player = match.Players?.find((p: any) => {
           const id = p.HumanPlayerId || p.Gamertag || p.PlayerId;
@@ -1956,6 +1983,11 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
         const matchId = match.MatchId || '';
         const detailsId = matchId ? `match-details-${matchId}` : '';
         const timelineId = matchId ? `match-timeline-${matchId}` : '';
+        const isPinned = matchId ? pinnedSet.has(matchId) : false;
+        const pinLabel = isPinned ? 'Pinned' : 'Pin';
+        const pinClass = isPinned
+          ? 'text-amber-200 border-amber-400/40 bg-amber-400/10'
+          : 'text-cyan-300 border-cyan-500/20 bg-slate-800/40 hover:text-cyan-200 hover:border-cyan-400/40';
         const bgClass = i % 2 === 0 ? 'bg-slate-800/20' : '';
 
           return `
@@ -2002,6 +2034,16 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
                       >
                         <span>Build Timeline</span>
                         <span class="match-timeline-chevron transition-transform duration-200" aria-hidden="true">&#x25BC;</span>
+                      </button>
+                      <button
+                        type="button"
+                        class="match-pin-toggle flex-[1] inline-flex items-center justify-center rounded-md border px-3 py-2 text-xs ${pinClass} transition-colors"
+                        aria-pressed="${isPinned ? 'true' : 'false'}"
+                        title="${pinLabel} match"
+                        data-match-id="${matchId}"
+                      >
+                        <i class="fas fa-thumbtack mr-1" aria-hidden="true"></i>
+                        <span class="hidden sm:inline">${pinLabel}</span>
                       </button>
                       <button
                         type="button"
@@ -2202,7 +2244,16 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
         const isCompleteSet = payload?.IsCompleteSetOfEvents;
         if (events.length === 0) {
           timelineEl.removeAttribute('data-loading');
-          timelineEl.innerHTML = 'No build events available for this match.';
+          timelineEl.innerHTML = `
+            <div class="text-sm text-gray-400">
+              No event data available for this match.
+              <button type="button" class="match-timeline-retry ml-2 text-xs text-cyan-300 hover:text-cyan-200 underline" data-match-id="${matchId}">Retry</button>
+            </div>
+          `;
+          const retryBtn = timelineEl.querySelector('.match-timeline-retry') as HTMLButtonElement | null;
+          if (retryBtn) {
+            retryBtn.addEventListener('click', () => loadMatchTimeline(matchId, timelineEl));
+          }
           timelineEl.setAttribute('data-loaded', 'true');
           return;
         }
@@ -2364,10 +2415,162 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
 
         if (entries.length === 0) {
           timelineEl.removeAttribute('data-loading');
-          timelineEl.innerHTML = 'No build events available for this match.';
+          timelineEl.innerHTML = `
+            <div class="text-sm text-gray-400">
+              No event data available for this match.
+              <button type="button" class="match-timeline-retry ml-2 text-xs text-cyan-300 hover:text-cyan-200 underline" data-match-id="${matchId}">Retry</button>
+            </div>
+          `;
+          const retryBtn = timelineEl.querySelector('.match-timeline-retry') as HTMLButtonElement | null;
+          if (retryBtn) {
+            retryBtn.addEventListener('click', () => loadMatchTimeline(matchId, timelineEl));
+          }
           timelineEl.setAttribute('data-loaded', 'true');
           return;
         }
+
+        const playerCounts = new Map<number, { playerIndex: number; name: string; teamId: number | null; units: number; techs: number; powers: number }>();
+        const buildOrderEntries = new Map<number, { playerIndex: number; name: string; teamId: number | null; entries: TimelineEntry[] }>();
+        const buildOrderKinds = new Set<TimelineEntry['kind']>(['building', 'unit', 'upgrade', 'unit_upgrade']);
+        entries.forEach((entry) => {
+          if (entry.playerIndex == null) return;
+          const playerInfo = playersByIndex.get(entry.playerIndex);
+          const name = playerInfo?.name || entry.playerName || `Player ${entry.playerIndex}`;
+          const teamId = playerInfo?.teamId ?? entry.teamId ?? null;
+          const row = playerCounts.get(entry.playerIndex) || {
+            playerIndex: entry.playerIndex,
+            name,
+            teamId,
+            units: 0,
+            techs: 0,
+            powers: 0,
+          };
+          if (entry.kind === 'unit') row.units += 1;
+          if (entry.kind === 'unit_upgrade') row.techs += 1;
+          if (entry.kind === 'power') row.powers += 1;
+          playerCounts.set(entry.playerIndex, row);
+
+          if (buildOrderKinds.has(entry.kind)) {
+            const orderRow = buildOrderEntries.get(entry.playerIndex) || {
+              playerIndex: entry.playerIndex,
+              name,
+              teamId,
+              entries: [],
+            };
+            orderRow.entries.push(entry);
+            buildOrderEntries.set(entry.playerIndex, orderRow);
+          }
+        });
+
+        playersByIndex.forEach((info, index) => {
+          if (info.playerType === 3) return;
+          if (!playerCounts.has(index)) {
+            playerCounts.set(index, {
+              playerIndex: index,
+              name: info.name || `Player ${index}`,
+              teamId: info.teamId ?? null,
+              units: 0,
+              techs: 0,
+              powers: 0,
+            });
+          }
+        });
+
+        const summaryTeams = new Map<number, { players: Array<{ playerIndex: number; name: string; units: number; techs: number; powers: number }>; totals: { units: number; techs: number; powers: number } }>();
+        playerCounts.forEach((row) => {
+          const teamKey = typeof row.teamId === 'number' ? row.teamId : -1;
+          const team = summaryTeams.get(teamKey) || { players: [], totals: { units: 0, techs: 0, powers: 0 } };
+          team.players.push({ playerIndex: row.playerIndex, name: row.name, units: row.units, techs: row.techs, powers: row.powers });
+          team.totals.units += row.units;
+          team.totals.techs += row.techs;
+          team.totals.powers += row.powers;
+          summaryTeams.set(teamKey, team);
+        });
+
+        const summaryCards = [...summaryTeams.entries()]
+          .sort((a, b) => a[0] - b[0])
+          .map(([teamId, team]) => {
+            const headerLabel = teamId === -1 ? 'Unknown Team' : (teamId === 0 ? 'Neutral' : `Team ${teamId}`);
+            const rows = team.players
+              .sort((a, b) => a.playerIndex - b.playerIndex)
+              .map((player) => `
+                <span class="text-gray-200 truncate">${player.name}</span>
+                <span class="text-xs font-mono text-sky-200 text-right">${player.units}</span>
+                <span class="text-xs font-mono text-teal-200 text-right">${player.techs}</span>
+                <span class="text-xs font-mono text-amber-200 text-right">${player.powers}</span>
+              `).join('');
+            const tableHtml = team.players.length
+              ? `
+                <div class="grid grid-cols-[minmax(0,1fr)_auto_auto_auto] gap-3 text-xs">
+                  <span class="text-[10px] uppercase tracking-wider text-gray-500">Player</span>
+                  <span class="text-[10px] uppercase tracking-wider text-gray-500 text-right">Units</span>
+                  <span class="text-[10px] uppercase tracking-wider text-gray-500 text-right">Unit Upgrades</span>
+                  <span class="text-[10px] uppercase tracking-wider text-gray-500 text-right">Powers</span>
+                  ${rows}
+                </div>
+              `
+              : '<p class="text-xs text-gray-500">No player data.</p>';
+
+            return `
+              <div class="rounded-lg border border-slate-700/40 bg-slate-800/40 p-3">
+                <div class="flex items-center justify-between mb-2">
+                  <p class="text-[10px] uppercase tracking-wider text-gray-400">${headerLabel}</p>
+                  <span class="text-[10px] uppercase tracking-wider text-gray-500">Totals</span>
+                </div>
+                ${tableHtml}
+                <div class="mt-3 flex flex-wrap gap-3 text-[10px] uppercase tracking-wider text-gray-500">
+                  <span>Units <span class="text-sky-200">${team.totals.units}</span></span>
+                  <span>Unit Upgrades <span class="text-teal-200">${team.totals.techs}</span></span>
+                  <span>Powers <span class="text-amber-200">${team.totals.powers}</span></span>
+                </div>
+              </div>
+            `;
+          });
+
+        const buildOrderTeams = new Map<number, Array<{ playerIndex: number; name: string; entries: TimelineEntry[] }>>();
+        buildOrderEntries.forEach((row) => {
+          const teamKey = typeof row.teamId === 'number' ? row.teamId : -1;
+          const list = buildOrderTeams.get(teamKey) || [];
+          const entriesSorted = row.entries.sort((a, b) => a.timeMs - b.timeMs).slice(0, 5);
+          list.push({ playerIndex: row.playerIndex, name: row.name, entries: entriesSorted });
+          buildOrderTeams.set(teamKey, list);
+        });
+
+        const buildOrderCards = [...buildOrderTeams.entries()]
+          .sort((a, b) => a[0] - b[0])
+          .map(([teamId, players]) => {
+            const headerLabel = teamId === -1 ? 'Unknown Team' : (teamId === 0 ? 'Neutral' : `Team ${teamId}`);
+            const playerBlocks = players
+              .sort((a, b) => a.playerIndex - b.playerIndex)
+              .map((player) => {
+                const items = player.entries.map((entry) => `
+                  <div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2 text-xs">
+                    <span class="font-mono text-cyan-300">${formatMatchClock(entry.timeMs)}</span>
+                    <span class="text-gray-300">${entry.label}</span>
+                  </div>
+                `).join('') || '<span class="text-xs text-gray-500">No build order data</span>';
+                return `
+                  <div class="rounded-md border border-slate-700/40 bg-slate-900/40 p-2">
+                    <p class="text-[10px] uppercase tracking-wider text-gray-400 mb-2">${player.name}</p>
+                    <div class="space-y-1">
+                      ${items}
+                    </div>
+                  </div>
+                `;
+              }).join('');
+
+            return `
+              <div class="rounded-lg border border-slate-700/40 bg-slate-800/40 p-3">
+                <div class="flex items-center justify-between mb-2">
+                  <p class="text-[10px] uppercase tracking-wider text-gray-400">${headerLabel}</p>
+                  <span class="text-[10px] uppercase tracking-wider text-gray-500">First 5</span>
+                </div>
+                <div class="space-y-2">
+                  ${playerBlocks}
+                </div>
+              </div>
+            `;
+          });
 
         const completionTag = isCompleteSet === false
           ? '<span class="text-amber-300">Event feed incomplete</span>'
@@ -2392,6 +2595,22 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
               ${completionTag}
             </span>
           </div>
+          ${summaryCards.length ? `
+            <div class="mb-4">
+              <p class="text-[11px] uppercase tracking-wider text-gray-500 mb-2">Match Summary</p>
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                ${summaryCards.join('')}
+              </div>
+            </div>
+          ` : ''}
+          ${buildOrderCards.length ? `
+            <div class="mb-4">
+              <p class="text-[11px] uppercase tracking-wider text-gray-500 mb-2">Build Order Highlights</p>
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                ${buildOrderCards.join('')}
+              </div>
+            </div>
+          ` : ''}
           <div class="rounded-lg border border-slate-700/40 bg-slate-800/30 p-3 mb-3">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
               <label class="flex flex-col gap-1">
@@ -2674,6 +2893,15 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
 
           if (timelineEl.getAttribute('data-loaded') === 'true') return;
           await loadMatchTimeline(matchId, timelineEl);
+        });
+      });
+
+      matchesContent.querySelectorAll('.match-pin-toggle').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const matchId = (btn as HTMLElement).getAttribute('data-match-id') || '';
+          if (!matchId) return;
+          togglePinnedMatch(matchId);
+          renderMatches(currentMatches, currentGamertag);
         });
       });
 
