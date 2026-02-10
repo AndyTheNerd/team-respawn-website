@@ -1,0 +1,12 @@
+name = "team-respawn-pages"
+compatibility_date = "2026-02-10"
+pages_build_output_dir = "../dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "team-respawn-hw2"
+database_id = "e3e3f817-a439-46f4-b268-2b2b391a8fa1"
+
+[vars]
+STORE_RAW_MATCHES = "0"
+STORE_RAW_EVENTS = "0"
