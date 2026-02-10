@@ -672,6 +672,8 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
     const leadersToggle = document.getElementById('leaders-toggle') as HTMLButtonElement | null;
     const leadersPanel = document.getElementById('leaders-panel') as HTMLElement | null;
     const leadersChevron = leadersToggle?.querySelector('.leaders-chevron') as HTMLElement | null;
+    const defaultSearchPlaceholder = 'Enter gamertag...';
+    const rotatingGamertags = ['xandy92', 'btc hosticide', 'American Sklz', 'Slashstorm', 'Jolly Sine', 'Powermoes114', 'TheCommander158', 'Nakamura RTS', 'KGB Officer', 'Blackandfan', 'TR AndrUwU', 'PatrossDev'];
     const SHARE_HERO_GRADIENT = 'linear-gradient(120deg, rgba(2, 6, 23, 0.85), rgba(6, 40, 64, 0.85))';
 
     if (leadersToggle && leadersPanel) {
@@ -684,6 +686,34 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
         leadersPanel.classList.toggle('hidden', expandedNow);
         if (leadersChevron) leadersChevron.style.transform = expandedNow ? 'rotate(0deg)' : 'rotate(180deg)';
       });
+    }
+
+    let placeholderIndex = 0;
+    let placeholderIntervalId: number | null = null;
+    const isSearchInputIdle = () => searchInput.value.trim() === '' && document.activeElement !== searchInput;
+
+    function stopSearchPlaceholderRotation(reset = false) {
+      if (placeholderIntervalId !== null) {
+        window.clearInterval(placeholderIntervalId);
+        placeholderIntervalId = null;
+      }
+      if (reset && searchInput.value.trim() === '') {
+        searchInput.placeholder = defaultSearchPlaceholder;
+      }
+    }
+
+    function startSearchPlaceholderRotation() {
+      if (!isSearchInputIdle()) return;
+      stopSearchPlaceholderRotation();
+      searchInput.placeholder = `Try: ${rotatingGamertags[placeholderIndex]}`;
+      placeholderIntervalId = window.setInterval(() => {
+        if (!isSearchInputIdle()) {
+          stopSearchPlaceholderRotation(true);
+          return;
+        }
+        placeholderIndex = (placeholderIndex + 1) % rotatingGamertags.length;
+        searchInput.placeholder = `Try: ${rotatingGamertags[placeholderIndex]}`;
+      }, 2200);
     }
 
     type ShareData = {
@@ -2016,6 +2046,17 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
     searchInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') performSearch(searchInput.value);
     });
+    searchInput.addEventListener('focus', () => stopSearchPlaceholderRotation(true));
+    searchInput.addEventListener('blur', () => startSearchPlaceholderRotation());
+    searchInput.addEventListener('input', () => {
+      if (searchInput.value.trim() !== '') {
+        stopSearchPlaceholderRotation(false);
+      } else if (document.activeElement !== searchInput) {
+        startSearchPlaceholderRotation();
+      }
+    });
+
+    startSearchPlaceholderRotation();
 
     renderRecentSearches();
 
@@ -2026,6 +2067,7 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
       pendingShareMatchId = matchIdParam;
     }
     if (gamertagParam) {
+      stopSearchPlaceholderRotation(false);
       searchInput.value = gamertagParam;
       performSearch(gamertagParam);
     }
