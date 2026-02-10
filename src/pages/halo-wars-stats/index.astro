@@ -497,19 +497,33 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
         </section>
 
         <!-- Leader Usage -->
-        <section id="leader-usage">
-          <h2 class="text-xl font-bold text-cyan-300 mb-4">
-            <i class="fas fa-users text-cyan-400 mr-2" aria-hidden="true"></i>Leader Usage
-          </h2>
-          <div id="leaders-skeleton" class="rounded-xl p-6 border border-cyan-500/20 space-y-3" style="background: rgba(30, 41, 59, 0.4);">
-            <div class="h-8 bg-slate-700/50 rounded animate-pulse"></div>
-            <div class="h-8 bg-slate-700/50 rounded animate-pulse w-5/6"></div>
-            <div class="h-8 bg-slate-700/50 rounded animate-pulse w-4/6"></div>
-            <div class="h-8 bg-slate-700/50 rounded animate-pulse w-3/6"></div>
-          </div>
-          <div id="leaders-content" class="hidden rounded-xl p-6 border border-cyan-500/20" style="background: rgba(30, 41, 59, 0.4);"></div>
-          <div id="leaders-error" class="hidden"></div>
-        </section>
+          <section id="leader-usage">
+            <h2 class="text-xl font-bold text-cyan-300 mb-4">
+              <button
+                id="leaders-toggle"
+                type="button"
+                class="w-full flex items-center justify-between text-left"
+                aria-expanded="true"
+                aria-controls="leaders-panel"
+              >
+                <span class="flex items-center">
+                  <i class="fas fa-users text-cyan-400 mr-2" aria-hidden="true"></i>
+                  Leader Usage
+                </span>
+                <span class="leaders-chevron transition-transform duration-200" aria-hidden="true">&#x25BC;</span>
+              </button>
+            </h2>
+            <div id="leaders-panel">
+              <div id="leaders-skeleton" class="rounded-xl p-6 border border-cyan-500/20 space-y-3" style="background: rgba(30, 41, 59, 0.4);">
+              <div class="h-8 bg-slate-700/50 rounded animate-pulse"></div>
+              <div class="h-8 bg-slate-700/50 rounded animate-pulse w-5/6"></div>
+              <div class="h-8 bg-slate-700/50 rounded animate-pulse w-4/6"></div>
+              <div class="h-8 bg-slate-700/50 rounded animate-pulse w-3/6"></div>
+              </div>
+              <div id="leaders-content" class="hidden rounded-xl p-6 border border-cyan-500/20" style="background: rgba(30, 41, 59, 0.4);"></div>
+              <div id="leaders-error" class="hidden"></div>
+            </div>
+          </section>
 
         <!-- Recent Matches -->
         <section id="recent-matches">
@@ -655,7 +669,22 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
     const shareDownloadBtn = document.getElementById('match-share-download') as HTMLButtonElement | null;
     const shareCopyImageBtn = document.getElementById('match-share-copy-image') as HTMLButtonElement | null;
     const shareLinks = document.querySelectorAll('.match-share-link');
+    const leadersToggle = document.getElementById('leaders-toggle') as HTMLButtonElement | null;
+    const leadersPanel = document.getElementById('leaders-panel') as HTMLElement | null;
+    const leadersChevron = leadersToggle?.querySelector('.leaders-chevron') as HTMLElement | null;
     const SHARE_HERO_GRADIENT = 'linear-gradient(120deg, rgba(2, 6, 23, 0.85), rgba(6, 40, 64, 0.85))';
+
+    if (leadersToggle && leadersPanel) {
+      const isExpanded = leadersToggle.getAttribute('aria-expanded') === 'true';
+      if (leadersChevron) leadersChevron.style.transform = isExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
+
+      leadersToggle.addEventListener('click', () => {
+        const expandedNow = leadersToggle.getAttribute('aria-expanded') === 'true';
+        leadersToggle.setAttribute('aria-expanded', expandedNow ? 'false' : 'true');
+        leadersPanel.classList.toggle('hidden', expandedNow);
+        if (leadersChevron) leadersChevron.style.transform = expandedNow ? 'rotate(0deg)' : 'rotate(180deg)';
+      });
+    }
 
     type ShareData = {
       matchId: string;
@@ -1727,7 +1756,7 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
                         aria-controls="${detailsId}"
                         aria-expanded="false"
                       >
-                        <span>Team compositions</span>
+                        <span>Team Compositions and Stats</span>
                         <span class="match-details-chevron transition-transform duration-200" aria-hidden="true">&#x25BC;</span>
                       </button>
                       <button
