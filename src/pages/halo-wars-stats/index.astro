@@ -9,7 +9,7 @@ import { videos } from '../../data/videos';
 const hw2VideoPool = videos
   .filter((video) => video.privacy === 'Public')
   .filter((video) => /\bhalo wars 2\b|\bhw2\b/i.test(video.title))
-  .map(({ title, publishedAt, videoId }) => ({ title, publishedAt, videoId }));
+  .map(({ title, publishedAt, videoId, durationMs }) => ({ title, publishedAt, videoId, durationMs }));
 const hw2VideoJson = JSON.stringify(hw2VideoPool).replace(/</g, '\\u003c');
 ---
 <BaseLayout
@@ -791,6 +791,10 @@ const hw2VideoJson = JSON.stringify(hw2VideoPool).replace(/</g, '\\u003c');
               class="inline-flex items-center justify-center rounded-md border border-cyan-500/40 bg-cyan-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-cyan-200 hover:bg-cyan-500/20 hover:text-cyan-100 transition-colors"
             >
               Watch
+              <svg class="ml-2" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M5 11L11 5"></path>
+                <path d="M6.5 5H11V9.5"></path>
+              </svg>
             </a>
           </div>
         </div>
@@ -991,6 +995,7 @@ const hw2VideoJson = JSON.stringify(hw2VideoPool).replace(/</g, '\\u003c');
       title: string;
       publishedAt: string;
       videoId: string;
+      durationMs?: number;
     };
 
     const hw2VideoList: VideoCta[] = (() => {
@@ -1004,6 +1009,18 @@ const hw2VideoJson = JSON.stringify(hw2VideoPool).replace(/</g, '\\u003c');
       }
     })();
 
+    function formatVideoDuration(durationMs?: number): string {
+      if (!durationMs || !Number.isFinite(durationMs)) return '';
+      const totalSeconds = Math.max(0, Math.round(durationMs / 1000));
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      if (hours > 0) {
+        return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      }
+      return `${minutes}:${String(seconds).padStart(2, '0')}`;
+    }
+
     function renderVideoCta() {
       if (!videoCtaEl) return;
       if (hw2VideoList.length === 0) {
@@ -1016,8 +1033,12 @@ const hw2VideoJson = JSON.stringify(hw2VideoPool).replace(/</g, '\\u003c');
       const dateLabel = choice.publishedAt
         ? new Date(choice.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
         : '';
+      const durationLabel = formatVideoDuration(choice.durationMs);
+      const metaBits = [dateLabel ? `Published ${dateLabel}` : '', durationLabel ? `Duration ${durationLabel}` : '']
+        .filter(Boolean)
+        .join(' • ');
       if (videoTitleEl) videoTitleEl.textContent = choice.title;
-      if (videoDateEl) videoDateEl.textContent = dateLabel ? `Published ${dateLabel}` : '';
+      if (videoDateEl) videoDateEl.textContent = metaBits;
       if (videoLinkEl) videoLinkEl.href = url;
       if (videoThumbEl) {
         videoThumbEl.src = thumb;
