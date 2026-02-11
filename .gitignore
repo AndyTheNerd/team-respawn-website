@@ -4,4 +4,6 @@ cache
 webcoreui
 nul
 .env
+.dev.vars
+.wrangler/
 .claude/
