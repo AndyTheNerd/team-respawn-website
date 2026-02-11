@@ -5,12 +5,14 @@ import Footer from '../../components/Footer.astro';
 import SidePanel from '../../components/SidePanel.astro';
 import StorehausPromo from '../../components/StorehausPromo.astro';
 import { videos } from '../../data/videos';
+import { hw2NameMappings } from '../../data/haloWars2/nameMappings';
 
 const hw2VideoPool = videos
   .filter((video) => video.privacy === 'Public')
   .filter((video) => /\bhalo wars 2\b|\bhw2\b/i.test(video.title))
   .map(({ title, publishedAt, videoId, durationMs }) => ({ title, publishedAt, videoId, durationMs }));
 const hw2VideoJson = JSON.stringify(hw2VideoPool).replace(/</g, '\\u003c');
+const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u003c');
 ---
 <BaseLayout
   title="Halo Wars 2 Stats - Team Respawn"
@@ -799,6 +801,7 @@ const hw2VideoJson = JSON.stringify(hw2VideoPool).replace(/</g, '\\u003c');
           </div>
         </div>
         <script type="application/json" id="hw2-video-data" set:html={hw2VideoJson}></script>
+        <script type="application/json" id="hw2-name-maps" set:html={hw2NameMappingsJson}></script>
       </section>
 
       <!-- Storehaus Promo -->
@@ -833,6 +836,7 @@ const hw2VideoJson = JSON.stringify(hw2VideoPool).replace(/</g, '\\u003c');
     const videoDateEl = document.getElementById('hw2-video-date') as HTMLElement | null;
     const videoLinkEl = document.getElementById('hw2-video-link') as HTMLAnchorElement | null;
     const videoDataEl = document.getElementById('hw2-video-data') as HTMLScriptElement | null;
+    const nameMapsEl = document.getElementById('hw2-name-maps') as HTMLScriptElement | null;
     const shareModal = document.getElementById('match-share-modal') as HTMLElement | null;
     const shareCard = document.getElementById('match-share-card') as HTMLElement | null;
     const shareResultEl = document.getElementById('match-share-result') as HTMLElement | null;
@@ -1009,6 +1013,101 @@ const hw2VideoJson = JSON.stringify(hw2VideoPool).replace(/</g, '\\u003c');
       }
     })();
 
+    type Hw2NameMappings = {
+      aliases?: {
+        leaders?: Record<string, string>;
+        powers?: Record<string, string>;
+        units?: Record<string, string>;
+        buildings?: Record<string, string>;
+        tech?: Record<string, string>;
+      };
+      idMaps?: {
+        leaderPowers?: Record<string, string>;
+        units?: Record<string, string>;
+        buildings?: Record<string, string>;
+        upgrades?: Record<string, string>;
+      };
+    };
+
+    const hw2NameMappings: Hw2NameMappings | null = (() => {
+      if (!nameMapsEl?.textContent) return null;
+      try {
+        return JSON.parse(nameMapsEl.textContent) as Hw2NameMappings;
+      } catch {
+        return null;
+      }
+    })();
+
+    type AliasLookup = {
+      leaders: Map<string, string>;
+      powers: Map<string, string>;
+      units: Map<string, string>;
+      buildings: Map<string, string>;
+      tech: Map<string, string>;
+    };
+
+    function normalizeAliasKey(value: string): string {
+      return value
+        .toUpperCase()
+        .replace(/[^A-Z0-9]+/g, ' ')
+        .trim();
+    }
+
+    const aliasLookup: AliasLookup = (() => {
+      const lookup: AliasLookup = {
+        leaders: new Map(),
+        powers: new Map(),
+        units: new Map(),
+        buildings: new Map(),
+        tech: new Map(),
+      };
+      const aliases = hw2NameMappings?.aliases;
+      if (!aliases) return lookup;
+
+      const load = (target: Map<string, string>, source?: Record<string, string>) => {
+        if (!source) return;
+        Object.entries(source).forEach(([key, value]) => {
+          const normalized = normalizeAliasKey(key);
+          if (normalized) target.set(normalized, value);
+        });
+      };
+
+      load(lookup.leaders, aliases.leaders);
+      load(lookup.powers, aliases.powers);
+      load(lookup.units, aliases.units);
+      load(lookup.buildings, aliases.buildings);
+      load(lookup.tech, aliases.tech);
+
+      return lookup;
+    })();
+
+    function resolveAliasName(value: string, kinds: Array<keyof AliasLookup>): string | null {
+      if (!value) return null;
+      const normalized = normalizeAliasKey(value);
+      if (!normalized) return null;
+      for (const kind of kinds) {
+        const hit = aliasLookup[kind]?.get(normalized);
+        if (hit) return hit;
+      }
+      return null;
+    }
+
+    function buildNormalizedIdMap(source: Record<string, string> | undefined, normalize: (value: string) => string) {
+      const map = new Map<string, string>();
+      if (!source) return map;
+      Object.entries(source).forEach(([key, value]) => {
+        const normalized = normalize(key);
+        if (!normalized) return;
+        if (!map.has(normalized)) map.set(normalized, value);
+      });
+      return map;
+    }
+
+    const leaderPowerIdOverrideMap = buildNormalizedIdMap(hw2NameMappings?.idMaps?.leaderPowers, normalizeLeaderPowerId);
+    const unitIdOverrideMap = buildNormalizedIdMap(hw2NameMappings?.idMaps?.units, normalizeGameObjectId);
+    const buildingIdOverrideMap = buildNormalizedIdMap(hw2NameMappings?.idMaps?.buildings, normalizeGameObjectId);
+    const techIdOverrideMap = buildNormalizedIdMap(hw2NameMappings?.idMaps?.upgrades, normalizeTechId);
+
     function formatVideoDuration(durationMs?: number): string {
       if (!durationMs || !Number.isFinite(durationMs)) return '';
       const totalSeconds = Math.max(0, Math.round(durationMs / 1000));
@@ -1178,6 +1277,8 @@ const hw2VideoJson = JSON.stringify(hw2VideoPool).replace(/</g, '\\u003c');
     function getLeaderPowerDisplayName(powerId: string, map?: Record<string, string> | null): string {
       if (!powerId) return '';
       if (map?.[powerId]) return map[powerId];
+      const directAlias = resolveAliasName(powerId, ['powers']);
+      if (directAlias) return directAlias;
 
       const candidates = [
         powerId,
@@ -1189,7 +1290,11 @@ const hw2VideoJson = JSON.stringify(hw2VideoPool).replace(/</g, '\\u003c');
 
       for (const candidate of candidates) {
         if (map?.[candidate]) return map[candidate];
+        const aliasHit = resolveAliasName(candidate, ['powers']);
+        if (aliasHit) return aliasHit;
         const normalized = normalizeLeaderPowerId(candidate);
+        const overrideHit = leaderPowerIdOverrideMap.get(normalized);
+        if (overrideHit) return overrideHit;
         const normalizedHit = leaderPowerNormalizedMap?.get(normalized);
         if (normalizedHit) return normalizedHit;
         if (normalized.endsWith('mp')) {
@@ -1202,7 +1307,8 @@ const hw2VideoJson = JSON.stringify(hw2VideoPool).replace(/</g, '\\u003c');
         }
       }
 
-      return humanizeLeaderPowerId(powerId);
+      const humanized = humanizeLeaderPowerId(powerId);
+      return resolveAliasName(humanized, ['powers']) || humanized;
     }
 
     async function ensureGameObjectMap(): Promise<Record<string, string> | null> {
@@ -1222,6 +1328,14 @@ const hw2VideoJson = JSON.stringify(hw2VideoPool).replace(/</g, '\\u003c');
         return null;
       })();
       return gameObjectMapLoading;
+    }
+
+    const displayNameOverrides: Record<string, string> = {
+      'Pegasus': 'Frostraven',
+    };
+
+    function applyDisplayNameOverride(name: string): string {
+      return displayNameOverrides[name] || name;
     }
 
     function normalizeGameObjectId(objectId: string): string {
@@ -1244,11 +1358,17 @@ const hw2VideoJson = JSON.stringify(hw2VideoPool).replace(/</g, '\\u003c');
 
     function getGameObjectDisplayName(objectId: string, map?: Record<string, string> | null): string {
       if (!objectId) return '';
-      if (map?.[objectId]) return map[objectId];
+      if (map?.[objectId]) return applyDisplayNameOverride(map[objectId]);
+      const aliasHit = resolveAliasName(objectId, ['units', 'buildings']);
+      if (aliasHit) return applyDisplayNameOverride(aliasHit);
       const normalized = normalizeGameObjectId(objectId);
+      const overrideHit = unitIdOverrideMap.get(normalized) || buildingIdOverrideMap.get(normalized);
+      if (overrideHit) return applyDisplayNameOverride(overrideHit);
       const normalizedHit = gameObjectNormalizedMap?.get(normalized);
-      if (normalizedHit) return normalizedHit;
-      return humanizeGameObjectId(objectId);
+      if (normalizedHit) return applyDisplayNameOverride(normalizedHit);
+      const humanized = humanizeGameObjectId(objectId);
+      const humanAlias = resolveAliasName(humanized, ['units', 'buildings']);
+      return applyDisplayNameOverride(humanAlias || humanized);
     }
 
     async function ensureTechMap(): Promise<Record<string, string> | null> {
@@ -1290,11 +1410,17 @@ const hw2VideoJson = JSON.stringify(hw2VideoPool).replace(/</g, '\\u003c');
 
     function getTechDisplayName(techId: string, map?: Record<string, string> | null): string {
       if (!techId) return '';
-      if (map?.[techId]) return map[techId];
+      if (map?.[techId]) return applyDisplayNameOverride(map[techId]);
+      const aliasHit = resolveAliasName(techId, ['tech']);
+      if (aliasHit) return applyDisplayNameOverride(aliasHit);
       const normalized = normalizeTechId(techId);
+      const overrideHit = techIdOverrideMap.get(normalized);
+      if (overrideHit) return applyDisplayNameOverride(overrideHit);
       const normalizedHit = techNormalizedMap?.get(normalized);
-      if (normalizedHit) return normalizedHit;
-      return humanizeTechId(techId);
+      if (normalizedHit) return applyDisplayNameOverride(normalizedHit);
+      const humanized = humanizeTechId(techId);
+      const humanAlias = resolveAliasName(humanized, ['tech']);
+      return applyDisplayNameOverride(humanAlias || humanized);
     }
 
     function getRecentSearches(): string[] {
@@ -2760,6 +2886,7 @@ const hw2VideoJson = JSON.stringify(hw2VideoPool).replace(/</g, '\\u003c');
         entries.forEach((entry) => {
           if (entry.playerIndex == null) return;
           const playerInfo = playersByIndex.get(entry.playerIndex);
+          if (playerInfo?.playerType === 3) return;
           const name = playerInfo?.name || entry.playerName || `Player ${entry.playerIndex}`;
           const teamId = playerInfo?.teamId ?? entry.teamId ?? null;
           const row = playerCounts.get(entry.playerIndex) || {
@@ -3108,6 +3235,7 @@ const hw2VideoJson = JSON.stringify(hw2VideoPool).replace(/</g, '\\u003c');
         const leaderPowerMap = await ensureLeaderPowerMap();
         const teamMap = new Map<number, { members: Array<{ name: string; leader: string; destroyed: number; lost: number; powerEntries: Array<{ name: string; times: number }> }>; totals: { destroyed: number; lost: number; powers: number } }>();
         players.forEach((p: any) => {
+          if (p.PlayerType === 3) return;
           const teamId = p.TeamId;
           const leaderId = p.LeaderId;
           if (teamId == null || leaderId == null) return;
@@ -3246,7 +3374,12 @@ const hw2VideoJson = JSON.stringify(hw2VideoPool).replace(/</g, '\\u003c');
           matchEventsCache.set(matchId, payload);
         }
 
-        const { entries, playersByIndex, isCompleteSet } = await buildEventEntries(payload);
+        const { entries: rawEntries, playersByIndex, isCompleteSet } = await buildEventEntries(payload);
+        const entries = rawEntries.filter((entry) => {
+          if (entry.playerIndex == null) return true;
+          const info = playersByIndex.get(entry.playerIndex);
+          return info?.playerType !== 3;
+        });
         if (entries.length === 0) {
           timelineEl.removeAttribute('data-loading');
           timelineEl.innerHTML = `
@@ -3546,6 +3679,18 @@ const hw2VideoJson = JSON.stringify(hw2VideoPool).replace(/</g, '\\u003c');
           (btn as HTMLElement).setAttribute('aria-expanded', isExpanded ? 'false' : 'true');
           detailsEl.classList.toggle('hidden', isExpanded);
           if (chevron) chevron.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
+
+          if (!isExpanded) {
+            const timelineToggle = matchesContent.querySelector(`.match-timeline-toggle[data-match-id="${matchId}"]`) as HTMLElement | null;
+            if (timelineToggle && timelineToggle.getAttribute('aria-expanded') === 'true') {
+              timelineToggle.setAttribute('aria-expanded', 'false');
+              const timelineEl = document.getElementById(`match-timeline-${matchId}`);
+              if (timelineEl) timelineEl.classList.add('hidden');
+              const timelineChevron = timelineToggle.querySelector('.match-timeline-chevron') as HTMLElement | null;
+              if (timelineChevron) timelineChevron.style.transform = 'rotate(0deg)';
+            }
+          }
+
           if (isExpanded) return;
 
           if (detailsEl.getAttribute('data-loaded') === 'true') return;
@@ -3566,6 +3711,18 @@ const hw2VideoJson = JSON.stringify(hw2VideoPool).replace(/</g, '\\u003c');
           (btn as HTMLElement).setAttribute('aria-expanded', isExpanded ? 'false' : 'true');
           timelineEl.classList.toggle('hidden', isExpanded);
           if (chevron) chevron.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
+
+          if (!isExpanded) {
+            const detailsToggle = matchesContent.querySelector(`.match-details-toggle[data-match-id="${matchId}"]`) as HTMLElement | null;
+            if (detailsToggle && detailsToggle.getAttribute('aria-expanded') === 'true') {
+              detailsToggle.setAttribute('aria-expanded', 'false');
+              const detailsEl = document.getElementById(`match-details-${matchId}`);
+              if (detailsEl) detailsEl.classList.add('hidden');
+              const detailsChevron = detailsToggle.querySelector('.match-details-chevron') as HTMLElement | null;
+              if (detailsChevron) detailsChevron.style.transform = 'rotate(0deg)';
+            }
+          }
+
           if (isExpanded) return;
 
           if (timelineEl.getAttribute('data-loaded') === 'true') return;
