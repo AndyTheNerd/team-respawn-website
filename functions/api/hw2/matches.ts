@@ -1,10 +1,18 @@
 import { errorResponse, fetchWithKeyFallback, HALO_ENDPOINTS, jsonResponse, statusFromError } from './_shared';
 
+type D1PreparedStatement = {
+  bind: (...args: unknown[]) => D1PreparedStatement;
+  all: <T = unknown>() => Promise<{ results: T[] }>;
+  first: <T = unknown>() => Promise<T | null>;
+};
+
+type D1Database = {
+  prepare: (query: string) => D1PreparedStatement;
+  batch: (statements: unknown[]) => Promise<unknown>;
+};
+
 type Env = {
-  DB?: {
-    prepare: (query: string) => { bind: (...args: unknown[]) => unknown };
-    batch: (statements: unknown[]) => Promise<unknown>;
-  };
+  DB?: D1Database;
   HW2_API_KEY_1?: string;
   HW2_API_KEY_2?: string;
   HW2_API_KEY_3?: string;
@@ -53,6 +61,118 @@ function computeTeamSize(players?: MatchSummary['Players']): number | null {
   });
   if (counts.size === 0) return null;
   return Math.max(...counts.values());
+}
+
+function formatDurationIso(totalSeconds: number | null): string | null {
+  if (totalSeconds == null || totalSeconds <= 0) return null;
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = Math.floor(totalSeconds % 60);
+  const parts = [];
+  if (hours > 0) parts.push(`${hours}H`);
+  if (minutes > 0) parts.push(`${minutes}M`);
+  if (seconds > 0 || parts.length === 0) parts.push(`${seconds}S`);
+  return `PT${parts.join('')}`;
+}
+
+function shouldUseCache(errorType: string): boolean {
+  return errorType === 'rate_limit' || errorType === 'network' || errorType === 'auth';
+}
+
+type CachedMatchRow = {
+  match_id: string;
+  match_type: number | null;
+  game_mode: number | null;
+  season_id: string | null;
+  playlist_id: string | null;
+  map_id: string | null;
+  started_at: string | null;
+  duration_seconds: number | null;
+  ingested_at: string | null;
+};
+
+type CachedPlayerRow = {
+  match_id: string;
+  player_name: string | null;
+  is_human: number | null;
+  team_id: number | null;
+  leader_id: number | null;
+  outcome: number | null;
+  player_index: number | null;
+};
+
+async function loadCachedMatches(db: D1Database, gamertag: string, count: number) {
+  const playerId = normalizePlayerId(gamertag);
+  const matchRowsResult = await db.prepare(
+    `SELECT
+       m.match_id,
+       m.match_type,
+       m.game_mode,
+       m.season_id,
+       m.playlist_id,
+       m.map_id,
+       m.started_at,
+       m.duration_seconds,
+       m.ingested_at
+     FROM match_players mp
+     JOIN matches m ON m.match_id = mp.match_id
+     WHERE mp.player_id = ?
+     ORDER BY m.started_at DESC
+     LIMIT ?`
+  ).bind(playerId, count).all<CachedMatchRow>();
+
+  const matchRows = matchRowsResult?.results || [];
+  if (matchRows.length === 0) return null;
+
+  const matchIds = matchRows.map((row) => row.match_id);
+  const placeholders = matchIds.map(() => '?').join(', ');
+  const playerRowsResult = await db.prepare(
+    `SELECT match_id, player_name, is_human, team_id, leader_id, outcome, player_index
+     FROM match_players
+     WHERE match_id IN (${placeholders})`
+  ).bind(...matchIds).all<CachedPlayerRow>();
+  const playerRows = playerRowsResult?.results || [];
+
+  const playersByMatch = new Map<string, MatchSummary['Players']>();
+  playerRows.forEach((row) => {
+    const list = playersByMatch.get(row.match_id) || [];
+    const isHuman = row.is_human === 1;
+    const name = row.player_name || '';
+    list.push({
+      HumanPlayerId: isHuman ? { Gamertag: name } : undefined,
+      Gamertag: isHuman ? name : undefined,
+      PlayerId: isHuman ? name : undefined,
+      PlayerType: isHuman ? 0 : 3,
+      TeamId: row.team_id ?? undefined,
+      LeaderId: row.leader_id ?? undefined,
+      MatchOutcome: row.outcome ?? undefined,
+      PlayerIndex: row.player_index ?? undefined,
+    });
+    playersByMatch.set(row.match_id, list);
+  });
+
+  let latestIngested = '';
+  const results: MatchSummary[] = matchRows.map((row) => {
+    if (row.ingested_at && row.ingested_at > latestIngested) {
+      latestIngested = row.ingested_at;
+    }
+    return {
+      MatchId: row.match_id,
+      MatchType: row.match_type ?? undefined,
+      GameMode: row.game_mode ?? undefined,
+      SeasonId: row.season_id ?? undefined,
+      PlaylistId: row.playlist_id ?? undefined,
+      MapId: row.map_id ?? undefined,
+      MatchStartDate: row.started_at ? { ISO8601Date: row.started_at } : undefined,
+      PlayerMatchDuration: formatDurationIso(row.duration_seconds),
+      Players: playersByMatch.get(row.match_id) || [],
+    };
+  });
+
+  return {
+    payload: { Results: results, _meta: { cached: true, fetchedAt: latestIngested || null } },
+    fetchedAt: latestIngested || null,
+  };
 }
 
 async function storeMatchSummaries(db: Env['DB'], gamertag: string, matches: MatchSummary[]) {
@@ -224,11 +344,20 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   const url = `${HALO_ENDPOINTS.HALO_API_URL}/players/${encoded}/matches?start=0&count=${count}`;
   const result = await fetchWithKeyFallback<{ Results: MatchSummary[] }>(url, apiKeys);
   if (!result.ok) {
+    if (shouldUseCache(result.error.type)) {
+      const cached = await loadCachedMatches(env.DB, gamertag, count);
+      if (cached?.payload) {
+        return jsonResponse({
+          ...(cached.payload as Record<string, unknown>),
+          _meta: { ...(cached.payload as any)?._meta, reason: result.error.type },
+        });
+      }
+    }
     return errorResponse(result.error, statusFromError(result.error));
   }
 
   const matches = Array.isArray(result.data?.Results) ? result.data.Results : [];
   await storeMatchSummaries(env.DB, gamertag, matches);
 
-  return jsonResponse(result.data);
+  return jsonResponse({ ...result.data, _meta: { cached: false, fetchedAt: new Date().toISOString() } });
 };

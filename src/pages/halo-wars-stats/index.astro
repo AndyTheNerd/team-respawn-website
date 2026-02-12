@@ -767,6 +767,22 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
 
       <!-- Global Error Area -->
       <div id="global-error" class="hidden max-w-2xl mx-auto"></div>
+      <div id="stale-banner" class="hidden max-w-2xl mx-auto mt-4">
+        <div class="rounded-lg border border-amber-500/40 bg-amber-900/20 text-amber-200 px-4 py-3 flex items-start gap-3">
+          <i class="fas fa-database mt-0.5" aria-hidden="true"></i>
+          <div class="flex-1">
+            <p class="font-medium">Showing cached data — may not be the most recent.</p>
+            <p id="stale-banner-meta" class="text-xs text-amber-200/80 mt-1"></p>
+          </div>
+          <button
+            id="stale-banner-retry"
+            type="button"
+            class="shrink-0 rounded-md border border-amber-400/40 bg-amber-400/10 px-3 py-1 text-[10px] uppercase tracking-wider text-amber-200 hover:bg-amber-400/20"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
 
       <section id="hw2-video-cta" class="mt-8 hidden">
         <div class="rounded-xl border border-cyan-500/20 bg-slate-900/40 p-4 flex flex-col sm:flex-row sm:items-center gap-4">
@@ -829,6 +845,9 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
     const searchBtn = document.getElementById('search-btn') as HTMLButtonElement;
     const resultsContainer = document.getElementById('results-container')!;
     const globalError = document.getElementById('global-error')!;
+    const staleBanner = document.getElementById('stale-banner') as HTMLElement | null;
+    const staleBannerMeta = document.getElementById('stale-banner-meta') as HTMLElement | null;
+    const staleBannerRetry = document.getElementById('stale-banner-retry') as HTMLButtonElement | null;
     const recentSearchesEl = document.getElementById('recent-searches')!;
     const videoCtaEl = document.getElementById('hw2-video-cta') as HTMLElement | null;
     const videoThumbEl = document.getElementById('hw2-video-thumb') as HTMLImageElement | null;
@@ -1533,6 +1552,28 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
         </div>
       `;
       container.classList.remove('hidden');
+    }
+
+    function hideStaleBanner() {
+      if (!staleBanner) return;
+      staleBanner.classList.add('hidden');
+      if (staleBannerMeta) staleBannerMeta.textContent = '';
+    }
+
+    function showStaleBanner(sources: Array<{ label: string; fetchedAt?: string | null }>) {
+      if (!staleBanner) return;
+      const sourceText = sources.map((source) => source.label).join(', ');
+      const dates = sources.map((source) => source.fetchedAt).filter(Boolean) as string[];
+      const latest = dates.sort().at(-1);
+      const latestText = latest
+        ? new Date(latest).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })
+        : '';
+      const metaBits = [
+        sourceText ? `Sources: ${sourceText}.` : '',
+        latestText ? `Cached snapshot from ${latestText}.` : '',
+      ].filter(Boolean).join(' ');
+      if (staleBannerMeta) staleBannerMeta.textContent = metaBits;
+      staleBanner.classList.remove('hidden');
     }
 
     function showSkeleton(sectionId: string) {
@@ -2341,6 +2382,12 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
     profileShareBtn?.addEventListener('click', () => {
       if (activeProfileShareData) {
         openProfileShareModal(activeProfileShareData);
+      }
+    });
+    staleBannerRetry?.addEventListener('click', () => {
+      const target = currentGamertag || searchInput.value;
+      if (target.trim()) {
+        performSearch(target);
       }
     });
 
@@ -3924,6 +3971,7 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
 
       globalError.classList.add('hidden');
       globalError.innerHTML = '';
+      hideStaleBanner();
       resultsContainer.classList.remove('hidden');
 
       document.getElementById('player-gamertag')!.textContent = gamertag;
@@ -3954,6 +4002,23 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
         getPlayerMatches(gamertag),
         CURRENT_SEASON ? getPlayerSeasonStats(gamertag, CURRENT_SEASON.id) : Promise.resolve({ ok: false, error: { type: 'unknown', message: 'No season configured.' } }),
       ]);
+
+      const staleSources: Array<{ label: string; fetchedAt?: string | null }> = [];
+      const statsMeta = statsResult.ok ? (statsResult.data as any)?._meta : null;
+      if (statsMeta?.cached) {
+        staleSources.push({ label: 'Overview', fetchedAt: statsMeta.fetchedAt });
+      }
+      const matchesMeta = matchesResult.ok ? (matchesResult.data as any)?._meta : null;
+      if (matchesMeta?.cached) {
+        staleSources.push({ label: 'Matches', fetchedAt: matchesMeta.fetchedAt });
+      }
+      const seasonMeta = seasonResult.ok ? (seasonResult.data as any)?._meta : null;
+      if (seasonMeta?.cached) {
+        staleSources.push({ label: 'Season', fetchedAt: seasonMeta.fetchedAt });
+      }
+      if (staleSources.length > 0) {
+        showStaleBanner(staleSources);
+      }
 
       const matchesList = matchesResult.ok ? (matchesResult.data.Results || []) : [];
 

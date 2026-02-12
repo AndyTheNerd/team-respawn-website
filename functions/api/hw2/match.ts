@@ -1,10 +1,18 @@
 import { errorResponse, fetchWithKeyFallback, HALO_ENDPOINTS, jsonResponse, statusFromError } from './_shared';
 
+type D1PreparedStatement = {
+  bind: (...args: unknown[]) => D1PreparedStatement;
+  all: <T = unknown>() => Promise<{ results: T[] }>;
+  first: <T = unknown>() => Promise<T | null>;
+};
+
+type D1Database = {
+  prepare: (query: string) => D1PreparedStatement;
+  batch: (statements: unknown[]) => Promise<unknown>;
+};
+
 type Env = {
-  DB?: {
-    prepare: (query: string) => { bind: (...args: unknown[]) => unknown };
-    batch: (statements: unknown[]) => Promise<unknown>;
-  };
+  DB?: D1Database;
   HW2_API_KEY_1?: string;
   HW2_API_KEY_2?: string;
   HW2_API_KEY_3?: string;
@@ -23,6 +31,28 @@ type MatchPlayerDetail = {
   LeaderPowerStats?: Record<string, number | { TimesCast?: number; TotalPlays?: number }>;
   PlayerIndex?: number;
 };
+
+type CachedMatchRow = {
+  payload_json: string;
+  fetched_at: string;
+};
+
+function shouldUseCache(errorType: string): boolean {
+  return errorType === 'rate_limit' || errorType === 'network' || errorType === 'auth';
+}
+
+async function loadCachedMatch(db: D1Database, matchId: string) {
+  const row = await db.prepare(
+    'SELECT payload_json, fetched_at FROM raw_match_payloads WHERE match_id = ?'
+  ).bind(matchId).first<CachedMatchRow>();
+  if (!row?.payload_json) return null;
+  try {
+    const payload = JSON.parse(row.payload_json);
+    return { payload, fetchedAt: row.fetched_at };
+  } catch {
+    return null;
+  }
+}
 
 function normalizePlayerId(gamertag: string): string {
   return gamertag.trim().toLowerCase();
@@ -268,11 +298,20 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const urlMatch = `${HALO_ENDPOINTS.HALO_API_URL}/matches/${encoded}`;
   const result = await fetchWithKeyFallback<any>(urlMatch, apiKeys);
   if (!result.ok) {
+    if (env.DB && shouldUseCache(result.error.type)) {
+      const cached = await loadCachedMatch(env.DB, matchId);
+      if (cached?.payload) {
+        return jsonResponse({
+          ...cached.payload,
+          _meta: { cached: true, fetchedAt: cached.fetchedAt, reason: result.error.type },
+        });
+      }
+    }
     return errorResponse(result.error, statusFromError(result.error));
   }
 
   const storeRaw = env.STORE_RAW_MATCHES === '1';
   await storeMatchDetail(env.DB, matchId, result.data, storeRaw);
 
-  return jsonResponse(result.data);
+  return jsonResponse({ ...result.data, _meta: { cached: false, fetchedAt: new Date().toISOString() } });
 };

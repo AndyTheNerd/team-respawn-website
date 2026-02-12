@@ -20,6 +20,7 @@ Run from this `workers/` directory:
 ```powershell
 npx wrangler d1 execute team-respawn-hw2 --file ../migrations/0001_init.sql --remote
 npx wrangler d1 execute team-respawn-hw2 --file ../migrations/0002_match_events.sql --remote
+npx wrangler d1 execute team-respawn-hw2 --file ../migrations/0003_player_stats_cache.sql --remote
 ```
 
 ## 3) Create/Configure Cloudflare Pages project

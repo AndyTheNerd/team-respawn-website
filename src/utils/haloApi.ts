@@ -5,6 +5,14 @@ const SUMMARY_API_URL = 'https://s3publicapis.azure-api.net/stats/hw2';
 const METADATA_API_URL = 'https://s3publicapis.azure-api.net/metadata/hw2';
 const PAGES_API_BASE = '/api/hw2';
 
+type CacheMeta = {
+  cached?: boolean;
+  fetchedAt?: string;
+  reason?: string;
+};
+
+type WithMeta<T> = T & { _meta?: CacheMeta };
+
 const API_KEYS = [
   import.meta.env.PUBLIC_HW2_API_KEY_1,
   import.meta.env.PUBLIC_HW2_API_KEY_2,
@@ -100,37 +108,54 @@ async function fetchWithKeyFallback<T>(url: string, extraHeaders: Record<string,
   };
 }
 
-export async function getPlayerStats(gamertag: string): Promise<ApiResult<PlayerStatsSummaryResponse>> {
+export async function getPlayerStats(gamertag: string): Promise<ApiResult<WithMeta<PlayerStatsSummaryResponse>>> {
   const encoded = encodeURIComponent(gamertag);
-  return fetchWithKeyFallback<PlayerStatsSummaryResponse>(`${SUMMARY_API_URL}/players/${encoded}/stats`);
+  return fetchFromPagesFunction<WithMeta<PlayerStatsSummaryResponse>>(
+    `${PAGES_API_BASE}/stats?gamertag=${encoded}`,
+    { method: 'GET' },
+    () => fetchWithKeyFallback<WithMeta<PlayerStatsSummaryResponse>>(`${SUMMARY_API_URL}/players/${encoded}/stats`)
+  );
 }
 
-export async function getPlayerSeasonStats(gamertag: string, seasonId: string): Promise<ApiResult<SeasonStatsResponse>> {
+export async function getPlayerSeasonStats(
+  gamertag: string,
+  seasonId: string
+): Promise<ApiResult<WithMeta<SeasonStatsResponse>>> {
   const encoded = encodeURIComponent(gamertag);
-  return fetchWithKeyFallback<SeasonStatsResponse>(`${SUMMARY_API_URL}/players/${encoded}/stats/seasons/${seasonId}`);
+  return fetchFromPagesFunction<WithMeta<SeasonStatsResponse>>(
+    `${PAGES_API_BASE}/season-stats?gamertag=${encoded}&seasonId=${encodeURIComponent(seasonId)}`,
+    { method: 'GET' },
+    () =>
+      fetchWithKeyFallback<WithMeta<SeasonStatsResponse>>(
+        `${SUMMARY_API_URL}/players/${encoded}/stats/seasons/${seasonId}`
+      )
+  );
 }
 
-export async function getMatchResult(matchId: string): Promise<ApiResult<any>> {
+export async function getMatchResult(matchId: string): Promise<ApiResult<WithMeta<any>>> {
   const encoded = encodeURIComponent(matchId);
-  return fetchFromPagesFunction<any>(
+  return fetchFromPagesFunction<WithMeta<any>>(
     `${PAGES_API_BASE}/match?matchId=${encoded}`,
     { method: 'GET' },
     () => fetchWithKeyFallback<any>(`${HALO_API_URL}/matches/${encoded}`)
   );
 }
 
-export async function getMatchEvents(matchId: string): Promise<ApiResult<any>> {
+export async function getMatchEvents(matchId: string): Promise<ApiResult<WithMeta<any>>> {
   const encoded = encodeURIComponent(matchId);
-  return fetchFromPagesFunction<any>(
+  return fetchFromPagesFunction<WithMeta<any>>(
     `${PAGES_API_BASE}/events?matchId=${encoded}`,
     { method: 'GET' },
     () => fetchWithKeyFallback<any>(`${SUMMARY_API_URL}/matches/${encoded}/events`)
   );
 }
 
-export async function getPlayerMatches(gamertag: string, count = 10): Promise<ApiResult<{ Results: MatchResult[] }>> {
+export async function getPlayerMatches(
+  gamertag: string,
+  count = 10
+): Promise<ApiResult<WithMeta<{ Results: MatchResult[] }>>> {
   const encoded = encodeURIComponent(gamertag);
-  return fetchFromPagesFunction<{ Results: MatchResult[] }>(
+  return fetchFromPagesFunction<WithMeta<{ Results: MatchResult[] }>>(
     `${PAGES_API_BASE}/matches`,
     {
       method: 'POST',
@@ -138,7 +163,7 @@ export async function getPlayerMatches(gamertag: string, count = 10): Promise<Ap
       body: JSON.stringify({ gamertag, count }),
     },
     () =>
-      fetchWithKeyFallback<{ Results: MatchResult[] }>(
+      fetchWithKeyFallback<WithMeta<{ Results: MatchResult[] }>>(
         `${HALO_API_URL}/players/${encoded}/matches?start=0&count=${count}`
       )
   );

@@ -1,10 +1,18 @@
 import { errorResponse, fetchWithKeyFallback, HALO_ENDPOINTS, jsonResponse, statusFromError } from './_shared';
 
+type D1PreparedStatement = {
+  bind: (...args: unknown[]) => D1PreparedStatement;
+  all: <T = unknown>() => Promise<{ results: T[] }>;
+  first: <T = unknown>() => Promise<T | null>;
+};
+
+type D1Database = {
+  prepare: (query: string) => D1PreparedStatement;
+  batch: (statements: unknown[]) => Promise<unknown>;
+};
+
 type Env = {
-  DB?: {
-    prepare: (query: string) => { bind: (...args: unknown[]) => unknown };
-    batch: (statements: unknown[]) => Promise<unknown>;
-  };
+  DB?: D1Database;
   HW2_API_KEY_1?: string;
   HW2_API_KEY_2?: string;
   HW2_API_KEY_3?: string;
@@ -36,6 +44,29 @@ type SummaryRow = {
   firstEventMs: number | null;
   lastEventMs: number | null;
 };
+
+type CachedEventRow = {
+  payload_json: string;
+  fetched_at: string;
+  is_complete: number | null;
+};
+
+function shouldUseCache(errorType: string): boolean {
+  return errorType === 'rate_limit' || errorType === 'network' || errorType === 'auth';
+}
+
+async function loadCachedEvents(db: D1Database, matchId: string) {
+  const row = await db.prepare(
+    'SELECT payload_json, fetched_at, is_complete FROM raw_event_payloads WHERE match_id = ?'
+  ).bind(matchId).first<CachedEventRow>();
+  if (!row?.payload_json) return null;
+  try {
+    const payload = JSON.parse(row.payload_json);
+    return { payload, fetchedAt: row.fetched_at, isComplete: row.is_complete };
+  } catch {
+    return null;
+  }
+}
 
 function getOrInitSummary(map: Map<number, SummaryRow>, playerIndex: number, teamId: number | null): SummaryRow {
   const existing = map.get(playerIndex);
@@ -278,11 +309,20 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const urlEvents = `${HALO_ENDPOINTS.SUMMARY_API_URL}/matches/${encoded}/events`;
   const result = await fetchWithKeyFallback<any>(urlEvents, apiKeys);
   if (!result.ok) {
+    if (env.DB && shouldUseCache(result.error.type)) {
+      const cached = await loadCachedEvents(env.DB, matchId);
+      if (cached?.payload) {
+        return jsonResponse({
+          ...cached.payload,
+          _meta: { cached: true, fetchedAt: cached.fetchedAt, reason: result.error.type },
+        });
+      }
+    }
     return errorResponse(result.error, statusFromError(result.error));
   }
 
   const storeRaw = env.STORE_RAW_EVENTS === '1';
   await storeMatchEvents(env.DB, matchId, result.data, storeRaw);
 
-  return jsonResponse(result.data);
+  return jsonResponse({ ...result.data, _meta: { cached: false, fetchedAt: new Date().toISOString() } });
 };
