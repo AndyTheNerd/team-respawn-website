@@ -6,4 +6,5 @@ nul
 .env
 .dev.vars
 .wrangler/
+.astro/types.d.ts
 .claude/
