@@ -22,6 +22,7 @@ const isBlogRoute = Astro.url?.pathname?.startsWith('/blog');
 const rawBodyClasses = [bodyClass, isBlogRoute ? 'blog-page' : ''].filter(Boolean).join(' ');
 const resolvedBodyClass = Array.from(new Set(rawBodyClasses.split(/\s+/).filter(Boolean))).join(' ');
 const cloudinaryCloudName = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME || import.meta.env.CLOUDINARY_CLOUD_NAME || '';
+const cloudflareAnalyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN || '';
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -61,6 +62,13 @@ const cloudinaryCloudName = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME || impo
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" crossorigin="anonymous"></script>
     {cloudinaryCloudName && (
       <script is:inline set:html={`window.__CLOUDINARY_CLOUD_NAME__ = ${JSON.stringify(cloudinaryCloudName)};`}></script>
+    )}
+    {cloudflareAnalyticsToken && (
+      <script
+        defer
+        src="https://static.cloudflareinsights.com/beacon.min.js"
+        data-cf-beacon={`{"token":"${cloudflareAnalyticsToken}"}`}
+      ></script>
     )}
     <slot name="head" />
   </head>
