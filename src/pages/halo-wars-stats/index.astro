@@ -593,7 +593,7 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
               <div class="p-4 border-b border-slate-700/30 animate-pulse"><div class="flex gap-4 items-center"><div class="h-12 w-20 bg-slate-700/50 rounded"></div><div class="flex-1 space-y-2"><div class="h-4 bg-slate-700/50 rounded w-1/3"></div><div class="h-3 bg-slate-700/50 rounded w-1/4"></div></div></div></div>
             </div>
           </div>
-          <div id="matches-content" class="hidden rounded-xl border border-cyan-500/20 overflow-hidden" style="background: rgba(30, 41, 59, 0.4);"></div>
+          <div id="matches-content" class="hidden rounded-xl border border-cyan-500/20 overflow-visible" style="background: rgba(30, 41, 59, 0.4);"></div>
           <div id="matches-error" class="hidden"></div>
         </section>
       </div>
@@ -1197,6 +1197,7 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
       name: string;
       teamId: number | null;
       playerType: number | null;
+      leaderId?: number | null;
     };
 
     const STORAGE_KEY = 'hw2-recent-searches';
@@ -1216,6 +1217,7 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
     let currentGamertag = '';
     let matchLookup = new Map<string, any>();
     let matchEventsCache = new Map<string, any>();
+    let matchResultCache = new Map<string, any>();
     let activeShareData: ShareData | null = null;
     let activeProfileShareData: ProfileShareData | null = null;
     let shareStatusTimeout: number | null = null;
@@ -2433,7 +2435,7 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
       const seasonRanked = seasonStats?.RankedPlaylistStats || [];
       const seasonLabel = CURRENT_SEASON ? getSeasonName(CURRENT_SEASON.id) : 'Current Season';
 
-      const buildCard = (stat: any, label: string, subLabel: string, emptyText: string) => {
+      const buildCard = (stat: any, label: string, subLabel: string, emptyText: string, showProgress: boolean) => {
         if (!stat) {
           return `
             <div class="rounded-xl p-6 border border-cyan-500/20 text-center" style="background: rgba(30, 41, 59, 0.4);">
@@ -2450,16 +2452,34 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
         const losses = getMatchesLost(stat);
         const total = getMatchesCompleted(stat) || (wins + losses);
         const wr = total > 0 ? ((wins / total) * 100).toFixed(1) : '0.0';
+        const progressRaw = csr?.PercentToNextTier;
+        const progressPct = showProgress && typeof progressRaw === 'number'
+          ? Math.max(0, Math.min(100, progressRaw))
+          : null;
+        const progressTitle = progressPct != null ? `${Math.round(progressPct)}% to next tier` : '';
+        const ringRadius = 46;
+        const ringCirc = 2 * Math.PI * ringRadius;
+        const ringOffset = progressPct != null
+          ? ringCirc * (1 - (progressPct / 100))
+          : ringCirc;
 
         return `
           <div class="rounded-xl p-6 border border-cyan-500/20 text-center" style="background: rgba(30, 41, 59, 0.4);">
             <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">${label}</h3>
             <p class="text-[10px] text-gray-500 uppercase tracking-wider mb-4">${subLabel}</p>
-            <div class="csr-glow rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center bg-slate-800/60 border border-cyan-500/30">
-              ${tier.imageUrl
-                ? `<img src="${tier.imageUrl}" alt="${tier.title}" class="w-16 h-16 object-contain" loading="lazy" />`
-                : `<span class="text-cyan-400 text-xs font-mono">${tier.title}</span>`
-              }
+            <div class="relative w-24 h-24 mx-auto mb-3 flex items-center justify-center"${progressPct != null ? ` title="${progressTitle}"` : ''}>
+              ${progressPct != null ? `
+                <svg class="absolute inset-0 -rotate-90" viewBox="0 0 120 120" aria-hidden="true">
+                  <circle cx="60" cy="60" r="${ringRadius}" fill="none" stroke="rgba(148, 163, 184, 0.25)" stroke-width="8"></circle>
+                  <circle cx="60" cy="60" r="${ringRadius}" fill="none" stroke="rgba(34, 211, 238, 0.9)" stroke-width="8" stroke-linecap="round" stroke-dasharray="${ringCirc}" stroke-dashoffset="${ringOffset}"></circle>
+                </svg>
+              ` : ''}
+              <div class="csr-glow rounded-full w-20 h-20 flex items-center justify-center bg-slate-800/60 border border-cyan-500/30">
+                ${tier.imageUrl
+                  ? `<img src="${tier.imageUrl}" alt="${tier.title}" class="w-16 h-16 object-contain" loading="lazy" />`
+                  : `<span class="text-cyan-400 text-xs font-mono">${tier.title}</span>`
+                }
+              </div>
             </div>
             <p class="text-cyan-300 font-semibold font-mono text-sm mb-1">${tier.title}</p>
             ${csr.Raw ? `<p class="text-xs text-gray-400 font-mono mb-2">CSR: ${Math.round(csr.Raw)}</p>` : ''}
@@ -2474,12 +2494,12 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
 
       const lifetimeCards = playlistIds.map(p => {
         const stat = rankedStats.find((s: any) => s.PlaylistId === p.id);
-        return buildCard(stat, p.label, 'All-Time High', 'No ranked data');
+        return buildCard(stat, p.label, 'All-Time High', 'No ranked data', true);
       });
 
       const seasonCards = playlistIds.map(p => {
         const stat = seasonRanked.find((s: any) => s.PlaylistId === p.id);
-        return buildCard(stat, p.label, seasonLabel, 'No season data');
+        return buildCard(stat, p.label, seasonLabel, 'No season data', true);
       });
 
       rankedContent.innerHTML = [...lifetimeCards, ...seasonCards].join('');
@@ -2733,7 +2753,16 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
             'Unknown';
           const teamId = typeof event?.TeamId === 'number' ? event.TeamId : null;
           const playerType = typeof event?.PlayerType === 'number' ? event.PlayerType : null;
-          playersByIndex.set(index, { name, teamId, playerType });
+          const leaderRaw = event?.LeaderId ?? event?.Leader ?? event?.LeaderType;
+          const leaderId = (() => {
+            if (typeof leaderRaw === 'number') return leaderRaw;
+            if (typeof leaderRaw === 'string' && leaderRaw.trim() !== '') {
+              const parsed = Number(leaderRaw);
+              return Number.isFinite(parsed) ? parsed : null;
+            }
+            return null;
+          })();
+          playersByIndex.set(index, { name, teamId, playerType, leaderId });
         });
 
         const [leaderPowerMap, gameObjectMap, techMap] = await Promise.all([
@@ -3411,6 +3440,121 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
           })
           .join('');
         const highlightsHtml = buildTimelineHighlights(entries);
+        const match = matchLookup.get(matchId) || currentMatches.find((m: any) => m.MatchId === matchId);
+        const normalizeRosterKey = (value: string) => value.trim().toLowerCase();
+        const getMatchPlayersArray = (raw: any) => {
+          if (Array.isArray(raw)) return raw;
+          if (raw && typeof raw === 'object') return Object.values(raw);
+          return [];
+        };
+        const getMatchPlayerName = (player: any) => {
+          const humanId = player?.HumanPlayerId;
+          if (typeof humanId === 'string') return humanId;
+          if (typeof humanId === 'object' && humanId?.Gamertag) return String(humanId.Gamertag);
+          return player?.Gamertag || player?.PlayerId || player?.Xuid || '';
+        };
+        const matchPlayers = await (async () => {
+          const basePlayers = getMatchPlayersArray(match?.Players);
+          const hasLeaders = basePlayers.some((p: any) => p?.LeaderId != null);
+          if (hasLeaders) return basePlayers;
+          const cached = matchResultCache.get(matchId);
+          if (cached) return getMatchPlayersArray(cached?.Players);
+          const result = await getMatchResult(matchId);
+          if (result.ok && result.data) {
+            matchResultCache.set(matchId, result.data);
+            return getMatchPlayersArray(result.data?.Players);
+          }
+          return basePlayers;
+        })();
+        const matchLeaderByIndex = new Map<number, number>();
+        const matchLeaderByName = new Map<string, number>();
+        matchPlayers.forEach((player: any) => {
+          const leaderId = player?.LeaderId;
+          if (leaderId == null) return;
+          if (typeof player?.PlayerIndex === 'number') {
+            matchLeaderByIndex.set(player.PlayerIndex, leaderId);
+          }
+          const nameKey = normalizeRosterKey(getMatchPlayerName(player));
+          if (nameKey) matchLeaderByName.set(nameKey, leaderId);
+        });
+        const resolveLeaderIdForPlayer = (index: number, info: PlayerInfo) => {
+          if (typeof info.leaderId === 'number') return info.leaderId;
+          const byIndex = matchLeaderByIndex.get(index);
+          if (byIndex != null) return byIndex;
+          const nameKey = normalizeRosterKey(info.name || '');
+          if (!nameKey) return null;
+          return matchLeaderByName.get(nameKey) ?? null;
+        };
+        const getTeamSwatchClass = (teamId: number | null) => {
+          if (typeof teamId !== 'number') return 'bg-slate-500';
+          if (teamId === 1) return 'bg-sky-400';
+          if (teamId === 2) return 'bg-red-400';
+          return 'bg-sky-400';
+        };
+        const rosterEntries = [...playersByIndex.entries()]
+          .filter(([, info]) => info.playerType !== 3)
+          .sort((a, b) => a[0] - b[0])
+          .map(([index, info]) => {
+            const leaderId = resolveLeaderIdForPlayer(index, info);
+            const leaderName = leaderId != null ? getLeaderName(leaderId) : 'Unknown';
+            const teamLabel = typeof info.teamId === 'number' ? `Team ${info.teamId}` : '';
+            return {
+              index,
+              name: info.name || `Player ${index}`,
+              leaderName,
+              teamLabel,
+              swatchClass: getTeamSwatchClass(info.teamId ?? null),
+              teamId: info.teamId ?? null,
+            };
+          });
+        const team1Entries = rosterEntries.filter((entry) => entry.teamId === 1);
+        const team2Entries = rosterEntries.filter((entry) => entry.teamId === 2);
+        const otherEntries = rosterEntries.filter((entry) => entry.teamId !== 1 && entry.teamId !== 2);
+        const rosterHtml = rosterEntries.length > 0
+          ? `
+            <div class="match-timeline-roster sticky top-3 z-20 mb-3 rounded-lg border border-slate-700/40 bg-slate-900/80 px-3 py-2 backdrop-blur">
+              <div class="flex items-center justify-between text-[10px] uppercase tracking-wider text-gray-500 mb-2">
+                <span>Roster</span>
+                <span class="text-[10px] text-gray-600">Leaders</span>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div class="flex flex-wrap gap-2">
+                  ${team1Entries.map((entry) => `
+                    <div class="inline-flex items-center gap-2 rounded-full border border-slate-700/60 bg-slate-800/70 px-3 py-1 text-[11px] text-gray-200">
+                      <span class="inline-flex h-2 w-2 rounded-full ${entry.swatchClass}"></span>
+                      <span class="font-semibold text-gray-100">${entry.name}</span>
+                      <span class="text-gray-500">•</span>
+                      <span class="text-cyan-200">${entry.leaderName}</span>
+                    </div>
+                  `).join('')}
+                </div>
+                <div class="flex flex-wrap justify-start md:justify-end gap-2">
+                  ${team2Entries.map((entry) => `
+                    <div class="inline-flex items-center gap-2 rounded-full border border-slate-700/60 bg-slate-800/70 px-3 py-1 text-[11px] text-gray-200">
+                      <span class="inline-flex h-2 w-2 rounded-full ${entry.swatchClass}"></span>
+                      <span class="font-semibold text-gray-100">${entry.name}</span>
+                      <span class="text-gray-500">•</span>
+                      <span class="text-cyan-200">${entry.leaderName}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+              ${otherEntries.length > 0 ? `
+                <div class="mt-2 flex flex-wrap gap-2">
+                  ${otherEntries.map((entry) => `
+                    <div class="inline-flex items-center gap-2 rounded-full border border-slate-700/60 bg-slate-800/70 px-3 py-1 text-[11px] text-gray-200">
+                      <span class="inline-flex h-2 w-2 rounded-full ${entry.swatchClass}"></span>
+                      <span class="font-semibold text-gray-100">${entry.name}</span>
+                      <span class="text-gray-500">•</span>
+                      <span class="text-cyan-200">${entry.leaderName}</span>
+                      ${entry.teamLabel ? `<span class="text-[10px] text-gray-500">${entry.teamLabel}</span>` : ''}
+                    </div>
+                  `).join('')}
+                </div>
+              ` : ''}
+            </div>
+          `
+          : '';
 
         timelineEl.innerHTML = `
           <div class="flex flex-wrap items-center justify-between gap-2 text-[11px] uppercase tracking-wider text-gray-500 mb-3">
@@ -3421,6 +3565,7 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
             </span>
           </div>
           ${highlightsHtml}
+          ${rosterHtml}
           <div class="rounded-lg border border-slate-700/40 bg-slate-800/30 p-3 mb-3">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
               <label class="flex flex-col gap-1">
