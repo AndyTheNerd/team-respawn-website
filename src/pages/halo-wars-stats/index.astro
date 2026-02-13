@@ -2620,7 +2620,8 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
         const tier = getCsrTier(csr.Designation, csr.Tier);
         const wins = getMatchesWon(stat);
         const losses = getMatchesLost(stat);
-        const total = getMatchesCompleted(stat) || (wins + losses);
+        const recordTotal = wins + losses;
+        const total = recordTotal > 0 ? recordTotal : getMatchesCompleted(stat);
         const wr = total > 0 ? ((wins / total) * 100).toFixed(1) : '0.0';
         const progressRaw = csr?.PercentToNextTier;
         const progressPct = showProgress && typeof progressRaw === 'number'
