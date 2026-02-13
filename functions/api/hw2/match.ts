@@ -153,7 +153,7 @@ async function storeMatchDetail(
       ? Object.values(playersRaw)
       : [];
 
-  const teamTotals = new Map<number, { destroyed: number; lost: number; powers: number }>();
+  const teamTotals = new Map<number, { destroyed: number; lost: number; powers: number; outcome: number | null }>();
 
   players.forEach((player, index) => {
     const teamId = player?.TeamId;
@@ -234,10 +234,13 @@ async function storeMatchDetail(
     });
 
     if (typeof teamId === 'number') {
-      const existing = teamTotals.get(teamId) || { destroyed: 0, lost: 0, powers: 0 };
+      const existing = teamTotals.get(teamId) || { destroyed: 0, lost: 0, powers: 0, outcome: null };
       existing.destroyed += destroyed;
       existing.lost += lost;
       existing.powers += powerCount;
+      if (existing.outcome == null && outcome != null) {
+        existing.outcome = outcome;
+      }
       teamTotals.set(teamId, existing);
     }
   });
@@ -261,7 +264,7 @@ async function storeMatchDetail(
       ).bind(
         matchId,
         teamId,
-        null,
+        totals.outcome,
         totals.destroyed,
         totals.lost,
         totals.powers

@@ -1,0 +1,609 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import SidePanel from '../../components/SidePanel.astro';
+import StorehausPromo from '../../components/StorehausPromo.astro';
+---
+<BaseLayout
+  title="AoE4 Stats - Team Respawn"
+  description="Search Age of Empires IV players and view mode ratings, civ performance, recent matches, and global meta context."
+  keywords="AoE4 stats, Age of Empires 4 stats, AoE4 player lookup, AoE4 ladder, Team Respawn"
+  canonical="https://www.teamrespawn.net/aoe4-stats/"
+  ogTitle="AoE4 Stats Lookup - Team Respawn"
+  ogDescription="Search Age of Empires IV players and view ladder, civ, match, and meta insights."
+  ogImage="https://www.teamrespawn.net/content/Team-Respawn-Full.png"
+>
+  <Fragment slot="head">
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "AoE4 Stats Lookup",
+        "description": "Search Age of Empires IV players and view ladder, civ, match, and meta insights.",
+        "url": "https://www.teamrespawn.net/aoe4-stats/"
+      }
+    </script>
+    <style>
+      .aoe4-card { background: rgba(30, 41, 59, 0.42); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 12px; }
+      .chip { border-radius: 9999px; padding: 4px 10px; font-size: 11px; line-height: 1; border: 1px solid rgba(148, 163, 184, 0.35); }
+      .chip.win { color: #22c55e; border-color: rgba(34, 197, 94, 0.45); background: rgba(34, 197, 94, 0.12); }
+      .chip.loss { color: #f87171; border-color: rgba(248, 113, 113, 0.45); background: rgba(248, 113, 113, 0.15); }
+      .chip.draw { color: #cbd5e1; background: rgba(148, 163, 184, 0.12); }
+      .table-wrap { overflow-x: auto; }
+      .table { width: 100%; min-width: 720px; text-align: left; font-size: 13px; }
+      .table th { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: .08em; border-bottom: 1px solid rgba(148,163,184,.35); padding: 10px 10px 10px 0; }
+      .table td { border-bottom: 1px solid rgba(148,163,184,.22); padding: 10px 10px 10px 0; }
+      .table tr:last-child td { border-bottom: 0; }
+    </style>
+  </Fragment>
+
+  <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-white focus:text-black focus:px-4 focus:py-2 focus:rounded">Skip to main content</a>
+
+  <div class="container mx-auto p-4 sm:p-8">
+    <Header />
+    <main id="main-content">
+      <section class="mb-8 rounded-xl border border-amber-500/30 overflow-hidden" style="background: linear-gradient(135deg,#2a1909 0%,#40250f 50%,#271708 100%);">
+        <div class="px-6 py-10 sm:py-14 text-center">
+          <h1 class="text-3xl sm:text-5xl font-bold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-300 to-orange-300">AoE4 Stats</h1>
+          <p class="text-amber-100/80 max-w-3xl mx-auto">Search a player to view ratings, civ usage, recent matches, and RM Solo meta context.</p>
+        </div>
+      </section>
+
+      <section class="mb-8">
+        <div class="max-w-3xl mx-auto flex flex-col sm:flex-row gap-3">
+          <div class="relative flex-1">
+            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-amber-300/70" aria-hidden="true"></i>
+            <input id="player-input" type="text" placeholder="Enter player name..." class="w-full pl-11 pr-4 py-3 rounded-lg bg-slate-800/60 border border-amber-500/35 text-white placeholder-gray-400 focus:outline-none focus:border-amber-300 focus:ring-1 focus:ring-amber-300/50 font-mono" />
+          </div>
+          <button id="search-btn" type="button" class="px-6 py-3 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-semibold">Search</button>
+        </div>
+        <div id="recent-searches" class="max-w-3xl mx-auto mt-3 flex flex-wrap gap-2 hidden"></div>
+      </section>
+
+      <div id="global-error" class="hidden max-w-3xl mx-auto"></div>
+      <div id="results" class="hidden space-y-6">
+        <section class="aoe4-card p-6">
+          <div id="overview-loading" class="h-28 animate-pulse bg-slate-700/50 rounded"></div>
+          <div id="overview-content" class="hidden">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+              <div>
+                <h2 id="player-name" class="text-2xl font-bold text-amber-200 font-mono">-</h2>
+                <p class="text-xs text-gray-400">Profile: <span id="player-id" class="font-mono">-</span> <span id="player-country-wrap" class="hidden">| Country: <span id="player-country" class="uppercase"></span></span></p>
+              </div>
+              <div class="text-xs text-gray-400">Last game: <span id="last-game-at">-</span></div>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div class="bg-slate-800/40 rounded p-3"><p class="text-xs text-gray-400">Matches</p><p id="stat-matches" class="text-xl font-mono font-bold text-white">-</p></div>
+              <div class="bg-slate-800/40 rounded p-3"><p class="text-xs text-gray-400">Wins</p><p id="stat-wins" class="text-xl font-mono font-bold text-green-400">-</p></div>
+              <div class="bg-slate-800/40 rounded p-3"><p class="text-xs text-gray-400">Losses</p><p id="stat-losses" class="text-xl font-mono font-bold text-red-400">-</p></div>
+              <div class="bg-slate-800/40 rounded p-3"><p class="text-xs text-gray-400">Win Rate</p><p id="stat-winrate" class="text-xl font-mono font-bold text-amber-200">-</p></div>
+              <div class="bg-slate-800/40 rounded p-3"><p class="text-xs text-gray-400">Rating</p><p id="stat-rating" class="text-xl font-mono font-bold text-white">-</p></div>
+              <div class="bg-slate-800/40 rounded p-3"><p class="text-xs text-gray-400">Rank</p><p id="stat-rank" class="text-xl font-mono font-bold text-white">-</p></div>
+              <div class="bg-slate-800/40 rounded p-3"><p class="text-xs text-gray-400">Rank Level</p><p id="stat-rank-level" class="text-xl font-mono font-bold text-white">-</p></div>
+              <div class="bg-slate-800/40 rounded p-3"><p class="text-xs text-gray-400">Streak</p><p id="stat-streak" class="text-xl font-mono font-bold text-white">-</p></div>
+            </div>
+          </div>
+          <div id="overview-error" class="hidden"></div>
+        </section>
+
+        <section class="aoe4-card p-6">
+          <h2 class="text-xl font-bold text-amber-200 mb-3"><i class="fas fa-layer-group text-amber-300 mr-2"></i>Mode Breakdown</h2>
+          <div id="modes-loading" class="h-32 animate-pulse bg-slate-700/50 rounded"></div>
+          <div id="modes-content" class="hidden"></div>
+          <div id="modes-error" class="hidden"></div>
+        </section>
+
+        <section class="aoe4-card p-6">
+          <h2 class="text-xl font-bold text-amber-200 mb-3"><i class="fas fa-chess-rook text-amber-300 mr-2"></i>Civilization Performance</h2>
+          <div id="civs-loading" class="h-28 animate-pulse bg-slate-700/50 rounded"></div>
+          <div id="civs-content" class="hidden"></div>
+          <div id="civs-error" class="hidden"></div>
+        </section>
+
+        <section class="aoe4-card p-6">
+          <h2 class="text-xl font-bold text-amber-200 mb-3"><i class="fas fa-chart-line text-amber-300 mr-2"></i>Insights</h2>
+          <div id="insights-loading" class="h-56 animate-pulse bg-slate-700/50 rounded"></div>
+          <div id="insights-content" class="hidden grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <div><h3 class="text-xs text-gray-400 uppercase mb-2">Rating Trend</h3><div class="relative" style="height:250px;"><canvas id="rating-chart"></canvas></div><p id="rating-chart-empty" class="hidden text-xs text-gray-500 mt-2">Not enough rating history.</p></div>
+            <div><h3 class="text-xs text-gray-400 uppercase mb-2">Match Durations</h3><div class="relative" style="height:250px;"><canvas id="duration-chart"></canvas></div><p id="duration-chart-empty" class="hidden text-xs text-gray-500 mt-2">Not enough matches for chart.</p></div>
+          </div>
+          <div id="insights-error" class="hidden"></div>
+        </section>
+
+        <section class="aoe4-card p-6">
+          <h2 class="text-xl font-bold text-amber-200 mb-3"><i class="fas fa-flask text-amber-300 mr-2"></i>Advanced Match Stats (Experimental)</h2>
+          <div id="advanced-loading" class="h-20 animate-pulse bg-slate-700/50 rounded"></div>
+          <div id="advanced-content" class="hidden"></div>
+          <div id="advanced-error" class="hidden"></div>
+        </section>
+
+        <section class="aoe4-card p-6">
+          <h2 class="text-xl font-bold text-amber-200 mb-3"><i class="fas fa-globe text-amber-300 mr-2"></i>Global Meta Snapshot (RM Solo)</h2>
+          <div id="meta-loading" class="h-32 animate-pulse bg-slate-700/50 rounded"></div>
+          <div id="meta-content" class="hidden space-y-6"></div>
+          <div id="meta-error" class="hidden"></div>
+        </section>
+
+        <section class="aoe4-card p-6">
+          <h2 class="text-xl font-bold text-amber-200 mb-3"><i class="fas fa-history text-amber-300 mr-2"></i>Recent Matches</h2>
+          <div id="matches-loading" class="h-32 animate-pulse bg-slate-700/50 rounded"></div>
+          <div id="matches-content" class="hidden space-y-3"></div>
+          <div id="matches-error" class="hidden"></div>
+        </section>
+      </div>
+      <StorehausPromo class="mt-10" />
+    </main>
+    <Footer />
+  </div>
+  <SidePanel />
+  <script src="/js/side-panel.js" is:inline></script>
+  <script src="/js/tabs.js" is:inline></script>
+  <script src="/js/dropdowns.js" is:inline></script>
+  <script>
+    import { searchAoe4Players, getAoe4Player, getAoe4PlayerGames, getAoe4LastGame, getAoe4MetaStats } from '../../utils/aoe4Api';
+
+    const RECENT_KEY = 'aoe4-recent-searches';
+    const MODE_PRIORITY = ['rm_solo','rm_team','rm_1v1_elo','rm_2v2_elo','rm_3v3_elo','qm_1v1','qm_2v2','qm_3v3','qm_4v4','qm_ffa','rm_1v1'];
+
+    const input = document.getElementById('player-input') as HTMLInputElement;
+    const button = document.getElementById('search-btn') as HTMLButtonElement;
+    const recentEl = document.getElementById('recent-searches') as HTMLElement;
+    const resultsEl = document.getElementById('results') as HTMLElement;
+    const globalError = document.getElementById('global-error') as HTMLElement;
+
+    const ids = {
+      playerName: document.getElementById('player-name') as HTMLElement,
+      playerId: document.getElementById('player-id') as HTMLElement,
+      countryWrap: document.getElementById('player-country-wrap') as HTMLElement,
+      country: document.getElementById('player-country') as HTMLElement,
+      lastGameAt: document.getElementById('last-game-at') as HTMLElement,
+      matches: document.getElementById('stat-matches') as HTMLElement,
+      wins: document.getElementById('stat-wins') as HTMLElement,
+      losses: document.getElementById('stat-losses') as HTMLElement,
+      winrate: document.getElementById('stat-winrate') as HTMLElement,
+      rating: document.getElementById('stat-rating') as HTMLElement,
+      rank: document.getElementById('stat-rank') as HTMLElement,
+      rankLevel: document.getElementById('stat-rank-level') as HTMLElement,
+      streak: document.getElementById('stat-streak') as HTMLElement,
+    };
+
+    const sections = {
+      overview: ['overview-loading','overview-content','overview-error'],
+      modes: ['modes-loading','modes-content','modes-error'],
+      civs: ['civs-loading','civs-content','civs-error'],
+      insights: ['insights-loading','insights-content','insights-error'],
+      advanced: ['advanced-loading','advanced-content','advanced-error'],
+      meta: ['meta-loading','meta-content','meta-error'],
+      matches: ['matches-loading','matches-content','matches-error'],
+    } as const;
+
+    let chartJsPromise: Promise<any> | null = null;
+    let ratingChart: any = null;
+    let durationChart: any = null;
+    let activeProfileId: number | null = null;
+
+    const escapeHtml = (v: unknown) => typeof v === 'string'
+      ? v.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')
+      : '';
+    const n = (v: unknown) => typeof v === 'number' && Number.isFinite(v) ? new Intl.NumberFormat('en-US').format(v) : '-';
+    const pct = (v: unknown) => typeof v === 'number' && Number.isFinite(v) ? `${v.toFixed(1)}%` : '-';
+    const date = (v: unknown) => typeof v === 'string' && v ? new Date(v).toLocaleString() : '-';
+    const dur = (s: unknown) => typeof s === 'number' && s > 0 ? `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}` : '-';
+    const title = (v: string) => v.replace(/_/g,' ').replace(/\b\w/g, (c) => c.toUpperCase());
+
+    function showError(el: HTMLElement, message: string) {
+      el.className = 'rounded-lg border border-red-500/35 bg-red-900/20 text-red-200 px-4 py-3 text-sm';
+      el.innerHTML = `<i class="fas fa-exclamation-triangle mr-2"></i>${escapeHtml(message)}`;
+    }
+
+    function hideError(el: HTMLElement) {
+      el.className = 'hidden';
+      el.innerHTML = '';
+    }
+
+    function showLoaded(group: keyof typeof sections) {
+      const [loadingId, contentId] = sections[group];
+      (document.getElementById(loadingId) as HTMLElement).classList.add('hidden');
+      (document.getElementById(contentId) as HTMLElement).classList.remove('hidden');
+    }
+
+    function resetUi() {
+      hideError(globalError);
+      Object.values(sections).forEach(([loadingId, contentId, errorId]) => {
+        (document.getElementById(loadingId) as HTMLElement).classList.remove('hidden');
+        (document.getElementById(contentId) as HTMLElement).classList.add('hidden');
+        hideError(document.getElementById(errorId) as HTMLElement);
+      });
+      resultsEl.classList.remove('hidden');
+      if (ratingChart) { ratingChart.destroy(); ratingChart = null; }
+      if (durationChart) { durationChart.destroy(); durationChart = null; }
+    }
+
+    function recentList(): string[] {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+        return Array.isArray(parsed) ? parsed.filter((entry) => typeof entry === 'string') : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function renderRecent() {
+      const list = recentList();
+      if (!list.length) {
+        recentEl.classList.add('hidden');
+        recentEl.innerHTML = '';
+        return;
+      }
+      recentEl.classList.remove('hidden');
+      recentEl.innerHTML = list.map((query) => (
+        `<button type="button" class="px-3 py-1 rounded-full border border-amber-500/35 bg-amber-500/10 text-amber-200 text-xs" data-q="${escapeHtml(query)}">${escapeHtml(query)}</button>`
+      )).join('');
+      recentEl.querySelectorAll('button[data-q]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const query = (btn as HTMLElement).getAttribute('data-q') || '';
+          input.value = query;
+          lookup(query);
+        });
+      });
+    }
+
+    function saveRecent(query: string) {
+      const next = [query, ...recentList().filter((entry) => entry.toLowerCase() !== query.toLowerCase())].slice(0, 8);
+      localStorage.setItem(RECENT_KEY, JSON.stringify(next));
+      renderRecent();
+    }
+
+    async function ensureChart() {
+      if ((window as any).Chart) return (window as any).Chart;
+      if (chartJsPromise) return chartJsPromise;
+      chartJsPromise = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js';
+        script.onload = () => resolve((window as any).Chart);
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+      return chartJsPromise;
+    }
+
+    function modeName(key: string) {
+      const map: Record<string, string> = {
+        rm_solo: 'Ranked Solo',
+        rm_team: 'Ranked Team',
+        rm_1v1_elo: '1v1 Elo',
+        rm_2v2_elo: '2v2 Elo',
+        rm_3v3_elo: '3v3 Elo',
+        qm_1v1: 'QM 1v1',
+        qm_2v2: 'QM 2v2',
+        qm_3v3: 'QM 3v3',
+        qm_4v4: 'QM 4v4',
+        qm_ffa: 'QM FFA',
+        rm_1v1: 'Ranked 1v1 (Legacy)',
+      };
+      return map[key] || title(key);
+    }
+
+    function normalizeModes(player: any) {
+      const entries = Object.entries(player?.modes || {}).map(([key, mode]: [string, any]) => ({
+        key,
+        name: modeName(key),
+        rating: typeof mode?.rating === 'number' ? mode.rating : null,
+        rank: typeof mode?.rank === 'number' ? mode.rank : null,
+        rankLevel: typeof mode?.rank_level === 'string' ? mode.rank_level : null,
+        streak: typeof mode?.streak === 'number' ? mode.streak : null,
+        games: typeof mode?.games_count === 'number' ? mode.games_count : 0,
+        wins: typeof mode?.wins_count === 'number' ? mode.wins_count : 0,
+        losses: typeof mode?.losses_count === 'number' ? mode.losses_count : 0,
+        winRate: typeof mode?.win_rate === 'number' ? mode.win_rate : null,
+        lastGameAt: typeof mode?.last_game_at === 'string' ? mode.last_game_at : null,
+        civs: Array.isArray(mode?.civilizations) ? mode.civilizations : [],
+        history: mode?.rating_history && typeof mode.rating_history === 'object' ? mode.rating_history : {},
+      }));
+
+      entries.sort((a, b) => {
+        const ai = MODE_PRIORITY.indexOf(a.key);
+        const bi = MODE_PRIORITY.indexOf(b.key);
+        if (ai >= 0 && bi >= 0) return ai - bi;
+        if (ai >= 0) return -1;
+        if (bi >= 0) return 1;
+        return b.games - a.games;
+      });
+
+      return entries;
+    }
+
+    function playersFromGame(game: any): any[] {
+      const teams = Array.isArray(game?.teams) ? game.teams : [];
+      const players: any[] = [];
+      teams.forEach((team: any) => {
+        if (!Array.isArray(team)) return;
+        team.forEach((entry: any) => players.push(entry?.player || entry));
+      });
+      return players;
+    }
+
+    function renderOverview(player: any, primary: any) {
+      ids.playerName.textContent = player?.name || '-';
+      ids.playerId.textContent = player?.profile_id ? String(player.profile_id) : '-';
+      ids.lastGameAt.textContent = date(player?.last_game_at || primary?.lastGameAt);
+      if (player?.country) {
+        ids.countryWrap.classList.remove('hidden');
+        ids.country.textContent = String(player.country);
+      } else {
+        ids.countryWrap.classList.add('hidden');
+      }
+      ids.matches.textContent = n(primary?.games);
+      ids.wins.textContent = n(primary?.wins);
+      ids.losses.textContent = n(primary?.losses);
+      ids.winrate.textContent = pct(primary?.winRate);
+      ids.rating.textContent = n(primary?.rating);
+      ids.rank.textContent = primary?.rank != null ? `#${n(primary.rank)}` : '-';
+      ids.rankLevel.textContent = primary?.rankLevel ? title(primary.rankLevel) : '-';
+      ids.streak.textContent = primary?.streak != null ? String(primary.streak) : '-';
+      showLoaded('overview');
+    }
+
+    function renderModeTable(modes: any[]) {
+      const content = document.getElementById('modes-content') as HTMLElement;
+      if (!modes.length) {
+        content.innerHTML = '<p class="text-sm text-gray-400">No mode data returned.</p>';
+        showLoaded('modes');
+        return;
+      }
+      const rows = modes.map((mode) => (
+        `<tr><td class="font-semibold text-amber-100">${escapeHtml(mode.name)}</td><td class="font-mono">${n(mode.rating)}</td><td class="font-mono">${mode.rank != null ? `#${n(mode.rank)}` : '-'}</td><td>${mode.rankLevel ? escapeHtml(title(mode.rankLevel)) : '-'}</td><td class="font-mono">${n(mode.games)}</td><td class="font-mono">${pct(mode.winRate)}</td><td class="font-mono">${mode.streak != null ? mode.streak : '-'}</td><td class="text-xs text-gray-400">${date(mode.lastGameAt)}</td></tr>`
+      )).join('');
+      content.innerHTML = `<div class="table-wrap"><table class="table"><thead><tr><th>Mode</th><th>Rating</th><th>Rank</th><th>Level</th><th>Games</th><th>Win Rate</th><th>Streak</th><th>Last Game</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+      showLoaded('modes');
+    }
+
+    function renderCivs(primary: any) {
+      const content = document.getElementById('civs-content') as HTMLElement;
+      const civs = Array.isArray(primary?.civs)
+        ? [...primary.civs].sort((a, b) => (b?.pick_rate || 0) - (a?.pick_rate || 0))
+        : [];
+      if (!civs.length) {
+        content.innerHTML = '<p class="text-sm text-gray-400">No civilization rows for this mode.</p>';
+        showLoaded('civs');
+        return;
+      }
+      const rows = civs.map((civ: any) => (
+        `<tr><td class="font-semibold text-amber-100">${escapeHtml(title(civ?.civilization || '-'))}</td><td class="font-mono">${pct(civ?.pick_rate)}</td><td class="font-mono">${pct(civ?.win_rate)}</td><td class="font-mono">${n(civ?.games_count || 0)}</td></tr>`
+      )).join('');
+      content.innerHTML = `<p class="text-xs text-gray-400 mb-2">Mode: <span class="text-amber-200">${escapeHtml(primary?.name || '-')}</span></p><div class="table-wrap"><table class="table"><thead><tr><th>Civilization</th><th>Pick Rate</th><th>Win Rate</th><th>Games</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+      showLoaded('civs');
+    }
+
+    function renderMatches(payload: any, profileId: number) {
+      const content = document.getElementById('matches-content') as HTMLElement;
+      const games = Array.isArray(payload?.games) ? payload.games : [];
+      if (!games.length) {
+        content.innerHTML = '<p class="text-sm text-gray-400">No recent games returned.</p>';
+        showLoaded('matches');
+        return;
+      }
+
+      content.innerHTML = games.map((game: any) => {
+        const players = playersFromGame(game);
+        const me = players.find((p) => Number(p?.profile_id) === profileId);
+        const opponents = players.filter((p) => Number(p?.profile_id) !== profileId).slice(0, 3);
+        const result = String(me?.result || 'draw').toLowerCase();
+        const resultClass = result === 'win' ? 'win' : result === 'loss' ? 'loss' : 'draw';
+        const ratingDiff = typeof me?.rating_diff === 'number'
+          ? `${me.rating_diff > 0 ? '+' : ''}${me.rating_diff}`
+          : '-';
+        return `<article class="rounded-lg border border-slate-700/50 bg-slate-800/35 p-4"><div class="flex flex-col sm:flex-row sm:justify-between gap-3"><div><div class="mb-2"><span class="chip ${resultClass}">${escapeHtml(result)}</span> <span class="text-xs text-gray-500 ml-2">Game #${n(game?.game_id)}</span></div><p class="text-sm font-semibold text-amber-100">${escapeHtml(game?.map || 'Unknown Map')}</p><p class="text-xs text-gray-400 mt-1">You: ${escapeHtml(title(me?.civilization || '-'))} | Opponent(s): ${escapeHtml(opponents.map((p: any) => `${p?.name || 'Unknown'} (${title(p?.civilization || '-')})`).join(' | ') || 'N/A')}</p></div><div class="text-xs grid grid-cols-2 gap-2 sm:min-w-[220px]"><div><p class="text-gray-500 uppercase">Duration</p><p class="font-mono text-white">${dur(game?.duration)}</p></div><div><p class="text-gray-500 uppercase">Rating D</p><p class="font-mono text-white">${escapeHtml(ratingDiff)}</p></div><div><p class="text-gray-500 uppercase">Patch</p><p class="font-mono text-white">${n(game?.patch)}</p></div><div><p class="text-gray-500 uppercase">Server</p><p class="font-mono text-white">${escapeHtml(game?.server || '-')}</p></div></div></div><p class="text-[11px] text-gray-500 mt-3">${date(game?.started_at)}</p></article>`;
+      }).join('');
+
+      showLoaded('matches');
+    }
+
+    async function renderCharts(primary: any, gamesPayload: any) {
+      const Chart = await ensureChart();
+      const ratingEmpty = document.getElementById('rating-chart-empty') as HTMLElement;
+      const durationEmpty = document.getElementById('duration-chart-empty') as HTMLElement;
+      ratingEmpty.classList.add('hidden');
+      durationEmpty.classList.add('hidden');
+
+      const history = Object.entries(primary?.history || {})
+        .map(([ts, item]: [string, any]) => ({ ts: Number(ts), rating: typeof item?.rating === 'number' ? item.rating : null }))
+        .filter((point) => Number.isFinite(point.ts) && point.rating != null)
+        .sort((a, b) => a.ts - b.ts);
+
+      if (ratingChart) { ratingChart.destroy(); ratingChart = null; }
+      if (history.length >= 2) {
+        ratingChart = new Chart(document.getElementById('rating-chart') as HTMLCanvasElement, {
+          type: 'line',
+          data: {
+            labels: history.map((point) => new Date(point.ts * 1000).toLocaleDateString()),
+            datasets: [{ label:'Rating', data: history.map((point) => point.rating), borderColor:'#f59e0b', backgroundColor:'rgba(245,158,11,.2)', fill:true, tension:.2, pointRadius:2 }],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148,163,184,.08)' } },
+              y: { ticks: { color: '#e2e8f0' }, grid: { color: 'rgba(148,163,184,.08)' } },
+            },
+            plugins: { legend: { labels: { color: '#fbbf24' } } },
+          },
+        });
+      } else {
+        ratingEmpty.classList.remove('hidden');
+      }
+
+      const durations = (Array.isArray(gamesPayload?.games) ? gamesPayload.games : [])
+        .map((game: any) => typeof game?.duration === 'number' ? game.duration / 60 : null)
+        .filter((m: number | null): m is number => m != null && m > 0);
+
+      if (durationChart) { durationChart.destroy(); durationChart = null; }
+      if (durations.length >= 3) {
+        const bins = [{l:'<10m',min:0,max:10},{l:'10-15m',min:10,max:15},{l:'15-20m',min:15,max:20},{l:'20-25m',min:20,max:25},{l:'25m+',min:25,max:Infinity}];
+        const counts = bins.map((bin) => durations.filter((m) => m >= bin.min && m < bin.max).length);
+        durationChart = new Chart(document.getElementById('duration-chart') as HTMLCanvasElement, {
+          type:'bar',
+          data:{ labels: bins.map((bin) => bin.l), datasets:[{ label:'Matches', data: counts, backgroundColor:'rgba(251,191,36,.72)', borderColor:'rgba(251,191,36,1)', borderWidth:1 }]},
+          options:{ responsive:true, maintainAspectRatio:false, scales:{ x:{ ticks:{ color:'#94a3b8' }, grid:{ color:'rgba(148,163,184,.08)' } }, y:{ ticks:{ color:'#e2e8f0', precision:0 }, grid:{ color:'rgba(148,163,184,.08)' } } }, plugins:{ legend:{ labels:{ color:'#fbbf24' } } } },
+        });
+      } else {
+        durationEmpty.classList.remove('hidden');
+      }
+
+      showLoaded('insights');
+    }
+
+    function firstNum(root: any, paths: string[]): number | null {
+      for (const path of paths) {
+        const value = path.split('.').reduce((curr: any, key) => (curr && typeof curr === 'object' ? curr[key] : undefined), root);
+        if (typeof value === 'number' && Number.isFinite(value)) return value;
+      }
+      return null;
+    }
+
+    function renderAdvanced(lastGame: any, profileId: number) {
+      const content = document.getElementById('advanced-content') as HTMLElement;
+      const player = playersFromGame(lastGame).find((entry) => Number(entry?.profile_id) === profileId);
+      if (!player) {
+        content.innerHTML = '<p class="text-sm text-gray-400">No player-level advanced data in last game payload.</p>';
+        showLoaded('advanced');
+        return;
+      }
+
+      const metrics = [
+        ['Food Collected', firstNum(player, ['stats.resources.food_collected','resources.food_collected','food_collected'])],
+        ['Wood Collected', firstNum(player, ['stats.resources.wood_collected','resources.wood_collected','wood_collected'])],
+        ['Gold Collected', firstNum(player, ['stats.resources.gold_collected','resources.gold_collected','gold_collected'])],
+        ['Stone Collected', firstNum(player, ['stats.resources.stone_collected','resources.stone_collected','stone_collected'])],
+        ['Units Built', firstNum(player, ['stats.units.built','stats.units_built','units.built','units_built'])],
+        ['Units Lost', firstNum(player, ['stats.units.lost','stats.units_lost','units.lost','units_lost'])],
+        ['Units Killed', firstNum(player, ['stats.units.killed','stats.units_killed','units.killed','units_killed'])],
+      ].filter(([, value]) => value != null) as Array<[string, number]>;
+
+      if (!metrics.length) {
+        content.innerHTML = '<p class="text-sm text-amber-100 mb-2">Open payload did not include resource or unit counters for this match.</p><p class="text-xs text-gray-400">If AoE4World returns those fields later, this section auto-populates.</p>';
+      } else {
+        content.innerHTML = `<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">${metrics.map(([label, value]) => `<div class="bg-slate-800/40 rounded p-3 border border-amber-500/10"><p class="text-xs text-gray-400">${escapeHtml(label)}</p><p class="text-xl font-mono font-bold text-white">${n(value)}</p></div>`).join('')}</div>`;
+      }
+
+      showLoaded('advanced');
+    }
+
+    function renderMeta(metaCivs: any, metaMaps: any, metaMatchups: any, primary: any) {
+      const content = document.getElementById('meta-content') as HTMLElement;
+      const civRows = (Array.isArray(metaCivs?.data) ? metaCivs.data : []).slice(0,8).map((civ: any) => `<tr><td class="font-semibold text-amber-100">${escapeHtml(title(civ?.civilization || '-'))}</td><td class="font-mono">${pct(civ?.pick_rate)}</td><td class="font-mono">${pct(civ?.win_rate)}</td><td class="font-mono">${n(civ?.games_count || 0)}</td></tr>`).join('');
+      const mapRows = (Array.isArray(metaMaps?.data) ? metaMaps.data : []).slice(0,8).map((map: any) => `<tr><td class="font-semibold text-amber-100">${escapeHtml(map?.map || '-')}</td><td class="font-mono">${n(map?.games_count || 0)}</td><td class="font-mono">${dur(map?.duration_median)}</td><td class="font-mono">${escapeHtml(title(map?.highest_win_rate_civilization || '-'))}</td></tr>`).join('');
+      const topCiv = primary?.civs?.[0]?.civilization || null;
+      const matchupRows = (Array.isArray(metaMatchups?.data) ? metaMatchups.data : [])
+        .filter((row: any) => !topCiv || row?.civilization === topCiv)
+        .filter((row: any) => (row?.games_count || 0) >= 50)
+        .sort((a: any, b: any) => (b?.win_rate || 0) - (a?.win_rate || 0))
+        .slice(0, 8)
+        .map((row: any) => `<tr><td class="font-semibold text-amber-100">${escapeHtml(title(row?.civilization || '-'))}</td><td class="font-semibold text-amber-100">${escapeHtml(title(row?.other_civilization || '-'))}</td><td class="font-mono">${pct(row?.win_rate)}</td><td class="font-mono">${n(row?.games_count || 0)}</td></tr>`).join('');
+
+      content.innerHTML = `
+        <section><h3 class="text-xs text-gray-400 uppercase mb-2">Top Civilizations</h3><div class="table-wrap"><table class="table"><thead><tr><th>Civilization</th><th>Pick Rate</th><th>Win Rate</th><th>Games</th></tr></thead><tbody>${civRows || '<tr><td colspan="4" class="text-gray-400">No data.</td></tr>'}</tbody></table></div></section>
+        <section><h3 class="text-xs text-gray-400 uppercase mb-2">Top Maps</h3><div class="table-wrap"><table class="table"><thead><tr><th>Map</th><th>Games</th><th>Median Duration</th><th>Top Civ</th></tr></thead><tbody>${mapRows || '<tr><td colspan="4" class="text-gray-400">No data.</td></tr>'}</tbody></table></div></section>
+        <section><h3 class="text-xs text-gray-400 uppercase mb-2">${topCiv ? `Best Matchups For ${escapeHtml(title(topCiv))}` : 'Best Matchups'}</h3><div class="table-wrap"><table class="table"><thead><tr><th>Civ</th><th>Vs</th><th>Win Rate</th><th>Games</th></tr></thead><tbody>${matchupRows || '<tr><td colspan="4" class="text-gray-400">No rows met filter.</td></tr>'}</tbody></table></div></section>`;
+
+      showLoaded('meta');
+    }
+
+    async function lookup(rawQuery: string) {
+      const query = rawQuery.trim();
+      if (query.length < 3) {
+        showError(globalError, 'Search query must be at least 3 characters.');
+        return;
+      }
+
+      saveRecent(query);
+      resetUi();
+
+      const search = await searchAoe4Players(query, 1, false);
+      if (!search.ok) {
+        showError(globalError, search.error.message);
+        return;
+      }
+
+      const players = Array.isArray(search.data?.players) ? search.data.players : [];
+      const chosen = players.find((p: any) => String(p?.name || '').toLowerCase() === query.toLowerCase()) || players[0];
+      if (!chosen?.profile_id) {
+        showError(globalError, 'No matching players found.');
+        return;
+      }
+
+      const profileId = Number(chosen.profile_id);
+      activeProfileId = profileId;
+
+      const [playerRes, gamesRes, lastRes, metaCivsRes, metaMapsRes, metaMatchRes] = await Promise.all([
+        getAoe4Player(profileId),
+        getAoe4PlayerGames(profileId, { leaderboard: 'rm_solo', limit: 20 }),
+        getAoe4LastGame(profileId, true),
+        getAoe4MetaStats('rm_solo', 'civilizations'),
+        getAoe4MetaStats('rm_solo', 'maps'),
+        getAoe4MetaStats('rm_solo', 'matchups'),
+      ]);
+      if (activeProfileId !== profileId) return;
+
+      if (!playerRes.ok) {
+        showError(globalError, playerRes.error.message);
+        return;
+      }
+
+      const player = playerRes.data;
+      const modes = normalizeModes(player);
+      const primary = modes.find((m) => m.key === 'rm_solo' && m.games > 0) || modes.find((m) => m.games > 0) || modes[0];
+
+      renderOverview(player, primary);
+      renderModeTable(modes);
+      renderCivs(primary);
+
+      if (gamesRes.ok) {
+        renderMatches(gamesRes.data, profileId);
+      } else {
+        showError(document.getElementById('matches-error') as HTMLElement, gamesRes.error.message);
+        (document.getElementById('matches-loading') as HTMLElement).classList.add('hidden');
+      }
+
+      try {
+        await renderCharts(primary, gamesRes.ok ? gamesRes.data : null);
+      } catch {
+        showError(document.getElementById('insights-error') as HTMLElement, 'Unable to load chart library.');
+        (document.getElementById('insights-loading') as HTMLElement).classList.add('hidden');
+      }
+
+      if (lastRes.ok) {
+        renderAdvanced(lastRes.data, profileId);
+      } else {
+        showError(document.getElementById('advanced-error') as HTMLElement, lastRes.error.message);
+        (document.getElementById('advanced-loading') as HTMLElement).classList.add('hidden');
+      }
+
+      if (metaCivsRes.ok && metaMapsRes.ok && metaMatchRes.ok) {
+        renderMeta(metaCivsRes.data, metaMapsRes.data, metaMatchRes.data, primary);
+      } else {
+        const msg = [
+          metaCivsRes.ok ? '' : metaCivsRes.error.message,
+          metaMapsRes.ok ? '' : metaMapsRes.error.message,
+          metaMatchRes.ok ? '' : metaMatchRes.error.message,
+        ].filter(Boolean).join(' | ');
+        showError(document.getElementById('meta-error') as HTMLElement, msg || 'Unable to load meta data.');
+        (document.getElementById('meta-loading') as HTMLElement).classList.add('hidden');
+      }
+    }
+
+    button.addEventListener('click', () => lookup(input.value));
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') lookup(input.value);
+    });
+    renderRecent();
+
+    const params = new URLSearchParams(window.location.search);
+    const initial = params.get('player') || params.get('query');
+    if (initial) {
+      input.value = initial;
+      lookup(initial);
+    }
+  </script>
+</BaseLayout>

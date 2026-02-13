@@ -4,9 +4,8 @@ import SocialIcons from './SocialIcons.astro';
 const pathname = Astro.url?.pathname ?? '';
 const isHome = pathname === '/' || pathname === '/index.html';
 const isBlog = pathname.startsWith('/blog');
-const guideCategory = Astro.url?.searchParams?.get('category')?.toLowerCase();
-const isGuides = isBlog && guideCategory === 'guides';
 const isHw2Stats = pathname === '/halo-wars-stats' || pathname === '/halo-wars-stats/';
+const isAoe4Stats = pathname === '/aoe4-stats' || pathname === '/aoe4-stats/';
 const isStorehausInfo = pathname === '/storehaus-info' || pathname === '/storehaus-info/';
 const isStorehausPrivacy = pathname === '/storehaus/privacy-policy' || pathname === '/storehaus/privacy-policy/';
 const isStorehausTerms = pathname === '/storehaus/terms-of-service' || pathname === '/storehaus/terms-of-service/';
@@ -68,6 +67,14 @@ const isStorehausTerms = pathname === '/storehaus/terms-of-service' || pathname 
         <i class="fas fa-chart-bar mr-2" aria-hidden="true"></i>
         HW2 Stats
       </a>
+      <a
+        href="/aoe4-stats"
+        class={`side-panel-tab-link ${isAoe4Stats ? 'side-panel-tab-active' : 'side-panel-tab-inactive'} text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50`}
+        role="menuitem"
+      >
+        <i class="fas fa-chess-rook mr-2" aria-hidden="true"></i>
+        AoE4 Stats
+      </a>
       <button
         data-tab-id="other-projects-tab"
         class="side-panel-tab-link side-panel-tab-inactive text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50"
@@ -79,7 +86,7 @@ const isStorehausTerms = pathname === '/storehaus/terms-of-service' || pathname 
       </button>
       <a
         href="/blog?category=Guides"
-        class={`side-panel-tab-link ${isGuides ? 'side-panel-tab-active' : 'side-panel-tab-inactive'} text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50`}
+        class="side-panel-tab-link side-panel-tab-inactive text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50"
         role="menuitem"
       >
         <i class="fas fa-gamepad mr-2" aria-hidden="true"></i>

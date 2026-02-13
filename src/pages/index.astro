@@ -93,11 +93,11 @@ import StorehausPromo from '../components/StorehausPromo.astro';
               <button
                 id="twitch-collapse-toggle"
                 aria-label="Toggle Twitch stream visibility"
-                aria-expanded="true"
+                aria-expanded="false"
                 class="p-2 rounded-lg hover:bg-purple-600/30 transition-colors duration-200 text-purple-400 hover:text-purple-300"
                 type="button"
               >
-                <i class="fas fa-chevron-up transition-transform duration-300" id="twitch-collapse-icon" aria-hidden="true"></i>
+                <i class="fas fa-chevron-down transition-transform duration-300" id="twitch-collapse-icon" aria-hidden="true"></i>
               </button>
             </div>
             <a
@@ -110,7 +110,7 @@ import StorehausPromo from '../components/StorehausPromo.astro';
               Watch on Twitch
             </a>
           </div>
-          <div id="twitch-embed-content" class="twitch-content-expanded">
+          <div id="twitch-embed-content" class="twitch-content-collapsed">
             <div class="aspect-video rounded-lg overflow-hidden border border-purple-500/30 shadow-lg">
               <iframe
                 src="https://player.twitch.tv/?channel=teamrespawntv&parent=localhost&parent=127.0.0.1&parent=teamrespawn.net&parent=www.teamrespawn.net&parent=andythenerd.github.io&muted=false"

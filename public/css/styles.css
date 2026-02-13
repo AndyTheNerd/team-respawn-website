@@ -134,6 +134,12 @@ textarea {
     margin-bottom: 0;
 }
 
+/* Keep all homepage channel stat cards the same height */
+.stats-section .stat-card {
+    min-height: 220px;
+    height: 100%;
+}
+
 /* Carousel styles */
 .carousel-container {
     scroll-snap-type: x mandatory;

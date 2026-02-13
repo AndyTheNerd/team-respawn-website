@@ -87,6 +87,12 @@ function renderStatsSection() {
         { icon: 'fa-video', label: 'Videos', value: '3K+', color: 'from-pink-500 to-red-500' },
         { icon: 'fa-calendar', label: 'Years Active', value: '5+', color: 'from-orange-500 to-yellow-500' }
     ];
+    const highlightData = [
+        { icon: 'fa-crown', text: 'Largest HW2 content creator in the world, with thousands of videos.', color: 'from-indigo-500 to-purple-500' },
+        { icon: 'fa-comments', text: 'Largest HW2 community Discord in the world. Over 5.8K members sharing tips and creating groups.', color: 'from-violet-500 to-indigo-500' },
+        { icon: 'fa-chart-line', text: 'Growing presence in AoE4 focused on teams gameplay and a casual atmosphere.', color: 'from-emerald-500 to-teal-500' },
+        { icon: 'fa-broadcast-tower', text: 'Live on Twitch almost every week playing HW2, AoE4, or Halo FPS.', color: 'from-fuchsia-500 to-purple-500' }
+    ];
 
     const statsCards = statsData.map(stat => `
         <div class="stat-card bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50 hover:border-gray-600 transition-all duration-300 hover:scale-105 hover:shadow-xl">
@@ -103,6 +109,18 @@ function renderStatsSection() {
             </div>
         </div>
     `).join('');
+    const highlightCards = highlightData.map(highlight => `
+        <div class="stat-card bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50 hover:border-gray-600 transition-all duration-300 hover:scale-105 hover:shadow-xl">
+            <div class="flex flex-col items-center text-center">
+                <div class="w-16 h-16 rounded-full bg-gradient-to-br ${highlight.color} flex items-center justify-center mb-4 shadow-lg">
+                    <i class="fas ${highlight.icon} text-2xl text-white" aria-hidden="true"></i>
+                </div>
+                <div class="text-gray-300 text-sm sm:text-base font-semibold leading-relaxed">
+                    ${escapeHtml(highlight.text)}
+                </div>
+            </div>
+        </div>
+    `).join('');
 
     return `
         <section class="stats-section mb-8">
@@ -112,6 +130,9 @@ function renderStatsSection() {
                 </h2>
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                     ${statsCards}
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mt-4">
+                    ${highlightCards}
                 </div>
             </div>
         </section>
@@ -399,4 +420,3 @@ function renderHomeContent(allVideos) {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { renderHomeContent, renderHeroSection, renderStatsSection, renderFeaturedCarousel, initCarousel };
 }
-

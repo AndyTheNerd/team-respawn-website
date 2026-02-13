@@ -87,17 +87,6 @@ function switchTab(activeTabId) {
         }
     }
 
-    // Update Guides dropdown visual indicator based on active tab
-    const guidesDropdownToggle = document.getElementById('guides-dropdown-toggle');
-    if (guidesDropdownToggle) {
-        const isGuidesTab = ['halo-wars-tab', 'age-of-empires-tab', 'age-of-mythology-tab'].includes(activeTabId);
-        if (isGuidesTab) {
-            guidesDropdownToggle.classList.add('nav-link-active');
-        } else {
-            guidesDropdownToggle.classList.remove('nav-link-active');
-        }
-    }
-
     // Control Twitch embed visibility - only show on home tab
     const twitchContainer = document.getElementById('twitch-embed-container');
     if (twitchContainer) {
@@ -206,7 +195,8 @@ function restoreTwitchCollapseState() {
         return;
     }
     
-    const isCollapsed = localStorage.getItem('twitchEmbedCollapsed') === 'true';
+    const savedCollapsePreference = localStorage.getItem('twitchEmbedCollapsed');
+    const isCollapsed = savedCollapsePreference !== 'false';
     
     if (isCollapsed) {
         twitchContent.classList.remove('twitch-content-expanded');
