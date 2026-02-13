@@ -1306,6 +1306,7 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
       label: string;
       kind: 'building' | 'upgrade' | 'unit' | 'unit_upgrade' | 'power' | 'veterancy';
       detail?: string;
+      techTier?: 2 | 3;
     };
 
     type PlayerInfo = {
@@ -1566,6 +1567,30 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
       const humanized = humanizeTechId(techId);
       const humanAlias = resolveAliasName(humanized, ['tech']);
       return applyDisplayNameOverride(humanAlias || humanized);
+    }
+
+    function detectTechTierFromBuildingUpgrade(buildingId: string, buildingName = ''): 2 | 3 | null {
+      if (!buildingId && !buildingName) return null;
+      const id = String(buildingId || '').toLowerCase();
+      const name = String(buildingName || '').toLowerCase();
+      const looksLikeMainBase =
+        id.includes('bldg_command')
+        || id.includes('bldg_builder')
+        || name.includes('main base');
+      if (!looksLikeMainBase) return null;
+      if (/(?:_0?3)$/.test(id) || /(?:^|[^a-z0-9])level\s*3(?:[^a-z0-9]|$)/.test(name)) return 2;
+      if (/(?:_0?4)$/.test(id) || /(?:^|[^a-z0-9])level\s*4(?:[^a-z0-9]|$)/.test(name)) return 3;
+      return null;
+    }
+
+    function renderTechTierBadge(entry: TimelineEntry): string {
+      if (entry.techTier === 2) {
+        return '<span class="inline-flex items-center px-2 py-0.5 rounded-full border text-[10px] uppercase tracking-wider border-cyan-300/50 text-cyan-100 bg-cyan-400/15">Tech 2</span>';
+      }
+      if (entry.techTier === 3) {
+        return '<span class="inline-flex items-center px-2 py-0.5 rounded-full border text-[10px] uppercase tracking-wider border-fuchsia-300/50 text-fuchsia-100 bg-fuchsia-400/15">Tech 3</span>';
+      }
+      return '';
     }
 
     function getRecentSearches(): string[] {
@@ -3103,6 +3128,7 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
             const toName = nextId ? getGameObjectDisplayName(nextId, gameObjectMap) : 'Unknown Building';
             const label = fromName ? `Upgraded ${fromName} -> ${toName}` : `Upgraded to ${toName}`;
             const detail = nextId ? `ID: ${nextId}` : (event?.InstanceId != null ? `Instance ${event.InstanceId}` : '');
+            const techTier = detectTechTierFromBuildingUpgrade(nextId, toName);
             entries.push({
               timeMs,
               playerIndex,
@@ -3111,6 +3137,7 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
               label,
               kind: 'upgrade',
               detail: detail || undefined,
+              techTier: techTier || undefined,
             });
             if (typeof instanceId === 'number' && nextId) {
               buildingInstanceMap.set(instanceId, nextId);
@@ -3312,7 +3339,10 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
                 const items = player.entries.map((entry) => `
                   <div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2 text-xs">
                     <span class="font-mono text-cyan-300">${formatMatchClock(entry.timeMs)}</span>
-                    <span class="text-gray-300">${entry.label}</span>
+                    <span class="flex flex-wrap items-center gap-2">
+                      <span class="text-gray-300">${entry.label}</span>
+                      ${renderTechTierBadge(entry)}
+                    </span>
                   </div>
                 `).join('') || '<span class="text-xs text-gray-500">No build order data</span>';
                 return `
@@ -3385,12 +3415,34 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
                 <span class="text-gray-200 truncate">${entry.playerName}</span>
                 <span class="inline-flex items-center px-2 py-0.5 rounded-full border text-[10px] uppercase tracking-wider ${tag.className}">${tag.label}</span>
                 <span class="text-gray-400">${entry.label}</span>
+                ${renderTechTierBadge(entry)}
               </div>
             </div>
           `;
         }).filter(Boolean).join('');
 
-        if (!highlightRows) return '';
+        const techMilestoneRows = ([2, 3] as const).map((tier) => {
+          const entry = sorted.find((e) => e.kind === 'upgrade' && e.techTier === tier);
+          if (!entry) return '';
+          const timeLabel = formatMatchClock(entry.timeMs);
+          return `
+            <div class="rounded-md border border-slate-700/40 bg-slate-900/40 p-2">
+              <div class="flex items-center justify-between text-[10px] uppercase tracking-wider text-gray-500 mb-1">
+                <span>First Tech ${tier}</span>
+                <span class="font-mono text-cyan-300">${timeLabel}</span>
+              </div>
+              <div class="flex flex-wrap items-center gap-2 text-xs">
+                <span class="text-gray-200 truncate">${entry.playerName}</span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full border text-[10px] uppercase tracking-wider border-orange-400/40 text-orange-200 bg-orange-400/10">Upgrade</span>
+                <span class="text-gray-400">${entry.label}</span>
+                ${renderTechTierBadge(entry)}
+              </div>
+            </div>
+          `;
+        }).filter(Boolean).join('');
+
+        const combinedRows = [highlightRows, techMilestoneRows].filter(Boolean).join('');
+        if (!combinedRows) return '';
 
         return `
           <div class="rounded-lg border border-slate-700/40 bg-slate-800/30 p-3 mb-3">
@@ -3399,7 +3451,7 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
               <span class="text-[10px] text-gray-600">Firsts</span>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-              ${highlightRows}
+              ${combinedRows}
             </div>
           </div>
         `;
@@ -3546,6 +3598,15 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
             ? Object.values(playersRaw)
             : [];
 
+        const getPlayerDisplayName = (player: any): string => {
+          return player?.HumanPlayerId?.Gamertag
+            || player?.Gamertag
+            || (player?.HumanPlayerId && typeof player.HumanPlayerId === 'string' ? player.HumanPlayerId : '')
+            || (player?.IsHuman === false ? 'AI' : '')
+            || (player?.ComputerPlayerId != null ? `AI ${player.ComputerPlayerId}` : '')
+            || 'Unknown';
+        };
+
         const leaderPowerMap = await ensureLeaderPowerMap();
         const teamMap = new Map<number, { members: Array<{ name: string; leader: string; destroyed: number; lost: number; powerEntries: Array<{ name: string; times: number }> }>; totals: { destroyed: number; lost: number; powers: number } }>();
         players.forEach((p: any) => {
@@ -3553,12 +3614,7 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
           const teamId = p.TeamId;
           const leaderId = p.LeaderId;
           if (teamId == null || leaderId == null) return;
-          const gamertag = p?.HumanPlayerId?.Gamertag
-            || p?.Gamertag
-            || (p?.HumanPlayerId && typeof p.HumanPlayerId === 'string' ? p.HumanPlayerId : '')
-            || (p?.IsHuman === false ? 'AI' : '')
-            || (p?.ComputerPlayerId != null ? `AI ${p.ComputerPlayerId}` : '')
-            || 'Unknown';
+          const gamertag = getPlayerDisplayName(p);
           const leaderName = getLeaderName(leaderId);
           let destroyed = 0;
           let lost = 0;
@@ -3643,8 +3699,194 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
             `;
           });
 
+        let techTimingSection = `
+          <div class="mt-4 rounded-lg border border-slate-700/40 bg-slate-900/40 p-3">
+            <p class="text-[11px] uppercase tracking-wider text-gray-400">Tech Timing by Player</p>
+            <p class="text-xs text-gray-500 mt-1">Unable to load event data for tech timing.</p>
+          </div>
+        `;
+        const techTimingsResult = await fetchMatchEventsPayload(matchId);
+        if (techTimingsResult.ok) {
+          const { entries: eventEntries, playersByIndex, isCompleteSet } = await buildEventEntries(techTimingsResult.data);
+          const firstTechByIndex = new Map<number, { tech2Ms: number | null; tech3Ms: number | null }>();
+          const firstTechByName = new Map<string, { tech2Ms: number | null; tech3Ms: number | null }>();
+          const ensureIndexTiming = (playerIndex: number) => {
+            const existing = firstTechByIndex.get(playerIndex);
+            if (existing) return existing;
+            const created = { tech2Ms: null as number | null, tech3Ms: null as number | null };
+            firstTechByIndex.set(playerIndex, created);
+            return created;
+          };
+          const ensureNameTiming = (name: string) => {
+            const key = name.trim().toLowerCase();
+            const existing = firstTechByName.get(key);
+            if (existing) return existing;
+            const created = { tech2Ms: null as number | null, tech3Ms: null as number | null };
+            firstTechByName.set(key, created);
+            return created;
+          };
+          const techEntries = eventEntries
+            .filter((entry) => entry.kind === 'upgrade' && (entry.techTier === 2 || entry.techTier === 3))
+            .sort((a, b) => a.timeMs - b.timeMs);
+          techEntries.forEach((entry) => {
+            const tier = entry.techTier;
+            if (tier !== 2 && tier !== 3) return;
+            if (typeof entry.playerIndex === 'number') {
+              const timing = ensureIndexTiming(entry.playerIndex);
+              if (tier === 2 && timing.tech2Ms == null) timing.tech2Ms = entry.timeMs;
+              if (tier === 3 && timing.tech3Ms == null) timing.tech3Ms = entry.timeMs;
+            }
+            const playerName = entry.playerName?.trim();
+            if (playerName && playerName.toLowerCase() !== 'unknown' && !/^player\s+\d+$/i.test(playerName)) {
+              const timingByName = ensureNameTiming(playerName);
+              if (tier === 2 && timingByName.tech2Ms == null) timingByName.tech2Ms = entry.timeMs;
+              if (tier === 3 && timingByName.tech3Ms == null) timingByName.tech3Ms = entry.timeMs;
+            }
+          });
+
+          const normalizeTechPlayerName = (value: string) => value.trim().toLowerCase();
+          const techRowsMap = new Map<string, { playerIndex: number | null; name: string; teamId: number | null; indexTrusted: boolean }>();
+
+          players.forEach((player: any) => {
+            if (player?.PlayerType === 3) return;
+            const playerIndex = typeof player?.PlayerIndex === 'number' ? player.PlayerIndex : null;
+            const name = getPlayerDisplayName(player);
+            const teamId = typeof player?.TeamId === 'number' ? player.TeamId : null;
+            if (playerIndex != null) {
+              techRowsMap.set(`idx:${playerIndex}`, { playerIndex, name, teamId, indexTrusted: true });
+              return;
+            }
+            const normalizedName = normalizeTechPlayerName(name);
+            const key = normalizedName ? `name:${normalizedName}` : `anon:${techRowsMap.size}`;
+            const existing = techRowsMap.get(key);
+            if (existing) {
+              if (existing.name === 'Unknown' && name !== 'Unknown') existing.name = name;
+              if (existing.teamId == null && teamId != null) existing.teamId = teamId;
+              return;
+            }
+            techRowsMap.set(key, { playerIndex: null, name, teamId, indexTrusted: false });
+          });
+
+          playersByIndex.forEach((info, index) => {
+            if (info.playerType === 3) return;
+            const indexKey = `idx:${index}`;
+            const existing = techRowsMap.get(indexKey);
+            if (existing) {
+              if (existing.name === 'Unknown' && info.name) existing.name = info.name;
+              if (existing.teamId == null && info.teamId != null) existing.teamId = info.teamId;
+              existing.playerIndex = index;
+              existing.indexTrusted = true;
+              return;
+            }
+            techRowsMap.set(indexKey, {
+              playerIndex: index,
+              name: info.name || `Player ${index}`,
+              teamId: info.teamId ?? null,
+              indexTrusted: true,
+            });
+          });
+
+          // Drop duplicate name-only rows when we also have an index-backed row for the same player.
+          [...techRowsMap.entries()]
+            .filter(([key]) => key.startsWith('name:'))
+            .forEach(([key, row]) => {
+              const normalizedName = normalizeTechPlayerName(row.name);
+              if (!normalizedName) return;
+              const hasIndexed = [...techRowsMap.entries()].some(([otherKey, otherRow]) => {
+                if (!otherKey.startsWith('idx:')) return false;
+                return normalizeTechPlayerName(otherRow.name) === normalizedName;
+              });
+              if (!hasIndexed) return;
+              techRowsMap.delete(key);
+            });
+
+          const resolveTiming = (row: { playerIndex: number | null; name: string; indexTrusted: boolean }) => {
+            if (row.indexTrusted && typeof row.playerIndex === 'number') {
+              const byIndex = firstTechByIndex.get(row.playerIndex);
+              if (byIndex) return byIndex;
+            }
+            const byName = firstTechByName.get(normalizeTechPlayerName(row.name));
+            return byName || { tech2Ms: null, tech3Ms: null };
+          };
+
+          const techRowsData = [...techRowsMap.values()]
+            .map((row) => {
+              const timing = resolveTiming(row);
+              return {
+                ...row,
+                tech2Ms: timing.tech2Ms,
+                tech3Ms: timing.tech3Ms,
+              };
+            })
+            .sort((a, b) => {
+              const teamA = typeof a.teamId === 'number' ? a.teamId : 99;
+              const teamB = typeof b.teamId === 'number' ? b.teamId : 99;
+              if (teamA !== teamB) return teamA - teamB;
+              if (typeof a.playerIndex === 'number' && typeof b.playerIndex === 'number' && a.playerIndex !== b.playerIndex) {
+                return a.playerIndex - b.playerIndex;
+              }
+              if (typeof a.playerIndex === 'number' && typeof b.playerIndex !== 'number') return -1;
+              if (typeof b.playerIndex === 'number' && typeof a.playerIndex !== 'number') return 1;
+              return a.name.localeCompare(b.name);
+            });
+
+          const allTech2Ms = techRowsData.length > 0 && techRowsData.every((row) => row.tech2Ms != null)
+            ? Math.max(...techRowsData.map((row) => row.tech2Ms as number))
+            : null;
+          const allTech3Ms = techRowsData.length > 0 && techRowsData.every((row) => row.tech3Ms != null)
+            ? Math.max(...techRowsData.map((row) => row.tech3Ms as number))
+            : null;
+          const completionTag = isCompleteSet === false
+            ? '<span class="text-[10px] uppercase tracking-wider text-amber-300">Event feed incomplete</span>'
+            : '<span class="text-[10px] uppercase tracking-wider text-emerald-300">Event feed complete</span>';
+          const rowsHtml = techRowsData.map((row) => {
+            const teamLabel = typeof row.teamId === 'number' ? `Team ${row.teamId}` : 'Team ?';
+            const tech2Label = row.tech2Ms != null ? formatMatchClock(row.tech2Ms) : '-';
+            const tech3Label = row.tech3Ms != null ? formatMatchClock(row.tech3Ms) : '-';
+            return `
+              <tr class="border-t border-slate-700/40">
+                <td class="py-2 pr-4 text-gray-400">${teamLabel}</td>
+                <td class="py-2 pr-4 text-gray-200">${row.name}</td>
+                <td class="py-2 pr-4 font-mono text-cyan-200">${tech2Label}</td>
+                <td class="py-2 font-mono text-fuchsia-200">${tech3Label}</td>
+              </tr>
+            `;
+          }).join('');
+
+          techTimingSection = `
+            <div class="mt-4 rounded-lg border border-slate-700/40 bg-slate-900/40 p-3">
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                <p class="text-[11px] uppercase tracking-wider text-gray-400">Tech Timing by Player</p>
+                ${completionTag}
+              </div>
+              ${techRowsData.length > 0 ? `
+                <div class="overflow-x-auto">
+                  <table class="w-full text-xs">
+                    <thead>
+                      <tr class="text-[10px] uppercase tracking-wider text-gray-500">
+                        <th class="text-left font-normal pb-2 pr-4">Team</th>
+                        <th class="text-left font-normal pb-2 pr-4">Player</th>
+                        <th class="text-left font-normal pb-2 pr-4">Tech 2</th>
+                        <th class="text-left font-normal pb-2">Tech 3</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${rowsHtml}
+                    </tbody>
+                  </table>
+                </div>
+                <div class="mt-3 flex flex-wrap gap-4 text-[10px] uppercase tracking-wider text-gray-500">
+                  <span>All Players Tech 2: <span class="text-gray-300">${allTech2Ms != null ? formatMatchClock(allTech2Ms) : '-'}</span></span>
+                  <span>All Players Tech 3: <span class="text-gray-300">${allTech3Ms != null ? formatMatchClock(allTech3Ms) : '-'}</span></span>
+                </div>
+              ` : '<p class="text-xs text-gray-500">No Tech 2/Tech 3 timing data available.</p>'}
+            </div>
+          `;
+        }
+
         detailsEl.innerHTML = `
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">${teamCards.join('')}</div>
+          ${techTimingSection}
           <div class="mt-4 rounded-lg border border-slate-700/40 bg-slate-900/40 p-3">
             <div>
               <p class="text-[11px] uppercase tracking-wider text-gray-400">Match Summary + Build Order</p>
@@ -3991,6 +4233,7 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
                         <span class="text-gray-200 truncate">${entry.playerName}</span>
                         <span class="inline-flex items-center px-2 py-0.5 rounded-full border text-[10px] uppercase tracking-wider ${tag.className}">${tag.label}</span>
                         <span class="text-gray-300">${entry.label}</span>
+                        ${renderTechTierBadge(entry)}
                       </div>
                       ${entry.detail ? `<div class="text-[10px] text-gray-500 mt-1">${entry.detail}</div>` : ''}
                     </div>
@@ -4034,6 +4277,7 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
                       <span class="text-gray-200 truncate">${entry.playerName}</span>
                       <span class="inline-flex items-center px-2 py-0.5 rounded-full border text-[10px] uppercase tracking-wider ${tag.className}">${tag.label}</span>
                       <span class="text-gray-300">${entry.label}</span>
+                      ${renderTechTierBadge(entry)}
                     </div>
                     ${entry.detail ? `<div class="text-[10px] text-gray-500 mt-1">${entry.detail}</div>` : ''}
                   </div>
