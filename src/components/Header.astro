@@ -6,7 +6,6 @@ const { showPanelButton = true } = Astro.props;
 const pathname = Astro.url?.pathname ?? '';
 const isHome = pathname === '/' || pathname === '/index.html';
 const isBlog = pathname.startsWith('/blog');
-const isGuides = isBlog && Astro.url?.searchParams?.get('category')?.toLowerCase() === 'guides';
 const isStorehaus = pathname.startsWith('/storehaus');
 const isHw2Stats = pathname.startsWith('/halo-wars-stats');
 ---
@@ -72,39 +71,6 @@ const isHw2Stats = pathname.startsWith('/halo-wars-stats');
         >
           Walkthroughs
         </button>
-        <div class="nav-dropdown" data-dropdown>
-          <button
-            id="guides-dropdown-toggle"
-            class={`nav-link nav-dropdown-toggle ${isGuides ? 'nav-link-active' : ''}`}
-            type="button"
-            aria-expanded="false"
-            aria-controls="guides-dropdown-menu"
-            aria-label="Open guides menu"
-            data-dropdown-toggle
-          >
-            Guides
-            <svg class="nav-dropdown-icon h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-          </button>
-          <div id="guides-dropdown-menu" class="nav-dropdown-menu" role="menu" aria-label="Guides pages" data-dropdown-menu>
-            <a href="/blog?category=Guides&tag=Halo%20Wars%201" class="nav-dropdown-item" role="menuitem">
-              Halo Wars 1
-            </a>
-            <a href="/blog?category=Guides&tag=Halo%20Wars%202" class="nav-dropdown-item" role="menuitem">
-              Halo Wars 2
-            </a>
-            <a href="/blog?category=Guides&tag=Age%20of%20Empires%20II" class="nav-dropdown-item" role="menuitem">
-              Age of Empires II
-            </a>
-            <a href="/blog?category=Guides&tag=Age%20of%20Empires%20IV" class="nav-dropdown-item" role="menuitem">
-              Age of Empires IV
-            </a>
-            <a href="/blog?category=Guides&tag=Age%20of%20Mythology" class="nav-dropdown-item" role="menuitem">
-              Age of Mythology
-            </a>
-          </div>
-        </div>
         <a
           href="/blog"
           class={`nav-link ${isBlog ? 'nav-link-active' : ''}`}
