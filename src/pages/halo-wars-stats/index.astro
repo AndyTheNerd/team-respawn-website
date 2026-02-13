@@ -484,7 +484,10 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
           </div>
           <div id="overview-content" class="hidden">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-              <h2 id="player-gamertag" class="text-2xl sm:text-3xl font-bold text-cyan-300 font-mono"></h2>
+              <h2 class="text-2xl sm:text-3xl font-bold text-cyan-300 font-mono">
+                <span id="player-gamertag"></span>
+                <span id="player-last-seen" class="ml-2 text-xs text-gray-400 font-normal hidden"></span>
+              </h2>
               <button
                 id="profile-share-btn"
                 type="button"
@@ -894,6 +897,8 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
     const profileShareCopyImageBtn = document.getElementById('profile-share-copy-image') as HTMLButtonElement | null;
     const profileShareLinks = profileShareModal?.querySelectorAll('.profile-share-link') ?? document.querySelectorAll('.profile-share-link');
     const profileShareBtn = document.getElementById('profile-share-btn') as HTMLButtonElement | null;
+    const playerGamertagEl = document.getElementById('player-gamertag') as HTMLElement | null;
+    const playerLastSeenEl = document.getElementById('player-last-seen') as HTMLElement | null;
     const leadersToggle = document.getElementById('leaders-toggle') as HTMLButtonElement | null;
     const leadersPanel = document.getElementById('leaders-panel') as HTMLElement | null;
     const leadersChevron = leadersToggle?.querySelector('.leaders-chevron') as HTMLElement | null;
@@ -1021,12 +1026,18 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
       durationMs?: number;
     };
 
+    const MIN_HW2_VIDEO_DURATION_MS = 4 * 60 * 1000;
+
     const hw2VideoList: VideoCta[] = (() => {
       if (!videoDataEl?.textContent) return [];
       try {
         const parsed = JSON.parse(videoDataEl.textContent);
         if (!Array.isArray(parsed)) return [];
-        return parsed.filter((entry) => entry?.title && entry?.videoId);
+        return parsed.filter((entry) => {
+          if (!entry?.title || !entry?.videoId) return false;
+          if (!Number.isFinite(entry.durationMs)) return false;
+          return entry.durationMs >= MIN_HW2_VIDEO_DURATION_MS;
+        });
       } catch {
         return [];
       }
@@ -1163,6 +1174,31 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
         videoThumbEl.alt = `Team Respawn video: ${choice.title}`;
       }
       videoCtaEl.classList.remove('hidden');
+    }
+
+    function updateLastSeen(matches: any[]) {
+      if (!playerLastSeenEl) return;
+      if (!Array.isArray(matches) || matches.length === 0) {
+        playerLastSeenEl.textContent = '';
+        playerLastSeenEl.classList.add('hidden');
+        return;
+      }
+      let latestMs = 0;
+      matches.forEach((match) => {
+        const iso = match?.MatchStartDate?.ISO8601Date;
+        if (!iso) return;
+        const ms = Date.parse(iso);
+        if (!Number.isFinite(ms)) return;
+        if (ms > latestMs) latestMs = ms;
+      });
+      if (!latestMs) {
+        playerLastSeenEl.textContent = '';
+        playerLastSeenEl.classList.add('hidden');
+        return;
+      }
+      const label = new Date(latestMs).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      playerLastSeenEl.textContent = `Last seen ${label}`;
+      playerLastSeenEl.classList.remove('hidden');
     }
 
     type ShareData = {
@@ -2244,7 +2280,6 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
       profileShareModal.classList.add('hidden');
       profileShareModal.setAttribute('aria-hidden', 'true');
       updateShareBodyState();
-      activeProfileShareData = null;
       setProfileShareStatus('');
     }
 
@@ -3974,7 +4009,11 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
       hideStaleBanner();
       resultsContainer.classList.remove('hidden');
 
-      document.getElementById('player-gamertag')!.textContent = gamertag;
+      if (playerGamertagEl) playerGamertagEl.textContent = gamertag;
+      if (playerLastSeenEl) {
+        playerLastSeenEl.textContent = '';
+        playerLastSeenEl.classList.add('hidden');
+      }
       currentGamertag = gamertag;
       activeProfileShareData = null;
       if (profileShareBtn) {
@@ -4021,6 +4060,7 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
       }
 
       const matchesList = matchesResult.ok ? (matchesResult.data.Results || []) : [];
+      updateLastSeen(matchesList);
 
       if (statsResult.ok) {
         renderOverview(statsResult.data, gamertag);
