@@ -559,7 +559,7 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
                 id="leaders-toggle"
                 type="button"
                 class="w-full flex items-center justify-between text-left"
-                aria-expanded="true"
+                aria-expanded="false"
                 aria-controls="leaders-panel"
               >
                 <span class="flex items-center">
@@ -567,12 +567,12 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
                   Leader Usage
                 </span>
                 <span class="flex items-center gap-1 text-xs text-cyan-300/80">
-                  <span>Collapse</span>
+                  <span>Expand</span>
                   <span class="leaders-chevron transition-transform duration-200" aria-hidden="true">&#x25BC;</span>
                 </span>
               </button>
             </h2>
-            <div id="leaders-panel">
+            <div id="leaders-panel" class="hidden">
               <div id="leaders-skeleton" class="rounded-xl p-6 border border-cyan-500/20 space-y-3" style="background: rgba(30, 41, 59, 0.4);">
               <div class="h-8 bg-slate-700/50 rounded animate-pulse"></div>
               <div class="h-8 bg-slate-700/50 rounded animate-pulse w-5/6"></div>
@@ -581,6 +581,46 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
               </div>
               <div id="leaders-content" class="hidden rounded-xl p-6 border border-cyan-500/20" style="background: rgba(30, 41, 59, 0.4);"></div>
               <div id="leaders-error" class="hidden"></div>
+            </div>
+          </section>
+
+        <!-- Match Insights -->
+          <section id="match-insights">
+            <h2 class="text-xl font-bold text-cyan-300 mb-4">
+              <button
+                id="insights-toggle"
+                type="button"
+                class="w-full flex items-center justify-between text-left"
+                aria-expanded="false"
+                aria-controls="insights-panel"
+              >
+                <span class="flex items-center">
+                  <i class="fas fa-chart-bar text-cyan-400 mr-2" aria-hidden="true"></i>
+                  Match Insights
+                </span>
+                <span class="flex items-center gap-1 text-xs text-cyan-300/80">
+                  <span>Expand</span>
+                  <span class="insights-chevron transition-transform duration-200" aria-hidden="true">&#x25BC;</span>
+                </span>
+              </button>
+            </h2>
+            <div id="insights-panel" class="hidden">
+              <div id="insights-skeleton" class="rounded-xl p-6 border border-cyan-500/20 space-y-3" style="background: rgba(30, 41, 59, 0.4);">
+                <div class="h-48 bg-slate-700/50 rounded animate-pulse"></div>
+              </div>
+              <div id="insights-content" class="hidden rounded-xl p-6 border border-cyan-500/20" style="background: rgba(30, 41, 59, 0.4);">
+                <div class="mb-3">
+                  <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Match Duration Distribution</h3>
+                  <p class="text-xs text-gray-500 mt-1">Distribution of match durations across recent matches</p>
+                </div>
+                <div class="relative" style="height: 280px;">
+                  <canvas id="chart-duration-distribution"></canvas>
+                </div>
+                <div id="duration-chart-empty" class="hidden text-center py-8 text-sm text-gray-500">
+                  Not enough match data to generate chart.
+                </div>
+              </div>
+              <div id="insights-error" class="hidden"></div>
             </div>
           </section>
 
@@ -907,6 +947,7 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
     const SHARE_HERO_GRADIENT = 'linear-gradient(120deg, rgba(2, 6, 23, 0.85), rgba(6, 40, 64, 0.85))';
 
     if (leadersToggle && leadersPanel) {
+      const leadersLabel = leadersToggle.querySelector('.flex.items-center.gap-1 > span:first-child') as HTMLElement | null;
       const isExpanded = leadersToggle.getAttribute('aria-expanded') === 'true';
       if (leadersChevron) leadersChevron.style.transform = isExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
 
@@ -915,6 +956,25 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
         leadersToggle.setAttribute('aria-expanded', expandedNow ? 'false' : 'true');
         leadersPanel.classList.toggle('hidden', expandedNow);
         if (leadersChevron) leadersChevron.style.transform = expandedNow ? 'rotate(0deg)' : 'rotate(180deg)';
+        if (leadersLabel) leadersLabel.textContent = expandedNow ? 'Expand' : 'Collapse';
+      });
+    }
+
+    const insightsToggle = document.getElementById('insights-toggle') as HTMLButtonElement | null;
+    const insightsPanel = document.getElementById('insights-panel') as HTMLElement | null;
+    const insightsChevron = insightsToggle?.querySelector('.insights-chevron') as HTMLElement | null;
+
+    if (insightsToggle && insightsPanel) {
+      const insightsLabel = insightsToggle.querySelector('.flex.items-center.gap-1 > span:first-child') as HTMLElement | null;
+      const isExpanded = insightsToggle.getAttribute('aria-expanded') === 'true';
+      if (insightsChevron) insightsChevron.style.transform = isExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
+
+      insightsToggle.addEventListener('click', () => {
+        const expandedNow = insightsToggle.getAttribute('aria-expanded') === 'true';
+        insightsToggle.setAttribute('aria-expanded', expandedNow ? 'false' : 'true');
+        insightsPanel.classList.toggle('hidden', expandedNow);
+        if (insightsChevron) insightsChevron.style.transform = expandedNow ? 'rotate(0deg)' : 'rotate(180deg)';
+        if (insightsLabel) insightsLabel.textContent = expandedNow ? 'Expand' : 'Collapse';
       });
     }
 
@@ -1278,6 +1338,34 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
     let shareStatusTimeout: number | null = null;
     let profileShareStatusTimeout: number | null = null;
     let html2canvasPromise: Promise<any> | null = null;
+    let chartJsPromise: Promise<any> | null = null;
+    const chartInstances = new Map<string, any>();
+
+    async function ensureChartJs(): Promise<any> {
+      const existing = (window as any).Chart;
+      if (existing) return existing;
+      if (chartJsPromise) return chartJsPromise;
+      chartJsPromise = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js';
+        script.onload = () => resolve((window as any).Chart);
+        script.onerror = () => {
+          chartJsPromise = null;
+          reject(new Error('Failed to load Chart.js'));
+        };
+        document.head.appendChild(script);
+      });
+      return chartJsPromise;
+    }
+
+    function destroyChart(canvasId: string) {
+      const existing = chartInstances.get(canvasId);
+      if (existing) {
+        existing.destroy();
+        chartInstances.delete(canvasId);
+      }
+    }
+
     let mapImageRequestId = 0;
     let pendingDeepLinkMatchId: string | null = null;
     let shareMapImageDataUrl: string | null = null;
@@ -2611,6 +2699,109 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
       leadersContent.classList.remove('hidden');
     }
 
+    async function renderDurationDistribution(matches: any[]) {
+      hideSkeleton('insights');
+      const insightsContent = document.getElementById('insights-content')!;
+      const emptyEl = document.getElementById('duration-chart-empty');
+      const canvasEl = document.getElementById('chart-duration-distribution') as HTMLCanvasElement | null;
+
+      if (!canvasEl) return;
+
+      const durations: number[] = [];
+      (Array.isArray(matches) ? matches : []).forEach((match: any) => {
+        const iso = match.PlayerMatchDuration || match.MatchDuration;
+        if (!iso) return;
+        const parts = parseDurationParts(iso);
+        const totalMinutes = (parts.weeks * 7 + parts.days) * 1440
+          + parts.hours * 60
+          + parts.minutes
+          + parts.seconds / 60;
+        if (totalMinutes > 0) durations.push(totalMinutes);
+      });
+
+      if (durations.length < 2) {
+        canvasEl.parentElement!.classList.add('hidden');
+        if (emptyEl) emptyEl.classList.remove('hidden');
+        insightsContent.classList.remove('hidden');
+        return;
+      }
+
+      if (emptyEl) emptyEl.classList.add('hidden');
+      canvasEl.parentElement!.classList.remove('hidden');
+
+      const bucketSize = 5;
+      const maxDuration = Math.ceil(Math.max(...durations) / bucketSize) * bucketSize;
+      const bucketCount = Math.max(1, maxDuration / bucketSize);
+      const buckets = new Array(bucketCount).fill(0);
+
+      durations.forEach((d) => {
+        const index = Math.min(Math.floor(d / bucketSize), bucketCount - 1);
+        buckets[index]++;
+      });
+
+      const labels = buckets.map((_, i) => {
+        const start = i * bucketSize;
+        const end = start + bucketSize;
+        return `${start}-${end}m`;
+      });
+
+      try {
+        const Chart = await ensureChartJs();
+        destroyChart('chart-duration-distribution');
+
+        const chart = new Chart(canvasEl, {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [{
+              label: 'Matches',
+              data: buckets,
+              backgroundColor: 'rgba(6, 182, 212, 0.6)',
+              borderColor: 'rgba(6, 182, 212, 1)',
+              borderWidth: 1,
+              borderRadius: 4,
+            }],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                titleColor: '#f8fafc',
+                bodyColor: '#e2e8f0',
+                borderColor: 'rgba(6, 182, 212, 0.3)',
+                borderWidth: 1,
+              },
+            },
+            scales: {
+              x: {
+                grid: { color: 'rgba(148, 163, 184, 0.1)' },
+                ticks: { color: '#94a3b8', font: { size: 11 } },
+                title: { display: true, text: 'Duration', color: '#94a3b8' },
+              },
+              y: {
+                beginAtZero: true,
+                grid: { color: 'rgba(148, 163, 184, 0.1)' },
+                ticks: { color: '#94a3b8', font: { size: 11 }, stepSize: 1, precision: 0 },
+                title: { display: true, text: 'Matches', color: '#94a3b8' },
+              },
+            },
+          },
+        });
+        chartInstances.set('chart-duration-distribution', chart);
+      } catch {
+        canvasEl.parentElement!.classList.add('hidden');
+        if (emptyEl) {
+          emptyEl.textContent = 'Unable to load chart library.';
+          emptyEl.classList.remove('hidden');
+        }
+      }
+
+      insightsContent.classList.remove('hidden');
+    }
+
     function renderMatches(matches: any[], gamertag: string) {
       hideSkeleton('matches');
       const matchesContent = document.getElementById('matches-content')!;
@@ -2759,6 +2950,16 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
                       </button>
                       <button
                         type="button"
+                        class="match-graphs-toggle flex-[3] flex items-center justify-between rounded-md border border-cyan-500/20 bg-slate-800/40 px-3 py-2 text-xs text-cyan-300 hover:text-cyan-200 hover:border-cyan-400/40 transition-colors"
+                        data-match-id="${matchId}"
+                        aria-controls="match-graphs-${matchId}"
+                        aria-expanded="false"
+                      >
+                        <span>Match Graphs</span>
+                        <span class="match-graphs-chevron transition-transform duration-200" aria-hidden="true">&#x25BC;</span>
+                      </button>
+                      <button
+                        type="button"
                         class="match-pin-toggle flex-[1] inline-flex items-center justify-center rounded-md border px-3 py-2 text-xs ${pinClass} transition-colors"
                         aria-pressed="${isPinned ? 'true' : 'false'}"
                         title="${pinLabel} match"
@@ -2787,6 +2988,7 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
                     </div>
                     <div id="${detailsId}" class="match-details mt-3 hidden" data-loaded="false"></div>
                     <div id="${timelineId}" class="match-timeline mt-3 hidden" data-loaded="false"></div>
+                    <div id="match-graphs-${matchId}" class="match-graphs mt-3 hidden" data-loaded="false"></div>
                   ` : ''}
                 </div>
               </div>
@@ -3893,6 +4095,452 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
         timelineEl.setAttribute('data-loaded', 'true');
       };
 
+      // --- Chart render functions for per-match graphs ---
+
+      function renderUnitsChart(Chart: any, matchId: string, matchResult: any) {
+        const canvasEl = document.getElementById(`chart-units-${matchId}`) as HTMLCanvasElement | null;
+        const wrapperEl = canvasEl?.closest('[id^="graph-units"]');
+        const emptyEl = wrapperEl?.querySelector('.chart-empty') as HTMLElement | null;
+        if (!canvasEl) return;
+
+        const playersRaw = matchResult?.Players;
+        const players = Array.isArray(playersRaw)
+          ? playersRaw
+          : (playersRaw && typeof playersRaw === 'object')
+            ? Object.values(playersRaw)
+            : [];
+
+        type UnitRow = { name: string; teamId: number; destroyed: number; lost: number };
+        const rows: UnitRow[] = [];
+
+        players.forEach((p: any) => {
+          if (p.PlayerType === 3) return;
+          const gamertag = p?.HumanPlayerId?.Gamertag
+            || p?.Gamertag
+            || (typeof p?.HumanPlayerId === 'string' ? p.HumanPlayerId : '')
+            || 'Unknown';
+          let destroyed = 0;
+          let lost = 0;
+          const unitStats = p?.UnitStats;
+          if (unitStats && typeof unitStats === 'object') {
+            Object.values(unitStats).forEach((u: any) => {
+              destroyed += u?.TotalDestroyed || 0;
+              lost += u?.TotalLost || 0;
+            });
+          }
+          rows.push({ name: gamertag, teamId: p.TeamId ?? 0, destroyed, lost });
+        });
+
+        if (rows.length === 0) {
+          canvasEl.parentElement!.classList.add('hidden');
+          if (emptyEl) emptyEl.classList.remove('hidden');
+          return;
+        }
+
+        rows.sort((a, b) => a.teamId - b.teamId);
+
+        const labels = rows.map(r => r.name);
+        const destroyedData = rows.map(r => r.destroyed);
+        const lostData = rows.map(r => -r.lost);
+
+        destroyChart(`chart-units-${matchId}`);
+        const chart = new Chart(canvasEl, {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [
+              {
+                label: 'Units Destroyed',
+                data: destroyedData,
+                backgroundColor: 'rgba(34, 197, 94, 0.6)',
+                borderColor: 'rgba(34, 197, 94, 1)',
+                borderWidth: 1,
+                borderRadius: 4,
+              },
+              {
+                label: 'Units Lost',
+                data: lostData,
+                backgroundColor: 'rgba(239, 68, 68, 0.6)',
+                borderColor: 'rgba(239, 68, 68, 1)',
+                borderWidth: 1,
+                borderRadius: 4,
+              },
+            ],
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                labels: { color: '#94a3b8', font: { size: 11 } },
+                position: 'top',
+              },
+              tooltip: {
+                backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                titleColor: '#f8fafc',
+                bodyColor: '#e2e8f0',
+                borderColor: 'rgba(6, 182, 212, 0.3)',
+                borderWidth: 1,
+                callbacks: {
+                  label: (context: any) => {
+                    const value = Math.abs(context.raw);
+                    return `${context.dataset.label}: ${value}`;
+                  },
+                },
+              },
+            },
+            scales: {
+              x: {
+                grid: { color: 'rgba(148, 163, 184, 0.1)' },
+                ticks: {
+                  color: '#94a3b8',
+                  callback: (value: any) => Math.abs(Number(value)),
+                },
+                title: { display: true, text: 'Units', color: '#94a3b8' },
+              },
+              y: {
+                grid: { color: 'rgba(148, 163, 184, 0.1)' },
+                ticks: { color: '#e2e8f0', font: { size: 11 } },
+              },
+            },
+          },
+        });
+        chartInstances.set(`chart-units-${matchId}`, chart);
+      }
+
+      function renderActivityChart(
+        Chart: any,
+        matchId: string,
+        entries: TimelineEntry[],
+        playersByIndex: Map<number, PlayerInfo>
+      ) {
+        const canvasEl = document.getElementById(`chart-activity-${matchId}`) as HTMLCanvasElement | null;
+        const wrapperEl = canvasEl?.closest('[id^="graph-activity"]');
+        const emptyEl = wrapperEl?.querySelector('.chart-empty') as HTMLElement | null;
+        if (!canvasEl) return;
+
+        if (entries.length === 0) {
+          canvasEl.parentElement!.classList.add('hidden');
+          if (emptyEl) emptyEl.classList.remove('hidden');
+          return;
+        }
+
+        const maxTimeMs = entries.reduce((max, e) => Math.max(max, e.timeMs), 0);
+        const bucketSizeMs = 60000;
+        const bucketCount = Math.max(1, Math.ceil(maxTimeMs / bucketSizeMs));
+
+        const playerBuckets = new Map<number, number[]>();
+        const sorted = [...entries].sort((a, b) => a.timeMs - b.timeMs);
+
+        sorted.forEach((entry) => {
+          if (entry.playerIndex == null) return;
+          if (!playerBuckets.has(entry.playerIndex)) {
+            playerBuckets.set(entry.playerIndex, new Array(bucketCount).fill(0));
+          }
+          const bucketIdx = Math.min(Math.floor(entry.timeMs / bucketSizeMs), bucketCount - 1);
+          playerBuckets.get(entry.playerIndex)![bucketIdx]++;
+        });
+
+        playerBuckets.forEach((buckets) => {
+          for (let i = 1; i < buckets.length; i++) {
+            buckets[i] += buckets[i - 1];
+          }
+        });
+
+        const labels = Array.from({ length: bucketCount }, (_, i) => {
+          const minutes = i + 1;
+          return minutes < 60 ? `${minutes}m` : `${Math.floor(minutes / 60)}h${minutes % 60 ? `${minutes % 60}m` : ''}`;
+        });
+
+        const team1Colors = ['rgba(56, 189, 248, 0.9)', 'rgba(14, 165, 233, 0.9)', 'rgba(2, 132, 199, 0.9)'];
+        const team2Colors = ['rgba(251, 113, 133, 0.9)', 'rgba(244, 63, 94, 0.9)', 'rgba(225, 29, 72, 0.9)'];
+        let t1idx = 0, t2idx = 0;
+
+        const datasets = [...playerBuckets.entries()]
+          .sort((a, b) => a[0] - b[0])
+          .map(([playerIndex, cumulativeBuckets]) => {
+            const info = playersByIndex.get(playerIndex);
+            const name = info?.name || `Player ${playerIndex}`;
+            const teamId = info?.teamId;
+            let color: string;
+            if (teamId === 1) {
+              color = team1Colors[t1idx % team1Colors.length];
+              t1idx++;
+            } else if (teamId === 2) {
+              color = team2Colors[t2idx % team2Colors.length];
+              t2idx++;
+            } else {
+              color = 'rgba(148, 163, 184, 0.7)';
+            }
+
+            return {
+              label: name,
+              data: cumulativeBuckets,
+              borderColor: color,
+              backgroundColor: color.replace(/[\d.]+\)$/, '0.1)'),
+              fill: false,
+              tension: 0.3,
+              pointRadius: 0,
+              borderWidth: 2,
+            };
+          });
+
+        destroyChart(`chart-activity-${matchId}`);
+        const chart = new Chart(canvasEl, {
+          type: 'line',
+          data: { labels, datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+              legend: {
+                labels: { color: '#94a3b8', font: { size: 10 }, usePointStyle: true, pointStyle: 'line' },
+                position: 'top',
+              },
+              tooltip: {
+                backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                titleColor: '#f8fafc',
+                bodyColor: '#e2e8f0',
+                borderColor: 'rgba(6, 182, 212, 0.3)',
+                borderWidth: 1,
+              },
+            },
+            scales: {
+              x: {
+                grid: { color: 'rgba(148, 163, 184, 0.08)' },
+                ticks: { color: '#94a3b8', font: { size: 10 }, maxTicksLimit: 15 },
+                title: { display: true, text: 'Match Time', color: '#94a3b8' },
+              },
+              y: {
+                beginAtZero: true,
+                grid: { color: 'rgba(148, 163, 184, 0.08)' },
+                ticks: { color: '#94a3b8', font: { size: 10 } },
+                title: { display: true, text: 'Cumulative Actions', color: '#94a3b8' },
+              },
+            },
+          },
+        });
+        chartInstances.set(`chart-activity-${matchId}`, chart);
+      }
+
+      function renderBuildOrderChart(
+        Chart: any,
+        matchId: string,
+        entries: TimelineEntry[],
+        playersByIndex: Map<number, PlayerInfo>
+      ) {
+        const canvasEl = document.getElementById(`chart-buildorder-${matchId}`) as HTMLCanvasElement | null;
+        const wrapperEl = canvasEl?.closest('[id^="graph-buildorder"]');
+        const emptyEl = wrapperEl?.querySelector('.chart-empty') as HTMLElement | null;
+        if (!canvasEl) return;
+
+        const buildKinds = new Set(['building', 'unit', 'upgrade', 'unit_upgrade', 'power']);
+        const buildEntries = entries.filter(e => e.playerIndex != null && buildKinds.has(e.kind));
+
+        if (buildEntries.length === 0) {
+          canvasEl.parentElement!.classList.add('hidden');
+          if (emptyEl) emptyEl.classList.remove('hidden');
+          return;
+        }
+
+        const playerIndices = [...new Set(buildEntries.map(e => e.playerIndex!))].sort((a, b) => a - b);
+        const playerRowMap = new Map<number, number>();
+        const playerLabels: string[] = [];
+        playerIndices.forEach((idx, row) => {
+          playerRowMap.set(idx, row);
+          const info = playersByIndex.get(idx);
+          playerLabels.push(info?.name || `Player ${idx}`);
+        });
+
+        const kindColorMap: Record<string, string> = {
+          building:     'rgba(52, 211, 153, 0.8)',
+          upgrade:      'rgba(251, 146, 60, 0.8)',
+          unit:         'rgba(56, 189, 248, 0.8)',
+          unit_upgrade: 'rgba(45, 212, 191, 0.8)',
+          power:        'rgba(251, 191, 36, 0.8)',
+        };
+
+        const kindLabelMap: Record<string, string> = {
+          building: 'Building',
+          upgrade: 'Upgrade',
+          unit: 'Unit',
+          unit_upgrade: 'Tech',
+          power: 'Power',
+        };
+
+        const dataByKind = new Map<string, Array<{ x: number; y: number; label: string }>>();
+
+        buildEntries.forEach((entry) => {
+          const row = playerRowMap.get(entry.playerIndex!);
+          if (row == null) return;
+          const kind = entry.kind;
+          if (!dataByKind.has(kind)) dataByKind.set(kind, []);
+          dataByKind.get(kind)!.push({
+            x: entry.timeMs / 60000,
+            y: row,
+            label: entry.label,
+          });
+        });
+
+        const datasets = [...dataByKind.entries()].map(([kind, points]) => ({
+          label: kindLabelMap[kind] || kind,
+          data: points,
+          backgroundColor: kindColorMap[kind] || 'rgba(148, 163, 184, 0.6)',
+          borderColor: (kindColorMap[kind] || 'rgba(148, 163, 184, 0.6)').replace(/[\d.]+\)$/, '1)'),
+          borderWidth: 1,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+        }));
+
+        const dynamicHeight = Math.max(200, playerLabels.length * 50);
+        canvasEl.parentElement!.style.height = `${dynamicHeight}px`;
+
+        destroyChart(`chart-buildorder-${matchId}`);
+        const chart = new Chart(canvasEl, {
+          type: 'scatter',
+          data: { datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                labels: { color: '#94a3b8', font: { size: 10 }, usePointStyle: true },
+                position: 'top',
+              },
+              tooltip: {
+                backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                titleColor: '#f8fafc',
+                bodyColor: '#e2e8f0',
+                borderColor: 'rgba(6, 182, 212, 0.3)',
+                borderWidth: 1,
+                callbacks: {
+                  title: (items: any[]) => {
+                    if (!items.length) return '';
+                    const pt = items[0].raw;
+                    const playerName = playerLabels[pt.y] || '';
+                    const time = formatMatchClock(pt.x * 60000);
+                    return `${playerName} @ ${time}`;
+                  },
+                  label: (context: any) => context.raw.label || '',
+                },
+              },
+            },
+            scales: {
+              x: {
+                grid: { color: 'rgba(148, 163, 184, 0.08)' },
+                ticks: {
+                  color: '#94a3b8',
+                  font: { size: 10 },
+                  callback: (value: any) => `${Math.round(Number(value))}m`,
+                },
+                title: { display: true, text: 'Match Time (minutes)', color: '#94a3b8' },
+              },
+              y: {
+                grid: { color: 'rgba(148, 163, 184, 0.08)' },
+                ticks: {
+                  color: '#e2e8f0',
+                  font: { size: 10 },
+                  callback: (_: any, index: number) => playerLabels[index] || '',
+                  stepSize: 1,
+                },
+                min: -0.5,
+                max: playerLabels.length - 0.5,
+                reverse: false,
+              },
+            },
+          },
+        });
+        chartInstances.set(`chart-buildorder-${matchId}`, chart);
+      }
+
+      const loadMatchGraphs = async (matchId: string, graphsEl: HTMLElement) => {
+        if (graphsEl.getAttribute('data-loading') === 'true') return;
+        graphsEl.setAttribute('data-loading', 'true');
+        graphsEl.innerHTML = `
+          <div class="space-y-3 animate-pulse">
+            <div class="h-48 bg-slate-700/50 rounded"></div>
+            <div class="h-48 bg-slate-700/50 rounded"></div>
+            <div class="h-48 bg-slate-700/50 rounded"></div>
+          </div>
+        `;
+
+        const [eventResult, matchResultData] = await Promise.all([
+          fetchMatchEventsPayload(matchId),
+          (async () => {
+            const cached = matchResultCache.get(matchId);
+            if (cached) return cached;
+            const result = await getMatchResult(matchId);
+            if (result.ok) {
+              matchResultCache.set(matchId, result.data);
+              return result.data;
+            }
+            return null;
+          })(),
+        ]);
+
+        let Chart: any;
+        try {
+          Chart = await ensureChartJs();
+        } catch {
+          graphsEl.removeAttribute('data-loading');
+          graphsEl.innerHTML = `<div class="text-sm text-red-300 py-2">Unable to load chart library.</div>`;
+          return;
+        }
+
+        graphsEl.innerHTML = `
+          <div class="space-y-6">
+            <div id="graph-units-${matchId}" class="rounded-lg border border-slate-700/40 bg-slate-800/40 p-3">
+              <h4 class="text-[10px] uppercase tracking-wider text-gray-400 mb-2">Units Destroyed vs Lost</h4>
+              <div class="relative" style="height: 240px;">
+                <canvas id="chart-units-${matchId}"></canvas>
+              </div>
+              <div class="chart-empty hidden text-center py-4 text-xs text-gray-500">No unit data available.</div>
+            </div>
+            <div id="graph-activity-${matchId}" class="rounded-lg border border-slate-700/40 bg-slate-800/40 p-3">
+              <h4 class="text-[10px] uppercase tracking-wider text-gray-400 mb-2">Activity Over Time</h4>
+              <div class="relative" style="height: 240px;">
+                <canvas id="chart-activity-${matchId}"></canvas>
+              </div>
+              <div class="chart-empty hidden text-center py-4 text-xs text-gray-500">No event data available.</div>
+            </div>
+            <div id="graph-buildorder-${matchId}" class="rounded-lg border border-slate-700/40 bg-slate-800/40 p-3">
+              <h4 class="text-[10px] uppercase tracking-wider text-gray-400 mb-2">Build Order Timeline</h4>
+              <div class="relative" style="height: 200px;">
+                <canvas id="chart-buildorder-${matchId}"></canvas>
+              </div>
+              <div class="chart-empty hidden text-center py-4 text-xs text-gray-500">No build data available.</div>
+            </div>
+          </div>
+        `;
+
+        renderUnitsChart(Chart, matchId, matchResultData);
+
+        if (eventResult.ok) {
+          const { entries, playersByIndex } = await buildEventEntries(eventResult.data);
+          const filteredEntries = entries.filter((entry) => {
+            if (entry.playerIndex == null) return true;
+            const info = playersByIndex.get(entry.playerIndex);
+            return info?.playerType !== 3;
+          });
+          renderActivityChart(Chart, matchId, filteredEntries, playersByIndex);
+          renderBuildOrderChart(Chart, matchId, filteredEntries, playersByIndex);
+        } else {
+          const activityEmpty = graphsEl.querySelector(`#graph-activity-${matchId} .chart-empty`) as HTMLElement | null;
+          const buildEmpty = graphsEl.querySelector(`#graph-buildorder-${matchId} .chart-empty`) as HTMLElement | null;
+          const activityCanvas = document.getElementById(`chart-activity-${matchId}`)?.parentElement;
+          const buildCanvas = document.getElementById(`chart-buildorder-${matchId}`)?.parentElement;
+          if (activityCanvas) activityCanvas.classList.add('hidden');
+          if (buildCanvas) buildCanvas.classList.add('hidden');
+          if (activityEmpty) activityEmpty.classList.remove('hidden');
+          if (buildEmpty) buildEmpty.classList.remove('hidden');
+        }
+
+        graphsEl.removeAttribute('data-loading');
+        graphsEl.setAttribute('data-loaded', 'true');
+      };
+
       matchesContent.querySelectorAll('.match-details-toggle').forEach(btn => {
         btn.addEventListener('click', async () => {
           const matchId = (btn as HTMLElement).getAttribute('data-match-id') || '';
@@ -3915,6 +4563,14 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
               if (timelineEl) timelineEl.classList.add('hidden');
               const timelineChevron = timelineToggle.querySelector('.match-timeline-chevron') as HTMLElement | null;
               if (timelineChevron) timelineChevron.style.transform = 'rotate(0deg)';
+            }
+            const graphsToggle = matchesContent.querySelector(`.match-graphs-toggle[data-match-id="${matchId}"]`) as HTMLElement | null;
+            if (graphsToggle && graphsToggle.getAttribute('aria-expanded') === 'true') {
+              graphsToggle.setAttribute('aria-expanded', 'false');
+              const graphsEl = document.getElementById(`match-graphs-${matchId}`);
+              if (graphsEl) graphsEl.classList.add('hidden');
+              const graphsChevron = graphsToggle.querySelector('.match-graphs-chevron') as HTMLElement | null;
+              if (graphsChevron) graphsChevron.style.transform = 'rotate(0deg)';
             }
           }
 
@@ -3948,12 +4604,60 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
               const detailsChevron = detailsToggle.querySelector('.match-details-chevron') as HTMLElement | null;
               if (detailsChevron) detailsChevron.style.transform = 'rotate(0deg)';
             }
+            const graphsToggle = matchesContent.querySelector(`.match-graphs-toggle[data-match-id="${matchId}"]`) as HTMLElement | null;
+            if (graphsToggle && graphsToggle.getAttribute('aria-expanded') === 'true') {
+              graphsToggle.setAttribute('aria-expanded', 'false');
+              const graphsEl = document.getElementById(`match-graphs-${matchId}`);
+              if (graphsEl) graphsEl.classList.add('hidden');
+              const graphsChevron = graphsToggle.querySelector('.match-graphs-chevron') as HTMLElement | null;
+              if (graphsChevron) graphsChevron.style.transform = 'rotate(0deg)';
+            }
           }
 
           if (isExpanded) return;
 
           if (timelineEl.getAttribute('data-loaded') === 'true') return;
           await loadMatchTimeline(matchId, timelineEl);
+        });
+      });
+
+      matchesContent.querySelectorAll('.match-graphs-toggle').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const matchId = (btn as HTMLElement).getAttribute('data-match-id') || '';
+          if (!matchId) return;
+          const graphsId = `match-graphs-${matchId}`;
+          const graphsEl = document.getElementById(graphsId);
+          const chevron = (btn as HTMLElement).querySelector('.match-graphs-chevron') as HTMLElement | null;
+          if (!graphsEl) return;
+
+          const isExpanded = (btn as HTMLElement).getAttribute('aria-expanded') === 'true';
+          (btn as HTMLElement).setAttribute('aria-expanded', isExpanded ? 'false' : 'true');
+          graphsEl.classList.toggle('hidden', isExpanded);
+          if (chevron) chevron.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
+
+          if (!isExpanded) {
+            const detailsToggle = matchesContent.querySelector(`.match-details-toggle[data-match-id="${matchId}"]`) as HTMLElement | null;
+            if (detailsToggle && detailsToggle.getAttribute('aria-expanded') === 'true') {
+              detailsToggle.setAttribute('aria-expanded', 'false');
+              const detailsEl = document.getElementById(`match-details-${matchId}`);
+              if (detailsEl) detailsEl.classList.add('hidden');
+              const detailsChevron = detailsToggle.querySelector('.match-details-chevron') as HTMLElement | null;
+              if (detailsChevron) detailsChevron.style.transform = 'rotate(0deg)';
+            }
+            const timelineToggle = matchesContent.querySelector(`.match-timeline-toggle[data-match-id="${matchId}"]`) as HTMLElement | null;
+            if (timelineToggle && timelineToggle.getAttribute('aria-expanded') === 'true') {
+              timelineToggle.setAttribute('aria-expanded', 'false');
+              const timelineEl = document.getElementById(`match-timeline-${matchId}`);
+              if (timelineEl) timelineEl.classList.add('hidden');
+              const timelineChevron = timelineToggle.querySelector('.match-timeline-chevron') as HTMLElement | null;
+              if (timelineChevron) timelineChevron.style.transform = 'rotate(0deg)';
+            }
+          }
+
+          if (isExpanded) return;
+
+          if (graphsEl.getAttribute('data-loaded') === 'true') return;
+          await loadMatchGraphs(matchId, graphsEl);
         });
       });
 
@@ -4027,11 +4731,16 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
       showSkeleton('overview');
       showSkeleton('ranked');
       showSkeleton('leaders');
+      showSkeleton('insights');
       showSkeleton('matches');
+
+      chartInstances.forEach((chart) => chart.destroy());
+      chartInstances.clear();
 
       document.getElementById('overview-content')!.classList.add('hidden');
       document.getElementById('ranked-content')!.classList.add('hidden');
       document.getElementById('leaders-content')!.classList.add('hidden');
+      document.getElementById('insights-content')!.classList.add('hidden');
       document.getElementById('matches-content')!.classList.add('hidden');
 
       addRecentSearch(gamertag);
@@ -4075,6 +4784,7 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
       if (matchesResult.ok) {
         renderMatches(matchesList, gamertag);
         renderLeaderUsage(matchesList);
+        renderDurationDistribution(matchesList);
         if (pendingDeepLinkMatchId) {
           const targetMatchId = pendingDeepLinkMatchId;
           pendingDeepLinkMatchId = null;
@@ -4085,6 +4795,7 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
         showError(document.getElementById('matches-error')!, matchesResult.error);
         hideSkeleton('leaders');
         showError(document.getElementById('leaders-error')!, matchesResult.error);
+        hideSkeleton('insights');
       }
     }
 
