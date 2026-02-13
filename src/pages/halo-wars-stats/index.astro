@@ -1320,6 +1320,8 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
     const STORAGE_KEY = 'hw2-recent-searches';
     const PINNED_MATCHES_KEY = 'hw2-pinned-matches';
     const MAX_RECENT = 5;
+    const MATCHES_PER_PAGE = 5;
+    const MATCH_FETCH_COUNT = 100;
     const CURRENT_SEASON = [...seasonData].sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0];
     let leaderPowerMapCache: Record<string, string> | null = null;
     let leaderPowerNormalizedMap: Map<string, string> | null = null;
@@ -1332,6 +1334,7 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
     let techMapLoading: Promise<Record<string, string> | null> | null = null;
     let currentMatches: any[] = [];
     let currentGamertag = '';
+    let currentMatchPage = 1;
     let matchLookup = new Map<string, any>();
     let matchEventsCache = new Map<string, any>();
     let matchResultCache = new Map<string, any>();
@@ -2829,6 +2832,13 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
       insightsContent.classList.remove('hidden');
     }
 
+    function getOrderedMatches(matches: any[], pinnedSet: Set<string> = new Set(getPinnedMatches())) {
+      const safeMatches = Array.isArray(matches) ? matches : [];
+      const pinnedMatches = safeMatches.filter((m: any) => m?.MatchId && pinnedSet.has(m.MatchId));
+      const unpinnedMatches = safeMatches.filter((m: any) => !m?.MatchId || !pinnedSet.has(m.MatchId));
+      return [...pinnedMatches, ...unpinnedMatches];
+    }
+
     function renderMatches(matches: any[], gamertag: string) {
       hideSkeleton('matches');
       const matchesContent = document.getElementById('matches-content')!;
@@ -2841,17 +2851,68 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
       });
 
       if (!matches || matches.length === 0) {
+        currentMatchPage = 1;
         matchesContent.innerHTML = '<p class="text-gray-500 text-sm text-center py-6">No recent matches found.</p>';
         matchesContent.classList.remove('hidden');
         return;
       }
 
       const pinnedSet = new Set(getPinnedMatches());
-      const pinnedMatches = currentMatches.filter((m: any) => m?.MatchId && pinnedSet.has(m.MatchId));
-      const unpinnedMatches = currentMatches.filter((m: any) => !m?.MatchId || !pinnedSet.has(m.MatchId));
-      const displayMatches = [...pinnedMatches, ...unpinnedMatches];
+      const displayMatches = getOrderedMatches(currentMatches, pinnedSet);
+      const totalMatchPages = Math.max(1, Math.ceil(displayMatches.length / MATCHES_PER_PAGE));
+      currentMatchPage = Math.max(1, Math.min(currentMatchPage, totalMatchPages));
 
-      matchesContent.innerHTML = '<div class="divide-y divide-slate-700/30">' + displayMatches.map((match: any, i: number) => {
+      const pageStart = (currentMatchPage - 1) * MATCHES_PER_PAGE;
+      const pageMatches = displayMatches.slice(pageStart, pageStart + MATCHES_PER_PAGE);
+      const PAGE_WINDOW = 5;
+      const halfWindow = Math.floor(PAGE_WINDOW / 2);
+      let windowStart = Math.max(1, currentMatchPage - halfWindow);
+      let windowEnd = Math.min(totalMatchPages, windowStart + PAGE_WINDOW - 1);
+      windowStart = Math.max(1, windowEnd - PAGE_WINDOW + 1);
+      const pageButtonsHtml = Array.from({ length: windowEnd - windowStart + 1 }, (_unused, index) => {
+        const pageNum = windowStart + index;
+        const isActive = pageNum === currentMatchPage;
+        const activeClass = isActive
+          ? 'bg-cyan-500/90 text-slate-950 border-cyan-300'
+          : 'bg-slate-800/50 text-cyan-200 border-cyan-500/20 hover:border-cyan-400/40 hover:text-cyan-100';
+        return `
+          <button
+            type="button"
+            class="matches-page-btn rounded-md border px-3 py-1.5 text-xs font-semibold transition-colors ${activeClass}"
+            data-page-target="${pageNum}"
+            ${isActive ? 'aria-current="page"' : ''}
+          >
+            ${pageNum}
+          </button>
+        `;
+      }).join('');
+      const paginationHtml = totalMatchPages > 1
+        ? `
+          <div class="flex items-center justify-between gap-3 border-t border-slate-700/40 px-4 py-3">
+            <button
+              type="button"
+              class="matches-page-btn rounded-md border border-cyan-500/20 bg-slate-800/50 px-3 py-1.5 text-xs font-semibold text-cyan-200 transition-colors hover:border-cyan-400/40 hover:text-cyan-100 disabled:opacity-40 disabled:cursor-not-allowed"
+              data-page-target="${currentMatchPage - 1}"
+              ${currentMatchPage <= 1 ? 'disabled' : ''}
+            >
+              Previous
+            </button>
+            <div class="flex items-center gap-2" aria-label="Matches pages">
+              ${pageButtonsHtml}
+            </div>
+            <button
+              type="button"
+              class="matches-page-btn rounded-md border border-cyan-500/20 bg-slate-800/50 px-3 py-1.5 text-xs font-semibold text-cyan-200 transition-colors hover:border-cyan-400/40 hover:text-cyan-100 disabled:opacity-40 disabled:cursor-not-allowed"
+              data-page-target="${currentMatchPage + 1}"
+              ${currentMatchPage >= totalMatchPages ? 'disabled' : ''}
+            >
+              Next
+            </button>
+          </div>
+        `
+        : '';
+
+      matchesContent.innerHTML = '<div class="divide-y divide-slate-700/30">' + pageMatches.map((match: any, i: number) => {
         const gtLower = gamertag.toLowerCase();
         const player = match.Players?.find((p: any) => {
           const id = p.HumanPlayerId || p.Gamertag || p.PlayerId;
@@ -3021,8 +3082,19 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
               </div>
             </div>
         `;
-      }).join('') + '</div>';
+      }).join('') + '</div>' + paginationHtml;
       matchesContent.classList.remove('hidden');
+      matchesContent.querySelectorAll('[data-page-target]').forEach((node) => {
+        const button = node as HTMLButtonElement;
+        button.addEventListener('click', () => {
+          const targetPage = Number(button.getAttribute('data-page-target'));
+          if (!Number.isFinite(targetPage)) return;
+          if (targetPage < 1 || targetPage > totalMatchPages) return;
+          if (targetPage === currentMatchPage) return;
+          currentMatchPage = targetPage;
+          renderMatches(currentMatches, currentGamertag);
+        });
+      });
       matchesContent.querySelectorAll('img[data-fallback]').forEach((node) => {
         const img = node as HTMLImageElement;
         img.addEventListener('error', () => {
@@ -4930,6 +5002,18 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
 
     function revealDeepLinkedMatch(matchId: string) {
       if (!matchId) return;
+      const orderedMatches = getOrderedMatches(currentMatches);
+      const targetIndex = orderedMatches.findIndex((match: any) => match?.MatchId === matchId);
+      if (targetIndex < 0) {
+        showError(globalError, { type: 'not_found', message: 'Match not found in recent history.' });
+        return;
+      }
+      const targetPage = Math.floor(targetIndex / MATCHES_PER_PAGE) + 1;
+      if (targetPage !== currentMatchPage) {
+        currentMatchPage = targetPage;
+        renderMatches(currentMatches, currentGamertag);
+      }
+
       const matchesContent = document.getElementById('matches-content');
       if (!matchesContent) return;
       const selectorId = matchId.replace(/"/g, '\\"');
@@ -4965,6 +5049,7 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
         playerLastSeenEl.classList.add('hidden');
       }
       currentGamertag = gamertag;
+      currentMatchPage = 1;
       activeProfileShareData = null;
       if (profileShareBtn) {
         profileShareBtn.classList.add('hidden');
@@ -4993,7 +5078,7 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
 
       const [statsResult, matchesResult, seasonResult] = await Promise.all([
         getPlayerStats(gamertag),
-        getPlayerMatches(gamertag),
+        getPlayerMatches(gamertag, MATCH_FETCH_COUNT),
         CURRENT_SEASON ? getPlayerSeasonStats(gamertag, CURRENT_SEASON.id) : Promise.resolve({ ok: false, error: { type: 'unknown', message: 'No season configured.' } }),
       ]);
 

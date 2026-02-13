@@ -79,6 +79,8 @@ function shouldUseCache(errorType: string): boolean {
   return errorType === 'rate_limit' || errorType === 'network' || errorType === 'auth';
 }
 
+const MATCHES_API_PAGE_SIZE = 25;
+
 type CachedMatchRow = {
   match_id: string;
   match_type: number | null;
@@ -173,6 +175,33 @@ async function loadCachedMatches(db: D1Database, gamertag: string, count: number
     payload: { Results: results, _meta: { cached: true, fetchedAt: latestIngested || null } },
     fetchedAt: latestIngested || null,
   };
+}
+
+async function fetchMatchesBatched(gamertag: string, count: number, apiKeys: string[]) {
+  const encoded = encodeURIComponent(gamertag);
+  const collected: MatchSummary[] = [];
+  let start = 0;
+
+  while (collected.length < count) {
+    const remaining = count - collected.length;
+    const batchCount = Math.min(remaining, MATCHES_API_PAGE_SIZE);
+    const url = `${HALO_ENDPOINTS.HALO_API_URL}/players/${encoded}/matches?start=${start}&count=${batchCount}`;
+    const batchResult = await fetchWithKeyFallback<{ Results: MatchSummary[] }>(url, apiKeys);
+
+    if (!batchResult.ok) {
+      if (collected.length > 0) break;
+      return batchResult;
+    }
+
+    const batchMatches = Array.isArray(batchResult.data?.Results) ? batchResult.data.Results : [];
+    if (batchMatches.length === 0) break;
+
+    collected.push(...batchMatches);
+    if (batchMatches.length < batchCount) break;
+    start += batchMatches.length;
+  }
+
+  return { ok: true as const, data: { Results: collected.slice(0, count) } };
 }
 
 async function storeMatchSummaries(db: Env['DB'], gamertag: string, matches: MatchSummary[]) {
@@ -332,7 +361,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   }
 
   const gamertag = payload?.gamertag?.trim() || '';
-  const count = Math.min(Math.max(Number(payload?.count ?? 10), 1), 25);
+  const count = Math.min(Math.max(Number(payload?.count ?? 10), 1), 100);
   if (!gamertag) {
     return errorResponse({ type: 'unknown', message: 'Gamertag is required.' }, 400);
   }
@@ -340,9 +369,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   const apiKeys = [env.HW2_API_KEY_1, env.HW2_API_KEY_2, env.HW2_API_KEY_3].filter(
     (key): key is string => Boolean(key)
   );
-  const encoded = encodeURIComponent(gamertag);
-  const url = `${HALO_ENDPOINTS.HALO_API_URL}/players/${encoded}/matches?start=0&count=${count}`;
-  const result = await fetchWithKeyFallback<{ Results: MatchSummary[] }>(url, apiKeys);
+  const result = await fetchMatchesBatched(gamertag, count, apiKeys);
   if (!result.ok) {
     if (shouldUseCache(result.error.type)) {
       const cached = await loadCachedMatches(env.DB, gamertag, count);

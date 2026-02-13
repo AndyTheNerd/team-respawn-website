@@ -150,11 +150,42 @@ export async function getMatchEvents(matchId: string): Promise<ApiResult<WithMet
   );
 }
 
+const MATCHES_API_PAGE_SIZE = 25;
+
+async function fetchMatchesBatched(
+  gamertag: string,
+  count: number
+): Promise<ApiResult<WithMeta<{ Results: MatchResult[] }>>> {
+  const encoded = encodeURIComponent(gamertag);
+  const collected: MatchResult[] = [];
+  let start = 0;
+
+  while (collected.length < count) {
+    const batchCount = Math.min(count - collected.length, MATCHES_API_PAGE_SIZE);
+    const result = await fetchWithKeyFallback<{ Results: MatchResult[] }>(
+      `${HALO_API_URL}/players/${encoded}/matches?start=${start}&count=${batchCount}`
+    );
+
+    if (!result.ok) {
+      if (collected.length > 0) break;
+      return result;
+    }
+
+    const batch = Array.isArray(result.data?.Results) ? result.data.Results : [];
+    if (batch.length === 0) break;
+
+    collected.push(...batch);
+    if (batch.length < batchCount) break;
+    start += batch.length;
+  }
+
+  return { ok: true, data: { Results: collected.slice(0, count) } };
+}
+
 export async function getPlayerMatches(
   gamertag: string,
   count = 10
 ): Promise<ApiResult<WithMeta<{ Results: MatchResult[] }>>> {
-  const encoded = encodeURIComponent(gamertag);
   return fetchFromPagesFunction<WithMeta<{ Results: MatchResult[] }>>(
     `${PAGES_API_BASE}/matches`,
     {
@@ -162,10 +193,7 @@ export async function getPlayerMatches(
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ gamertag, count }),
     },
-    () =>
-      fetchWithKeyFallback<WithMeta<{ Results: MatchResult[] }>>(
-        `${HALO_API_URL}/players/${encoded}/matches?start=0&count=${count}`
-      )
+    () => fetchMatchesBatched(gamertag, count)
   );
 }
 
