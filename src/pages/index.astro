@@ -44,6 +44,42 @@ import StorehausPromo from '../components/StorehausPromo.astro';
 
     <main id="home-content" role="main" aria-label="Home content">
       <section
+        id="hw2-announcement-banner"
+        class="mb-6 rounded-xl border border-cyan-400/30 bg-cyan-500/10 backdrop-blur-sm"
+        role="region"
+        aria-label="Halo Wars 2 stats announcement"
+      >
+        <div class="px-4 py-3 sm:px-5">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex items-start gap-3">
+              <i class="fas fa-bullhorn text-cyan-300 mt-0.5" aria-hidden="true"></i>
+              <p class="text-sm sm:text-base text-cyan-100">
+                <span class="font-semibold text-white">New:</span>
+                Explore the HW2 Stats page to search any gamertag, check CSR, and review recent matches.
+              </p>
+            </div>
+            <div class="flex items-center gap-2 sm:flex-shrink-0">
+              <a
+                href="/halo-wars-stats"
+                class="inline-flex items-center justify-center gap-2 rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-semibold px-4 py-2 transition-colors duration-200 whitespace-nowrap"
+              >
+                Open HW2 Stats
+              </a>
+              <button
+                id="hw2-announcement-dismiss"
+                type="button"
+                class="inline-flex items-center justify-center rounded-lg border border-cyan-300/30 text-cyan-200 hover:text-white hover:bg-cyan-400/10 px-3 py-2 text-sm transition-colors duration-200"
+                aria-label="Dismiss Halo Wars 2 stats announcement"
+                title="Dismiss"
+              >
+                <i class="fas fa-times" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section
         id="twitch-embed-container"
         class="mb-8 rounded-xl overflow-hidden border-2 border-purple-600 bg-gradient-to-br from-gray-800 via-gray-800 to-purple-900/20 shadow-2xl opacity-100 visible translate-y-0"
       >
@@ -144,4 +180,27 @@ import StorehausPromo from '../components/StorehausPromo.astro';
   <script src="/js/project-card.js" is:inline></script>
   <script src="/js/home-content.js" is:inline></script>
   <script src="/js/main.js" is:inline></script>
+  <script is:inline>
+    (() => {
+      const storageKey = 'tr_hw2_announcement_dismissed_v1';
+      const banner = document.getElementById('hw2-announcement-banner');
+      const dismissButton = document.getElementById('hw2-announcement-dismiss');
+
+      if (!banner || !dismissButton) return;
+
+      try {
+        if (window.localStorage.getItem(storageKey) === '1') {
+          banner.classList.add('hidden');
+          return;
+        }
+      } catch {}
+
+      dismissButton.addEventListener('click', () => {
+        banner.classList.add('hidden');
+        try {
+          window.localStorage.setItem(storageKey, '1');
+        } catch {}
+      });
+    })();
+  </script>
 </BaseLayout>
