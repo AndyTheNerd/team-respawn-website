@@ -18,7 +18,13 @@ function normalizeLeaderboard(value: string): string | null {
     'qm_4v4',
     'qm_ffa',
   ]);
+  const aliases: Record<string, string> = {
+    'rm_1v1_elo': 'rm_1v1',
+    'rm_2v2_elo': 'rm_2v2',
+    'rm_3v3_elo': 'rm_3v3',
+  };
   if (!value) return null;
+  if (aliases[value]) return aliases[value];
   return allowed.has(value) ? value : null;
 }
 

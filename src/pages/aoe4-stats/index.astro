@@ -3,7 +3,14 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import SidePanel from '../../components/SidePanel.astro';
-import StorehausPromo from '../../components/StorehausPromo.astro';
+import { videos } from '../../data/videos';
+
+const aoe4VideoPool = videos
+  .filter((video) => video.privacy === 'Public')
+  .filter((video) => /\bage of empires 4\b|\baoe4\b|\bage 4\b/i.test(video.title))
+  .filter((video) => Number.isFinite(video.durationMs) && (video.durationMs as number) >= 4 * 60 * 1000)
+  .map(({ title, publishedAt, videoId, durationMs }) => ({ title, publishedAt, videoId, durationMs }));
+const aoe4VideoJson = JSON.stringify(aoe4VideoPool).replace(/</g, '\\u003c');
 ---
 <BaseLayout
   title="AoE4 Stats - Team Respawn"
@@ -35,6 +42,18 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
       .table th { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: .08em; border-bottom: 1px solid rgba(148,163,184,.35); padding: 10px 10px 10px 0; }
       .table td { border-bottom: 1px solid rgba(148,163,184,.22); padding: 10px 10px 10px 0; }
       .table tr:last-child td { border-bottom: 0; }
+      .mode-table { width: max(100%, 1180px); table-layout: fixed; }
+      .mode-table th { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: .08em; border-bottom: 1px solid rgba(148,163,184,.35); padding: 10px 12px; }
+      .mode-table td { border-bottom: 1px solid rgba(148,163,184,.22); padding: 11px 14px; vertical-align: middle; }
+      .mode-table tr:last-child td { border-bottom: 0; }
+      .mode-table th, .mode-table td { white-space: nowrap; }
+      .mode-table td:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .meta-table { width: max(100%, 1040px); table-layout: fixed; }
+      .meta-table th { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: .08em; border-bottom: 1px solid rgba(148,163,184,.35); padding: 10px 12px; }
+      .meta-table td { border-bottom: 1px solid rgba(148,163,184,.22); padding: 10px 12px; vertical-align: middle; }
+      .meta-table tr:last-child td { border-bottom: 0; }
+      .meta-table th, .meta-table td { white-space: nowrap; }
+      .meta-table td:last-child { overflow: hidden; text-overflow: ellipsis; }
     </style>
   </Fragment>
 
@@ -52,9 +71,10 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
 
       <section class="mb-8">
         <div class="max-w-3xl mx-auto flex flex-col sm:flex-row gap-3">
-          <div class="relative flex-1">
+          <div id="player-input-wrap" class="relative flex-1">
             <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-amber-300/70" aria-hidden="true"></i>
             <input id="player-input" type="text" placeholder="Enter player name..." class="w-full pl-11 pr-4 py-3 rounded-lg bg-slate-800/60 border border-amber-500/35 text-white placeholder-gray-400 focus:outline-none focus:border-amber-300 focus:ring-1 focus:ring-amber-300/50 font-mono" />
+            <div id="name-candidates" class="hidden absolute left-0 right-0 top-full mt-2 z-30"></div>
           </div>
           <button id="search-btn" type="button" class="px-6 py-3 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-semibold">Search</button>
         </div>
@@ -95,14 +115,10 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
         </section>
 
         <section class="aoe4-card p-6">
-          <h2 class="text-xl font-bold text-amber-200 mb-3"><i class="fas fa-chess-rook text-amber-300 mr-2"></i>Civilization Performance</h2>
-          <div id="civs-loading" class="h-28 animate-pulse bg-slate-700/50 rounded"></div>
-          <div id="civs-content" class="hidden"></div>
-          <div id="civs-error" class="hidden"></div>
-        </section>
-
-        <section class="aoe4-card p-6">
-          <h2 class="text-xl font-bold text-amber-200 mb-3"><i class="fas fa-chart-line text-amber-300 mr-2"></i>Insights</h2>
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+            <h2 class="text-xl font-bold text-amber-200"><i class="fas fa-chart-line text-amber-300 mr-2"></i>Insights</h2>
+            <select id="insights-mode-select" class="hidden rounded-md border border-amber-500/35 bg-slate-800/70 px-2 py-1 text-xs text-amber-100"></select>
+          </div>
           <div id="insights-loading" class="h-56 animate-pulse bg-slate-700/50 rounded"></div>
           <div id="insights-content" class="hidden grid grid-cols-1 xl:grid-cols-2 gap-6">
             <div><h3 class="text-xs text-gray-400 uppercase mb-2">Rating Trend</h3><div class="relative" style="height:250px;"><canvas id="rating-chart"></canvas></div><p id="rating-chart-empty" class="hidden text-xs text-gray-500 mt-2">Not enough rating history.</p></div>
@@ -111,28 +127,89 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
           <div id="insights-error" class="hidden"></div>
         </section>
 
-        <section class="aoe4-card p-6">
-          <h2 class="text-xl font-bold text-amber-200 mb-3"><i class="fas fa-flask text-amber-300 mr-2"></i>Advanced Match Stats (Experimental)</h2>
-          <div id="advanced-loading" class="h-20 animate-pulse bg-slate-700/50 rounded"></div>
-          <div id="advanced-content" class="hidden"></div>
-          <div id="advanced-error" class="hidden"></div>
-        </section>
-
-        <section class="aoe4-card p-6">
-          <h2 class="text-xl font-bold text-amber-200 mb-3"><i class="fas fa-globe text-amber-300 mr-2"></i>Global Meta Snapshot (RM Solo)</h2>
-          <div id="meta-loading" class="h-32 animate-pulse bg-slate-700/50 rounded"></div>
-          <div id="meta-content" class="hidden space-y-6"></div>
-          <div id="meta-error" class="hidden"></div>
-        </section>
-
-        <section class="aoe4-card p-6">
-          <h2 class="text-xl font-bold text-amber-200 mb-3"><i class="fas fa-history text-amber-300 mr-2"></i>Recent Matches</h2>
-          <div id="matches-loading" class="h-32 animate-pulse bg-slate-700/50 rounded"></div>
-          <div id="matches-content" class="hidden space-y-3"></div>
+        <section id="recent-matches">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+            <h2 class="text-xl font-bold text-amber-200">
+              <i class="fas fa-history text-amber-300 mr-2" aria-hidden="true"></i>Recent Matches
+            </h2>
+            <select id="matches-mode-select" class="hidden rounded-md border border-amber-500/35 bg-slate-800/70 px-2 py-1 text-xs text-amber-100"></select>
+          </div>
+          <div id="matches-loading" class="rounded-xl border border-amber-500/20 overflow-hidden" style="background: rgba(30, 41, 59, 0.4);">
+            <div class="space-y-0">
+              <div class="p-4 border-b border-slate-700/30 animate-pulse"><div class="flex gap-4 items-center"><div class="flex-1 space-y-2"><div class="h-4 bg-slate-700/50 rounded w-1/3"></div><div class="h-3 bg-slate-700/50 rounded w-2/3"></div></div></div></div>
+              <div class="p-4 border-b border-slate-700/30 animate-pulse"><div class="flex gap-4 items-center"><div class="flex-1 space-y-2"><div class="h-4 bg-slate-700/50 rounded w-1/3"></div><div class="h-3 bg-slate-700/50 rounded w-2/3"></div></div></div></div>
+              <div class="p-4 animate-pulse"><div class="flex gap-4 items-center"><div class="flex-1 space-y-2"><div class="h-4 bg-slate-700/50 rounded w-1/3"></div><div class="h-3 bg-slate-700/50 rounded w-2/3"></div></div></div></div>
+            </div>
+          </div>
+          <div id="matches-content" class="hidden rounded-xl border border-amber-500/20 overflow-visible" style="background: rgba(30, 41, 59, 0.4);"></div>
           <div id="matches-error" class="hidden"></div>
         </section>
       </div>
-      <StorehausPromo class="mt-10" />
+
+      <section id="meta-panel" class="aoe4-card p-6 mt-8">
+        <div class="flex items-center justify-between gap-3 mb-3">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+            <h2 class="text-xl font-bold text-amber-200"><i class="fas fa-globe text-amber-300 mr-2"></i>Global Meta Snapshot</h2>
+            <select id="meta-leaderboard-select" class="rounded-md border border-amber-500/35 bg-slate-800/70 px-2 py-1 text-xs text-amber-100">
+              <option value="rm_solo">Ranked Solo (RM Solo)</option>
+              <option value="rm_2v2">Ranked Team 2v2</option>
+              <option value="rm_3v3">Ranked Team 3v3</option>
+              <option value="rm_4v4">Ranked Team 4v4</option>
+            </select>
+          </div>
+          <button
+            id="meta-toggle"
+            type="button"
+            class="inline-flex items-center justify-center rounded-md border border-amber-500/35 bg-amber-500/10 px-3 py-2 text-amber-200 hover:text-amber-100 hover:border-amber-400/50 transition-colors"
+            aria-expanded="true"
+            aria-controls="meta-panel-body"
+            aria-label="Collapse global meta snapshot"
+            title="Collapse"
+          >
+            <span class="meta-chevron transition-transform duration-200" aria-hidden="true">&#x25BC;</span>
+          </button>
+        </div>
+        <div id="meta-panel-body" class="space-y-6">
+          <div id="meta-loading" class="h-32 animate-pulse bg-slate-700/50 rounded"></div>
+          <div id="meta-content" class="hidden space-y-6"></div>
+          <div id="meta-error" class="hidden"></div>
+        </div>
+      </section>
+
+      <section id="aoe4-video-cta" class="mt-8 hidden">
+        <div class="rounded-xl border border-cyan-500/20 bg-slate-900/40 p-4 flex flex-col sm:flex-row sm:items-center gap-4">
+          <div class="flex items-center gap-4">
+            <img
+              id="aoe4-video-thumb"
+              src=""
+              alt=""
+              class="w-24 h-14 object-cover rounded-md border border-slate-700/60"
+              loading="lazy"
+            />
+            <div>
+              <p class="text-[10px] uppercase tracking-wider text-cyan-300">Watch a Team Respawn AoE4 video</p>
+              <p id="aoe4-video-title" class="text-sm text-gray-300"></p>
+              <p id="aoe4-video-date" class="text-[11px] text-gray-500"></p>
+            </div>
+          </div>
+          <div class="sm:ml-auto">
+            <a
+              id="aoe4-video-link"
+              href="#"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center justify-center rounded-md border border-cyan-500/40 bg-cyan-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-cyan-200 hover:bg-cyan-500/20 hover:text-cyan-100 transition-colors"
+            >
+              Watch
+              <svg class="ml-2" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M5 11L11 5"></path>
+                <path d="M6.5 5H11V9.5"></path>
+              </svg>
+            </a>
+          </div>
+        </div>
+        <script type="application/json" id="aoe4-video-data" set:html={aoe4VideoJson}></script>
+      </section>
     </main>
     <Footer />
   </div>
@@ -141,16 +218,33 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
   <script src="/js/tabs.js" is:inline></script>
   <script src="/js/dropdowns.js" is:inline></script>
   <script>
-    import { searchAoe4Players, getAoe4Player, getAoe4PlayerGames, getAoe4LastGame, getAoe4MetaStats } from '../../utils/aoe4Api';
+    import { searchAoe4Players, getAoe4Player, getAoe4PlayerGames, getAoe4MetaStats } from '../../utils/aoe4Api';
 
     const RECENT_KEY = 'aoe4-recent-searches';
     const MODE_PRIORITY = ['rm_solo','rm_team','rm_1v1_elo','rm_2v2_elo','rm_3v3_elo','qm_1v1','qm_2v2','qm_3v3','qm_4v4','qm_ffa','rm_1v1'];
 
     const input = document.getElementById('player-input') as HTMLInputElement;
+    const inputWrap = document.getElementById('player-input-wrap') as HTMLElement;
     const button = document.getElementById('search-btn') as HTMLButtonElement;
     const recentEl = document.getElementById('recent-searches') as HTMLElement;
+    const candidatesEl = document.getElementById('name-candidates') as HTMLElement;
     const resultsEl = document.getElementById('results') as HTMLElement;
     const globalError = document.getElementById('global-error') as HTMLElement;
+    const videoCtaEl = document.getElementById('aoe4-video-cta') as HTMLElement | null;
+    const videoThumbEl = document.getElementById('aoe4-video-thumb') as HTMLImageElement | null;
+    const videoTitleEl = document.getElementById('aoe4-video-title') as HTMLElement | null;
+    const videoDateEl = document.getElementById('aoe4-video-date') as HTMLElement | null;
+    const videoLinkEl = document.getElementById('aoe4-video-link') as HTMLAnchorElement | null;
+    const videoDataEl = document.getElementById('aoe4-video-data') as HTMLScriptElement | null;
+    const metaToggleBtn = document.getElementById('meta-toggle') as HTMLButtonElement;
+    const metaChevron = metaToggleBtn?.querySelector('.meta-chevron') as HTMLElement | null;
+    const metaPanelBody = document.getElementById('meta-panel-body') as HTMLElement;
+    const metaLeaderboardSelect = document.getElementById('meta-leaderboard-select') as HTMLSelectElement;
+    const metaLoading = document.getElementById('meta-loading') as HTMLElement;
+    const metaContent = document.getElementById('meta-content') as HTMLElement;
+    const metaError = document.getElementById('meta-error') as HTMLElement;
+    const insightsModeSelect = document.getElementById('insights-mode-select') as HTMLSelectElement;
+    const matchesModeSelect = document.getElementById('matches-mode-select') as HTMLSelectElement;
 
     const ids = {
       playerName: document.getElementById('player-name') as HTMLElement,
@@ -171,10 +265,9 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
     const sections = {
       overview: ['overview-loading','overview-content','overview-error'],
       modes: ['modes-loading','modes-content','modes-error'],
-      civs: ['civs-loading','civs-content','civs-error'],
+
       insights: ['insights-loading','insights-content','insights-error'],
-      advanced: ['advanced-loading','advanced-content','advanced-error'],
-      meta: ['meta-loading','meta-content','meta-error'],
+
       matches: ['matches-loading','matches-content','matches-error'],
     } as const;
 
@@ -182,6 +275,18 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
     let ratingChart: any = null;
     let durationChart: any = null;
     let activeProfileId: number | null = null;
+    let activeNameQuery = '';
+    let activeNameCandidates: any[] = [];
+    let suggestTimer: number | null = null;
+    let suggestSeq = 0;
+    let currentMetaLeaderboard = 'rm_solo';
+
+    const MATCHES_PER_PAGE = 10;
+    let currentMatchPage = 1;
+    let currentMatchGames: any[] = [];
+    let currentMatchProfileId = 0;
+    let currentModes: any[] = [];
+    let insightsGamesCache = new Map<string, any>();
 
     const escapeHtml = (v: unknown) => typeof v === 'string'
       ? v.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')
@@ -191,6 +296,30 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
     const date = (v: unknown) => typeof v === 'string' && v ? new Date(v).toLocaleString() : '-';
     const dur = (s: unknown) => typeof s === 'number' && s > 0 ? `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}` : '-';
     const title = (v: string) => v.replace(/_/g,' ').replace(/\b\w/g, (c) => c.toUpperCase());
+    const normalizeName = (v: unknown) => String(v || '').trim().toLowerCase();
+
+    type VideoCta = {
+      title: string;
+      publishedAt: string;
+      videoId: string;
+      durationMs?: number;
+    };
+
+    const MIN_AOE4_VIDEO_DURATION_MS = 4 * 60 * 1000;
+    const aoe4VideoList: VideoCta[] = (() => {
+      if (!videoDataEl?.textContent) return [];
+      try {
+        const parsed = JSON.parse(videoDataEl.textContent);
+        if (!Array.isArray(parsed)) return [];
+        return parsed.filter((entry) => {
+          if (!entry?.title || !entry?.videoId) return false;
+          if (!Number.isFinite(entry.durationMs)) return false;
+          return entry.durationMs >= MIN_AOE4_VIDEO_DURATION_MS;
+        });
+      } catch {
+        return [];
+      }
+    })();
 
     function showError(el: HTMLElement, message: string) {
       el.className = 'rounded-lg border border-red-500/35 bg-red-900/20 text-red-200 px-4 py-3 text-sm';
@@ -208,6 +337,249 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
       (document.getElementById(contentId) as HTMLElement).classList.remove('hidden');
     }
 
+    function modeName(key: string) {
+      const map: Record<string, string> = {
+        rm_solo: 'Ranked Solo',
+        rm_team: 'Ranked Team',
+        rm_1v1_elo: '1v1 Elo',
+        rm_2v2_elo: '2v2 Elo',
+        rm_3v3_elo: '3v3 Elo',
+        qm_1v1: 'QM 1v1',
+        qm_2v2: 'QM 2v2',
+        qm_3v3: 'QM 3v3',
+        qm_4v4: 'QM 4v4',
+        qm_ffa: 'QM FFA',
+        rm_1v1: 'Ranked 1v1 (Legacy)',
+        rm_2v2: 'Ranked Team 2v2',
+        rm_3v3: 'Ranked Team 3v3',
+        rm_4v4: 'Ranked Team 4v4',
+      };
+      return map[key] || title(key);
+    }
+
+    function setMetaCollapsed(collapsed: boolean) {
+      metaPanelBody.classList.toggle('hidden', collapsed);
+      metaToggleBtn.setAttribute('aria-expanded', String(!collapsed));
+      metaToggleBtn.setAttribute('aria-label', collapsed ? 'Expand global meta snapshot' : 'Collapse global meta snapshot');
+      metaToggleBtn.title = collapsed ? 'Expand' : 'Collapse';
+      if (metaChevron) metaChevron.style.transform = collapsed ? 'rotate(0deg)' : 'rotate(180deg)';
+    }
+
+    function formatVideoDuration(durationMs?: number): string {
+      if (!durationMs || !Number.isFinite(durationMs)) return '';
+      const totalSeconds = Math.max(0, Math.round(durationMs / 1000));
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      if (hours > 0) {
+        return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      }
+      return `${minutes}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    function renderVideoCta() {
+      if (!videoCtaEl) return;
+      if (aoe4VideoList.length === 0) {
+        videoCtaEl.classList.add('hidden');
+        return;
+      }
+      const choice = aoe4VideoList[Math.floor(Math.random() * aoe4VideoList.length)];
+      const url = `https://www.youtube.com/watch?v=${choice.videoId}`;
+      const thumb = `https://img.youtube.com/vi/${choice.videoId}/hqdefault.jpg`;
+      const dateLabel = choice.publishedAt
+        ? new Date(choice.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+        : '';
+      const durationLabel = formatVideoDuration(choice.durationMs);
+      const metaBits = [dateLabel ? `Published ${dateLabel}` : '', durationLabel ? `Duration ${durationLabel}` : '']
+        .filter(Boolean)
+        .join(' | ');
+
+      if (videoTitleEl) videoTitleEl.textContent = choice.title;
+      if (videoDateEl) videoDateEl.textContent = metaBits;
+      if (videoLinkEl) videoLinkEl.href = url;
+      if (videoThumbEl) {
+        videoThumbEl.src = thumb;
+        videoThumbEl.alt = `Team Respawn video: ${choice.title}`;
+      }
+      videoCtaEl.classList.remove('hidden');
+    }
+
+    function firstText(root: any, paths: string[]): string | null {
+      for (const path of paths) {
+        const value = path.split('.').reduce((curr: any, key) => (curr && typeof curr === 'object' ? curr[key] : undefined), root);
+        if (typeof value === 'string' && value.trim()) return value;
+      }
+      return null;
+    }
+
+    function numFromUnknown(value: unknown): number | null {
+      if (typeof value === 'number' && Number.isFinite(value)) return value;
+      if (typeof value === 'string') {
+        const cleaned = value.replace(/[^0-9.-]/g, '');
+        if (!cleaned) return null;
+        const parsed = Number(cleaned);
+        return Number.isFinite(parsed) ? parsed : null;
+      }
+      return null;
+    }
+
+    function normalizeBoardKey(value: unknown): string {
+      return String(value || '')
+        .trim()
+        .toLowerCase()
+        .replace(/[\s-]+/g, '_');
+    }
+
+    function pickModeFromObject(root: any): any | null {
+      const modeRoot = root?.modes && typeof root.modes === 'object' ? root.modes : root;
+      if (!modeRoot || typeof modeRoot !== 'object') return null;
+      const priority = ['rm_solo', 'rm_1v1', 'rm_team', 'rm_2v2', 'rm_3v3', 'rm_4v4', 'qm_1v1', 'qm_2v2'];
+      for (const key of priority) {
+        if (modeRoot[key] && typeof modeRoot[key] === 'object') return modeRoot[key];
+      }
+      const anyMode = Object.values(modeRoot).find((entry: any) => entry && typeof entry === 'object');
+      return anyMode || null;
+    }
+
+    function pickModeFromList(rows: any[]): any | null {
+      if (!rows.length) return null;
+      const priority = ['rm_solo', 'rm_1v1', 'rm_team', 'rm_2v2', 'rm_3v3', 'rm_4v4', 'qm_1v1', 'qm_2v2'];
+      const keyed = rows.map((row) => ({
+        row,
+        key: normalizeBoardKey(
+          row?.leaderboard || row?.leaderboard_key || row?.key || row?.name || row?.mode || row?.id
+        ),
+      }));
+      for (const wanted of priority) {
+        const exact = keyed.find((entry) => entry.key === wanted || entry.key.includes(wanted));
+        if (exact) return exact.row;
+      }
+      return keyed
+        .map((entry) => ({ row: entry.row, games: firstNum(entry.row, ['games_count', 'games', 'matches_count']) || 0 }))
+        .sort((a, b) => b.games - a.games)[0]?.row || null;
+    }
+
+    function candidateStats(player: any) {
+      const fromModes = pickModeFromObject(player);
+      const fromLeaderboards = pickModeFromList(Array.isArray(player?.leaderboards) ? player.leaderboards : []);
+      const fromRatings = pickModeFromList(Array.isArray(player?.ratings) ? player.ratings : []);
+      const source = fromModes || fromLeaderboards || fromRatings || player;
+
+      const wins = firstNum(source, ['wins_count', 'wins']);
+      const losses = firstNum(source, ['losses_count', 'losses']);
+      const games = firstNum(source, ['games_count', 'games', 'matches_count']) ??
+        (wins != null && losses != null ? wins + losses : null) ??
+        firstNum(player, ['games_count', 'games', 'matches_count']);
+      const rating = firstNum(source, ['rating', 'elo']) ?? firstNum(player, ['rating', 'elo']);
+      const rank = firstNum(source, ['rank']) ??
+        numFromUnknown(firstText(source, ['rank'])) ??
+        firstNum(player, ['rank']);
+
+      return { rating, rank, games };
+    }
+
+    function candidateScore(player: any) {
+      const stats = candidateStats(player);
+      const games = stats.games || 0;
+      const rating = stats.rating || 0;
+      return (games * 10000) + rating;
+    }
+
+    function renderNameCandidates(query: string, candidates: any[], selectedProfileId: number | null = null) {
+      activeNameQuery = query;
+      activeNameCandidates = [...candidates];
+      if (!candidates.length) {
+        candidatesEl.className = 'hidden absolute left-0 right-0 top-full mt-2 z-30';
+        candidatesEl.innerHTML = '';
+        return;
+      }
+
+      const cards = candidates.map((player) => {
+        const profileId = Number(player?.profile_id);
+        const validProfile = Number.isFinite(profileId);
+        const stats = candidateStats(player);
+        const rating = stats.rating;
+        const games = stats.games;
+        const rank = stats.rank;
+        const country = firstText(player, ['country', 'steam_country']);
+        const lastGame = firstText(player, ['modes.rm_solo.last_game_at', 'modes.rm_1v1.last_game_at', 'last_game_at']);
+        const isSelected = validProfile && selectedProfileId === profileId;
+        const btnClass = isSelected
+          ? 'border-amber-300/70 bg-amber-500/20'
+          : 'border-slate-700/60 bg-slate-800/45 hover:border-amber-400/60 hover:bg-slate-800/70';
+
+        return `
+          <button type="button" class="w-full text-left rounded-lg border px-3 py-3 transition ${btnClass}" data-profile-id="${validProfile ? profileId : ''}">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <p class="text-sm font-semibold text-amber-100 font-mono">${escapeHtml(player?.name || query)}</p>
+              <p class="text-xs text-gray-400">Profile: <span class="font-mono text-gray-300">${validProfile ? String(profileId) : '-'}</span></p>
+            </div>
+            <div class="mt-2 text-xs text-gray-300 grid grid-cols-2 sm:grid-cols-5 gap-2">
+              <span>Rating: <span class="font-mono text-white">${n(rating)}</span></span>
+              <span>Rank: <span class="font-mono text-white">${rank != null ? `#${n(rank)}` : '-'}</span></span>
+              <span>Games: <span class="font-mono text-white">${n(games)}</span></span>
+              <span>Country: <span class="font-mono text-white">${escapeHtml(country ? country.toUpperCase() : '-')}</span></span>
+              <span>Last: <span class="font-mono text-white">${escapeHtml(lastGame ? new Date(lastGame).toLocaleDateString() : '-')}</span></span>
+            </div>
+          </button>
+        `;
+      }).join('');
+
+      const normalizedQuery = normalizeName(query);
+      const exactNameCount = candidates.filter((player) => normalizeName(player?.name) === normalizedQuery).length;
+      const heading = exactNameCount > 1
+        ? `Multiple players named <span class="font-mono font-semibold">${escapeHtml(query)}</span> found. Pick a profile:`
+        : `Search results for <span class="font-mono font-semibold">${escapeHtml(query)}</span>. Pick a profile:`;
+
+      candidatesEl.className = 'absolute left-0 right-0 top-full mt-2 z-30 rounded-lg border border-amber-500/30 bg-slate-900/95 p-3 shadow-xl shadow-black/35';
+      candidatesEl.innerHTML = `
+        <p class="text-xs text-amber-200 mb-3">${heading}</p>
+        <div class="space-y-2 max-h-80 overflow-y-auto pr-1">${cards}</div>
+      `;
+
+      candidatesEl.querySelectorAll('button[data-profile-id]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const profileId = Number((btn as HTMLElement).getAttribute('data-profile-id'));
+          if (!Number.isFinite(profileId)) return;
+          renderNameCandidates('', []);
+          lookupByProfile(profileId);
+        });
+      });
+    }
+
+    async function updateSuggestions(rawQuery: string) {
+      const query = rawQuery.trim();
+      if (query.length < 3) {
+        renderNameCandidates('', []);
+        return;
+      }
+
+      const seq = ++suggestSeq;
+      const search = await searchAoe4Players(query, 1, false);
+      if (seq !== suggestSeq) return;
+      if (!search.ok) {
+        renderNameCandidates('', []);
+        return;
+      }
+
+      const players = Array.isArray(search.data?.players) ? search.data.players : [];
+      const normalizedQuery = normalizeName(query);
+      const candidates = [...players]
+        .filter((player: any) => player?.profile_id)
+        .sort((a: any, b: any) => {
+          const aExact = normalizeName(a?.name) === normalizedQuery ? 1 : 0;
+          const bExact = normalizeName(b?.name) === normalizedQuery ? 1 : 0;
+          if (aExact !== bExact) return bExact - aExact;
+          return candidateScore(b) - candidateScore(a);
+        });
+
+      if (candidates.length > 1) {
+        renderNameCandidates(query, candidates, null);
+      } else {
+        renderNameCandidates('', []);
+      }
+    }
+
     function resetUi() {
       hideError(globalError);
       Object.values(sections).forEach(([loadingId, contentId, errorId]) => {
@@ -218,6 +590,13 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
       resultsEl.classList.remove('hidden');
       if (ratingChart) { ratingChart.destroy(); ratingChart = null; }
       if (durationChart) { durationChart.destroy(); durationChart = null; }
+      currentMatchPage = 1;
+      currentModes = [];
+      insightsGamesCache = new Map();
+      insightsModeSelect.innerHTML = '';
+      insightsModeSelect.classList.add('hidden');
+      matchesModeSelect.innerHTML = '';
+      matchesModeSelect.classList.add('hidden');
     }
 
     function recentList(): string[] {
@@ -268,23 +647,6 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
       return chartJsPromise;
     }
 
-    function modeName(key: string) {
-      const map: Record<string, string> = {
-        rm_solo: 'Ranked Solo',
-        rm_team: 'Ranked Team',
-        rm_1v1_elo: '1v1 Elo',
-        rm_2v2_elo: '2v2 Elo',
-        rm_3v3_elo: '3v3 Elo',
-        qm_1v1: 'QM 1v1',
-        qm_2v2: 'QM 2v2',
-        qm_3v3: 'QM 3v3',
-        qm_4v4: 'QM 4v4',
-        qm_ffa: 'QM FFA',
-        rm_1v1: 'Ranked 1v1 (Legacy)',
-      };
-      return map[key] || title(key);
-    }
-
     function normalizeModes(player: any) {
       const entries = Object.entries(player?.modes || {}).map(([key, mode]: [string, any]) => ({
         key,
@@ -324,7 +686,23 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
       return players;
     }
 
-    function renderOverview(player: any, primary: any) {
+    function aggregateLifetimeTotals(modes: any[]) {
+      const totals = modes.reduce((acc, mode) => {
+        const games = typeof mode?.games === 'number' && Number.isFinite(mode.games) ? mode.games : 0;
+        const wins = typeof mode?.wins === 'number' && Number.isFinite(mode.wins) ? mode.wins : 0;
+        const losses = typeof mode?.losses === 'number' && Number.isFinite(mode.losses) ? mode.losses : 0;
+        acc.games += games;
+        acc.wins += wins;
+        acc.losses += losses;
+        return acc;
+      }, { games: 0, wins: 0, losses: 0 });
+
+      const decidedGames = totals.wins + totals.losses;
+      const winRate = decidedGames > 0 ? (totals.wins / decidedGames) * 100 : null;
+      return { ...totals, winRate };
+    }
+
+    function renderOverview(player: any, primary: any, lifetime: { games: number; wins: number; losses: number; winRate: number | null }) {
       ids.playerName.textContent = player?.name || '-';
       ids.playerId.textContent = player?.profile_id ? String(player.profile_id) : '-';
       ids.lastGameAt.textContent = date(player?.last_game_at || primary?.lastGameAt);
@@ -334,10 +712,10 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
       } else {
         ids.countryWrap.classList.add('hidden');
       }
-      ids.matches.textContent = n(primary?.games);
-      ids.wins.textContent = n(primary?.wins);
-      ids.losses.textContent = n(primary?.losses);
-      ids.winrate.textContent = pct(primary?.winRate);
+      ids.matches.textContent = n(lifetime?.games);
+      ids.wins.textContent = n(lifetime?.wins);
+      ids.losses.textContent = n(lifetime?.losses);
+      ids.winrate.textContent = pct(lifetime?.winRate);
       ids.rating.textContent = n(primary?.rating);
       ids.rank.textContent = primary?.rank != null ? `#${n(primary.rank)}` : '-';
       ids.rankLevel.textContent = primary?.rankLevel ? title(primary.rankLevel) : '-';
@@ -352,62 +730,185 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
         showLoaded('modes');
         return;
       }
-      const rows = modes.map((mode) => (
-        `<tr><td class="font-semibold text-amber-100">${escapeHtml(mode.name)}</td><td class="font-mono">${n(mode.rating)}</td><td class="font-mono">${mode.rank != null ? `#${n(mode.rank)}` : '-'}</td><td>${mode.rankLevel ? escapeHtml(title(mode.rankLevel)) : '-'}</td><td class="font-mono">${n(mode.games)}</td><td class="font-mono">${pct(mode.winRate)}</td><td class="font-mono">${mode.streak != null ? mode.streak : '-'}</td><td class="text-xs text-gray-400">${date(mode.lastGameAt)}</td></tr>`
-      )).join('');
-      content.innerHTML = `<div class="table-wrap"><table class="table"><thead><tr><th>Mode</th><th>Rating</th><th>Rank</th><th>Level</th><th>Games</th><th>Win Rate</th><th>Streak</th><th>Last Game</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+
+      const totalGames = modes.reduce((acc, mode) => acc + (Number(mode?.games) || 0), 0);
+      const totalWins = modes.reduce((acc, mode) => acc + (Number(mode?.wins) || 0), 0);
+      const totalLosses = modes.reduce((acc, mode) => acc + (Number(mode?.losses) || 0), 0);
+      const overallWinRate = (totalWins + totalLosses) > 0 ? (totalWins / (totalWins + totalLosses)) * 100 : null;
+
+      const rows = modes.map((mode) => `
+        <div class="grid grid-cols-[minmax(160px,2fr)_minmax(86px,.8fr)_minmax(90px,.9fr)_minmax(96px,1fr)_minmax(72px,.7fr)_minmax(88px,.8fr)_minmax(72px,.7fr)_minmax(150px,1.3fr)] gap-3 items-center text-sm">
+          <span class="font-semibold text-amber-100 truncate">${escapeHtml(mode.name)}</span>
+          <span class="font-mono text-right text-gray-100">${n(mode.rating)}</span>
+          <span class="font-mono text-right text-cyan-200">${mode.rank != null ? `#${n(mode.rank)}` : '-'}</span>
+          <span class="text-right text-gray-300 truncate">${mode.rankLevel ? escapeHtml(title(mode.rankLevel)) : '-'}</span>
+          <span class="font-mono text-right text-gray-100">${n(mode.games)}</span>
+          <span class="font-mono text-right text-emerald-200">${pct(mode.winRate)}</span>
+          <span class="font-mono text-right text-gray-100">${mode.streak != null ? mode.streak : '-'}</span>
+          <span class="text-right text-xs text-gray-400 truncate">${date(mode.lastGameAt)}</span>
+        </div>
+      `).join('');
+
+      content.innerHTML = `
+        <section class="rounded-lg border border-slate-700/40 bg-slate-800/40 p-4">
+          <div class="overflow-x-auto">
+            <div class="min-w-[980px]">
+              <div class="grid grid-cols-[minmax(160px,2fr)_minmax(86px,.8fr)_minmax(90px,.9fr)_minmax(96px,1fr)_minmax(72px,.7fr)_minmax(88px,.8fr)_minmax(72px,.7fr)_minmax(150px,1.3fr)] gap-3 text-[10px] uppercase tracking-wider text-gray-500 pb-2 border-b border-slate-700/40">
+                <span>Mode</span>
+                <span class="text-right">Rating</span>
+                <span class="text-right">Rank</span>
+                <span class="text-right">Level</span>
+                <span class="text-right">Games</span>
+                <span class="text-right">Win Rate</span>
+                <span class="text-right">Streak</span>
+                <span class="text-right">Last Game</span>
+              </div>
+              <div class="pt-2 space-y-1">
+                ${rows}
+              </div>
+            </div>
+          </div>
+          <div class="mt-3 border-t border-slate-700/40 pt-3 flex flex-wrap gap-4 text-[10px] uppercase tracking-wider text-gray-500">
+            <span>Modes <span class="text-amber-100">${n(modes.length)}</span></span>
+            <span>Games <span class="text-cyan-200">${n(totalGames)}</span></span>
+            <span>Wins <span class="text-emerald-200">${n(totalWins)}</span></span>
+            <span>Losses <span class="text-red-300">${n(totalLosses)}</span></span>
+            <span>Win Rate <span class="text-emerald-200">${pct(overallWinRate)}</span></span>
+          </div>
+        </section>
+      `;
       showLoaded('modes');
     }
 
-    function renderCivs(primary: any) {
-      const content = document.getElementById('civs-content') as HTMLElement;
-      const civs = Array.isArray(primary?.civs)
-        ? [...primary.civs].sort((a, b) => (b?.pick_rate || 0) - (a?.pick_rate || 0))
-        : [];
-      if (!civs.length) {
-        content.innerHTML = '<p class="text-sm text-gray-400">No civilization rows for this mode.</p>';
-        showLoaded('civs');
-        return;
-      }
-      const rows = civs.map((civ: any) => (
-        `<tr><td class="font-semibold text-amber-100">${escapeHtml(title(civ?.civilization || '-'))}</td><td class="font-mono">${pct(civ?.pick_rate)}</td><td class="font-mono">${pct(civ?.win_rate)}</td><td class="font-mono">${n(civ?.games_count || 0)}</td></tr>`
-      )).join('');
-      content.innerHTML = `<p class="text-xs text-gray-400 mb-2">Mode: <span class="text-amber-200">${escapeHtml(primary?.name || '-')}</span></p><div class="table-wrap"><table class="table"><thead><tr><th>Civilization</th><th>Pick Rate</th><th>Win Rate</th><th>Games</th></tr></thead><tbody>${rows}</tbody></table></div>`;
-      showLoaded('civs');
-    }
 
     function renderMatches(payload: any, profileId: number) {
       const content = document.getElementById('matches-content') as HTMLElement;
       const games = Array.isArray(payload?.games) ? payload.games : [];
       if (!games.length) {
-        content.innerHTML = '<p class="text-sm text-gray-400">No recent games returned.</p>';
+        content.innerHTML = '<p class="text-gray-500 text-sm text-center py-6">No recent matches found.</p>';
         showLoaded('matches');
         return;
       }
 
-      content.innerHTML = games.map((game: any) => {
+      currentMatchGames = games;
+      currentMatchProfileId = profileId;
+      const totalPages = Math.max(1, Math.ceil(games.length / MATCHES_PER_PAGE));
+      currentMatchPage = Math.max(1, Math.min(currentMatchPage, totalPages));
+
+      const pageStart = (currentMatchPage - 1) * MATCHES_PER_PAGE;
+      const pageGames = games.slice(pageStart, pageStart + MATCHES_PER_PAGE);
+
+      const PAGE_WINDOW = 5;
+      const halfWindow = Math.floor(PAGE_WINDOW / 2);
+      let windowStart = Math.max(1, currentMatchPage - halfWindow);
+      let windowEnd = Math.min(totalPages, windowStart + PAGE_WINDOW - 1);
+      windowStart = Math.max(1, windowEnd - PAGE_WINDOW + 1);
+      const pageButtonsHtml = Array.from({ length: windowEnd - windowStart + 1 }, (_unused, index) => {
+        const pageNum = windowStart + index;
+        const isActive = pageNum === currentMatchPage;
+        const activeClass = isActive
+          ? 'bg-amber-500/90 text-slate-950 border-amber-300'
+          : 'bg-slate-800/50 text-amber-200 border-amber-500/20 hover:border-amber-400/40 hover:text-amber-100';
+        return `<button type="button" class="matches-page-btn rounded-md border px-3 py-1.5 text-xs font-semibold transition-colors ${activeClass}" data-page-target="${pageNum}" ${isActive ? 'aria-current="page"' : ''}>${pageNum}</button>`;
+      }).join('');
+      const paginationHtml = totalPages > 1
+        ? `
+          <div class="flex items-center justify-between gap-3 border-t border-slate-700/40 px-4 py-3">
+            <button type="button" class="matches-page-btn rounded-md border border-amber-500/20 bg-slate-800/50 px-3 py-1.5 text-xs font-semibold text-amber-200 transition-colors hover:border-amber-400/40 hover:text-amber-100 disabled:opacity-40 disabled:cursor-not-allowed" data-page-target="${currentMatchPage - 1}" ${currentMatchPage <= 1 ? 'disabled' : ''}>Previous</button>
+            <div class="flex items-center gap-2" aria-label="Matches pages">${pageButtonsHtml}</div>
+            <button type="button" class="matches-page-btn rounded-md border border-amber-500/20 bg-slate-800/50 px-3 py-1.5 text-xs font-semibold text-amber-200 transition-colors hover:border-amber-400/40 hover:text-amber-100 disabled:opacity-40 disabled:cursor-not-allowed" data-page-target="${currentMatchPage + 1}" ${currentMatchPage >= totalPages ? 'disabled' : ''}>Next</button>
+          </div>
+        `
+        : '';
+
+      content.innerHTML = '<div class="divide-y divide-slate-700/30">' + pageGames.map((game: any, i: number) => {
         const players = playersFromGame(game);
         const me = players.find((p) => Number(p?.profile_id) === profileId);
         const opponents = players.filter((p) => Number(p?.profile_id) !== profileId).slice(0, 3);
         const result = String(me?.result || 'draw').toLowerCase();
-        const resultClass = result === 'win' ? 'win' : result === 'loss' ? 'loss' : 'draw';
+        const isWin = result === 'win';
+        const isLoss = result === 'loss';
+        const resultText = isWin ? 'Victory' : isLoss ? 'Defeat' : 'Draw';
+        const resultColor = isWin ? 'text-green-400' : isLoss ? 'text-red-400' : 'text-gray-400';
+        const borderColor = isWin ? '#22c55e' : isLoss ? '#ef4444' : '#6b7280';
+        const bgClass = i % 2 === 0 ? 'bg-slate-800/20' : '';
+
+        const mapName = escapeHtml(game?.map || 'Unknown Map');
+        const civName = escapeHtml(title(me?.civilization || '-'));
+        const dateStr = game?.started_at
+          ? new Date(game.started_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+          : '';
+        const durationStr = dur(game?.duration);
         const ratingDiff = typeof me?.rating_diff === 'number'
           ? `${me.rating_diff > 0 ? '+' : ''}${me.rating_diff}`
-          : '-';
-        return `<article class="rounded-lg border border-slate-700/50 bg-slate-800/35 p-4"><div class="flex flex-col sm:flex-row sm:justify-between gap-3"><div><div class="mb-2"><span class="chip ${resultClass}">${escapeHtml(result)}</span> <span class="text-xs text-gray-500 ml-2">Game #${n(game?.game_id)}</span></div><p class="text-sm font-semibold text-amber-100">${escapeHtml(game?.map || 'Unknown Map')}</p><p class="text-xs text-gray-400 mt-1">You: ${escapeHtml(title(me?.civilization || '-'))} | Opponent(s): ${escapeHtml(opponents.map((p: any) => `${p?.name || 'Unknown'} (${title(p?.civilization || '-')})`).join(' | ') || 'N/A')}</p></div><div class="text-xs grid grid-cols-2 gap-2 sm:min-w-[220px]"><div><p class="text-gray-500 uppercase">Duration</p><p class="font-mono text-white">${dur(game?.duration)}</p></div><div><p class="text-gray-500 uppercase">Rating D</p><p class="font-mono text-white">${escapeHtml(ratingDiff)}</p></div><div><p class="text-gray-500 uppercase">Patch</p><p class="font-mono text-white">${n(game?.patch)}</p></div><div><p class="text-gray-500 uppercase">Server</p><p class="font-mono text-white">${escapeHtml(game?.server || '-')}</p></div></div></div><p class="text-[11px] text-gray-500 mt-3">${date(game?.started_at)}</p></article>`;
-      }).join('');
+          : '';
+        const ratingClass = typeof me?.rating_diff === 'number'
+          ? me.rating_diff > 0 ? 'text-green-400' : me.rating_diff < 0 ? 'text-red-400' : 'text-gray-400'
+          : 'text-gray-500';
+        const opponentText = opponents.map((p: any) =>
+          `${escapeHtml(p?.name || 'Unknown')} (${escapeHtml(title(p?.civilization || '-'))})`
+        ).join(', ') || 'N/A';
+
+        const teams = Array.isArray(game?.teams) ? game.teams : [];
+        const teamSizes = teams.map((t: any) => Array.isArray(t) ? t.length : 0);
+        const teamSizeLabel = teamSizes.length >= 2 ? `${teamSizes[0]}v${teamSizes[1]}` : '';
+
+        return `
+            <div class="${bgClass} hover:bg-slate-700/20 transition-colors" style="border-left: 4px solid ${borderColor};">
+              <div class="flex items-start gap-4 p-4">
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span class="font-semibold ${resultColor} text-sm">${resultText}</span>
+                    <span class="text-gray-400 text-xs">on</span>
+                    <span class="text-white text-sm truncate">${mapName}</span>
+                  </div>
+                  <div class="flex items-center gap-3 text-xs text-gray-400 mt-1 flex-wrap">
+                    <span>${civName}</span>
+                    ${dateStr ? `<span>${dateStr}</span>` : ''}
+                    ${durationStr !== '-' ? `<span>• ${durationStr}</span>` : ''}
+                    ${teamSizeLabel ? `<span>• ${teamSizeLabel}</span>` : ''}
+                    ${ratingDiff ? `<span class="${ratingClass}">• Rating ${ratingDiff}</span>` : ''}
+                    ${game?.server ? `<span>• ${escapeHtml(game.server)}</span>` : ''}
+                  </div>
+                  <div class="text-xs text-gray-500 mt-1">
+                    <span>vs ${opponentText}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+        `;
+      }).join('') + '</div>' + paginationHtml;
 
       showLoaded('matches');
+
+      content.querySelectorAll('[data-page-target]').forEach((node) => {
+        const btn = node as HTMLButtonElement;
+        btn.addEventListener('click', () => {
+          const target = Number(btn.getAttribute('data-page-target'));
+          if (!Number.isFinite(target) || target < 1 || target > totalPages || target === currentMatchPage) return;
+          currentMatchPage = target;
+          renderMatches({ games: currentMatchGames }, currentMatchProfileId);
+        });
+      });
     }
 
-    async function renderCharts(primary: any, gamesPayload: any) {
+    async function getGamesForMode(modeKey: string): Promise<any> {
+      if (insightsGamesCache.has(modeKey)) return insightsGamesCache.get(modeKey);
+      if (!activeProfileId) return null;
+      const res = await getAoe4PlayerGames(activeProfileId, { leaderboard: modeKey, limit: 20 });
+      const data = res.ok ? res.data : null;
+      insightsGamesCache.set(modeKey, data);
+      return data;
+    }
+
+    async function renderCharts(mode: any, gamesPayload: any) {
       const Chart = await ensureChart();
       const ratingEmpty = document.getElementById('rating-chart-empty') as HTMLElement;
       const durationEmpty = document.getElementById('duration-chart-empty') as HTMLElement;
       ratingEmpty.classList.add('hidden');
       durationEmpty.classList.add('hidden');
 
-      const history = Object.entries(primary?.history || {})
+      const history = Object.entries(mode?.history || {})
         .map(([ts, item]: [string, any]) => ({ ts: Number(ts), rating: typeof item?.rating === 'number' ? item.rating : null }))
         .filter((point) => Number.isFinite(point.ts) && point.rating != null)
         .sort((a, b) => a.ts - b.ts);
@@ -462,88 +963,13 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
       return null;
     }
 
-    function renderAdvanced(lastGame: any, profileId: number) {
-      const content = document.getElementById('advanced-content') as HTMLElement;
-      const player = playersFromGame(lastGame).find((entry) => Number(entry?.profile_id) === profileId);
-      if (!player) {
-        content.innerHTML = '<p class="text-sm text-gray-400">No player-level advanced data in last game payload.</p>';
-        showLoaded('advanced');
-        return;
-      }
-
-      const metrics = [
-        ['Food Collected', firstNum(player, ['stats.resources.food_collected','resources.food_collected','food_collected'])],
-        ['Wood Collected', firstNum(player, ['stats.resources.wood_collected','resources.wood_collected','wood_collected'])],
-        ['Gold Collected', firstNum(player, ['stats.resources.gold_collected','resources.gold_collected','gold_collected'])],
-        ['Stone Collected', firstNum(player, ['stats.resources.stone_collected','resources.stone_collected','stone_collected'])],
-        ['Units Built', firstNum(player, ['stats.units.built','stats.units_built','units.built','units_built'])],
-        ['Units Lost', firstNum(player, ['stats.units.lost','stats.units_lost','units.lost','units_lost'])],
-        ['Units Killed', firstNum(player, ['stats.units.killed','stats.units_killed','units.killed','units_killed'])],
-      ].filter(([, value]) => value != null) as Array<[string, number]>;
-
-      if (!metrics.length) {
-        content.innerHTML = '<p class="text-sm text-amber-100 mb-2">Open payload did not include resource or unit counters for this match.</p><p class="text-xs text-gray-400">If AoE4World returns those fields later, this section auto-populates.</p>';
-      } else {
-        content.innerHTML = `<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">${metrics.map(([label, value]) => `<div class="bg-slate-800/40 rounded p-3 border border-amber-500/10"><p class="text-xs text-gray-400">${escapeHtml(label)}</p><p class="text-xl font-mono font-bold text-white">${n(value)}</p></div>`).join('')}</div>`;
-      }
-
-      showLoaded('advanced');
-    }
-
-    function renderMeta(metaCivs: any, metaMaps: any, metaMatchups: any, primary: any) {
-      const content = document.getElementById('meta-content') as HTMLElement;
-      const civRows = (Array.isArray(metaCivs?.data) ? metaCivs.data : []).slice(0,8).map((civ: any) => `<tr><td class="font-semibold text-amber-100">${escapeHtml(title(civ?.civilization || '-'))}</td><td class="font-mono">${pct(civ?.pick_rate)}</td><td class="font-mono">${pct(civ?.win_rate)}</td><td class="font-mono">${n(civ?.games_count || 0)}</td></tr>`).join('');
-      const mapRows = (Array.isArray(metaMaps?.data) ? metaMaps.data : []).slice(0,8).map((map: any) => `<tr><td class="font-semibold text-amber-100">${escapeHtml(map?.map || '-')}</td><td class="font-mono">${n(map?.games_count || 0)}</td><td class="font-mono">${dur(map?.duration_median)}</td><td class="font-mono">${escapeHtml(title(map?.highest_win_rate_civilization || '-'))}</td></tr>`).join('');
-      const topCiv = primary?.civs?.[0]?.civilization || null;
-      const matchupRows = (Array.isArray(metaMatchups?.data) ? metaMatchups.data : [])
-        .filter((row: any) => !topCiv || row?.civilization === topCiv)
-        .filter((row: any) => (row?.games_count || 0) >= 50)
-        .sort((a: any, b: any) => (b?.win_rate || 0) - (a?.win_rate || 0))
-        .slice(0, 8)
-        .map((row: any) => `<tr><td class="font-semibold text-amber-100">${escapeHtml(title(row?.civilization || '-'))}</td><td class="font-semibold text-amber-100">${escapeHtml(title(row?.other_civilization || '-'))}</td><td class="font-mono">${pct(row?.win_rate)}</td><td class="font-mono">${n(row?.games_count || 0)}</td></tr>`).join('');
-
-      content.innerHTML = `
-        <section><h3 class="text-xs text-gray-400 uppercase mb-2">Top Civilizations</h3><div class="table-wrap"><table class="table"><thead><tr><th>Civilization</th><th>Pick Rate</th><th>Win Rate</th><th>Games</th></tr></thead><tbody>${civRows || '<tr><td colspan="4" class="text-gray-400">No data.</td></tr>'}</tbody></table></div></section>
-        <section><h3 class="text-xs text-gray-400 uppercase mb-2">Top Maps</h3><div class="table-wrap"><table class="table"><thead><tr><th>Map</th><th>Games</th><th>Median Duration</th><th>Top Civ</th></tr></thead><tbody>${mapRows || '<tr><td colspan="4" class="text-gray-400">No data.</td></tr>'}</tbody></table></div></section>
-        <section><h3 class="text-xs text-gray-400 uppercase mb-2">${topCiv ? `Best Matchups For ${escapeHtml(title(topCiv))}` : 'Best Matchups'}</h3><div class="table-wrap"><table class="table"><thead><tr><th>Civ</th><th>Vs</th><th>Win Rate</th><th>Games</th></tr></thead><tbody>${matchupRows || '<tr><td colspan="4" class="text-gray-400">No rows met filter.</td></tr>'}</tbody></table></div></section>`;
-
-      showLoaded('meta');
-    }
-
-    async function lookup(rawQuery: string) {
-      const query = rawQuery.trim();
-      if (query.length < 3) {
-        showError(globalError, 'Search query must be at least 3 characters.');
-        return;
-      }
-
-      saveRecent(query);
+    async function lookupByProfile(profileId: number) {
+      setMetaCollapsed(true);
       resetUi();
-
-      const search = await searchAoe4Players(query, 1, false);
-      if (!search.ok) {
-        showError(globalError, search.error.message);
-        return;
-      }
-
-      const players = Array.isArray(search.data?.players) ? search.data.players : [];
-      const chosen = players.find((p: any) => String(p?.name || '').toLowerCase() === query.toLowerCase()) || players[0];
-      if (!chosen?.profile_id) {
-        showError(globalError, 'No matching players found.');
-        return;
-      }
-
-      const profileId = Number(chosen.profile_id);
+      renderNameCandidates(activeNameQuery, activeNameCandidates, profileId);
       activeProfileId = profileId;
 
-      const [playerRes, gamesRes, lastRes, metaCivsRes, metaMapsRes, metaMatchRes] = await Promise.all([
-        getAoe4Player(profileId),
-        getAoe4PlayerGames(profileId, { leaderboard: 'rm_solo', limit: 20 }),
-        getAoe4LastGame(profileId, true),
-        getAoe4MetaStats('rm_solo', 'civilizations'),
-        getAoe4MetaStats('rm_solo', 'maps'),
-        getAoe4MetaStats('rm_solo', 'matchups'),
-      ]);
+      const playerRes = await getAoe4Player(profileId);
       if (activeProfileId !== profileId) return;
 
       if (!playerRes.ok) {
@@ -553,14 +979,35 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
 
       const player = playerRes.data;
       const modes = normalizeModes(player);
+      currentModes = modes;
       const primary = modes.find((m) => m.key === 'rm_solo' && m.games > 0) || modes.find((m) => m.games > 0) || modes[0];
+      const primaryKey = primary?.key || 'rm_solo';
+      const lifetime = aggregateLifetimeTotals(modes);
 
-      renderOverview(player, primary);
+      renderOverview(player, primary, lifetime);
       renderModeTable(modes);
-      renderCivs(primary);
+
+      // Populate mode dropdowns with modes that have games
+      const playedModes = modes.filter((m) => m.games > 0);
+      const modeOptionsHtml = playedModes.map((m) =>
+        `<option value="${escapeHtml(m.key)}"${m.key === primaryKey ? ' selected' : ''}>${escapeHtml(m.name)}</option>`
+      ).join('');
+      if (playedModes.length > 1) {
+        insightsModeSelect.innerHTML = modeOptionsHtml;
+        insightsModeSelect.classList.remove('hidden');
+        matchesModeSelect.innerHTML = modeOptionsHtml;
+        matchesModeSelect.classList.remove('hidden');
+      } else {
+        insightsModeSelect.classList.add('hidden');
+        matchesModeSelect.classList.add('hidden');
+      }
+
+      const gamesRes = await getAoe4PlayerGames(profileId, { leaderboard: primaryKey, limit: 20 });
+      if (activeProfileId !== profileId) return;
 
       if (gamesRes.ok) {
         renderMatches(gamesRes.data, profileId);
+        insightsGamesCache.set(primaryKey, gamesRes.data);
       } else {
         showError(document.getElementById('matches-error') as HTMLElement, gamesRes.error.message);
         (document.getElementById('matches-loading') as HTMLElement).classList.add('hidden');
@@ -573,30 +1020,288 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
         (document.getElementById('insights-loading') as HTMLElement).classList.add('hidden');
       }
 
-      if (lastRes.ok) {
-        renderAdvanced(lastRes.data, profileId);
-      } else {
-        showError(document.getElementById('advanced-error') as HTMLElement, lastRes.error.message);
-        (document.getElementById('advanced-loading') as HTMLElement).classList.add('hidden');
+    }
+
+    function renderMeta(metaCivs: any, metaMaps: any, metaMatchups: any) {
+      const content = metaContent;
+      const civData = (Array.isArray(metaCivs?.data) ? metaCivs.data : []).slice(0, 8);
+      const mapData = (Array.isArray(metaMaps?.data) ? metaMaps.data : []).slice(0, 8);
+      const matchupData = (Array.isArray(metaMatchups?.data) ? metaMatchups.data : [])
+        .filter((row: any) => (row?.games_count || 0) >= 50)
+        .sort((a: any, b: any) => (b?.win_rate || 0) - (a?.win_rate || 0))
+        .slice(0, 8);
+
+      const renderMetaCard = (args: {
+        title: string;
+        headers: [string, string, string, string];
+        rowsHtml: string;
+        emptyText: string;
+        footer: string;
+      }) => `
+        <section class="rounded-lg border border-slate-700/40 bg-slate-800/40 p-4">
+          <p class="text-[10px] uppercase tracking-wider text-gray-400 mb-3">${args.title}</p>
+          <div class="overflow-x-auto">
+            <div class="min-w-[640px]">
+              <div class="grid grid-cols-[minmax(0,1.8fr)_minmax(110px,0.9fr)_minmax(110px,0.9fr)_minmax(100px,0.7fr)] gap-3 text-[10px] uppercase tracking-wider text-gray-500 pb-2 border-b border-slate-700/40">
+                <span>${args.headers[0]}</span>
+                <span class="text-right">${args.headers[1]}</span>
+                <span class="text-right">${args.headers[2]}</span>
+                <span class="text-right">${args.headers[3]}</span>
+              </div>
+              <div class="pt-2 space-y-1">
+                ${args.rowsHtml || `<p class="text-sm text-gray-400 py-2">${args.emptyText}</p>`}
+              </div>
+            </div>
+          </div>
+          <div class="mt-3 border-t border-slate-700/40 pt-3 flex flex-wrap gap-4 text-[10px] uppercase tracking-wider text-gray-500">
+            ${args.footer}
+          </div>
+        </section>
+      `;
+
+      const civRows = civData.map((civ: any) => `
+        <div class="grid grid-cols-[minmax(0,1.8fr)_minmax(110px,0.9fr)_minmax(110px,0.9fr)_minmax(100px,0.7fr)] gap-3 items-center text-sm">
+          <span class="font-semibold text-amber-100 truncate">${escapeHtml(title(civ?.civilization || '-'))}</span>
+          <span class="font-mono text-right text-cyan-200">${pct(civ?.pick_rate)}</span>
+          <span class="font-mono text-right text-emerald-200">${pct(civ?.win_rate)}</span>
+          <span class="font-mono text-right text-gray-100">${n(civ?.games_count || 0)}</span>
+        </div>
+      `).join('');
+
+      const mapRows = mapData.map((map: any) => `
+        <div class="grid grid-cols-[minmax(0,1.8fr)_minmax(110px,0.9fr)_minmax(110px,0.9fr)_minmax(100px,0.7fr)] gap-3 items-center text-sm">
+          <span class="font-semibold text-amber-100 truncate">${escapeHtml(map?.map || '-')}</span>
+          <span class="font-mono text-right text-gray-100">${n(map?.games_count || 0)}</span>
+          <span class="font-mono text-right text-cyan-200">${dur(map?.duration_median)}</span>
+          <span class="font-mono text-right text-emerald-200 truncate">${escapeHtml(title(map?.highest_win_rate_civilization || '-'))}</span>
+        </div>
+      `).join('');
+
+      const matchupRows = matchupData.map((row: any) => `
+        <div class="grid grid-cols-[minmax(0,1.8fr)_minmax(110px,0.9fr)_minmax(110px,0.9fr)_minmax(100px,0.7fr)] gap-3 items-center text-sm">
+          <span class="font-semibold text-amber-100 truncate">${escapeHtml(title(row?.civilization || '-'))}</span>
+          <span class="font-mono text-right text-gray-100 truncate">${escapeHtml(title(row?.other_civilization || '-'))}</span>
+          <span class="font-mono text-right text-emerald-200">${pct(row?.win_rate)}</span>
+          <span class="font-mono text-right text-cyan-200">${n(row?.games_count || 0)}</span>
+        </div>
+      `).join('');
+
+      const civTotalGames = civData.reduce((acc: number, civ: any) => acc + (Number(civ?.games_count) || 0), 0);
+      const mapTotalGames = mapData.reduce((acc: number, map: any) => acc + (Number(map?.games_count) || 0), 0);
+      const matchupTotalGames = matchupData.reduce((acc: number, row: any) => acc + (Number(row?.games_count) || 0), 0);
+      const topMatchup = matchupData[0];
+
+      content.innerHTML = `
+        <div class="space-y-4">
+          ${renderMetaCard({
+            title: 'Top Civilizations',
+            headers: ['Civilization', 'Pick Rate', 'Win Rate', 'Games'],
+            rowsHtml: civRows,
+            emptyText: 'No civilization data.',
+            footer: `
+              <span>Civs <span class="text-amber-100">${n(civData.length)}</span></span>
+              <span>Games <span class="text-cyan-200">${n(civTotalGames)}</span></span>
+            `,
+          })}
+          ${renderMetaCard({
+            title: 'Top Maps',
+            headers: ['Map', 'Games', 'Median', 'Top Civ'],
+            rowsHtml: mapRows,
+            emptyText: 'No map data.',
+            footer: `
+              <span>Maps <span class="text-amber-100">${n(mapData.length)}</span></span>
+              <span>Games <span class="text-cyan-200">${n(mapTotalGames)}</span></span>
+            `,
+          })}
+          ${renderMetaCard({
+            title: 'Best Matchups',
+            headers: ['Civilization', 'Vs', 'Win Rate', 'Games'],
+            rowsHtml: matchupRows,
+            emptyText: 'No matchups met minimum sample.',
+            footer: `
+              <span>Rows <span class="text-amber-100">${n(matchupData.length)}</span></span>
+              <span>Games <span class="text-cyan-200">${n(matchupTotalGames)}</span></span>
+              <span>Top Pair <span class="text-emerald-200">${topMatchup ? `${escapeHtml(title(topMatchup?.civilization || '-'))} vs ${escapeHtml(title(topMatchup?.other_civilization || '-'))}` : '-'}</span></span>
+            `,
+          })}
+        </div>`;
+
+      metaLoading.classList.add('hidden');
+      metaContent.classList.remove('hidden');
+      hideError(metaError);
+    }
+
+    function isNotFoundResult(result: any): boolean {
+      return !result?.ok && result?.error?.type === 'not_found';
+    }
+
+    function isRateLimitResult(result: any): boolean {
+      return !result?.ok && result?.error?.type === 'rate_limit';
+    }
+
+    async function loadGlobalMeta(leaderboard: string = currentMetaLeaderboard) {
+      currentMetaLeaderboard = leaderboard;
+      hideError(metaError);
+      metaLoading.classList.remove('hidden');
+      metaContent.classList.add('hidden');
+
+      const [metaCivsRes, metaMapsRes, metaMatchRes] = await Promise.all([
+        getAoe4MetaStats(leaderboard, 'civilizations'),
+        getAoe4MetaStats(leaderboard, 'maps'),
+        getAoe4MetaStats(leaderboard, 'matchups'),
+      ]);
+
+      const civsFatal = !metaCivsRes.ok && !isNotFoundResult(metaCivsRes);
+      const mapsFatal = !metaMapsRes.ok && !isNotFoundResult(metaMapsRes);
+      const matchFatal = !metaMatchRes.ok && !isNotFoundResult(metaMatchRes);
+
+      if (civsFatal || mapsFatal || matchFatal) {
+        const msg = [
+          civsFatal ? metaCivsRes.error.message : '',
+          mapsFatal ? metaMapsRes.error.message : '',
+          matchFatal ? metaMatchRes.error.message : '',
+        ].filter(Boolean).join(' | ');
+        showError(metaError, msg || 'Unable to load meta data.');
+        metaLoading.classList.add('hidden');
+        return;
       }
 
-      if (metaCivsRes.ok && metaMapsRes.ok && metaMatchRes.ok) {
-        renderMeta(metaCivsRes.data, metaMapsRes.data, metaMatchRes.data, primary);
-      } else {
-        const msg = [
-          metaCivsRes.ok ? '' : metaCivsRes.error.message,
-          metaMapsRes.ok ? '' : metaMapsRes.error.message,
-          metaMatchRes.ok ? '' : metaMatchRes.error.message,
-        ].filter(Boolean).join(' | ');
-        showError(document.getElementById('meta-error') as HTMLElement, msg || 'Unable to load meta data.');
-        (document.getElementById('meta-loading') as HTMLElement).classList.add('hidden');
+      renderMeta(
+        metaCivsRes.ok ? metaCivsRes.data : { data: [] },
+        metaMapsRes.ok ? metaMapsRes.data : { data: [] },
+        metaMatchRes.ok ? metaMatchRes.data : { data: [] },
+      );
+
+      if (isNotFoundResult(metaCivsRes) || isNotFoundResult(metaMapsRes) || isNotFoundResult(metaMatchRes)) {
+        showError(metaError, `Some ${modeName(leaderboard)} meta datasets are not available yet. Showing available sections.`);
+        return;
+      }
+      if (isRateLimitResult(metaCivsRes) || isRateLimitResult(metaMapsRes) || isRateLimitResult(metaMatchRes)) {
+        showError(metaError, 'Meta data is partially rate-limited right now. Showing available sections.');
+        return;
       }
     }
 
+    async function lookup(rawQuery: string) {
+      const query = rawQuery.trim();
+      if (query.length < 3) {
+        showError(globalError, 'Search query must be at least 3 characters.');
+        return;
+      }
+
+      setMetaCollapsed(true);
+      saveRecent(query);
+      hideError(globalError);
+      resultsEl.classList.add('hidden');
+      renderNameCandidates('', []);
+
+      const search = await searchAoe4Players(query, 1, false);
+      if (!search.ok) {
+        showError(globalError, search.error.message);
+        return;
+      }
+
+      const players = Array.isArray(search.data?.players) ? search.data.players : [];
+      const normalizedQuery = normalizeName(query);
+      const candidates = [...players]
+        .filter((player: any) => player?.profile_id)
+        .sort((a: any, b: any) => {
+          const aExact = normalizeName(a?.name) === normalizedQuery ? 1 : 0;
+          const bExact = normalizeName(b?.name) === normalizedQuery ? 1 : 0;
+          if (aExact !== bExact) return bExact - aExact;
+          return candidateScore(b) - candidateScore(a);
+        });
+      const chosen = candidates[0];
+      if (!chosen?.profile_id) {
+        showError(globalError, 'No matching players found.');
+        return;
+      }
+
+      if (candidates.length > 1) {
+        renderNameCandidates(query, candidates, Number(chosen.profile_id));
+      }
+
+      await lookupByProfile(Number(chosen.profile_id));
+    }
+
     button.addEventListener('click', () => lookup(input.value));
-    input.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter') lookup(input.value);
+    metaToggleBtn.addEventListener('click', () => {
+      const isCollapsed = metaPanelBody.classList.contains('hidden');
+      setMetaCollapsed(!isCollapsed);
     });
+    metaLeaderboardSelect.addEventListener('change', () => {
+      void loadGlobalMeta(metaLeaderboardSelect.value);
+    });
+    insightsModeSelect.addEventListener('change', async () => {
+      const modeKey = insightsModeSelect.value;
+      const mode = currentModes.find((m) => m.key === modeKey);
+      if (!mode) return;
+      const insightsLoading = document.getElementById('insights-loading') as HTMLElement;
+      const insightsContent = document.getElementById('insights-content') as HTMLElement;
+      const insightsError = document.getElementById('insights-error') as HTMLElement;
+      hideError(insightsError);
+      insightsContent.classList.add('hidden');
+      insightsLoading.classList.remove('hidden');
+      try {
+        const gamesPayload = await getGamesForMode(modeKey);
+        await renderCharts(mode, gamesPayload);
+        insightsLoading.classList.add('hidden');
+        insightsContent.classList.remove('hidden');
+      } catch {
+        insightsLoading.classList.add('hidden');
+        insightsContent.classList.remove('hidden');
+        showError(insightsError, 'Unable to load charts for this mode.');
+      }
+    });
+    matchesModeSelect.addEventListener('change', async () => {
+      const modeKey = matchesModeSelect.value;
+      if (!activeProfileId) return;
+      const matchesLoading = document.getElementById('matches-loading') as HTMLElement;
+      const matchesContent = document.getElementById('matches-content') as HTMLElement;
+      const matchesError = document.getElementById('matches-error') as HTMLElement;
+      hideError(matchesError);
+      matchesContent.classList.add('hidden');
+      matchesLoading.classList.remove('hidden');
+      try {
+        const gamesPayload = await getGamesForMode(modeKey);
+        currentMatchPage = 1;
+        renderMatches(gamesPayload || { games: [] }, activeProfileId);
+        matchesLoading.classList.add('hidden');
+        matchesContent.classList.remove('hidden');
+      } catch {
+        matchesLoading.classList.add('hidden');
+        matchesContent.classList.remove('hidden');
+        showError(matchesError, 'Unable to load matches for this mode.');
+      }
+    });
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        lookup(input.value);
+      }
+    });
+    input.addEventListener('input', () => {
+      if (suggestTimer != null) window.clearTimeout(suggestTimer);
+      suggestTimer = window.setTimeout(() => {
+        updateSuggestions(input.value);
+      }, 250);
+    });
+    input.addEventListener('focus', () => {
+      if (input.value.trim().length >= 3) {
+        updateSuggestions(input.value);
+      }
+    });
+
+    document.addEventListener('click', (event) => {
+      const target = event.target as Node | null;
+      if (!target) return;
+      if (!inputWrap.contains(target)) {
+        renderNameCandidates('', []);
+      }
+    });
+    metaLeaderboardSelect.value = currentMetaLeaderboard;
+    loadGlobalMeta(currentMetaLeaderboard);
+    renderVideoCta();
     renderRecent();
 
     const params = new URLSearchParams(window.location.search);
