@@ -1319,6 +1319,7 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
 
     const STORAGE_KEY = 'hw2-recent-searches';
     const PINNED_MATCHES_KEY = 'hw2-pinned-matches';
+    const PROFILE_PATH_PREFIX = '/halo-wars-stats/player/';
     const MAX_RECENT = 5;
     const MATCHES_PER_PAGE = 5;
     const MATCH_FETCH_COUNT = 100;
@@ -1377,6 +1378,79 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
     let shareRequestId = 0;
     let shareMapImageUrl: string | null = null;
     let shareMapImagePromise: Promise<string | null> | null = null;
+
+    function parseGamertagFromProfilePath(pathname: string): string | null {
+      if (!pathname || !pathname.toLowerCase().startsWith(PROFILE_PATH_PREFIX)) return null;
+      const remainder = pathname.slice(PROFILE_PATH_PREFIX.length);
+      if (!remainder) return null;
+      const segment = remainder.split('/').find((part) => part.trim() !== '') || '';
+      if (!segment) return null;
+      try {
+        const decoded = decodeURIComponent(segment).trim();
+        return decoded || null;
+      } catch {
+        const fallback = segment.trim();
+        return fallback || null;
+      }
+    }
+
+    function buildProfilePath(gamertag: string): string {
+      return `${PROFILE_PATH_PREFIX}${encodeURIComponent(gamertag.trim())}`;
+    }
+
+    function supportsCanonicalProfilePath(): boolean {
+      const host = window.location.hostname.toLowerCase();
+      return host !== 'localhost' && host !== '127.0.0.1' && host !== '::1';
+    }
+
+    function buildProfileUrl(gamertag: string, matchId?: string | null): string {
+      const cleanGamertag = gamertag.trim();
+      const params = new URLSearchParams();
+      const cleanMatchId = (matchId || '').trim();
+      if (cleanMatchId) params.set('matchId', cleanMatchId);
+
+      if (supportsCanonicalProfilePath()) {
+        const path = buildProfilePath(cleanGamertag);
+        const query = params.toString();
+        return `${window.location.origin}${path}${query ? `?${query}` : ''}`;
+      }
+
+      params.set('gamertag', cleanGamertag);
+      return `${window.location.origin}/halo-wars-stats?${params.toString()}`;
+    }
+
+    function syncProfileUrl(gamertag: string, matchId?: string | null) {
+      const cleanGamertag = gamertag.trim();
+      if (!cleanGamertag) return;
+      const params = new URLSearchParams(window.location.search);
+      const cleanMatchId = (matchId || '').trim();
+      let next = '';
+
+      if (supportsCanonicalProfilePath()) {
+        const path = buildProfilePath(cleanGamertag);
+        params.delete('gamertag');
+        if (cleanMatchId) {
+          params.set('matchId', cleanMatchId);
+        } else {
+          params.delete('matchId');
+        }
+        const query = params.toString();
+        next = `${path}${query ? `?${query}` : ''}`;
+      } else {
+        params.set('gamertag', cleanGamertag);
+        if (cleanMatchId) {
+          params.set('matchId', cleanMatchId);
+        } else {
+          params.delete('matchId');
+        }
+        next = `/halo-wars-stats?${params.toString()}`;
+      }
+
+      const current = `${window.location.pathname}${window.location.search}`;
+      if (next !== current) {
+        window.history.replaceState(null, '', next);
+      }
+    }
 
     async function ensureLeaderPowerMap(): Promise<Record<string, string> | null> {
       if (leaderPowerMapCache) return leaderPowerMapCache;
@@ -2029,8 +2103,7 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
       }
 
       const matchId = match.MatchId || '';
-      const baseUrl = `${window.location.origin}/halo-wars-stats`;
-      const shareUrl = `${baseUrl}?gamertag=${encodeURIComponent(gamertag)}${matchId ? `&matchId=${encodeURIComponent(matchId)}` : ''}`;
+      const shareUrl = buildProfileUrl(gamertag, matchId || null);
       const shareTitle = `${gamertag} - ${resultText} as ${leaderName} on ${mapName} | Halo Wars 2 Stats`;
       const shareText = `${gamertag} - ${resultText} on ${mapName} as ${leaderName}${durationStr ? ` | ${durationStr}` : ''}${teamSizeLabel ? ` | ${teamSizeLabel}` : ''}`;
 
@@ -2586,8 +2659,7 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
       document.getElementById('stat-time-all')!.textContent = `All modes: ${allTimeStr}`;
       document.getElementById('stat-avg-match')!.textContent = avgMatchStr;
       document.getElementById('stat-terminus-wave')!.textContent = terminusWave > 0 ? String(terminusWave) : '-';
-      const baseUrl = `${window.location.origin}/halo-wars-stats`;
-      const shareUrl = `${baseUrl}?gamertag=${encodeURIComponent(gamertag)}`;
+      const shareUrl = buildProfileUrl(gamertag);
       const shareTitle = `${gamertag} | Halo Wars 2 Stats Profile`;
       const shareText = `${gamertag} | ${winRate}% win rate | ${winRateLabel} | ${mmTotals.matches} matches | Avg match ${avgMatchStr}`;
       const subtitle = `Matchmaking: ${winRate}% win rate`;
@@ -5035,20 +5107,22 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
       }
     }
 
-    async function performSearch(gamertag: string) {
-      if (!gamertag.trim()) return;
+    async function performSearch(gamertag: string, options: { matchId?: string | null } = {}) {
+      const cleanGamertag = gamertag.trim();
+      if (!cleanGamertag) return;
+      syncProfileUrl(cleanGamertag, options.matchId ?? null);
 
       globalError.classList.add('hidden');
       globalError.innerHTML = '';
       hideStaleBanner();
       resultsContainer.classList.remove('hidden');
 
-      if (playerGamertagEl) playerGamertagEl.textContent = gamertag;
+      if (playerGamertagEl) playerGamertagEl.textContent = cleanGamertag;
       if (playerLastSeenEl) {
         playerLastSeenEl.textContent = '';
         playerLastSeenEl.classList.add('hidden');
       }
-      currentGamertag = gamertag;
+      currentGamertag = cleanGamertag;
       currentMatchPage = 1;
       activeProfileShareData = null;
       if (profileShareBtn) {
@@ -5074,12 +5148,12 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
       document.getElementById('insights-content')!.classList.add('hidden');
       document.getElementById('matches-content')!.classList.add('hidden');
 
-      addRecentSearch(gamertag);
+      addRecentSearch(cleanGamertag);
 
       const [statsResult, matchesResult, seasonResult] = await Promise.all([
-        getPlayerStats(gamertag),
-        getPlayerMatches(gamertag, MATCH_FETCH_COUNT),
-        CURRENT_SEASON ? getPlayerSeasonStats(gamertag, CURRENT_SEASON.id) : Promise.resolve({ ok: false, error: { type: 'unknown', message: 'No season configured.' } }),
+        getPlayerStats(cleanGamertag),
+        getPlayerMatches(cleanGamertag, MATCH_FETCH_COUNT),
+        CURRENT_SEASON ? getPlayerSeasonStats(cleanGamertag, CURRENT_SEASON.id) : Promise.resolve({ ok: false, error: { type: 'unknown', message: 'No season configured.' } }),
       ]);
 
       const staleSources: Array<{ label: string; fetchedAt?: string | null }> = [];
@@ -5103,7 +5177,7 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
       updateLastSeen(matchesList);
 
       if (statsResult.ok) {
-        renderOverview(statsResult.data, gamertag);
+        renderOverview(statsResult.data, cleanGamertag);
         renderRankedStats(statsResult.data, seasonResult.ok ? seasonResult.data : undefined);
       } else {
         hideSkeleton('overview');
@@ -5113,7 +5187,7 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
       }
 
       if (matchesResult.ok) {
-        renderMatches(matchesList, gamertag);
+        renderMatches(matchesList, cleanGamertag);
         renderLeaderUsage(matchesList);
         renderDurationDistribution(matchesList);
         if (pendingDeepLinkMatchId) {
@@ -5149,15 +5223,17 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
     renderRecentSearches();
 
     const urlParams = new URLSearchParams(window.location.search);
-    const gamertagParam = urlParams.get('gamertag');
-    const matchIdParam = urlParams.get('matchId');
+    const pathGamertag = parseGamertagFromProfilePath(window.location.pathname);
+    const queryGamertag = urlParams.get('gamertag')?.trim() || '';
+    const initialGamertag = pathGamertag || queryGamertag;
+    const matchIdParam = urlParams.get('matchId')?.trim() || '';
     if (matchIdParam) {
       pendingDeepLinkMatchId = matchIdParam;
     }
-    if (gamertagParam) {
+    if (initialGamertag) {
       stopSearchPlaceholderRotation(false);
-      searchInput.value = gamertagParam;
-      performSearch(gamertagParam);
+      searchInput.value = initialGamertag;
+      performSearch(initialGamertag, { matchId: matchIdParam || null });
     }
   </script>
 </BaseLayout>
