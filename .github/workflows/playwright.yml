@@ -1,0 +1,40 @@
+name: Playwright Tests
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+    branches: ["main", "master"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright tests
+        run: npx playwright test
+        env:
+          CI: true
+          PUBLIC_HW2_API_KEY_1: ${{ secrets.PUBLIC_HW2_API_KEY_1 }}
+          PUBLIC_HW2_API_KEY_2: ${{ secrets.PUBLIC_HW2_API_KEY_2 }}
+          PUBLIC_HW2_API_KEY_3: ${{ secrets.PUBLIC_HW2_API_KEY_3 }}
+
+      - name: Upload test report
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
