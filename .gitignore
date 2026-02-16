@@ -8,3 +8,7 @@ nul
 .wrangler/
 .astro/types.d.ts
 .claude/
+REFACTOR_CHANGELOG.md
+test-results/
+playwright-report/
+blob-report/
