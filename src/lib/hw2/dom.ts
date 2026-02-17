@@ -13,6 +13,8 @@ export const videoDateEl = document.getElementById('hw2-video-date') as HTMLElem
 export const videoLinkEl = document.getElementById('hw2-video-link') as HTMLAnchorElement | null;
 export const videoDataEl = document.getElementById('hw2-video-data') as HTMLScriptElement | null;
 export const nameMapsEl = document.getElementById('hw2-name-maps') as HTMLScriptElement | null;
+export const contentCreatorGamertagsEl = document.getElementById('hw2-content-creator-gamertags') as HTMLScriptElement | null;
+export const cheaterGamertagsEl = document.getElementById('hw2-cheater-gamertags') as HTMLScriptElement | null;
 
 // Match share modal elements
 export const shareModal = document.getElementById('match-share-modal') as HTMLElement | null;
@@ -58,6 +60,8 @@ export const profileShareBtn = document.getElementById('profile-share-btn') as H
 
 // Player info elements
 export const playerGamertagEl = document.getElementById('player-gamertag') as HTMLElement | null;
+export const playerContentCreatorIndicatorEl = document.getElementById('player-content-creator-indicator') as HTMLElement | null;
+export const playerCheaterIndicatorEl = document.getElementById('player-cheater-indicator') as HTMLElement | null;
 export const playerLastSeenEl = document.getElementById('player-last-seen') as HTMLElement | null;
 
 // Collapsible panel elements

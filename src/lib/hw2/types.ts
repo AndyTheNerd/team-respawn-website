@@ -77,6 +77,9 @@ export type TimelineEntry = {
   techTier?: 2 | 3;
   supply?: number;
   energy?: number;
+  commandXp?: number;
+  population?: number;
+  populationCap?: number;
 };
 
 export type PlayerInfo = {

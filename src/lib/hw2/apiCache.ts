@@ -73,7 +73,6 @@ export function humanizeLeaderPowerId(powerId: string): string {
 
 export function getLeaderPowerDisplayName(powerId: string, map?: Record<string, string> | null): string {
   if (!powerId) return '';
-  if (map?.[powerId]) return map[powerId];
   const directAlias = resolveAliasName(powerId, ['powers']);
   if (directAlias) return directAlias;
 
@@ -86,7 +85,6 @@ export function getLeaderPowerDisplayName(powerId: string, map?: Record<string, 
   if (!/_Proc$/i.test(powerId)) candidates.push(`${powerId}_Proc`);
 
   for (const candidate of candidates) {
-    if (map?.[candidate]) return map[candidate];
     const aliasHit = resolveAliasName(candidate, ['powers']);
     if (aliasHit) return aliasHit;
     const normalized = normalizeLeaderPowerId(candidate);
@@ -94,6 +92,7 @@ export function getLeaderPowerDisplayName(powerId: string, map?: Record<string, 
     if (overrideHit) return overrideHit;
     const normalizedHit = leaderPowerNormalizedMap?.get(normalized);
     if (normalizedHit) return normalizedHit;
+    if (map?.[candidate]) return map[candidate];
     if (normalized.endsWith('mp')) {
       const noMp = normalized.slice(0, -2);
       const mpHit = leaderPowerNormalizedMap?.get(noMp);
@@ -146,7 +145,6 @@ export function humanizeGameObjectId(objectId: string): string {
 
 export function getGameObjectDisplayName(objectId: string, map?: Record<string, string> | null): string {
   if (!objectId) return '';
-  if (map?.[objectId]) return applyDisplayNameOverride(map[objectId]);
   const aliasHit = resolveAliasName(objectId, ['units', 'buildings']);
   if (aliasHit) return applyDisplayNameOverride(aliasHit);
   const normalized = normalizeGameObjectId(objectId);
@@ -154,6 +152,7 @@ export function getGameObjectDisplayName(objectId: string, map?: Record<string, 
   if (overrideHit) return applyDisplayNameOverride(overrideHit);
   const normalizedHit = gameObjectNormalizedMap?.get(normalized);
   if (normalizedHit) return applyDisplayNameOverride(normalizedHit);
+  if (map?.[objectId]) return applyDisplayNameOverride(map[objectId]);
   const humanized = humanizeGameObjectId(objectId);
   const humanAlias = resolveAliasName(humanized, ['units', 'buildings']);
   return applyDisplayNameOverride(humanAlias || humanized);
@@ -196,7 +195,6 @@ export function humanizeTechId(techId: string): string {
 
 export function getTechDisplayName(techId: string, map?: Record<string, string> | null): string {
   if (!techId) return '';
-  if (map?.[techId]) return applyDisplayNameOverride(map[techId]);
   const aliasHit = resolveAliasName(techId, ['tech']);
   if (aliasHit) return applyDisplayNameOverride(aliasHit);
   const normalized = normalizeTechId(techId);
@@ -204,6 +202,7 @@ export function getTechDisplayName(techId: string, map?: Record<string, string> 
   if (overrideHit) return applyDisplayNameOverride(overrideHit);
   const normalizedHit = techNormalizedMap?.get(normalized);
   if (normalizedHit) return applyDisplayNameOverride(normalizedHit);
+  if (map?.[techId]) return applyDisplayNameOverride(map[techId]);
   const humanized = humanizeTechId(techId);
   const humanAlias = resolveAliasName(humanized, ['tech']);
   return applyDisplayNameOverride(humanAlias || humanized);

@@ -1,6 +1,6 @@
 import type { VideoCta, Hw2NameMappings, AliasLookup, TimelineEntry } from './types';
 import { MIN_HW2_VIDEO_DURATION_MS } from './state';
-import { videoCtaEl, videoThumbEl, videoTitleEl, videoDateEl, videoLinkEl, videoDataEl, nameMapsEl, playerLastSeenEl } from './dom';
+import { videoCtaEl, videoThumbEl, videoTitleEl, videoDateEl, videoLinkEl, videoDataEl, nameMapsEl, playerLastSeenEl, contentCreatorGamertagsEl, cheaterGamertagsEl } from './dom';
 import { getLeaderName } from '../../data/haloWars2/leaders';
 
 // --- Video CTA ---
@@ -143,6 +143,52 @@ export const leaderPowerIdOverrideMap = buildNormalizedIdMap(hw2NameMappings?.id
 export const unitIdOverrideMap = buildNormalizedIdMap(hw2NameMappings?.idMaps?.units, normalizeGameObjectId);
 export const buildingIdOverrideMap = buildNormalizedIdMap(hw2NameMappings?.idMaps?.buildings, normalizeGameObjectId);
 export const techIdOverrideMap = buildNormalizedIdMap(hw2NameMappings?.idMaps?.upgrades, normalizeTechId);
+
+export function normalizeGamertagKey(value: string): string {
+  return value.trim().toLowerCase();
+}
+
+const contentCreatorGamertagLookup: Set<string> = (() => {
+  const lookup = new Set<string>();
+  if (!contentCreatorGamertagsEl?.textContent) return lookup;
+  try {
+    const parsed = JSON.parse(contentCreatorGamertagsEl.textContent);
+    if (!Array.isArray(parsed)) return lookup;
+    parsed.forEach((entry) => {
+      if (typeof entry !== 'string') return;
+      const normalized = normalizeGamertagKey(entry);
+      if (normalized) lookup.add(normalized);
+    });
+  } catch {
+    return lookup;
+  }
+  return lookup;
+})();
+
+const confirmedCheaterGamertagLookup: Set<string> = (() => {
+  const lookup = new Set<string>();
+  if (!cheaterGamertagsEl?.textContent) return lookup;
+  try {
+    const parsed = JSON.parse(cheaterGamertagsEl.textContent);
+    if (!Array.isArray(parsed)) return lookup;
+    parsed.forEach((entry) => {
+      if (typeof entry !== 'string') return;
+      const normalized = normalizeGamertagKey(entry);
+      if (normalized) lookup.add(normalized);
+    });
+  } catch {
+    return lookup;
+  }
+  return lookup;
+})();
+
+export function isContentCreatorGamertag(gamertag: string): boolean {
+  return contentCreatorGamertagLookup.has(normalizeGamertagKey(gamertag));
+}
+
+export function isConfirmedCheaterGamertag(gamertag: string): boolean {
+  return confirmedCheaterGamertagLookup.has(normalizeGamertagKey(gamertag));
+}
 
 // --- Last Seen ---
 

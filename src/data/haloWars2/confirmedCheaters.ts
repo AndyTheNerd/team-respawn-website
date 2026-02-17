@@ -1,0 +1,20 @@
+export const confirmedCheaterGamertags = [
+  'rockGeneration',
+  'Screw Laws',
+  'The Kaylon',
+  'love guru kalib',
+  'arenti',
+  'Johnson1923779',
+  'xca5 sucks',
+  'Hahaball',
+  'YANGS GANG 2020',
+  'UNSC MESSIAH',
+  'EL HECH1ZERO',
+  'Maximuswins9',
+  'Divisceral',
+  'Hurmix117',
+  'SixTrAveL',
+  'Syllogisme5483',
+  'RockPlaysLadder',
+  'EVIL ROCKGEN'
+];

@@ -6,6 +6,8 @@ import SidePanel from '../../components/SidePanel.astro';
 import StorehausPromo from '../../components/StorehausPromo.astro';
 import { videos } from '../../data/videos';
 import { hw2NameMappings } from '../../data/haloWars2/nameMappings';
+import { confirmedCheaterGamertags } from '../../data/haloWars2/confirmedCheaters';
+import { contentCreatorGamertags } from '../../data/haloWars2/contentCreators';
 
 const hw2VideoPool = videos
   .filter((video) => video.privacy === 'Public')
@@ -13,6 +15,8 @@ const hw2VideoPool = videos
   .map(({ title, publishedAt, videoId, durationMs }) => ({ title, publishedAt, videoId, durationMs }));
 const hw2VideoJson = JSON.stringify(hw2VideoPool).replace(/</g, '\\u003c');
 const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u003c');
+const hw2CheaterGamertagsJson = JSON.stringify(confirmedCheaterGamertags).replace(/</g, '\\u003c');
+const hw2ContentCreatorGamertagsJson = JSON.stringify(contentCreatorGamertags).replace(/</g, '\\u003c');
 ---
 <BaseLayout
   title="Halo Wars 2 Stats - Team Respawn"
@@ -539,6 +543,20 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
               <h2 class="text-2xl sm:text-3xl font-bold text-cyan-300 font-mono">
                 <span id="player-gamertag"></span>
+                <span
+                  id="player-content-creator-indicator"
+                  class="ml-2 hidden align-middle rounded-full border border-amber-400/40 bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-200"
+                  title="This gamertag is in the content creator list."
+                >
+                  Content Creator
+                </span>
+                <span
+                  id="player-cheater-indicator"
+                  class="ml-2 hidden align-middle rounded-full border border-red-400/40 bg-red-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-red-200"
+                  title="This gamertag appears in the confirmed cheat records dataset."
+                >
+                  Suspected cheating
+                </span>
                 <span id="player-last-seen" class="ml-2 text-xs text-gray-400 font-normal hidden"></span>
               </h2>
               <button
@@ -945,6 +963,8 @@ const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u00
         </div>
         <script type="application/json" id="hw2-video-data" set:html={hw2VideoJson}></script>
         <script type="application/json" id="hw2-name-maps" set:html={hw2NameMappingsJson}></script>
+        <script type="application/json" id="hw2-content-creator-gamertags" set:html={hw2ContentCreatorGamertagsJson}></script>
+        <script type="application/json" id="hw2-cheater-gamertags" set:html={hw2CheaterGamertagsJson}></script>
       </section>
 
       <!-- Storehaus Promo -->

@@ -55,6 +55,7 @@ export const hw2NameMappings = {
       'MASTADON': 'Mastodon',
       'MASTADONS': 'Mastodons',
       'MAURADER': 'Marauder',
+      'UNSC VEH JOHNSON MANTIS 01': 'Mantis',
     },
   },
   idMaps: {
@@ -156,6 +157,7 @@ export const hw2NameMappings = {
       unsc_veh_forgehog_01: 'Forgehog',
       unsc_veh_scorpion_01: 'Scorpion',
       unsc_veh_serina_hero_01: 'Tundra Bison',
+      unsc_veh_johnson_mantis_01: 'Mantis',
       unsc_veh_mongoose_01: 'Jackrabbit',
       unsc_veh_warthog_01: 'Warthog',
       unsc_veh_wolverine_01: 'Wolverine',

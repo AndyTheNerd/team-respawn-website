@@ -92,10 +92,31 @@ const EVENT_FIELDS: Record<string, string[]> = {
   TechResearched: ['TechId', 'SupplyCost', 'EnergyCost', 'ResearcherInstanceId', 'ProvidedByScenario'],
   LeaderPowerCast: ['PowerId'],
   // Enhanced event fields (Didact integration)
-  ResourceHeartbeat: ['Supply', 'Energy', 'Population', 'PopulationCap', 'TotalSupply', 'TotalEnergy'],
+  ResourceHeartbeat: ['Supply', 'Energy', 'Population', 'PopulationCap', 'TotalSupply', 'TotalEnergy', 'CommandXP', 'TechLevel'],
   Death: ['VictimObjectTypeId', 'KillerObjectTypeId', 'KillerPlayerIndex', 'IsBuildingDeath'],
   BuildingRecycled: ['BuildingId', 'SupplyEarned', 'EnergyEarned'],
 };
+
+function compactPlayerResources(raw: any): Record<string, Record<string, number>> | null {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  const compact: Record<string, Record<string, number>> = {};
+  Object.entries(raw).forEach(([playerIndex, statsRaw]) => {
+    const stats = statsRaw as any;
+    if (!stats || typeof stats !== 'object') return;
+    const row: Record<string, number> = {};
+    const fields = ['TotalSupply', 'TotalEnergy', 'Supply', 'Energy', 'Population', 'PopulationCap', 'CommandXP', 'TechLevel'];
+    fields.forEach((field) => {
+      const value = stats[field];
+      if (typeof value === 'number' && Number.isFinite(value)) {
+        row[field] = value;
+      }
+    });
+    if (Object.keys(row).length > 0) {
+      compact[playerIndex] = row;
+    }
+  });
+  return Object.keys(compact).length > 0 ? compact : null;
+}
 
 function shouldUseCache(errorType: string): boolean {
   return errorType === 'rate_limit' || errorType === 'network' || errorType === 'auth';
@@ -131,6 +152,12 @@ function trimEventPayload(payload: any): any {
       if (extra) {
         for (const field of extra) {
           if (e[field] != null) base[field] = e[field];
+        }
+      }
+      if (e.EventName === 'ResourceHeartbeat') {
+        const compactResources = compactPlayerResources(e.PlayerResources);
+        if (compactResources) {
+          base.PlayerResources = compactResources;
         }
       }
       return base;

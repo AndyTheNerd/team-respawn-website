@@ -216,7 +216,10 @@ export function renderMatches(matches: any[], gamertag: string) {
                   aria-expanded="false"
                 >
                   <span>Team Compositions and Stats</span>
-                  <span class="match-details-chevron transition-transform duration-200" aria-hidden="true">&#x25BC;</span>
+                  <span class="inline-flex items-center gap-2">
+                    <span class="match-details-state text-[10px] uppercase tracking-wider text-gray-400">Expand</span>
+                    <span class="match-details-chevron transition-transform duration-200" aria-hidden="true">&#x25BC;</span>
+                  </span>
                 </button>
                 <button
                   type="button"
@@ -226,7 +229,10 @@ export function renderMatches(matches: any[], gamertag: string) {
                   aria-expanded="false"
                 >
                   <span>Build Timeline</span>
-                  <span class="match-timeline-chevron transition-transform duration-200" aria-hidden="true">&#x25BC;</span>
+                  <span class="inline-flex items-center gap-2">
+                    <span class="match-timeline-state text-[10px] uppercase tracking-wider text-gray-400">Expand</span>
+                    <span class="match-timeline-chevron transition-transform duration-200" aria-hidden="true">&#x25BC;</span>
+                  </span>
                 </button>
                 <button
                   type="button"
@@ -236,7 +242,10 @@ export function renderMatches(matches: any[], gamertag: string) {
                   aria-expanded="false"
                 >
                   <span>Match Graphs</span>
-                  <span class="match-graphs-chevron transition-transform duration-200" aria-hidden="true">&#x25BC;</span>
+                  <span class="inline-flex items-center gap-2">
+                    <span class="match-graphs-state text-[10px] uppercase tracking-wider text-gray-400">Expand</span>
+                    <span class="match-graphs-chevron transition-transform duration-200" aria-hidden="true">&#x25BC;</span>
+                  </span>
                 </button>
                 <button
                   type="button"
@@ -313,17 +322,27 @@ export function renderMatches(matches: any[], gamertag: string) {
   });
 
   // Wire up match details toggles
+  const setPanelToggleState = (
+    toggle: HTMLElement,
+    panel: 'details' | 'timeline' | 'graphs',
+    expanded: boolean
+  ) => {
+    toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    const chevron = toggle.querySelector(`.match-${panel}-chevron`) as HTMLElement | null;
+    if (chevron) chevron.style.transform = expanded ? 'rotate(180deg)' : 'rotate(0deg)';
+    const stateText = toggle.querySelector(`.match-${panel}-state`) as HTMLElement | null;
+    if (stateText) stateText.textContent = expanded ? 'Collapse' : 'Expand';
+  };
+
   const collapseOtherPanels = (matchId: string, keepPanel: string) => {
     const panels = ['details', 'timeline', 'graphs'] as const;
     panels.forEach((panel) => {
       if (panel === keepPanel) return;
       const toggle = matchesContent.querySelector(`.match-${panel}-toggle[data-match-id="${matchId}"]`) as HTMLElement | null;
       if (toggle && toggle.getAttribute('aria-expanded') === 'true') {
-        toggle.setAttribute('aria-expanded', 'false');
+        setPanelToggleState(toggle, panel, false);
         const el = document.getElementById(`match-${panel}-${matchId}`);
         if (el) el.classList.add('hidden');
-        const chevron = toggle.querySelector(`.match-${panel}-chevron`) as HTMLElement | null;
-        if (chevron) chevron.style.transform = 'rotate(0deg)';
       }
     });
   };
@@ -334,13 +353,11 @@ export function renderMatches(matches: any[], gamertag: string) {
       if (!matchId) return;
       const detailsId = `match-details-${matchId}`;
       const detailsEl = document.getElementById(detailsId);
-      const chevron = (btn as HTMLElement).querySelector('.match-details-chevron') as HTMLElement | null;
       if (!detailsEl) return;
 
       const isExpanded = (btn as HTMLElement).getAttribute('aria-expanded') === 'true';
-      (btn as HTMLElement).setAttribute('aria-expanded', isExpanded ? 'false' : 'true');
+      setPanelToggleState(btn as HTMLElement, 'details', !isExpanded);
       detailsEl.classList.toggle('hidden', isExpanded);
-      if (chevron) chevron.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
 
       if (!isExpanded) collapseOtherPanels(matchId, 'details');
       if (isExpanded) return;
@@ -355,13 +372,11 @@ export function renderMatches(matches: any[], gamertag: string) {
       if (!matchId) return;
       const timelineId = `match-timeline-${matchId}`;
       const timelineEl = document.getElementById(timelineId);
-      const chevron = (btn as HTMLElement).querySelector('.match-timeline-chevron') as HTMLElement | null;
       if (!timelineEl) return;
 
       const isExpanded = (btn as HTMLElement).getAttribute('aria-expanded') === 'true';
-      (btn as HTMLElement).setAttribute('aria-expanded', isExpanded ? 'false' : 'true');
+      setPanelToggleState(btn as HTMLElement, 'timeline', !isExpanded);
       timelineEl.classList.toggle('hidden', isExpanded);
-      if (chevron) chevron.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
 
       if (!isExpanded) collapseOtherPanels(matchId, 'timeline');
       if (isExpanded) return;
@@ -376,13 +391,11 @@ export function renderMatches(matches: any[], gamertag: string) {
       if (!matchId) return;
       const graphsId = `match-graphs-${matchId}`;
       const graphsEl = document.getElementById(graphsId);
-      const chevron = (btn as HTMLElement).querySelector('.match-graphs-chevron') as HTMLElement | null;
       if (!graphsEl) return;
 
       const isExpanded = (btn as HTMLElement).getAttribute('aria-expanded') === 'true';
-      (btn as HTMLElement).setAttribute('aria-expanded', isExpanded ? 'false' : 'true');
+      setPanelToggleState(btn as HTMLElement, 'graphs', !isExpanded);
       graphsEl.classList.toggle('hidden', isExpanded);
-      if (chevron) chevron.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
 
       if (!isExpanded) collapseOtherPanels(matchId, 'graphs');
       if (isExpanded) return;

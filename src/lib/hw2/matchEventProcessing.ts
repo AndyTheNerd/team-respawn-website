@@ -227,16 +227,62 @@ export async function buildEventEntries(payload: any): Promise<{
     }
 
     if (event?.EventName === 'ResourceHeartbeat') {
-      entries.push({
-        timeMs,
-        playerIndex,
-        playerName,
-        teamId,
-        label: 'Resource Snapshot',
-        kind: 'resource',
-        supply: event?.Supply ?? event?.TotalSupply,
-        energy: event?.Energy ?? event?.TotalEnergy,
-      });
+      const resourcesByPlayer = event?.PlayerResources;
+      let emittedFromPlayerMap = false;
+
+      if (resourcesByPlayer && typeof resourcesByPlayer === 'object' && !Array.isArray(resourcesByPlayer)) {
+        Object.entries(resourcesByPlayer).forEach(([indexKey, resourceRaw]) => {
+          const resource = resourceRaw as any;
+          if (!resource || typeof resource !== 'object') return;
+          const parsedIndex = Number(indexKey);
+          const mappedPlayerIndex = Number.isFinite(parsedIndex) ? parsedIndex : playerIndex;
+          const mappedInfo = mappedPlayerIndex != null ? playersByIndex.get(mappedPlayerIndex) : null;
+          const supply = resource?.Supply ?? resource?.TotalSupply;
+          const energy = resource?.Energy ?? resource?.TotalEnergy;
+          const commandXp = resource?.CommandXP;
+          const population = resource?.Population;
+          const populationCap = resource?.PopulationCap;
+          if (supply == null && energy == null && commandXp == null && population == null && populationCap == null) return;
+
+          entries.push({
+            timeMs,
+            playerIndex: mappedPlayerIndex,
+            playerName: mappedInfo?.name || (mappedPlayerIndex != null ? `Player ${mappedPlayerIndex}` : playerName),
+            teamId: mappedInfo?.teamId ?? teamId,
+            label: 'Resource Snapshot',
+            kind: 'resource',
+            supply,
+            energy,
+            commandXp,
+            population,
+            populationCap,
+          });
+          emittedFromPlayerMap = true;
+        });
+      }
+
+      if (!emittedFromPlayerMap) {
+        const supply = event?.Supply ?? event?.TotalSupply;
+        const energy = event?.Energy ?? event?.TotalEnergy;
+        const commandXp = event?.CommandXP;
+        const population = event?.Population;
+        const populationCap = event?.PopulationCap;
+        if (supply != null || energy != null || commandXp != null || population != null || populationCap != null) {
+          entries.push({
+            timeMs,
+            playerIndex,
+            playerName,
+            teamId,
+            label: 'Resource Snapshot',
+            kind: 'resource',
+            supply,
+            energy,
+            commandXp,
+            population,
+            populationCap,
+          });
+        }
+      }
     }
   });
 

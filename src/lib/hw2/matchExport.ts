@@ -195,6 +195,28 @@ export async function exportMatchToCsv(matchId: string, gamertag: string) {
         eventRows
       );
       XLSX.utils.book_append_sheet(wb, eventsSheet, 'Build Order Events');
+
+      const resourceRows: SheetRow[] = sorted
+        .filter((entry) => entry.kind === 'resource')
+        .filter((entry) => Number.isFinite(Number(entry.supply)) || Number.isFinite(Number(entry.energy)))
+        .map((entry) => {
+          const mins = Math.floor(entry.timeMs / 60000);
+          const secs = Math.floor((entry.timeMs % 60000) / 1000);
+          const timeStr = `${mins}:${String(secs).padStart(2, '0')}`;
+          const playerName = entry.playerName || 'Unknown';
+          const teamLabel = entry.teamId != null ? `Team ${entry.teamId}` : '';
+          const supply = Number.isFinite(Number(entry.supply)) ? Number(entry.supply) : '';
+          const power = Number.isFinite(Number(entry.energy)) ? Number(entry.energy) : '';
+          return [timeStr, playerName, teamLabel, supply, power];
+        });
+
+      if (resourceRows.length > 0) {
+        const resourcesSheet = buildSheet(XLSX,
+          ['Time', 'Player', 'Team', 'Supply', 'Power'],
+          resourceRows
+        );
+        XLSX.utils.book_append_sheet(wb, resourcesSheet, 'Resource Timeline');
+      }
     }
   }
 
