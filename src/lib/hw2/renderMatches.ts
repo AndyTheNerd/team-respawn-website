@@ -4,6 +4,7 @@ import { globalError } from './dom';
 import { parseDuration, getGameModeName } from './dataProcessing';
 import { getPinnedMatches, togglePinnedMatch } from './localStorage';
 import { showShareModal } from './shareCard';
+import { exportMatchToCsv, exportAllMatchesToCsv } from './matchExport';
 import { loadMatchDetails } from './matchDetails';
 import { loadMatchTimeline } from './matchTimeline';
 import { loadMatchGraphs } from './matchGraphs';
@@ -91,7 +92,19 @@ export function renderMatches(matches: any[], gamertag: string) {
     `
     : '';
 
-  matchesContent.innerHTML = '<div class="divide-y divide-slate-700/30">' + pageMatches.map((match: any, i: number) => {
+  const exportAllHtml = `
+    <div class="flex justify-end px-4 py-2 border-b border-slate-700/30">
+      <button
+        type="button"
+        class="export-all-matches-btn inline-flex items-center gap-2 rounded-md border border-cyan-500/20 bg-slate-800/40 px-3 py-2 text-xs text-cyan-300 hover:text-cyan-200 hover:border-cyan-400/40 transition-colors"
+        title="Export all matches to CSV"
+      >
+        <i class="fas fa-file-export" aria-hidden="true"></i>
+        Export All Matches (CSV)
+      </button>
+    </div>
+  `;
+  matchesContent.innerHTML = exportAllHtml + '<div class="divide-y divide-slate-700/30">' + pageMatches.map((match: any, i: number) => {
     const gtLower = gamertag.toLowerCase();
     const player = match.Players?.find((p: any) => {
       const id = p.HumanPlayerId || p.Gamertag || p.PlayerId;
@@ -197,7 +210,7 @@ export function renderMatches(matches: any[], gamertag: string) {
               <div class="flex flex-wrap gap-2 mt-3">
                 <button
                   type="button"
-                  class="match-details-toggle flex-[4] flex items-center justify-between rounded-md border border-cyan-500/20 bg-slate-800/40 px-3 py-2 text-xs text-cyan-300 hover:text-cyan-200 hover:border-cyan-400/40 transition-colors"
+                  class="match-details-toggle flex-none w-full sm:w-auto sm:flex-[4] flex items-center justify-between rounded-md border border-cyan-500/20 bg-slate-800/40 px-3 py-2 text-xs text-cyan-300 hover:text-cyan-200 hover:border-cyan-400/40 transition-colors"
                   data-match-id="${matchId}"
                   aria-controls="${detailsId}"
                   aria-expanded="false"
@@ -207,7 +220,7 @@ export function renderMatches(matches: any[], gamertag: string) {
                 </button>
                 <button
                   type="button"
-                  class="match-timeline-toggle flex-[3] flex items-center justify-between rounded-md border border-cyan-500/20 bg-slate-800/40 px-3 py-2 text-xs text-cyan-300 hover:text-cyan-200 hover:border-cyan-400/40 transition-colors"
+                  class="match-timeline-toggle flex-none w-full sm:w-auto sm:flex-[3] flex items-center justify-between rounded-md border border-cyan-500/20 bg-slate-800/40 px-3 py-2 text-xs text-cyan-300 hover:text-cyan-200 hover:border-cyan-400/40 transition-colors"
                   data-match-id="${matchId}"
                   aria-controls="${timelineId}"
                   aria-expanded="false"
@@ -217,7 +230,7 @@ export function renderMatches(matches: any[], gamertag: string) {
                 </button>
                 <button
                   type="button"
-                  class="match-graphs-toggle flex-[3] flex items-center justify-between rounded-md border border-cyan-500/20 bg-slate-800/40 px-3 py-2 text-xs text-cyan-300 hover:text-cyan-200 hover:border-cyan-400/40 transition-colors"
+                  class="match-graphs-toggle flex-none w-full sm:w-auto sm:flex-[3] flex items-center justify-between rounded-md border border-cyan-500/20 bg-slate-800/40 px-3 py-2 text-xs text-cyan-300 hover:text-cyan-200 hover:border-cyan-400/40 transition-colors"
                   data-match-id="${matchId}"
                   aria-controls="match-graphs-${matchId}"
                   aria-expanded="false"
@@ -251,6 +264,17 @@ export function renderMatches(matches: any[], gamertag: string) {
                     <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
                   </svg>
                   <span class="hidden sm:inline">Share</span>
+                </button>
+                <button
+                  type="button"
+                  class="match-export-toggle flex-[1] hidden sm:inline-flex items-center justify-center rounded-md border border-cyan-500/20 bg-slate-800/40 px-3 py-2 text-xs text-cyan-300 hover:text-cyan-200 hover:border-cyan-400/40 transition-colors"
+                  aria-label="Export match to CSV"
+                  title="Export match to CSV"
+                  data-match-id="${matchId}"
+                  data-gamertag="${gamertag}"
+                >
+                  <i class="fas fa-file-export" aria-hidden="true"></i>
+                  <span class="hidden sm:inline">Export</span>
                 </button>
               </div>
               <div id="${detailsId}" class="match-details mt-3 hidden" data-loaded="false"></div>
@@ -384,6 +408,32 @@ export function renderMatches(matches: any[], gamertag: string) {
       await showShareModal(matchId, gamertag);
     });
   });
+
+  matchesContent.querySelectorAll('.match-export-toggle').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const button = btn as HTMLButtonElement;
+      const matchId = button.getAttribute('data-match-id') || '';
+      const gamertag = button.getAttribute('data-gamertag') || '';
+      if (!matchId || !gamertag) return;
+      button.disabled = true;
+      const originalText = button.querySelector('span')?.textContent || '';
+      const spanEl = button.querySelector('span');
+      if (spanEl) spanEl.textContent = 'Exporting...';
+      try {
+        await exportMatchToCsv(matchId, gamertag);
+      } finally {
+        button.disabled = false;
+        if (spanEl) spanEl.textContent = originalText;
+      }
+    });
+  });
+
+  const exportAllBtn = matchesContent.querySelector('.export-all-matches-btn') as HTMLButtonElement | null;
+  if (exportAllBtn) {
+    exportAllBtn.addEventListener('click', () => {
+      exportAllMatchesToCsv(state.currentGamertag);
+    });
+  }
 }
 
 export function revealDeepLinkedMatch(matchId: string) {
