@@ -67,3 +67,8 @@ export const leadersChevron = leadersToggle?.querySelector('.leaders-chevron') a
 export const insightsToggle = document.getElementById('insights-toggle') as HTMLButtonElement | null;
 export const insightsPanel = document.getElementById('insights-panel') as HTMLElement | null;
 export const insightsChevron = insightsToggle?.querySelector('.insights-chevron') as HTMLElement | null;
+
+// Campaign panel elements
+export const campaignToggle = document.getElementById('campaign-toggle') as HTMLButtonElement | null;
+export const campaignPanel = document.getElementById('campaign-panel') as HTMLElement | null;
+export const campaignChevron = campaignToggle?.querySelector('.campaign-chevron') as HTMLElement | null;

@@ -9,8 +9,9 @@ import { renderOverview } from './renderOverview';
 import { renderRankedStats } from './renderRanked';
 import { renderLeaderUsage } from './renderLeaders';
 import { renderDurationDistribution } from './renderInsights';
+import { renderCampaignStats, parseCampaignLevelsMetadata } from './renderCampaign';
 import { renderMatches, revealDeepLinkedMatch } from './renderMatches';
-import { getPlayerStats, getPlayerSeasonStats, getPlayerMatches } from '../../utils/haloApi';
+import { getPlayerStats, getPlayerSeasonStats, getPlayerMatches, getCampaignProgress, getCampaignLevels } from '../../utils/haloApi';
 
 export async function performSearch(gamertag: string, options: { matchId?: string | null } = {}) {
   const cleanGamertag = gamertag.trim();
@@ -40,6 +41,7 @@ export async function performSearch(gamertag: string, options: { matchId?: strin
 
   showSkeleton('overview');
   showSkeleton('ranked');
+  showSkeleton('campaign');
   showSkeleton('leaders');
   showSkeleton('insights');
   showSkeleton('matches');
@@ -48,16 +50,19 @@ export async function performSearch(gamertag: string, options: { matchId?: strin
 
   document.getElementById('overview-content')!.classList.add('hidden');
   document.getElementById('ranked-content')!.classList.add('hidden');
+  document.getElementById('campaign-content')?.classList.add('hidden');
   document.getElementById('leaders-content')!.classList.add('hidden');
   document.getElementById('insights-content')!.classList.add('hidden');
   document.getElementById('matches-content')!.classList.add('hidden');
 
   addRecentSearch(cleanGamertag);
 
-  const [statsResult, matchesResult, seasonResult] = await Promise.all([
+  const [statsResult, matchesResult, seasonResult, campaignResult, campaignLevelsResult] = await Promise.all([
     getPlayerStats(cleanGamertag),
     getPlayerMatches(cleanGamertag, MATCH_FETCH_COUNT),
-    CURRENT_SEASON ? getPlayerSeasonStats(cleanGamertag, CURRENT_SEASON.id) : Promise.resolve({ ok: false, error: { type: 'unknown', message: 'No season configured.' } }),
+    CURRENT_SEASON ? getPlayerSeasonStats(cleanGamertag, CURRENT_SEASON.id) : Promise.resolve({ ok: false, error: { type: 'unknown' as const, message: 'No season configured.' } }),
+    getCampaignProgress(cleanGamertag),
+    getCampaignLevels(),
   ]);
 
   const staleSources: Array<{ label: string; fetchedAt?: string | null }> = [];
@@ -72,6 +77,10 @@ export async function performSearch(gamertag: string, options: { matchId?: strin
   const seasonMeta = seasonResult.ok ? (seasonResult.data as any)?._meta : null;
   if (seasonMeta?.cached) {
     staleSources.push({ label: 'Season', fetchedAt: seasonMeta.fetchedAt });
+  }
+  const campaignMeta = campaignResult.ok ? (campaignResult.data as any)?._meta : null;
+  if (campaignMeta?.cached) {
+    staleSources.push({ label: 'Campaign', fetchedAt: campaignMeta.fetchedAt });
   }
   if (staleSources.length > 0) {
     showStaleBanner(staleSources);
@@ -88,6 +97,16 @@ export async function performSearch(gamertag: string, options: { matchId?: strin
     hideSkeleton('ranked');
     hideSkeleton('leaders');
     showError(document.getElementById('overview-error')!, statsResult.error);
+  }
+
+  // Campaign progress (independent of stats result)
+  if (campaignLevelsResult.ok) {
+    parseCampaignLevelsMetadata(campaignLevelsResult.data);
+  }
+  if (campaignResult.ok) {
+    renderCampaignStats(campaignResult.data, statsResult.ok ? statsResult.data : null);
+  } else {
+    hideSkeleton('campaign');
   }
 
   if (matchesResult.ok) {
