@@ -4,6 +4,7 @@ import { formatMatchClock, renderTechTierBadge } from './dataProcessing';
 import { getLeaderName } from '../../data/haloWars2/leaders';
 import { getMatchEvents, getMatchResult } from '../../utils/haloApi';
 import { buildEventEntries } from './matchEventProcessing';
+import { extractBuildOrders, renderBuildOrderSummary } from './renderBuildOrder';
 
 function buildTimelineHighlights(entries: TimelineEntry[]) {
   if (entries.length === 0) return '';
@@ -22,6 +23,9 @@ function buildTimelineHighlights(entries: TimelineEntry[]) {
     unit_upgrade: { className: 'border-teal-400/40 text-teal-200 bg-teal-400/10', label: 'Tech' },
     power: { className: 'border-amber-400/40 text-amber-200 bg-amber-400/10', label: 'Power' },
     veterancy: { className: 'border-rose-400/40 text-rose-200 bg-rose-400/10', label: 'Veterancy' },
+    death: { className: 'border-red-400/40 text-red-200 bg-red-400/10', label: 'Death' },
+    recycle: { className: 'border-gray-400/40 text-gray-200 bg-gray-400/10', label: 'Recycle' },
+    resource: { className: 'border-lime-400/40 text-lime-200 bg-lime-400/10', label: 'Resource' },
   };
   const sorted = [...entries].sort((a, b) => a.timeMs - b.timeMs);
   const firstByKind = new Map<TimelineEntry['kind'], TimelineEntry>();
@@ -152,6 +156,8 @@ export async function loadMatchTimeline(matchId: string, timelineEl: HTMLElement
     })
     .join('');
   const highlightsHtml = buildTimelineHighlights(entries);
+  const buildOrders = extractBuildOrders(entries, playersByIndex);
+  const buildOrderHtml = renderBuildOrderSummary(buildOrders);
   const match = state.matchLookup.get(matchId) || state.currentMatches.find((m: any) => m.MatchId === matchId);
   const normalizeRosterKey = (value: string) => value.trim().toLowerCase();
   const getMatchPlayersArray = (raw: any) => {
@@ -277,6 +283,7 @@ export async function loadMatchTimeline(matchId: string, timelineEl: HTMLElement
       </span>
     </div>
     ${highlightsHtml}
+    ${buildOrderHtml}
     ${rosterHtml}
     <div class="rounded-lg border border-slate-700/40 bg-slate-800/30 p-3 mb-3">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
@@ -313,6 +320,18 @@ export async function loadMatchTimeline(matchId: string, timelineEl: HTMLElement
             <label class="inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1">
               <input type="checkbox" name="timeline-type" value="power" checked class="accent-amber-400" />
               <span class="text-[10px] uppercase tracking-wider text-amber-200">Powers</span>
+            </label>
+            <label class="inline-flex items-center gap-2 rounded-full border border-red-400/30 bg-red-400/10 px-3 py-1">
+              <input type="checkbox" name="timeline-type" value="death" class="accent-red-400" />
+              <span class="text-[10px] uppercase tracking-wider text-red-200">Deaths</span>
+            </label>
+            <label class="inline-flex items-center gap-2 rounded-full border border-gray-400/30 bg-gray-400/10 px-3 py-1">
+              <input type="checkbox" name="timeline-type" value="recycle" class="accent-gray-400" />
+              <span class="text-[10px] uppercase tracking-wider text-gray-200">Recycle</span>
+            </label>
+            <label class="inline-flex items-center gap-2 rounded-full border border-lime-400/30 bg-lime-400/10 px-3 py-1">
+              <input type="checkbox" name="timeline-type" value="resource" class="accent-lime-400" />
+              <span class="text-[10px] uppercase tracking-wider text-lime-200">Resources</span>
             </label>
           </div>
         </div>
@@ -356,6 +375,12 @@ export async function loadMatchTimeline(matchId: string, timelineEl: HTMLElement
         return { className: 'border-teal-400/40 text-teal-200 bg-teal-400/10', label: 'Unit Upgrade' };
       case 'veterancy':
         return { className: 'border-rose-400/40 text-rose-200 bg-rose-400/10', label: 'Veterancy' };
+      case 'death':
+        return { className: 'border-red-400/40 text-red-200 bg-red-400/10', label: 'Death' };
+      case 'recycle':
+        return { className: 'border-gray-400/40 text-gray-200 bg-gray-400/10', label: 'Recycle' };
+      case 'resource':
+        return { className: 'border-lime-400/40 text-lime-200 bg-lime-400/10', label: 'Resource' };
       default:
         return { className: 'border-amber-400/40 text-amber-200 bg-amber-400/10', label: 'Power' };
     }
