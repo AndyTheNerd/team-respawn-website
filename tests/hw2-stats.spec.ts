@@ -151,4 +151,20 @@ test.describe('HW2 Stats Page', () => {
     await insightsToggle.click();
     await expect(page.locator('#insights-panel')).not.toHaveClass(/hidden/);
   });
+
+  test('build timeline shows opening build order summary', async ({ page }) => {
+    await page.goto('/halo-wars-stats/');
+    await page.fill('#gamertag-input', TEST_GAMERTAG);
+    await page.click('#search-btn');
+
+    await expect(page.locator('#matches-content')).toBeVisible({ timeout: 30_000 });
+
+    // Open first match timeline
+    const timelineBtn = page.locator('.match-timeline-toggle').first();
+    await expect(timelineBtn).toBeVisible({ timeout: 10_000 });
+    await timelineBtn.click();
+
+    // The build order summary should appear within the timeline panel
+    await expect(page.locator('.build-order-summary').first()).toBeVisible({ timeout: 15_000 });
+  });
 });
