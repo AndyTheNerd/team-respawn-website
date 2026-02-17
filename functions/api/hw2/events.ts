@@ -40,6 +40,8 @@ type SummaryRow = {
   unitUpgrades: number;
   leaderPowersCast: number;
   veterancyPromotions: number;
+  unitsLost: number;
+  buildingsRecycled: number;
   buildOrder: BuildOrderEntry[];
   firstEventMs: number | null;
   lastEventMs: number | null;
@@ -51,21 +53,173 @@ type CachedEventRow = {
   is_complete: number | null;
 };
 
+type EventSummaryRow = {
+  player_index: number;
+  team_id: number | null;
+  units_trained: number;
+  buildings_completed: number;
+  building_upgrades: number;
+  unit_upgrades: number;
+  leader_powers_cast: number;
+  veterancy_promotions: number;
+  build_order_json: string | null;
+  first_event_ms: number | null;
+  last_event_ms: number | null;
+};
+
+const KEPT_EVENT_NAMES = new Set([
+  'PlayerJoinedMatch',
+  'BuildingConstructionQueued',
+  'BuildingConstructionCompleted',
+  'BuildingUpgraded',
+  'UnitTrained',
+  'UnitPromoted',
+  'TechResearched',
+  'LeaderPowerCast',
+  // Enhanced events (Didact integration)
+  'ResourceHeartbeat',
+  'Death',
+  'BuildingRecycled',
+]);
+
+const EVENT_FIELDS: Record<string, string[]> = {
+  PlayerJoinedMatch: ['HumanPlayerId', 'ComputerPlayerId', 'TeamId', 'PlayerType', 'LeaderId', 'Leader', 'LeaderType'],
+  BuildingConstructionQueued: ['BuildingId'],
+  BuildingConstructionCompleted: ['BuildingId'],
+  BuildingUpgraded: ['NewBuildingId'],
+  UnitTrained: ['SquadId', 'IsClone', 'ProvidedByScenario', 'CreatorInstanceId'],
+  UnitPromoted: ['SquadId'],
+  TechResearched: ['TechId', 'SupplyCost', 'EnergyCost', 'ResearcherInstanceId', 'ProvidedByScenario'],
+  LeaderPowerCast: ['PowerId'],
+  // Enhanced event fields (Didact integration)
+  ResourceHeartbeat: ['Supply', 'Energy', 'Population', 'PopulationCap', 'TotalSupply', 'TotalEnergy'],
+  Death: ['VictimObjectTypeId', 'KillerObjectTypeId', 'KillerPlayerIndex', 'IsBuildingDeath'],
+  BuildingRecycled: ['BuildingId', 'SupplyEarned', 'EnergyEarned'],
+};
+
 function shouldUseCache(errorType: string): boolean {
   return errorType === 'rate_limit' || errorType === 'network' || errorType === 'auth';
+}
+
+function trimEventPayload(payload: any): any {
+  const events = Array.isArray(payload?.GameEvents) ? payload.GameEvents : [];
+  // Track last ResourceHeartbeat time per player to sample at ~30s intervals
+  const lastHeartbeatByPlayer = new Map<number, number>();
+  const HEARTBEAT_SAMPLE_MS = 30_000;
+
+  const trimmedEvents = events
+    .filter((e: any) => {
+      if (!KEPT_EVENT_NAMES.has(e?.EventName)) return false;
+      // Sample ResourceHeartbeat to reduce payload size
+      if (e.EventName === 'ResourceHeartbeat') {
+        const pIdx = e.PlayerIndex ?? -1;
+        const timeMs = e.TimeSinceStartMilliseconds ?? 0;
+        const last = lastHeartbeatByPlayer.get(pIdx) ?? -HEARTBEAT_SAMPLE_MS;
+        if (timeMs - last < HEARTBEAT_SAMPLE_MS) return false;
+        lastHeartbeatByPlayer.set(pIdx, timeMs);
+      }
+      return true;
+    })
+    .map((e: any) => {
+      const base: any = {
+        TimeSinceStartMilliseconds: e.TimeSinceStartMilliseconds,
+        PlayerIndex: e.PlayerIndex,
+        EventName: e.EventName,
+      };
+      if (e.InstanceId != null) base.InstanceId = e.InstanceId;
+      const extra = EVENT_FIELDS[e.EventName];
+      if (extra) {
+        for (const field of extra) {
+          if (e[field] != null) base[field] = e[field];
+        }
+      }
+      return base;
+    });
+
+  return {
+    IsCompleteSetOfEvents: payload?.IsCompleteSetOfEvents ?? false,
+    GameEvents: trimmedEvents,
+  };
+}
+
+async function reconstructEventsFromDB(db: D1Database, matchId: string) {
+  const rows = await db.prepare(
+    `SELECT player_index, team_id, units_trained, buildings_completed, building_upgrades,
+            unit_upgrades, leader_powers_cast, veterancy_promotions, build_order_json,
+            first_event_ms, last_event_ms
+     FROM match_event_summaries WHERE match_id = ?`
+  ).bind(matchId).all<EventSummaryRow>();
+
+  if (!rows?.results?.length) return null;
+
+  const events: any[] = [];
+
+  for (const row of rows.results) {
+    events.push({
+      EventName: 'PlayerJoinedMatch',
+      TimeSinceStartMilliseconds: 0,
+      PlayerIndex: row.player_index,
+      TeamId: row.team_id,
+      PlayerType: 1,
+    });
+
+    if (row.build_order_json) {
+      try {
+        const buildOrder = JSON.parse(row.build_order_json) as BuildOrderEntry[];
+        for (const entry of buildOrder) {
+          const evt: any = {
+            TimeSinceStartMilliseconds: entry.time_ms,
+            PlayerIndex: row.player_index,
+          };
+          if (entry.instance_id != null) evt.InstanceId = entry.instance_id;
+          switch (entry.kind) {
+            case 'building':
+              evt.EventName = 'BuildingConstructionCompleted';
+              if (entry.object_id) evt.BuildingId = entry.object_id;
+              break;
+            case 'upgrade':
+              evt.EventName = 'BuildingUpgraded';
+              if (entry.object_id) evt.NewBuildingId = entry.object_id;
+              break;
+            case 'unit':
+              evt.EventName = 'UnitTrained';
+              if (entry.object_id) evt.SquadId = entry.object_id;
+              break;
+            case 'unit_upgrade':
+              evt.EventName = 'TechResearched';
+              if (entry.object_id) evt.TechId = entry.object_id;
+              break;
+          }
+          events.push(evt);
+        }
+      } catch { /* ignore malformed build order */ }
+    }
+  }
+
+  events.sort((a, b) => (a.TimeSinceStartMilliseconds || 0) - (b.TimeSinceStartMilliseconds || 0));
+
+  const ingestedRow = rows.results[0];
+  const fetchedAt = new Date().toISOString();
+
+  return {
+    payload: { IsCompleteSetOfEvents: false, GameEvents: events },
+    fetchedAt,
+    isComplete: 0,
+  };
 }
 
 async function loadCachedEvents(db: D1Database, matchId: string) {
   const row = await db.prepare(
     'SELECT payload_json, fetched_at, is_complete FROM raw_event_payloads WHERE match_id = ?'
   ).bind(matchId).first<CachedEventRow>();
-  if (!row?.payload_json) return null;
-  try {
-    const payload = JSON.parse(row.payload_json);
-    return { payload, fetchedAt: row.fetched_at, isComplete: row.is_complete };
-  } catch {
-    return null;
+  if (row?.payload_json) {
+    try {
+      const payload = JSON.parse(row.payload_json);
+      return { payload, fetchedAt: row.fetched_at, isComplete: row.is_complete };
+    } catch { /* fall through to reconstruction */ }
   }
+
+  return reconstructEventsFromDB(db, matchId);
 }
 
 function getOrInitSummary(map: Map<number, SummaryRow>, playerIndex: number, teamId: number | null): SummaryRow {
@@ -80,6 +234,8 @@ function getOrInitSummary(map: Map<number, SummaryRow>, playerIndex: number, tea
     unitUpgrades: 0,
     leaderPowersCast: 0,
     veterancyPromotions: 0,
+    unitsLost: 0,
+    buildingsRecycled: 0,
     buildOrder: [],
     firstEventMs: null,
     lastEventMs: null,
@@ -113,7 +269,7 @@ async function storeMatchEvents(
            payload_json = excluded.payload_json,
            is_complete = excluded.is_complete,
            fetched_at = excluded.fetched_at`
-      ).bind(matchId, JSON.stringify(payload), isComplete, now)
+      ).bind(matchId, JSON.stringify(trimEventPayload(payload)), isComplete, now)
     );
   }
 
@@ -211,6 +367,16 @@ async function storeMatchEvents(
     if (event?.EventName === 'UnitPromoted') {
       row.veterancyPromotions += 1;
     }
+
+    // Enhanced event handlers (Didact integration)
+    if (event?.EventName === 'Death') {
+      // The Death event fires on the victim's PlayerIndex
+      row.unitsLost += 1;
+    }
+
+    if (event?.EventName === 'BuildingRecycled') {
+      row.buildingsRecycled += 1;
+    }
   });
 
   playersByIndex.forEach((info, index) => {
@@ -225,6 +391,8 @@ async function storeMatchEvents(
         unitUpgrades: 0,
         leaderPowersCast: 0,
         veterancyPromotions: 0,
+        unitsLost: 0,
+        buildingsRecycled: 0,
         buildOrder: [],
         firstEventMs: null,
         lastEventMs: null,
@@ -245,11 +413,13 @@ async function storeMatchEvents(
            unit_upgrades,
            leader_powers_cast,
            veterancy_promotions,
+           units_lost,
+           buildings_recycled,
            build_order_json,
            first_event_ms,
            last_event_ms,
            ingested_at
-         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
          ON CONFLICT(match_id, player_index) DO UPDATE SET
            team_id = COALESCE(excluded.team_id, match_event_summaries.team_id),
            units_trained = excluded.units_trained,
@@ -258,6 +428,8 @@ async function storeMatchEvents(
            unit_upgrades = excluded.unit_upgrades,
            leader_powers_cast = excluded.leader_powers_cast,
            veterancy_promotions = excluded.veterancy_promotions,
+           units_lost = excluded.units_lost,
+           buildings_recycled = excluded.buildings_recycled,
            build_order_json = excluded.build_order_json,
            first_event_ms = excluded.first_event_ms,
            last_event_ms = excluded.last_event_ms,
@@ -272,6 +444,8 @@ async function storeMatchEvents(
         row.unitUpgrades,
         row.leaderPowersCast,
         row.veterancyPromotions,
+        row.unitsLost,
+        row.buildingsRecycled,
         row.buildOrder.length ? JSON.stringify(row.buildOrder) : null,
         row.firstEventMs,
         row.lastEventMs,

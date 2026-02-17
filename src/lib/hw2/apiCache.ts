@@ -1,5 +1,6 @@
 import { getLeaderPowerMap, getGameObjectMap, getTechMap } from '../../utils/haloApi';
 import { resolveAliasName, normalizeLeaderPowerId, normalizeGameObjectId, normalizeTechId, leaderPowerIdOverrideMap, unitIdOverrideMap, buildingIdOverrideMap, techIdOverrideMap, applyDisplayNameOverride } from './dataProcessing';
+import { hw2NameMappings } from '../../data/haloWars2/nameMappings';
 
 let leaderPowerMapCache: Record<string, string> | null = null;
 let leaderPowerNormalizedMap: Map<string, string> | null = null;
@@ -11,23 +12,40 @@ let techMapCache: Record<string, string> | null = null;
 let techNormalizedMap: Map<string, string> | null = null;
 let techMapLoading: Promise<Record<string, string> | null> | null = null;
 
+function seedFromStatic(
+  idMap: Record<string, string> | undefined,
+  normalize: (id: string) => string
+): { cache: Record<string, string>; normalized: Map<string, string> } {
+  const cache: Record<string, string> = {};
+  const normalized = new Map<string, string>();
+  if (idMap) {
+    Object.entries(idMap).forEach(([id, name]) => {
+      cache[id] = name;
+      normalized.set(normalize(id), name);
+    });
+  }
+  return { cache, normalized };
+}
+
 export async function ensureLeaderPowerMap(): Promise<Record<string, string> | null> {
   if (leaderPowerMapCache) return leaderPowerMapCache;
   if (leaderPowerMapLoading) return leaderPowerMapLoading;
+  // Seed immediately from static data so names resolve without waiting for API
+  const seed = seedFromStatic(hw2NameMappings?.idMaps?.leaderPowers, normalizeLeaderPowerId);
+  leaderPowerMapCache = seed.cache;
+  leaderPowerNormalizedMap = seed.normalized;
+  // Fire API fetch in background to overlay with fresh data
   leaderPowerMapLoading = (async () => {
     const result = await getLeaderPowerMap();
     if (result.ok) {
-      leaderPowerMapCache = result.data;
-      leaderPowerNormalizedMap = new Map<string, string>();
+      Object.assign(leaderPowerMapCache!, result.data);
       Object.entries(result.data).forEach(([id, name]) => {
         leaderPowerNormalizedMap!.set(normalizeLeaderPowerId(id), name);
       });
-      return leaderPowerMapCache;
     }
-    leaderPowerMapLoading = null;
-    return null;
+    return leaderPowerMapCache;
   })();
-  return leaderPowerMapLoading;
+  return leaderPowerMapCache;
 }
 
 export function humanizeLeaderPowerId(powerId: string): string {
@@ -93,20 +111,23 @@ export function getLeaderPowerDisplayName(powerId: string, map?: Record<string, 
 export async function ensureGameObjectMap(): Promise<Record<string, string> | null> {
   if (gameObjectMapCache) return gameObjectMapCache;
   if (gameObjectMapLoading) return gameObjectMapLoading;
+  // Seed from static units + buildings data
+  const unitSeed = seedFromStatic(hw2NameMappings?.idMaps?.units, normalizeGameObjectId);
+  const buildingSeed = seedFromStatic(hw2NameMappings?.idMaps?.buildings, normalizeGameObjectId);
+  gameObjectMapCache = { ...unitSeed.cache, ...buildingSeed.cache };
+  gameObjectNormalizedMap = new Map([...unitSeed.normalized, ...buildingSeed.normalized]);
+  // Overlay with API data in background
   gameObjectMapLoading = (async () => {
     const result = await getGameObjectMap();
     if (result.ok) {
-      gameObjectMapCache = result.data;
-      gameObjectNormalizedMap = new Map<string, string>();
+      Object.assign(gameObjectMapCache!, result.data);
       Object.entries(result.data).forEach(([id, name]) => {
         gameObjectNormalizedMap!.set(normalizeGameObjectId(id), name);
       });
-      return gameObjectMapCache;
     }
-    gameObjectMapLoading = null;
-    return null;
+    return gameObjectMapCache;
   })();
-  return gameObjectMapLoading;
+  return gameObjectMapCache;
 }
 
 export function humanizeGameObjectId(objectId: string): string {
@@ -141,20 +162,22 @@ export function getGameObjectDisplayName(objectId: string, map?: Record<string, 
 export async function ensureTechMap(): Promise<Record<string, string> | null> {
   if (techMapCache) return techMapCache;
   if (techMapLoading) return techMapLoading;
+  // Seed from static upgrades data
+  const seed = seedFromStatic(hw2NameMappings?.idMaps?.upgrades, normalizeTechId);
+  techMapCache = seed.cache;
+  techNormalizedMap = seed.normalized;
+  // Overlay with API data in background
   techMapLoading = (async () => {
     const result = await getTechMap();
     if (result.ok) {
-      techMapCache = result.data;
-      techNormalizedMap = new Map<string, string>();
+      Object.assign(techMapCache!, result.data);
       Object.entries(result.data).forEach(([id, name]) => {
         techNormalizedMap!.set(normalizeTechId(id), name);
       });
-      return techMapCache;
     }
-    techMapLoading = null;
-    return null;
+    return techMapCache;
   })();
-  return techMapLoading;
+  return techMapCache;
 }
 
 export function humanizeTechId(techId: string): string {

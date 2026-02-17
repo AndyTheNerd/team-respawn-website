@@ -190,6 +190,54 @@ export async function buildEventEntries(payload: any): Promise<{
         kind: 'power',
       });
     }
+
+    // Enhanced event handlers (Didact integration)
+    if (event?.EventName === 'Death') {
+      const victimId = event?.VictimObjectTypeId;
+      const victimName = victimId ? getGameObjectDisplayName(String(victimId), gameObjectMap) : 'Unit';
+      const killerId = event?.KillerObjectTypeId;
+      const killerName = killerId ? getGameObjectDisplayName(String(killerId), gameObjectMap) : '';
+      const detail = killerName ? `Killed by ${killerName}` : undefined;
+      entries.push({
+        timeMs,
+        playerIndex,
+        playerName,
+        teamId,
+        label: `Lost ${victimName}`,
+        kind: 'death',
+        detail,
+      });
+    }
+
+    if (event?.EventName === 'BuildingRecycled') {
+      const buildingId = event?.BuildingId;
+      const buildingName = buildingId ? getGameObjectDisplayName(String(buildingId), gameObjectMap) : 'Building';
+      const detailBits = [];
+      if (event?.SupplyEarned) detailBits.push(`+${event.SupplyEarned} Supply`);
+      if (event?.EnergyEarned) detailBits.push(`+${event.EnergyEarned} Energy`);
+      entries.push({
+        timeMs,
+        playerIndex,
+        playerName,
+        teamId,
+        label: `Recycled ${buildingName}`,
+        kind: 'recycle',
+        detail: detailBits.length ? detailBits.join(' | ') : undefined,
+      });
+    }
+
+    if (event?.EventName === 'ResourceHeartbeat') {
+      entries.push({
+        timeMs,
+        playerIndex,
+        playerName,
+        teamId,
+        label: 'Resource Snapshot',
+        kind: 'resource',
+        supply: event?.Supply ?? event?.TotalSupply,
+        energy: event?.Energy ?? event?.TotalEnergy,
+      });
+    }
   });
 
   return { entries, playersByIndex, isCompleteSet };

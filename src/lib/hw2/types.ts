@@ -72,9 +72,11 @@ export type TimelineEntry = {
   playerName: string;
   teamId: number | null;
   label: string;
-  kind: 'building' | 'upgrade' | 'unit' | 'unit_upgrade' | 'power' | 'veterancy';
+  kind: 'building' | 'upgrade' | 'unit' | 'unit_upgrade' | 'power' | 'veterancy' | 'death' | 'recycle' | 'resource';
   detail?: string;
   techTier?: 2 | 3;
+  supply?: number;
+  energy?: number;
 };
 
 export type PlayerInfo = {
