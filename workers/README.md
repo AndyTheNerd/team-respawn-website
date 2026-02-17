@@ -21,6 +21,8 @@ Run from this `workers/` directory:
 npx wrangler d1 execute team-respawn-hw2 --file ../migrations/0001_init.sql --remote
 npx wrangler d1 execute team-respawn-hw2 --file ../migrations/0002_match_events.sql --remote
 npx wrangler d1 execute team-respawn-hw2 --file ../migrations/0003_player_stats_cache.sql --remote
+npx wrangler d1 execute team-respawn-hw2 --file ../migrations/0004_campaign_cache.sql --remote
+npx wrangler d1 execute team-respawn-hw2 --file ../migrations/0005_player_matches_cache.sql --remote
 ```
 
 ## 3) Create/Configure Cloudflare Pages project
@@ -61,3 +63,4 @@ After deploy:
 - `https://teamrespawn.net/api/hw2/events?matchId=<id>`
 
 Events endpoint should now also persist event summaries into D1.
+Matches endpoint keeps one latest cached payload per gamertag in `player_matches_cache`.

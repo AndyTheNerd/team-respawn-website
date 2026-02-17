@@ -10,7 +10,9 @@
     "cf:d1:migrate:1": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0001_init.sql --remote",
     "cf:d1:migrate:2": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0002_match_events.sql --remote",
     "cf:d1:migrate:3": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0003_player_stats_cache.sql --remote",
-    "cf:d1:migrate": "npm run cf:d1:migrate:1 && npm run cf:d1:migrate:2 && npm run cf:d1:migrate:3"
+    "cf:d1:migrate:4": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0004_campaign_cache.sql --remote",
+    "cf:d1:migrate:5": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0005_player_matches_cache.sql --remote",
+    "cf:d1:migrate": "npm run cf:d1:migrate:1 && npm run cf:d1:migrate:2 && npm run cf:d1:migrate:3 && npm run cf:d1:migrate:4 && npm run cf:d1:migrate:5"
   },
   "dependencies": {
     "astro": "^5.16.15",
