@@ -5,6 +5,45 @@ import { getLeaderName } from '../../data/haloWars2/leaders';
 import { getMatchResult } from '../../utils/haloApi';
 import { fetchMatchEventsPayload, buildEventEntries } from './matchEventProcessing';
 
+const LEADER_POWER_SIGNATURES: Array<{ leaderId: number; patterns: RegExp[] }> = [
+  { leaderId: 16, patterns: [/^johnson/, /^unscbunkerdrop/, /^unscvehiclerecycle/, /^unscdiggingin/] },
+  { leaderId: 9, patterns: [/^jerome/, /^powgplaserbarrage01/] },
+  { leaderId: 3, patterns: [/^unscark/, /^unsclurebeacon/, /^unscretrieversentinel/] },
+  { leaderId: 10, patterns: [/^arbiter/, /^stasisprojectileeffect/] },
+  { leaderId: 15, patterns: [/^serina/, /^unscice/, /^unsccryo/] },
+  { leaderId: 7, patterns: [/^unscforge/, /^unscheavymetal/] },
+];
+
+function normalizePowerId(powerId: string): string {
+  return powerId.toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+function inferLeaderIdFromPowerStats(stats: any): number | null {
+  if (!stats || typeof stats !== 'object') return null;
+  const scoreByLeader = new Map<number, number>();
+
+  Object.entries(stats).forEach(([powerId, rawValue]) => {
+    const times = typeof rawValue === 'number'
+      ? rawValue
+      : (rawValue as any)?.TimesCast ?? (rawValue as any)?.TotalPlays ?? 0;
+    if (!Number.isFinite(times) || times <= 0) return;
+    const normalized = normalizePowerId(String(powerId));
+    if (!normalized) return;
+
+    for (const signature of LEADER_POWER_SIGNATURES) {
+      if (!signature.patterns.some((pattern) => pattern.test(normalized))) continue;
+      const prev = scoreByLeader.get(signature.leaderId) || 0;
+      scoreByLeader.set(signature.leaderId, prev + times);
+      return;
+    }
+  });
+
+  if (scoreByLeader.size === 0) return null;
+  const ranked = [...scoreByLeader.entries()].sort((a, b) => b[1] - a[1]);
+  if (ranked.length > 1 && ranked[0][1] === ranked[1][1]) return null;
+  return ranked[0][0];
+}
+
 function buildEventSummarySections(entries: TimelineEntry[], playersByIndex: Map<number, PlayerInfo>) {
   const playerCounts = new Map<number, { playerIndex: number; name: string; teamId: number | null; units: number; techs: number; powers: number }>();
   const buildOrderEntries = new Map<number, { playerIndex: number; name: string; teamId: number | null; entries: TimelineEntry[] }>();
@@ -309,14 +348,58 @@ export async function loadMatchDetails(matchId: string, detailsEl: HTMLElement) 
       || 'Unknown';
   };
 
-  const leaderPowerMap = await ensureLeaderPowerMap();
+  const [leaderPowerMap, eventPayloadResult] = await Promise.all([
+    ensureLeaderPowerMap(),
+    fetchMatchEventsPayload(matchId),
+  ]);
+  const normalizeRosterKey = (value: string) => value.trim().toLowerCase();
+  const parseLeaderId = (value: unknown): number | null => {
+    if (typeof value === 'number' && Number.isFinite(value)) return value;
+    if (typeof value === 'string' && value.trim() !== '') {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : null;
+    }
+    return null;
+  };
+  const getEventPlayerName = (event: any): string => {
+    const humanId = event?.HumanPlayerId;
+    if (typeof humanId === 'string') return humanId;
+    if (typeof humanId === 'object' && humanId?.Gamertag) return String(humanId.Gamertag);
+    return event?.Gamertag || event?.PlayerId || '';
+  };
+  const eventLeaderByIndex = new Map<number, number>();
+  const eventLeaderByName = new Map<string, number>();
+  if (eventPayloadResult.ok) {
+    const eventsRaw = eventPayloadResult.data?.GameEvents;
+    const events = Array.isArray(eventsRaw) ? eventsRaw : [];
+    events.forEach((event: any) => {
+      if (event?.EventName !== 'PlayerJoinedMatch') return;
+      const playerType = typeof event?.PlayerType === 'number' ? event.PlayerType : null;
+      if (playerType === 2 || playerType === 3) return;
+      const leaderId = parseLeaderId(event?.LeaderId ?? event?.Leader ?? event?.LeaderType);
+      if (leaderId == null) return;
+      const playerIndex = typeof event?.PlayerIndex === 'number' ? event.PlayerIndex : null;
+      if (playerIndex != null && !eventLeaderByIndex.has(playerIndex)) {
+        eventLeaderByIndex.set(playerIndex, leaderId);
+      }
+      const nameKey = normalizeRosterKey(getEventPlayerName(event));
+      if (nameKey && !eventLeaderByName.has(nameKey)) {
+        eventLeaderByName.set(nameKey, leaderId);
+      }
+    });
+  }
   const teamMap = new Map<number, { members: Array<{ name: string; leader: string; destroyed: number; lost: number; powerEntries: Array<{ name: string; times: number }> }>; totals: { destroyed: number; lost: number; powers: number } }>();
   players.forEach((p: any) => {
-    if (p.PlayerType === 3) return;
+    if (p.PlayerType === 2 || p.PlayerType === 3 || p.IsHuman === false) return;
     const teamId = p.TeamId;
-    const leaderId = p.LeaderId;
-    if (teamId == null || leaderId == null) return;
     const gamertag = getPlayerDisplayName(p);
+    const playerIndex = typeof p?.PlayerIndex === 'number' ? p.PlayerIndex : null;
+    const eventLeader = playerIndex != null
+      ? eventLeaderByIndex.get(playerIndex)
+      : eventLeaderByName.get(normalizeRosterKey(gamertag));
+    const inferredLeader = inferLeaderIdFromPowerStats(p?.LeaderPowerStats);
+    const leaderId = inferredLeader ?? eventLeader ?? p.LeaderId;
+    if (teamId == null || leaderId == null) return;
     const leaderName = getLeaderName(leaderId);
     let destroyed = 0;
     let lost = 0;

@@ -24,6 +24,7 @@ type MatchPlayerDetail = {
   LeaderId?: number;
   MatchOutcome?: number;
   IsHuman?: boolean;
+  PlayerType?: number;
   Gamertag?: string;
   HumanPlayerId?: { Gamertag?: string } | string;
   ComputerPlayerId?: number;
@@ -118,7 +119,7 @@ async function reconstructMatchFromDB(db: D1Database, matchId: string) {
         LeaderId: row.leader_id,
         MatchOutcome: row.outcome,
         IsHuman: isHuman,
-        PlayerType: isHuman ? 1 : 2,
+        PlayerType: isHuman ? 1 : 3,
       };
       if (isHuman && row.player_name) {
         player.HumanPlayerId = row.player_name;
@@ -166,16 +167,17 @@ function normalizePlayerId(gamertag: string): string {
   return gamertag.trim().toLowerCase();
 }
 
-function getPlayerName(player: MatchPlayerDetail): string {
+function getPlayerName(player: MatchPlayerDetail, isHuman: boolean): string {
   const humanId =
     (typeof player?.HumanPlayerId === 'string' && player.HumanPlayerId) ||
     (typeof player?.HumanPlayerId === 'object' && player.HumanPlayerId?.Gamertag) ||
     player?.Gamertag;
-  if (humanId) return String(humanId);
-  if (player?.IsHuman === false && player?.ComputerPlayerId != null) {
+  if (isHuman && humanId) return String(humanId);
+  if (!isHuman && player?.ComputerPlayerId != null) {
     return `AI ${player.ComputerPlayerId}`;
   }
-  if (player?.IsHuman === false) return 'AI';
+  if (!isHuman) return 'AI';
+  if (humanId) return String(humanId);
   return 'Unknown';
 }
 
@@ -188,9 +190,18 @@ function getPlayerId(player: MatchPlayerDetail): string | null {
   return normalizePlayerId(String(humanId));
 }
 
-function getPlayerKey(player: MatchPlayerDetail, index: number): string {
-  const humanId = getPlayerId(player);
-  if (humanId) return humanId;
+function resolveIsHuman(player: MatchPlayerDetail): boolean {
+  if (typeof player?.IsHuman === 'boolean') return player.IsHuman;
+  if (player?.PlayerType === 2 || player?.PlayerType === 3) return false;
+  if (player?.PlayerType === 0 || player?.PlayerType === 1) return true;
+  return getPlayerId(player) != null;
+}
+
+function getPlayerKey(player: MatchPlayerDetail, index: number, isHuman: boolean): string {
+  if (isHuman) {
+    const humanId = getPlayerId(player);
+    if (humanId) return humanId;
+  }
   if (player?.ComputerPlayerId != null) return `ai:${player.ComputerPlayerId}`;
   if (player?.TeamId != null) return `ai:${player.TeamId}:${index}`;
   return `ai:${index}`;
@@ -258,7 +269,7 @@ async function storeMatchDetail(
   const players = Array.isArray(playersRaw)
     ? playersRaw
     : (playersRaw && typeof playersRaw === 'object')
-      ? Object.values(playersRaw)
+      ? Object.values(playersRaw) as MatchPlayerDetail[]
       : [];
 
   const teamTotals = new Map<number, { destroyed: number; lost: number; powers: number }>();
@@ -267,10 +278,11 @@ async function storeMatchDetail(
     const teamId = player?.TeamId;
     const leaderId = player?.LeaderId ?? null;
     const outcome = player?.MatchOutcome ?? null;
-    const playerId = getPlayerId(player);
-    const playerName = getPlayerName(player);
-    const playerKey = getPlayerKey(player, index);
-    const isHuman = playerId ? 1 : 0;
+    const isHuman = resolveIsHuman(player);
+    const playerId = isHuman ? getPlayerId(player) : null;
+    const playerName = getPlayerName(player, isHuman);
+    const playerKey = getPlayerKey(player, index, isHuman);
+    const isHumanInt = isHuman ? 1 : 0;
     const { destroyed, lost } = sumUnitStats(player?.UnitStats);
     const powerEntries = extractLeaderPowers(player?.LeaderPowerStats);
     const powerCount = powerEntries.reduce((sum, entry) => sum + entry.times, 0);
@@ -319,7 +331,7 @@ async function storeMatchDetail(
         playerKey,
         playerId,
         playerName,
-        isHuman,
+        isHumanInt,
         teamId ?? null,
         leaderId,
         outcome,
