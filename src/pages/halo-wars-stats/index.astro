@@ -990,6 +990,32 @@ const hw2ContentCreatorGamertagsJson = JSON.stringify(contentCreatorGamertags).r
     import { parseGamertagFromProfilePath } from '../../lib/hw2/urlProfile';
     import { performSearch } from '../../lib/hw2/search';
     import { runComparison } from '../../lib/hw2/comparePlayers';
+    import { getMatchResult } from '../../utils/haloApi';
+
+    function resolveGamertagFromMatch(matchPayload: any): string {
+      const rawPlayers = matchPayload?.Players;
+      const players = Array.isArray(rawPlayers)
+        ? rawPlayers
+        : (rawPlayers && typeof rawPlayers === 'object')
+          ? Object.values(rawPlayers)
+          : [];
+
+      const getPlayerId = (player: any): string => {
+        const value = player?.HumanPlayerId?.Gamertag
+          || (typeof player?.HumanPlayerId === 'string' ? player.HumanPlayerId : '')
+          || player?.Gamertag
+          || player?.PlayerId;
+        return String(value || '').trim();
+      };
+
+      const preferred = players.find((player: any) => {
+        const id = getPlayerId(player);
+        if (!id) return false;
+        return !/^ai\s+\d+$/i.test(id);
+      }) || players.find((player: any) => getPlayerId(player) !== '');
+
+      return preferred ? getPlayerId(preferred) : '';
+    }
 
     // --- Collapsible panels ---
     if (leadersToggle && leadersPanel) {
@@ -1115,6 +1141,14 @@ const hw2ContentCreatorGamertagsJson = JSON.stringify(contentCreatorGamertags).r
       stopSearchPlaceholderRotation(false);
       searchInput.value = initialGamertag;
       performSearch(initialGamertag, { matchId: matchIdParam || null });
+    } else if (matchIdParam) {
+      const matchResult = await getMatchResult(matchIdParam);
+      const inferredGamertag = matchResult.ok ? resolveGamertagFromMatch(matchResult.data) : '';
+      if (inferredGamertag) {
+        stopSearchPlaceholderRotation(false);
+        searchInput.value = inferredGamertag;
+        performSearch(inferredGamertag, { matchId: matchIdParam });
+      }
     }
   </script>
 </BaseLayout>
