@@ -8,6 +8,9 @@ import { exportMatchToCsv, exportAllMatchesToCsv } from './matchExport';
 import { loadMatchDetails } from './matchDetails';
 import { loadMatchTimeline } from './matchTimeline';
 import { loadMatchGraphs } from './matchGraphs';
+import { loadMatchSummary, type MatchSummaryContext, type PlayerSummary } from './matchSummary';
+import { fetchMatchEventsPayload, buildEventEntries } from './matchEventProcessing';
+import { getMatchResult } from '../../utils/haloApi';
 import { getLeaderName } from '../../data/haloWars2/leaders';
 import { getMapName, getMapImage, getMapImageFallback } from '../../data/haloWars2/maps';
 import { getPlaylistName } from '../../data/haloWars2/playlists';
@@ -285,10 +288,24 @@ export function renderMatches(matches: any[], gamertag: string) {
                   <i class="fas fa-file-export" aria-hidden="true"></i>
                   <span class="hidden sm:inline">Export</span>
                 </button>
+                <button
+                  type="button"
+                  class="match-summary-toggle flex-none w-full sm:w-auto sm:flex-[4] flex items-center justify-between rounded-md border border-cyan-500/20 bg-slate-800/40 px-3 py-2 text-xs text-cyan-300 hover:text-cyan-200 hover:border-cyan-400/40 transition-colors"
+                  data-match-id="${matchId}"
+                  aria-controls="match-summary-${matchId}"
+                  aria-expanded="false"
+                >
+                  <span>✨ AI Summary</span>
+                  <span class="inline-flex items-center gap-2">
+                    <span class="match-summary-state text-[10px] uppercase tracking-wider text-gray-400">Expand</span>
+                    <span class="match-summary-chevron transition-transform duration-200" aria-hidden="true">&#x25BC;</span>
+                  </span>
+                </button>
               </div>
               <div id="${detailsId}" class="match-details mt-3 hidden" data-loaded="false"></div>
               <div id="${timelineId}" class="match-timeline mt-3 hidden" data-loaded="false"></div>
               <div id="match-graphs-${matchId}" class="match-graphs mt-3 hidden" data-loaded="false"></div>
+              <div id="match-summary-${matchId}" class="match-summary mt-3 hidden" data-loaded="false"></div>
             ` : ''}
           </div>
         </div>
@@ -335,7 +352,7 @@ export function renderMatches(matches: any[], gamertag: string) {
   };
 
   const collapseOtherPanels = (matchId: string, keepPanel: string) => {
-    const panels = ['details', 'timeline', 'graphs'] as const;
+    const panels = ['details', 'timeline', 'graphs', 'summary'] as const;
     panels.forEach((panel) => {
       if (panel === keepPanel) return;
       const toggle = matchesContent.querySelector(`.match-${panel}-toggle[data-match-id="${matchId}"]`) as HTMLElement | null;
@@ -401,6 +418,176 @@ export function renderMatches(matches: any[], gamertag: string) {
       if (isExpanded) return;
       if (graphsEl.getAttribute('data-loaded') === 'true') return;
       await loadMatchGraphs(matchId, graphsEl);
+    });
+  });
+
+  matchesContent.querySelectorAll('.match-summary-toggle').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const matchId = (btn as HTMLElement).getAttribute('data-match-id') || '';
+      if (!matchId) return;
+      const summaryId = `match-summary-${matchId}`;
+      const summaryEl = document.getElementById(summaryId);
+      if (!summaryEl) return;
+
+      const isExpanded = (btn as HTMLElement).getAttribute('aria-expanded') === 'true';
+      setPanelToggleState(btn as HTMLElement, 'summary', !isExpanded);
+      summaryEl.classList.toggle('hidden', isExpanded);
+
+      if (!isExpanded) collapseOtherPanels(matchId, 'summary');
+      if (isExpanded) return;
+      if (summaryEl.getAttribute('data-loaded') === 'true') return;
+
+      // Show loading skeleton immediately before any async work
+      summaryEl.innerHTML = `
+        <div class="rounded-lg border border-cyan-500/20 bg-slate-800/30 p-4">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-base">✨</span>
+            <span class="text-xs font-semibold uppercase tracking-wider text-cyan-300">AI Summary</span>
+          </div>
+          <div class="space-y-2">
+            <div class="h-3 bg-slate-700/50 rounded animate-pulse w-full"></div>
+            <div class="h-3 bg-slate-700/50 rounded animate-pulse w-5/6"></div>
+            <div class="h-3 bg-slate-700/50 rounded animate-pulse w-4/6"></div>
+            <div class="h-3 bg-slate-700/50 rounded animate-pulse w-full"></div>
+            <div class="h-3 bg-slate-700/50 rounded animate-pulse w-3/4"></div>
+          </div>
+        </div>
+      `;
+
+      const gtLower = state.currentGamertag.toLowerCase();
+
+      try {
+
+      // Always fetch detailed match for full UnitStats + LeaderPowerStats
+      let match = state.matchLookup.get(matchId);
+      const listPlayer = (Array.isArray(match?.Players) ? match.Players : []).find((p: any) => {
+        const id = (typeof p.HumanPlayerId === 'object' ? p.HumanPlayerId?.Gamertag : p.HumanPlayerId) || p.Gamertag;
+        return id && String(id).toLowerCase() === gtLower;
+      });
+      if (!listPlayer?.UnitStats) {
+        const detailResult = await getMatchResult(matchId);
+        if (detailResult.ok && detailResult.data) {
+          match = detailResult.data;
+          state.matchLookup.set(matchId, match);
+        }
+      }
+      if (!match) return;
+
+      // Fetch events for leader resolution, tech timing, build order, and powers
+      const eventsResult = await fetchMatchEventsPayload(matchId);
+      const { entries, playersByIndex } = eventsResult.ok && eventsResult.data
+        ? await buildEventEntries(eventsResult.data)
+        : { entries: [], playersByIndex: new Map<number, any>() };
+
+      // Index event data per playerIndex
+      const techT2ByPlayer = new Map<number, number>();
+      const techT3ByPlayer = new Map<number, number>();
+      const firstBuildingByPlayer = new Map<number, string>();
+      const firstUnitByPlayer = new Map<number, string>();
+      const powerCountByPlayer = new Map<number, Map<string, number>>();
+      for (const e of entries) {
+        if (e.playerIndex == null) continue;
+        if (e.kind === 'upgrade' && e.techTier === 2 && !techT2ByPlayer.has(e.playerIndex)) techT2ByPlayer.set(e.playerIndex, e.timeMs);
+        if (e.kind === 'upgrade' && e.techTier === 3 && !techT3ByPlayer.has(e.playerIndex)) techT3ByPlayer.set(e.playerIndex, e.timeMs);
+        if (e.kind === 'building' && !firstBuildingByPlayer.has(e.playerIndex)) firstBuildingByPlayer.set(e.playerIndex, e.label.replace(/^Completed /, ''));
+        if (e.kind === 'unit' && !firstUnitByPlayer.has(e.playerIndex)) firstUnitByPlayer.set(e.playerIndex, e.label.replace(/^Trained /, ''));
+        if (e.kind === 'power') {
+          const powerName = e.label.replace(/^Cast /, '');
+          const map = powerCountByPlayer.get(e.playerIndex) || new Map<string, number>();
+          map.set(powerName, (map.get(powerName) || 0) + 1);
+          powerCountByPlayer.set(e.playerIndex, map);
+        }
+      }
+
+      const toMin = (ms: number) => Math.round(ms / 6000) / 10; // 1 decimal place minutes
+      const getGt = (p: any): string =>
+        String((typeof p.HumanPlayerId === 'object' ? p.HumanPlayerId?.Gamertag : p.HumanPlayerId) || p.Gamertag || p.PlayerId || 'Unknown');
+
+      const buildPlayerSummary = (p: any): PlayerSummary => {
+        const gamertag = getGt(p);
+        const pidx = typeof p.PlayerIndex === 'number' ? p.PlayerIndex : null;
+        const info = pidx != null ? playersByIndex.get(pidx) : null;
+        const leaderId = info?.leaderId ?? p.LeaderId ?? null;
+
+        let unitsDestroyed = 0, unitsLost = 0;
+        const us = p.UnitStats;
+        if (us && typeof us === 'object') Object.values(us).forEach((u: any) => { unitsDestroyed += u?.TotalDestroyed || 0; unitsLost += u?.TotalLost || 0; });
+
+        const powerMap = pidx != null ? powerCountByPlayer.get(pidx) : null;
+        const topPowers = powerMap
+          ? [...powerMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4).map(([name, n]) => `${name} x${n}`)
+          : [];
+
+        return {
+          gamertag,
+          leader: leaderId != null ? getLeaderName(leaderId) : 'Unknown',
+          teamId: p.TeamId ?? null,
+          unitsDestroyed,
+          unitsLost,
+          topPowers,
+          techT2Min: pidx != null && techT2ByPlayer.has(pidx) ? toMin(techT2ByPlayer.get(pidx)!) : null,
+          techT3Min: pidx != null && techT3ByPlayer.has(pidx) ? toMin(techT3ByPlayer.get(pidx)!) : null,
+          firstBuilding: pidx != null ? (firstBuildingByPlayer.get(pidx) ?? null) : null,
+          firstUnit: pidx != null ? (firstUnitByPlayer.get(pidx) ?? null) : null,
+        };
+      };
+
+      const humanPlayers: any[] = (Array.isArray(match.Players) ? match.Players : Object.values(match.Players || {}))
+        .filter((p: any) => p.IsHuman !== false && p.PlayerType !== 2 && p.PlayerType !== 3);
+      const youPlayer = humanPlayers.find((p: any) => getGt(p).toLowerCase() === gtLower) || humanPlayers[0];
+      if (!youPlayer) return;
+
+      const youTeamId = youPlayer.TeamId ?? null;
+      const rawOutcome = youPlayer.MatchOutcome ?? youPlayer.PlayerMatchOutcome ?? match.PlayerMatchOutcome ?? match.MatchOutcome;
+      const outcome = typeof rawOutcome === 'string' ? rawOutcome.toLowerCase() : rawOutcome;
+      const resultText = outcome === 1 || outcome === 'win' || outcome === 'victory' ? 'Victory'
+        : outcome === 2 || outcome === 'loss' || outcome === 'defeat' ? 'Defeat' : 'Draw';
+
+      const mapName = getMapName(match.MapId || '');
+      const dateStr = match.MatchStartDate?.ISO8601Date
+        ? new Date(match.MatchStartDate.ISO8601Date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+        : '';
+      const durationStr = parseDuration(match.PlayerMatchDuration || match.MatchDuration || '') || '';
+      const playlistLabel = (match.PlaylistId ? getPlaylistName(match.PlaylistId) : '') || getGameModeName(match.GameMode) || '';
+      let teamSizeLabel = '';
+      if (match.Teams && typeof match.Teams === 'object') {
+        const sizes = Object.values(match.Teams).map((t: any) => t?.TeamSize).filter((s: any) => typeof s === 'number');
+        if (sizes.length >= 2) teamSizeLabel = `${sizes[0]}v${sizes[1]}`;
+        else if (sizes.length === 1) teamSizeLabel = `${sizes[0]}v${sizes[0]}`;
+      }
+      const prevCsr = match.RatingProgress?.PreviousCsr?.Raw;
+      const nextCsr = match.RatingProgress?.UpdatedCsr?.Raw;
+      const csrDelta = (typeof prevCsr === 'number' && typeof nextCsr === 'number') ? Math.round(nextCsr - prevCsr) : null;
+      const csrDeltaText = csrDelta != null ? `${csrDelta > 0 ? '+' : ''}${csrDelta}` : '';
+
+      const matchContext: MatchSummaryContext = {
+        result: resultText,
+        mapName,
+        duration: durationStr,
+        teamSize: teamSizeLabel,
+        playlist: playlistLabel,
+        csrDelta: csrDeltaText,
+        completed: youPlayer.PlayerCompletedMatch ?? match.PlayerCompletedMatch ?? null,
+        date: dateStr,
+        you: buildPlayerSummary(youPlayer),
+        allies: humanPlayers.filter((p: any) => p !== youPlayer && p.TeamId === youTeamId).map(buildPlayerSummary),
+        opponents: humanPlayers.filter((p: any) => p.TeamId !== youTeamId).map(buildPlayerSummary),
+      };
+
+      await loadMatchSummary(matchId, state.currentGamertag, matchContext, summaryEl);
+
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Failed to load summary.';
+        summaryEl.innerHTML = `
+          <div class="rounded-lg border border-red-500/20 bg-red-900/10 p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-base">✨</span>
+              <span class="text-xs font-semibold uppercase tracking-wider text-red-300">AI Summary</span>
+            </div>
+            <p class="text-sm text-red-300">${msg}</p>
+          </div>
+        `;
+      }
     });
   });
 
