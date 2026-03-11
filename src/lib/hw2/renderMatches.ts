@@ -341,7 +341,7 @@ export function renderMatches(matches: any[], gamertag: string) {
   // Wire up match details toggles
   const setPanelToggleState = (
     toggle: HTMLElement,
-    panel: 'details' | 'timeline' | 'graphs',
+    panel: 'details' | 'timeline' | 'graphs' | 'summary',
     expanded: boolean
   ) => {
     toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
