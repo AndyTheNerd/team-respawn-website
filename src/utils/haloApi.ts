@@ -44,6 +44,11 @@ async function fetchFromPagesFunction<T>(
     const isJson = contentType.includes('application/json');
     const data = isJson ? await response.json().catch(() => null) : null;
     if (response.ok) {
+      // In local dev, a misrouted /api call can return HTML with 200.
+      // Treat non-JSON success as invalid API response and use fallback if available.
+      if ((!isJson || data == null) && fallback) {
+        return fallback();
+      }
       return { ok: true, data: data as T };
     }
 

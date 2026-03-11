@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
+    "dev:cf": "wrangler pages dev --proxy 4321",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
@@ -12,6 +13,7 @@
     "cf:d1:migrate:3": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0003_player_stats_cache.sql --remote",
     "cf:d1:migrate:4": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0004_campaign_cache.sql --remote",
     "cf:d1:migrate:5": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0005_player_matches_cache.sql --remote",
+    "cf:d1:migrate:8": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0008_match_summaries.sql --remote",
     "cf:d1:migrate": "npm run cf:d1:migrate:1 && npm run cf:d1:migrate:2 && npm run cf:d1:migrate:3 && npm run cf:d1:migrate:4 && npm run cf:d1:migrate:5"
   },
   "dependencies": {
