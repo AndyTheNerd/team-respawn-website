@@ -8,8 +8,8 @@
       id="hw2-searches-heading"
       class="text-lg font-semibold text-gray-200 flex items-center gap-2"
     >
-      <i class="fas fa-search text-cyan-400" aria-hidden="true"></i>
-      Recent HW2 Searches
+      <i class="fas fa-globe text-cyan-400" aria-hidden="true"></i>
+      Community HW2 Searches
     </h2>
     <a
       href="/halo-wars-stats"
@@ -18,12 +18,13 @@
       Open Stats →
     </a>
   </div>
+  <p class="text-xs text-gray-500 mb-3">Gamertags recently looked up by visitors across the site.</p>
 
   <div
     id="hw2-recent-searches"
     class="flex flex-wrap gap-2 min-h-[2.5rem]"
     aria-live="polite"
-    aria-label="Recently searched gamertags"
+    aria-label="Recently searched gamertags by all users"
   >
     <!-- Loading chips -->
     {Array.from({ length: 8 }).map(() => (
