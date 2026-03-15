@@ -4,6 +4,7 @@ import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import SidePanel from '../../components/SidePanel.astro';
 import StorehausPromo from '../../components/StorehausPromo.astro';
+import RecentHW2Searches from '../../components/RecentHW2Searches.astro';
 import { videos } from '../../data/videos';
 import { hw2NameMappings } from '../../data/haloWars2/nameMappings';
 import { confirmedCheaterGamertags } from '../../data/haloWars2/confirmedCheaters';
@@ -468,6 +469,10 @@ const hw2ContentCreatorGamertagsJson = JSON.stringify(contentCreatorGamertags).r
         <!-- Recent Searches -->
         <div id="recent-searches" class="max-w-2xl mx-auto mt-3 flex flex-wrap gap-2 hidden"></div>
       </section>
+
+      <div id="recent-hw2-searches-section" class="hidden">
+        <RecentHW2Searches />
+      </div>
 
       <!-- Player Comparison -->
       <section id="compare-section" class="mb-8">
@@ -1129,6 +1134,10 @@ const hw2ContentCreatorGamertagsJson = JSON.stringify(contentCreatorGamertags).r
     renderRecentSearches();
 
     // --- URL-based initialization ---
+    const recentHw2SearchesSection = document.getElementById('recent-hw2-searches-section') as HTMLElement | null;
+    const setRecentHw2SearchesVisible = (visible: boolean) => {
+      recentHw2SearchesSection?.classList.toggle('hidden', !visible);
+    };
     const urlParams = new URLSearchParams(window.location.search);
     const pathGamertag = parseGamertagFromProfilePath(window.location.pathname);
     const queryGamertag = urlParams.get('gamertag')?.trim() || '';
@@ -1138,10 +1147,12 @@ const hw2ContentCreatorGamertagsJson = JSON.stringify(contentCreatorGamertags).r
       state.pendingDeepLinkMatchId = matchIdParam;
     }
     if (initialGamertag) {
+      setRecentHw2SearchesVisible(false);
       stopSearchPlaceholderRotation(false);
       searchInput.value = initialGamertag;
       performSearch(initialGamertag, { matchId: matchIdParam || null });
     } else if (matchIdParam) {
+      setRecentHw2SearchesVisible(false);
       const matchResult = await getMatchResult(matchIdParam);
       const inferredGamertag = matchResult.ok ? resolveGamertagFromMatch(matchResult.data) : '';
       if (inferredGamertag) {
@@ -1149,6 +1160,8 @@ const hw2ContentCreatorGamertagsJson = JSON.stringify(contentCreatorGamertags).r
         searchInput.value = inferredGamertag;
         performSearch(inferredGamertag, { matchId: matchIdParam });
       }
+    } else {
+      setRecentHw2SearchesVisible(true);
     }
   </script>
 </BaseLayout>

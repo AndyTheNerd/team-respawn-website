@@ -1,0 +1,77 @@
+---
+// Shows the most recently searched gamertags from the HW2 stats page.
+// Each chip links directly to that gamertag's stats.
+---
+<section class="mb-8" aria-labelledby="hw2-searches-heading">
+  <div class="flex items-center justify-between mb-3">
+    <h2
+      id="hw2-searches-heading"
+      class="text-lg font-semibold text-gray-200 flex items-center gap-2"
+    >
+      <i class="fas fa-search text-cyan-400" aria-hidden="true"></i>
+      Recent HW2 Searches
+    </h2>
+    <a
+      href="/halo-wars-stats"
+      class="text-sm text-cyan-400 hover:text-cyan-300 transition-colors duration-200"
+    >
+      Open Stats →
+    </a>
+  </div>
+
+  <div
+    id="hw2-recent-searches"
+    class="flex flex-wrap gap-2 min-h-[2.5rem]"
+    aria-live="polite"
+    aria-label="Recently searched gamertags"
+  >
+    <!-- Loading chips -->
+    {Array.from({ length: 8 }).map(() => (
+      <div class="animate-pulse h-8 w-24 bg-gray-800 rounded-full border border-gray-700/50"></div>
+    ))}
+  </div>
+</section>
+
+<script is:inline>
+  (async () => {
+    const container = document.getElementById('hw2-recent-searches');
+    if (!container) return;
+
+    function escHtml(s) {
+      const d = document.createElement('div');
+      d.textContent = String(s);
+      return d.innerHTML;
+    }
+
+    try {
+      const res = await fetch('/api/hw2/recent-searches');
+      if (!res.ok) throw new Error('fetch failed');
+      const data = await res.json();
+
+      if (!data.searches?.length) {
+        container.innerHTML =
+          '<p class="text-sm text-gray-500 italic">No searches yet. Be the first to look up a gamertag!</p>';
+        return;
+      }
+
+      container.innerHTML = data.searches
+        .map((s) => {
+          const safeTag = escHtml(s.gamertag ?? '');
+          const encodedTag = encodeURIComponent(s.gamertag ?? '');
+          return `
+            <a href="/halo-wars-stats?gamertag=${encodedTag}"
+               class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium
+                      bg-cyan-900/30 border border-cyan-500/30 text-cyan-200
+                      hover:bg-cyan-800/40 hover:border-cyan-400/50 hover:text-white
+                      transition-all duration-200">
+              <i class="fas fa-gamepad text-xs text-cyan-400" aria-hidden="true"></i>
+              ${safeTag}
+            </a>`;
+        })
+        .join('');
+    } catch {
+      container.innerHTML =
+        '<p class="text-sm text-gray-500 italic">Could not load recent searches.</p>';
+    }
+  })();
+</script>
