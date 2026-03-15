@@ -1,0 +1,68 @@
+---
+interface Props {
+  message: string;
+  href: string;
+  linkText: string;
+  storageKey: string;
+}
+
+const { message, href, linkText, storageKey } = Astro.props;
+---
+<section
+  id="announcement-banner"
+  class="mb-6 rounded-xl border border-cyan-400/30 bg-cyan-500/10 backdrop-blur-sm"
+  role="region"
+  aria-label="Announcement"
+>
+  <div class="px-4 py-3 sm:px-5">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div class="flex items-start gap-3">
+        <i class="fas fa-bullhorn text-cyan-300 mt-0.5" aria-hidden="true"></i>
+        <p class="text-sm sm:text-base text-cyan-100">
+          <span class="font-semibold text-white">New:</span>
+          {message}
+        </p>
+      </div>
+      <div class="flex items-center gap-2 sm:flex-shrink-0">
+        <a
+          href={href}
+          class="inline-flex items-center justify-center gap-2 rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-semibold px-4 py-2 transition-colors duration-200 whitespace-nowrap"
+        >
+          {linkText}
+        </a>
+        <button
+          id="announcement-banner-dismiss"
+          type="button"
+          class="inline-flex items-center justify-center rounded-lg border border-cyan-300/30 text-cyan-200 hover:text-white hover:bg-cyan-400/10 px-3 py-2 text-sm transition-colors duration-200"
+          aria-label="Dismiss announcement"
+          title="Dismiss"
+        >
+          <i class="fas fa-times" aria-hidden="true"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script define:vars={{ storageKey }} is:inline>
+  (() => {
+    const banner = document.getElementById('announcement-banner');
+    const dismissButton = document.getElementById('announcement-banner-dismiss');
+
+    if (!banner || !dismissButton) return;
+
+    try {
+      if (window.localStorage.getItem(storageKey) === '1') {
+        banner.classList.add('hidden');
+        return;
+      }
+    } catch {}
+
+    dismissButton.addEventListener('click', () => {
+      banner.classList.add('hidden');
+      try {
+        window.localStorage.setItem(storageKey, '1');
+      } catch {}
+    });
+  })();
+</script>
