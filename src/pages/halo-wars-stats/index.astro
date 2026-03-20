@@ -5,6 +5,7 @@ import Footer from '../../components/Footer.astro';
 import SidePanel from '../../components/SidePanel.astro';
 import StorehausPromo from '../../components/StorehausPromo.astro';
 import RecentHW2Searches from '../../components/RecentHW2Searches.astro';
+import HW2CommunityStats from '../../components/HW2CommunityStats.astro';
 import { videos } from '../../data/videos';
 import { hw2NameMappings } from '../../data/haloWars2/nameMappings';
 import { confirmedCheaterGamertags } from '../../data/haloWars2/confirmedCheaters';
@@ -470,10 +471,6 @@ const hw2ContentCreatorGamertagsJson = JSON.stringify(contentCreatorGamertags).r
         <div id="recent-searches" class="max-w-2xl mx-auto mt-3 flex flex-wrap gap-2 hidden"></div>
       </section>
 
-      <div id="recent-hw2-searches-section" class="hidden">
-        <RecentHW2Searches />
-      </div>
-
       <!-- Player Comparison -->
       <section id="compare-section" class="mb-8">
         <div class="max-w-2xl mx-auto">
@@ -526,6 +523,11 @@ const hw2ContentCreatorGamertagsJson = JSON.stringify(contentCreatorGamertags).r
           </div>
         </div>
       </section>
+
+      <div id="recent-hw2-searches-section" class="hidden">
+        <RecentHW2Searches />
+        <HW2CommunityStats />
+      </div>
 
       <!-- Results Container -->
       <div id="results-container" class="hidden space-y-6">

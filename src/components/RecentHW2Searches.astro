@@ -1,6 +1,10 @@
 ---
 // Shows the most recently searched gamertags from the HW2 stats page.
 // Each chip links directly to that gamertag's stats.
+interface Props {
+  showOpenStatsLink?: boolean;
+}
+const { showOpenStatsLink = false } = Astro.props;
 ---
 <section class="mb-8" aria-labelledby="hw2-searches-heading">
   <div class="flex items-center justify-between mb-3">
@@ -11,12 +15,14 @@
       <i class="fas fa-globe text-cyan-400" aria-hidden="true"></i>
       Community HW2 Searches
     </h2>
-    <a
-      href="/halo-wars-stats"
-      class="text-sm text-cyan-400 hover:text-cyan-300 transition-colors duration-200"
-    >
-      Open Stats →
-    </a>
+    {showOpenStatsLink && (
+      <a
+        href="/halo-wars-stats"
+        class="text-sm text-cyan-400 hover:text-cyan-300 transition-colors duration-200"
+      >
+        Open Stats →
+      </a>
+    )}
   </div>
   <p class="text-xs text-gray-500 mb-3">Gamertags recently looked up by visitors across the site.</p>
 
