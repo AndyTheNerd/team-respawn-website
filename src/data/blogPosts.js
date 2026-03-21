@@ -1,5 +1,185 @@
 ﻿const blogPosts = [
   {
+    title: 'Halo CE Anniversary Full Campaign Walkthrough',
+    date: 'Published on February 7, 2026',
+    dateIso: '2026-02-07',
+    category: 'Walkthroughs',
+    tags: ['Halo'],
+    excerpt: 'A full walkthrough of Halo Combat Evolved Anniversary. Watch the complete campaign run.',
+    href: '/blog/posts/halo-ce-anniversary-walkthrough',
+    accentClass: 'text-orange-400',
+    buttonClass: 'bg-orange-500 hover:bg-orange-600',
+    img: {
+      src: 'https://img.youtube.com/vi/F1IcZeDYFd4/maxresdefault.jpg',
+      alt: 'Halo CE Anniversary Full Campaign Walkthrough',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
+    title: 'Halo 2 Anniversary Full Campaign Walkthrough',
+    date: 'Published on February 7, 2026',
+    dateIso: '2026-02-07',
+    category: 'Walkthroughs',
+    tags: ['Halo'],
+    excerpt: 'A full walkthrough of Halo 2 Anniversary. Watch the complete campaign run.',
+    href: '/blog/posts/halo-2-anniversary-walkthrough',
+    accentClass: 'text-purple-400',
+    buttonClass: 'bg-purple-500 hover:bg-purple-600',
+    img: {
+      src: 'https://img.youtube.com/vi/KmaZvyOKJ0k/maxresdefault.jpg',
+      alt: 'Halo 2 Anniversary Full Campaign Walkthrough',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
+    title: 'Halo 3 Full Campaign Walkthrough',
+    date: 'Published on February 7, 2026',
+    dateIso: '2026-02-07',
+    category: 'Walkthroughs',
+    tags: ['Halo'],
+    excerpt: 'A full walkthrough of Halo 3. Watch the complete campaign run.',
+    href: '/blog/posts/halo-3-walkthrough',
+    accentClass: 'text-blue-400',
+    buttonClass: 'bg-blue-500 hover:bg-blue-600',
+    img: {
+      src: 'https://img.youtube.com/vi/Mu7YMk5W8-8/maxresdefault.jpg',
+      alt: 'Halo 3 Full Campaign Walkthrough',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
+    title: 'Halo 3 ODST Full Campaign Walkthrough',
+    date: 'Published on February 7, 2026',
+    dateIso: '2026-02-07',
+    category: 'Walkthroughs',
+    tags: ['Halo'],
+    excerpt: 'A full walkthrough of Halo 3 ODST. Watch the complete campaign run.',
+    href: '/blog/posts/halo-3-odst-walkthrough',
+    accentClass: 'text-pink-400',
+    buttonClass: 'bg-pink-500 hover:bg-pink-600',
+    img: {
+      src: 'https://img.youtube.com/vi/PIirToORUM8/maxresdefault.jpg',
+      alt: 'Halo 3 ODST Full Campaign Walkthrough',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
+    title: 'Halo Reach Full Campaign Walkthrough',
+    date: 'Published on February 7, 2026',
+    dateIso: '2026-02-07',
+    category: 'Walkthroughs',
+    tags: ['Halo'],
+    excerpt: 'A full walkthrough of Halo Reach. Watch the complete campaign run.',
+    href: '/blog/posts/halo-reach-walkthrough',
+    accentClass: 'text-lime-400',
+    buttonClass: 'bg-lime-500 hover:bg-lime-600',
+    img: {
+      src: 'https://img.youtube.com/vi/tKfsjD-ixGk/maxresdefault.jpg',
+      alt: 'Halo Reach Full Campaign Walkthrough',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
+    title: 'Halo 4 Full Campaign Walkthrough',
+    date: 'Published on February 7, 2026',
+    dateIso: '2026-02-07',
+    category: 'Walkthroughs',
+    tags: ['Halo'],
+    excerpt: 'A full walkthrough of Halo 4. Watch the complete campaign run.',
+    href: '/blog/posts/halo-4-walkthrough',
+    accentClass: 'text-teal-400',
+    buttonClass: 'bg-teal-500 hover:bg-teal-600',
+    img: {
+      src: 'https://img.youtube.com/vi/LmBFwjGlfmE/maxresdefault.jpg',
+      alt: 'Halo 4 Full Campaign Walkthrough',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
+    title: 'Halo Infinite Full Campaign Walkthrough',
+    date: 'Published on February 7, 2026',
+    dateIso: '2026-02-07',
+    category: 'Walkthroughs',
+    tags: ['Halo'],
+    excerpt: 'A full walkthrough of Halo Infinite. Watch the complete campaign run.',
+    href: '/blog/posts/halo-infinite-walkthrough',
+    accentClass: 'text-red-400',
+    buttonClass: 'bg-red-500 hover:bg-red-600',
+    img: {
+      src: 'https://img.youtube.com/vi/pI_oIv-3MSg/maxresdefault.jpg',
+      alt: 'Halo Infinite Full Campaign Walkthrough',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
+    title: 'Halo Wars 2 Full Campaign Walkthrough',
+    date: 'Published on February 7, 2026',
+    dateIso: '2026-02-07',
+    category: 'Walkthroughs',
+    tags: ['Halo Wars 2'],
+    excerpt: 'A full walkthrough of the Halo Wars 2 campaign. Watch the complete run.',
+    href: '/blog/posts/halo-wars-2-campaign-walkthrough',
+    accentClass: 'text-yellow-400',
+    buttonClass: 'bg-yellow-500 hover:bg-yellow-600',
+    img: {
+      src: 'https://img.youtube.com/vi/Ain_YH5VD6M/maxresdefault.jpg',
+      alt: 'Halo Wars 2 Full Campaign Walkthrough',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
+    title: 'Gears of War: Ultimate Edition Full Campaign Walkthrough',
+    date: 'Published on February 7, 2026',
+    dateIso: '2026-02-07',
+    category: 'Walkthroughs',
+    tags: ['Gears of War'],
+    excerpt: 'A full walkthrough of Gears of War: Ultimate Edition. Watch the complete campaign run.',
+    href: '/blog/posts/gears-of-war-ultimate-edition-walkthrough',
+    accentClass: 'text-indigo-400',
+    buttonClass: 'bg-indigo-500 hover:bg-indigo-600',
+    img: {
+      src: 'https://img.youtube.com/vi/Od2xVtB0z3k/maxresdefault.jpg',
+      alt: 'Gears of War: Ultimate Edition Full Campaign Walkthrough',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
+    title: 'Goblin Commander: Unleash the Horde Full Campaign Walkthrough',
+    date: 'Published on February 7, 2026',
+    dateIso: '2026-02-07',
+    category: 'Walkthroughs',
+    tags: ['Goblin Commander'],
+    excerpt: 'A full walkthrough of Goblin Commander: Unleash the Horde. Watch the complete campaign run.',
+    href: '/blog/posts/goblin-commander-walkthrough',
+    accentClass: 'text-emerald-400',
+    buttonClass: 'bg-emerald-500 hover:bg-emerald-600',
+    img: {
+      src: 'https://img.youtube.com/vi/VvD3M82_f_Q/maxresdefault.jpg',
+      alt: 'Goblin Commander: Unleash the Horde Full Campaign Walkthrough',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
     title: 'Halo Wars 2 - Operation Spearkbreaker Walkthrough',
     date: 'Published on February 8, 2026',
     dateIso: '2026-02-08',
