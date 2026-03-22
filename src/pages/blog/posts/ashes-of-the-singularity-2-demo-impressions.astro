@@ -1,0 +1,98 @@
+---
+import BlogPostLayout from '../../../layouts/BlogPostLayout.astro';
+---
+<BlogPostLayout
+  title="Ashes of the Singularity 2 — Demo First Impressions"
+  description="First impressions of the Ashes of the Singularity 2 demo, played as the United Earth Federation in a 6-player skirmish during Steam Next Fest."
+  category="Reviews"
+  tags={['Ashes of the Singularity 2']}
+  publishedDate="Published on February 23, 2026"
+  dateIso="2026-02-23"
+  youtubeId="uT0bc4IA5zg"
+>
+  <p class="text-lg leading-relaxed mb-6 italic text-gray-300">Played as the United Earth Federation in a 6-player skirmish during Steam Next Fest.</p>
+
+  <p class="text-lg leading-relaxed mb-6">I had never touched the original Ashes of the Singularity, so I went into this demo completely cold. What I didn't expect was how immediately legible it felt. Within the first few minutes, a reasonable shorthand formed on its own: this is what you'd get if Command &amp; Conquer, Company of Heroes, and Halo Wars were put in a blender. That's not a knock — it's genuinely one of the better things I can say about an RTS. Each of those games does something well, and Ashes 2 seems to know exactly which parts were worth borrowing.</p>
+
+  <p class="text-lg leading-relaxed mb-6">The biggest thing that stands out before anything else is the <strong class="text-cyan-400">scale</strong>. Battles here are enormous. Armies move in columns that stretch across the terrain, and when you zoom all the way out, the map reads like a living Risk board — colored territories stitched together by visible power lines, armies mobilizing across multiple fronts at once. That zoomed-out view is quietly one of the best features in the game. It makes the strategic picture immediately readable in a way that most RTS games struggle to pull off.</p>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Region Control</h2>
+
+  <p class="text-lg leading-relaxed mb-6">The map is divided into capturable territories, each with a fixed number of building slots. When you take a region, all existing structures in it are destroyed — the new owner starts from scratch. It's a simple rule that keeps every territorial exchange meaningful rather than just a line moving on a minimap.</p>
+
+  <p class="text-lg leading-relaxed mb-6">The connectivity between regions matters too. If an opponent captures a zone between two of your own, your isolated territories lose power. It's a Company of Heroes mechanic at heart, and it creates real decisions about where to defend and when to overextend. The terrain reinforces this — chokepoints and cliff lines funnel movement naturally, so holding a wedge feels like actual strategy rather than just having more units.</p>
+
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li><strong class="text-cyan-400">Air units don't contribute to capturing regions</strong>. Ground presence is what claims territory, so air-heavy builds need a ground force alongside them to actually hold ground.</li>
+    <li>The win condition is a headquarters kill. On maps this large, that can occasionally feel like a shortcut — you can theoretically ignore most of the board and snipe a base directly.</li>
+  </ul>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Economy</h2>
+
+  <p class="text-lg leading-relaxed mb-6">Two resources: <strong class="text-cyan-400">Durantium</strong> and <strong class="text-cyan-400">Ellarite</strong>. Deposits are fixed on the map, and the building slots within each region are split between resource extractors and power structures — so there's a real tension between growing your economy and keeping the lights on.</p>
+
+  <p class="text-lg leading-relaxed mb-6">The economy has a genuine gotcha built into it: you can queue up construction faster than your income supports, effectively going into debt. Production doesn't stop when your resources hit zero — it just stalls. Queue up too many buildings at once and you can quietly cripple yourself without realizing it until things have already gone sideways.</p>
+
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li><strong class="text-cyan-400">Supply Depots</strong> raise the population cap, so army size is tied directly to how many you've built</li>
+    <li><strong class="text-cyan-400">Refinery overclocking</strong> exists as an emergency resource spike — a leader power that deploys a temporary boosted refinery</li>
+    <li>Multiple production buildings of the same type still add throughput, but each subsequent one produces slightly slower than the last — parallel production with diminishing returns</li>
+  </ul>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 class="text-2xl font-bold mb-4 text-cyan-300 mt-8">The Army System</h2>
+
+  <p class="text-lg leading-relaxed mb-6">This is where Ashes 2 parts ways most clearly from the genre standard. You don't queue individual units. Instead, you configure an <strong class="text-cyan-400">army composition</strong> and hit <strong class="text-cyan-400">Assemble Army</strong> to confirm it. Nothing ships until you do. It's an easy step to miss, and missing it is quietly catastrophic — production just sits idle while the queue fills up.</p>
+
+  <p class="text-lg leading-relaxed mb-6">Once an army is in the field, you have two options for managing losses: <strong class="text-cyan-400">Replenish</strong> to replace destroyed units with the same composition, or manually adjust the composition and top it off. Units heal passively over time, and armies accumulate <strong class="text-cyan-400">veterancy</strong> through combat. At high vet levels, a single experienced unit becomes a serious problem for anyone trying to dislodge it.</p>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Units</h2>
+
+  <p class="text-lg leading-relaxed mb-6">The demo doesn't show everything, but what's on the board already has range. On the ground: Rifle Squads, standard tanks, the heavier Goliath, Vanguard, Razor Squads, and Skitters for faster harassment. At the top end sits the <strong class="text-cyan-400">God Slayer</strong> — a titan-class unit that, once it's been leveled up, starts eating through everything in its path.</p>
+
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li>Air operates off <strong class="text-cyan-400">Airfields</strong>, which require a Motor Pool first. Planes fly in active circuits over their operating area.</li>
+    <li><strong class="text-cyan-400">Flak Battery</strong> is the counter to air units.</li>
+    <li><strong class="text-cyan-400">Orbital Cannon</strong> for off-map fire support.</li>
+    <li>Defensive turrets count against the population cap rather than sitting in a separate budget — turtling has a real cost.</li>
+  </ul>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Late Game</h2>
+
+  <p class="text-lg leading-relaxed mb-6">Leader Powers charge up during play and open up some genuinely dramatic options — including what appears to be an orbital strike that doesn't distinguish between friend and foe. Late game armies push into the hundreds of population, orbital bombardment starts flying, and the map becomes a multi-front war with no clean lines. The sense of scale doesn't plateau — it keeps climbing.</p>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 class="text-2xl font-bold mb-4 text-cyan-300 mt-8">What Works</h2>
+
+  <p class="text-lg leading-relaxed mb-6">The macro focus is the right call. Ashes 2 isn't trying to be a game about unit control — it's a game about reading a large map and moving mass. That clarity of intent makes it approachable even at scale. The zoomed-out strategic view is excellent. The terrain-driven chokepoints give defense real teeth. The veterancy and service record systems give armies a sense of history. And relative to something like Age of Empires, the systems are streamlined enough that new players can orient quickly without feeling like they're missing a manual.</p>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 class="text-2xl font-bold mb-4 text-cyan-300 mt-8">What Needs Work</h2>
+
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li><strong class="text-cyan-400">Hotkeys and rally points</strong> are the biggest gap. The control scheme needs work before this feels fluid at a competitive level.</li>
+    <li><strong class="text-cyan-400">Pathfinding</strong> has some issues — units occasionally wander or take odd routes, especially in tighter terrain.</li>
+    <li><strong class="text-cyan-400">No in-game ping or flare</strong> for co-op play. On a map this large, being able to mark a location for a teammate is basically a necessity.</li>
+    <li><strong class="text-cyan-400">Army queue cancellation</strong> isn't clear. Once a large production queue is running, stopping it mid-way isn't intuitive.</li>
+    <li><strong class="text-cyan-400">Unit tracking at scale</strong> can get muddy. With armies this large, it's sometimes hard to account for where everything is.</li>
+  </ul>
+
+  <p class="text-lg leading-relaxed mb-6">These are fixable, and most of them feel like demo-stage roughness rather than structural problems. The foundation is solid enough that the edges matter.</p>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Bottom Line</h2>
+
+  <p class="text-lg leading-relaxed mb-6">Ashes of the Singularity 2 is doing something ambitious — building a large-scale RTS that doesn't collapse under its own weight. The demo makes a strong case that it's on the right track. The strategic layer is readable, the army system has real personality, and the sheer size of the engagements delivers something few RTS games manage to pull off. The rough spots are real, but they're the kind of rough spots that get polished. Worth watching closely.</p>
+</BlogPostLayout>

@@ -1,5 +1,23 @@
 ﻿const blogPosts = [
   {
+    title: 'Ashes of the Singularity 2 — Demo First Impressions',
+    date: 'Published on February 23, 2026',
+    dateIso: '2026-02-23',
+    category: 'Reviews',
+    tags: ['Ashes of the Singularity 2'],
+    excerpt: 'First impressions of the Ashes of the Singularity 2 demo — a large-scale RTS that blends Command & Conquer, Company of Heroes, and Halo Wars.',
+    href: '/blog/posts/ashes-of-the-singularity-2-demo-impressions',
+    accentClass: 'text-red-400',
+    buttonClass: 'bg-red-500 hover:bg-red-600',
+    img: {
+      src: 'https://img.youtube.com/vi/uT0bc4IA5zg/maxresdefault.jpg',
+      alt: 'Ashes of the Singularity 2 — Demo First Impressions',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
     title: 'Halo CE Anniversary Full Campaign Walkthrough',
     date: 'Published on February 7, 2026',
     dateIso: '2026-02-07',
