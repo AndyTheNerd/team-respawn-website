@@ -1,4 +1,5 @@
 node_modules
+junk/
 dist
 cache
 webcoreui
@@ -13,3 +14,5 @@ changelogs/
 test-results/
 playwright-report/
 blob-report/
+scripts/
+.astro/settings.json

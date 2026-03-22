@@ -1,0 +1,1436 @@
+﻿---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import SidePanel from '../../components/SidePanel.astro';
+import { videos } from '../../data/videos';
+import {
+  tagVideo,
+  GAME_LABELS,
+  SERIES_LABELS,
+  FORMAT_LABELS,
+  type GameTag,
+  type SeriesTag,
+  type FormatTag,
+} from '../../lib/videoUtils';
+
+// Tag all public videos at build time, newest first
+const taggedVideos = videos
+  .filter((v) => v.privacy === 'Public')
+  .map(tagVideo)
+  .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+
+// Derive available years
+const availableYears = [...new Set(taggedVideos.map((v) => v.year))]
+  .filter((y) => y > 0)
+  .sort((a, b) => b - a);
+
+const videoJson = JSON.stringify(taggedVideos).replace(/</g, '\\u003c');
+
+// Ordered lists for tile rendering
+const gameOrder: { value: GameTag; label: string; icon: string; img?: string; title: string }[] = [
+  { value: 'halo-wars-2',        label: 'HW2',         icon: 'fa-ring',               img: '/img/game-icons/halo-wars-2.png',        title: 'Halo Wars 2' },
+  { value: 'halo-wars-1',        label: 'HW1',         icon: 'fa-circle-dot',         img: '/img/game-icons/halo-wars-1.png',        title: 'Halo Wars' },
+  { value: 'aoe4',               label: 'AoE IV',      icon: 'fa-chess-rook',         img: '/img/game-icons/Age-of-Empires-IV.png',  title: 'Age of Empires IV' },
+  { value: 'aoe2',               label: 'AoE II',      icon: 'fa-shield',             img: '/img/game-icons/Age-of-Empires-II.png',  title: 'Age of Empires II' },
+  { value: 'aom',                label: 'AoM',         icon: 'fa-star',               img: '/img/game-icons/Retold.png',         title: 'Age of Mythology Retold' },
+  { value: 'halo-fps',           label: 'Halo FPS',    icon: 'fa-crosshairs',         img: '/img/game-icons/H1-White.png',           title: 'Halo (FPS series)' },
+  { value: 'gears',              label: 'Gears',       icon: 'fa-gears',              img: '/img/game-icons/Gears-Cog.png',          title: 'Gears of War' },
+  { value: 'goblin-commander',   label: 'Goblin Commander', icon: 'fa-dragon',        img: '/img/game-icons/goblin-commander.png',   title: 'Goblin Commander' },
+  { value: 'command-and-conquer',label: 'C&C',         icon: 'fa-bomb',               img: '/img/game-icons/command-and-conquer.png', title: 'Command & Conquer' },
+  { value: 'company-of-heroes',  label: 'CoH',         icon: 'fa-explosion',          img: '/img/game-icons/Company-of-Heroes.png',  title: 'Company of Heroes' },
+  { value: 'tempest-rising',     label: 'Tempest',     icon: 'fa-wind',                                                             title: 'Tempest Rising' },
+  { value: 'spellforce',         label: 'Spellforce',  icon: 'fa-hat-wizard',         img: '/img/game-icons/spellforce.png',         title: 'Spellforce' },
+  { value: 'ashes',              label: 'Ashes',       icon: 'fa-meteor',                                                            title: 'Ashes of the Singularity' },
+  { value: 'other',              label: 'Other',       icon: 'fa-gamepad',                                                          title: 'Other games' },
+];
+
+const seriesOrder: { value: SeriesTag; label: string; icon: string; title: string }[] = [
+  { value: 'mythbusters',  label: 'Mythbusters',   icon: 'fa-flask',           title: 'Mythbusters series' },
+  { value: 'super-turtle', label: 'Super Turtle',  icon: 'fa-shield-halved',   title: 'Super Turtle series' },
+  { value: 'walkthrough',  label: 'Walkthrough',   icon: 'fa-film',            title: 'Full walkthroughs' },
+  { value: 'guide',        label: 'Guide',         icon: 'fa-lightbulb',       title: 'Strategy guides & how-tos' },
+  { value: 'review',       label: 'Review',        icon: 'fa-star',            title: 'Reviews & first impressions' },
+  { value: 'general',      label: 'General',       icon: 'fa-gamepad',         title: 'General gameplay' },
+];
+
+const formatOrder: { value: FormatTag; label: string; icon: string; title: string }[] = [
+  { value: 'medium', label: '2-30 min', icon: 'fa-clock',         title: 'Medium-length videos' },
+  { value: 'long',   label: '30 min+',  icon: 'fa-hourglass-half', title: 'Long-form videos and full playthroughs' },
+];
+---
+
+<BaseLayout
+  title="Video Database - Team Respawn"
+  description="Search and filter all Team Respawn YouTube videos by game, series, format, and year. Find exactly the content you're looking for."
+  keywords="Team Respawn videos, Halo Wars 2, Age of Empires 4, Mythbusters, Super Turtle, walkthroughs, shorts"
+  canonical="https://www.teamrespawn.net/videos/"
+  ogTitle="Video Database - Team Respawn"
+  ogDescription="Search and filter all Team Respawn YouTube videos by game, series, format, and year."
+  ogImage="https://www.teamrespawn.net/content/Team-Respawn-Full.png"
+>
+  <Fragment slot="head">
+    <style>
+      /* â”€â”€â”€ Composer Panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+      .composer-panel {
+        background: rgba(10, 14, 26, 0.85);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 1rem;
+        padding: 1.25rem;
+        max-height: calc(100vh - 3rem);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+      }
+
+      .composer-section-label {
+        font-size: 0.6rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: rgba(148, 163, 184, 0.6);
+        margin-bottom: 0.5rem;
+      }
+
+      /* â”€â”€â”€ Composer Icon Tiles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+      .composer-grid {
+        display: grid;
+        gap: 0.35rem;
+      }
+      .composer-grid-games   { grid-template-columns: repeat(3, 1fr); }
+      .composer-grid-series  { grid-template-columns: repeat(3, 1fr); }
+      .composer-grid-format  { grid-template-columns: repeat(2, 1fr); }
+      .composer-grid-years   { grid-template-columns: repeat(4, 1fr); }
+
+      .composer-tile {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.3rem;
+        padding: 0.55rem 0.2rem 0.45rem;
+        border-radius: 0.5rem;
+        border: 1px solid rgba(255,255,255,0.07);
+        background: rgba(30, 41, 59, 0.45);
+        cursor: pointer;
+        transition: all 0.15s ease;
+        user-select: none;
+        height: 62px;
+        overflow: hidden;
+      }
+
+      .composer-tile:hover {
+        border-color: rgba(168, 85, 247, 0.4);
+        background: rgba(168, 85, 247, 0.08);
+      }
+
+      .composer-tile.active {
+        border-color: rgba(168, 85, 247, 0.65);
+        background: rgba(168, 85, 247, 0.16);
+        box-shadow: 0 0 10px rgba(168, 85, 247, 0.18);
+      }
+
+      /* Fixed-size icon box so all tiles have identical icon area regardless of FA glyph width */
+      .tile-icon-box {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.5rem;
+        height: 1.4rem;
+        flex-shrink: 0;
+      }
+      .tile-icon-box i {
+        font-size: 0.9rem;
+        color: rgba(148, 163, 184, 0.65);
+        transition: color 0.15s ease;
+        line-height: 1;
+      }
+      .composer-tile.active .tile-icon-box i {
+        color: rgba(196, 148, 255, 0.95);
+      }
+      .composer-tile:hover .tile-icon-box i {
+        color: rgba(196, 148, 255, 0.8);
+      }
+
+      /* Game logo images inside tiles */
+      .tile-img {
+        width: 2.2rem;
+        height: 1.4rem;
+        object-fit: contain;
+        display: block;
+        opacity: 0.6;
+        transition: opacity 0.15s ease, filter 0.15s ease;
+        filter: grayscale(0.3);
+      }
+      .composer-tile:hover .tile-img {
+        opacity: 0.9;
+        filter: grayscale(0);
+      }
+      .composer-tile.active .tile-img {
+        opacity: 1;
+        filter: grayscale(0) drop-shadow(0 0 4px rgba(168, 85, 247, 0.35));
+      }
+
+      .composer-tile .tile-label {
+        font-size: 0.52rem;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        color: rgba(100, 116, 139, 0.9);
+        text-align: center;
+        line-height: 1.2;
+        transition: color 0.15s ease;
+      }
+      .composer-tile.active .tile-label { color: rgba(216, 180, 254, 0.95); }
+      .composer-tile:hover .tile-label  { color: rgba(203, 213, 225, 0.9); }
+
+      /* MCC-style pip in bottom-left */
+      .composer-tile::before {
+        content: '';
+        position: absolute;
+        bottom: 4px;
+        left: 4px;
+        width: 5px;
+        height: 5px;
+        border-radius: 1px;
+        border: 1px solid rgba(100, 116, 139, 0.35);
+        background: transparent;
+        transition: all 0.13s ease;
+      }
+      .composer-tile.active::before {
+        background: rgba(168, 85, 247, 0.9);
+        border-color: rgba(168, 85, 247, 0.9);
+      }
+
+      .shorts-toggle {
+        width: 100%;
+        margin-top: 0.45rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        border-radius: 0.5rem;
+        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(30, 41, 59, 0.45);
+        color: rgba(148, 163, 184, 0.9);
+        font-size: 0.62rem;
+        letter-spacing: 0.03em;
+        font-weight: 600;
+        padding: 0.5rem 0.6rem;
+        transition: all 0.15s ease;
+      }
+      .shorts-toggle:hover {
+        border-color: rgba(168,85,247,0.35);
+        color: #cbd5e1;
+      }
+      .shorts-toggle.active {
+        border-color: rgba(168,85,247,0.6);
+        background: rgba(168,85,247,0.16);
+        color: rgba(216,180,254,1);
+      }
+      .shorts-toggle-knob {
+        width: 0.9rem;
+        height: 0.9rem;
+        border-radius: 9999px;
+        background: rgba(100,116,139,0.8);
+        box-shadow: inset 0 0 0 2px rgba(15,23,42,0.7);
+        transition: background 0.15s ease;
+        flex-shrink: 0;
+      }
+      .shorts-toggle.active .shorts-toggle-knob {
+        background: rgba(168,85,247,0.95);
+      }
+
+      /* â”€â”€â”€ Sort pills â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+      .sort-pill {
+        padding: 0.22rem 0.55rem;
+        border-radius: 9999px;
+        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(30, 41, 59, 0.5);
+        font-size: 0.62rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: rgba(100, 116, 139, 0.9);
+        cursor: pointer;
+        transition: all 0.13s ease;
+        white-space: nowrap;
+      }
+      .sort-pill:hover { border-color: rgba(168,85,247,0.35); color: #cbd5e1; }
+      .sort-pill.active {
+        border-color: rgba(168,85,247,0.6);
+        background: rgba(168,85,247,0.16);
+        color: rgba(216,180,254,1);
+      }
+
+      /* â”€â”€â”€ Active filter chips â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+      /* Chips sit inline in a flex row â€” no dramatic X button */
+      .active-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.15rem 0.38rem 0.15rem 0.58rem;
+        border-radius: 9999px;
+        background: rgba(51, 65, 85, 0.62);
+        border: 1px solid rgba(34, 211, 238, 0.28);
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+        color: rgba(103, 232, 249, 0.95);
+        transition: all 0.13s ease;
+        white-space: nowrap;
+      }
+      .active-chip:hover {
+        background: rgba(71, 85, 105, 0.68);
+        border-color: rgba(34, 211, 238, 0.45);
+      }
+      .active-chip-remove {
+        width: 1.15rem;
+        height: 1.15rem;
+        border: 0;
+        border-radius: 9999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        color: rgba(148, 163, 184, 0.9);
+        transition: color 0.13s ease, background-color 0.13s ease;
+        padding: 0;
+      }
+      .active-chip-remove:hover {
+        color: rgba(248, 113, 113, 0.95);
+        background: rgba(248, 113, 113, 0.12);
+      }
+      .active-chip-remove svg {
+        width: 0.75rem;
+        height: 0.75rem;
+        stroke-width: 2;
+      }
+
+      /* â”€â”€â”€ Video Cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+      .video-card {
+        display: flex;
+        flex-direction: column;
+        background: rgba(15, 23, 42, 0.7);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 0.75rem;
+        overflow: hidden;
+        transition: all 0.18s ease;
+      }
+      .video-card-link {
+        text-decoration: none;
+        color: inherit;
+      }
+      .video-card:hover,
+      .video-card:focus-within {
+        border-color: rgba(168, 85, 247, 0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+      }
+      .video-card-link:focus-visible {
+        outline: 2px solid rgba(168,85,247,0.7);
+        outline-offset: 2px;
+      }
+
+      .video-thumb-wrap {
+        position: relative;
+        aspect-ratio: 16/9;
+        background: rgba(30,41,59,0.5);
+        overflow: hidden;
+      }
+      .video-thumb-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .video-duration-overlay {
+        position: absolute;
+        bottom: 0.3rem;
+        right: 0.35rem;
+        background: rgba(0,0,0,0.78);
+        color: #fff;
+        font-size: 0.6rem;
+        font-weight: 600;
+        padding: 0.1rem 0.32rem;
+        border-radius: 3px;
+        letter-spacing: 0.02em;
+        pointer-events: none;
+      }
+
+      .video-card-body {
+        padding: 0.6rem 0.7rem 0.7rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+        flex: 1;
+      }
+
+      /* Title: prominent */
+      .video-card-title {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #e2e8f0;
+        line-height: 1.32;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      /* Metadata box â€” series + date, visually distinct from the title */
+      .video-card-meta {
+        display: inline-flex;
+        align-self: flex-start;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.22rem 0.5rem;
+        background: rgba(2, 6, 23, 0.82);
+        border: 1px solid rgba(148, 163, 184, 0.46);
+        border-radius: 0.42rem;
+        box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.75);
+        font-size: 0.62rem;
+        line-height: 1.15;
+        font-weight: 500;
+        color: rgba(148,163,184,0.9);
+      }
+      .video-meta-series {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        color: rgba(196,148,255,0.85);
+        flex-shrink: 0;
+      }
+      .video-meta-sep {
+        opacity: 0.35;
+        flex-shrink: 0;
+      }
+      .video-meta-date {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        flex-shrink: 0;
+      }
+      .video-card-meta i {
+        font-size: 0.48rem;
+        opacity: 0.6;
+      }
+
+      .video-card-actions {
+        margin-top: auto;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+      }
+      .video-share-btn {
+        border: 1px solid rgba(148,163,184,0.25);
+        background: rgba(30,41,59,0.55);
+        color: rgba(148,163,184,0.95);
+        border-radius: 0.45rem;
+        padding: 0.22rem 0.5rem;
+        font-size: 0.58rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        transition: all 0.15s ease;
+      }
+      .video-share-btn:hover {
+        border-color: rgba(168,85,247,0.55);
+        color: rgba(216,180,254,0.95);
+      }
+      .video-share-btn.copied {
+        border-color: rgba(34,197,94,0.75);
+        color: rgba(134,239,172,1);
+      }
+
+      /* â”€â”€â”€ Empty state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+      .empty-state {
+        grid-column: 1/-1;
+        text-align: center;
+        padding: 4rem 1rem;
+        color: rgba(100,116,139,0.7);
+      }
+
+      /* â”€â”€â”€ Match counter â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+      .match-counter {
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: rgba(168,85,247,0.85);
+      }
+
+      .results-summary {
+        font-size: 0.68rem;
+        color: rgba(148,163,184,0.85);
+        letter-spacing: 0.03em;
+      }
+
+      .vdb-pagination {
+        margin-top: 1rem;
+      }
+      .vdb-pagination.hidden {
+        display: none;
+      }
+      .vdb-pagination-controls {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.45rem;
+      }
+      .vdb-page-btn {
+        border: 1px solid rgba(148,163,184,0.2);
+        background: rgba(30,41,59,0.55);
+        color: rgba(148,163,184,0.95);
+        border-radius: 0.5rem;
+        min-width: 2rem;
+        padding: 0.32rem 0.6rem;
+        font-size: 0.72rem;
+        transition: all 0.15s ease;
+      }
+      .vdb-page-btn:hover {
+        border-color: rgba(168,85,247,0.4);
+        color: #e2e8f0;
+      }
+      .vdb-page-btn[aria-current='page'] {
+        border-color: rgba(168,85,247,0.8);
+        background: rgba(168,85,247,0.22);
+        color: rgba(216,180,254,1);
+      }
+      .vdb-page-ellipsis {
+        color: rgba(100,116,139,0.9);
+        font-size: 0.8rem;
+        padding: 0 0.2rem;
+      }
+
+      .vdb-scroll-top {
+        position: fixed;
+        right: 1rem;
+        bottom: 1.25rem;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 9999px;
+        border: 1px solid rgba(148,163,184,0.25);
+        background: rgba(15,23,42,0.86);
+        color: rgba(203,213,225,0.95);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(8px);
+        transition: opacity 0.2s ease, transform 0.2s ease, border-color 0.15s ease;
+        z-index: 50;
+      }
+      .vdb-scroll-top.visible {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0);
+      }
+      .vdb-scroll-top:hover {
+        border-color: rgba(168,85,247,0.55);
+      }
+
+      .vdb-visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      /* â”€â”€â”€ Search input â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+      .vdb-search-wrap {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(30,41,59,0.6);
+        border: 1px solid rgba(255,255,255,0.09);
+        border-radius: 0.625rem;
+        padding: 0.5rem 0.75rem;
+        transition: border-color 0.18s;
+      }
+      .vdb-search-wrap:focus-within {
+        border-color: rgba(168,85,247,0.45);
+        box-shadow: 0 0 0 2px rgba(168,85,247,0.12);
+      }
+      .vdb-search-input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: #e2e8f0;
+        font-size: 0.85rem;
+        min-width: 0;
+      }
+      .vdb-search-input::placeholder { color: rgba(71, 85, 105, 0.8); }
+
+      /* â”€â”€â”€ Composer mobile toggle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+      .composer-mobile-toggle {
+        display: none;
+        width: 100%;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.55rem 0.75rem;
+        border-radius: 0.5rem;
+        background: rgba(30,41,59,0.5);
+        border: 1px solid rgba(255,255,255,0.07);
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: rgba(148,163,184,0.85);
+        cursor: pointer;
+        margin-bottom: 0.75rem;
+      }
+      @media (max-width: 1023px) {
+        .composer-mobile-toggle { display: flex; }
+        .composer-collapsible { display: none; }
+        .composer-collapsible.open { display: block; }
+      }
+
+      /* â”€â”€â”€ Skeleton loader â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+      @keyframes shimmer {
+        0%   { background-position: -400px 0; }
+        100% { background-position: 400px 0; }
+      }
+      .skeleton {
+        background: linear-gradient(90deg, rgba(30,41,59,0.6) 25%, rgba(51,65,85,0.45) 50%, rgba(30,41,59,0.6) 75%);
+        background-size: 400px 100%;
+        animation: shimmer 1.4s ease-in-out infinite;
+        border-radius: 0.5rem;
+      }
+
+      /* â”€â”€â”€ Results grid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+      #video-results-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
+        gap: 0.875rem;
+        align-content: start;
+      }
+      @media (max-width: 480px) {
+        #video-results-grid { grid-template-columns: repeat(2, 1fr); }
+      }
+    </style>
+  </Fragment>
+
+  <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+    <Header showPanelButton={true} />
+    <SidePanel />
+
+    <main id="main-content">
+      <!-- Page Header -->
+      <div class="mb-5">
+        <h1 class="text-2xl sm:text-3xl font-bold text-white mb-1">Video Database</h1>
+        <p class="text-sm text-slate-500">
+          {taggedVideos.length.toLocaleString()} videos â€” filter and find exactly what you're looking for
+        </p>
+      </div>
+
+      <div class="flex flex-col lg:flex-row gap-5 items-start">
+
+        <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+             COMPOSER PANEL
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+        <aside class="w-full lg:w-64 xl:w-[17rem] flex-shrink-0 lg:sticky lg:top-6">
+          <div class="composer-panel">
+
+            <!-- Panel title + clear -->
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-bold tracking-widest uppercase text-slate-400">Compose Your Search</span>
+              <button id="vdb-clear-all" class="text-xs text-slate-600 hover:text-purple-400 transition-colors font-medium" type="button">
+                Clear All
+              </button>
+            </div>
+
+            <!-- Search -->
+            <div class="mb-4">
+              <div class="vdb-search-wrap">
+                <i class="fas fa-magnifying-glass text-slate-600 text-xs flex-shrink-0"></i>
+                <input
+                  id="vdb-search-input"
+                  class="vdb-search-input"
+                  type="search"
+                  placeholder="Search titles..."
+                  autocomplete="off"
+                  aria-label="Search video titles"
+                />
+                <button id="vdb-search-clear" class="text-slate-600 hover:text-slate-300 transition-colors hidden text-xs font-light" type="button" aria-label="Clear search">âœ•</button>
+              </div>
+            </div>
+
+            <!-- Mobile filter toggle -->
+            <button class="composer-mobile-toggle" id="vdb-composer-toggle" type="button" aria-expanded="false" aria-controls="vdb-composer-body">
+              <span>Filters</span>
+              <i class="fas fa-chevron-down text-xs transition-transform" id="vdb-composer-chevron"></i>
+            </button>
+
+            <div id="vdb-composer-body" class="composer-collapsible lg:block">
+
+              <!-- GAMES -->
+              <div class="mb-4">
+                <div class="composer-section-label">Games Included</div>
+                <div class="composer-grid composer-grid-games" role="group" aria-label="Filter by game">
+                  {gameOrder.map(g => (
+                    <button
+                      class="composer-tile"
+                      data-filter-type="game"
+                      data-filter-value={g.value}
+                      type="button"
+                      aria-pressed="false"
+                      title={g.title}
+                    >
+                      {g.img
+                        ? <img class="tile-img" src={g.img} alt="" aria-hidden="true" width="35" height="22" />
+                        : <span class="tile-icon-box"><i class={`fas ${g.icon} fa-fw`} aria-hidden="true"></i></span>
+                      }
+                      <span class="tile-label">{g.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <!-- SERIES -->
+              <div class="mb-4">
+                <div class="composer-section-label">Series</div>
+                <div class="composer-grid composer-grid-series" role="group" aria-label="Filter by series">
+                  {seriesOrder.map(s => (
+                    <button
+                      class="composer-tile"
+                      data-filter-type="series"
+                      data-filter-value={s.value}
+                      type="button"
+                      aria-pressed="false"
+                      title={s.title}
+                    >
+                      <span class="tile-icon-box"><i class={`fas ${s.icon} fa-fw`} aria-hidden="true"></i></span>
+                      <span class="tile-label">{s.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <!-- FORMAT -->
+              <div class="mb-4">
+                <div class="composer-section-label">Duration</div>
+                <div class="composer-grid composer-grid-format" role="group" aria-label="Filter by format">
+                  {formatOrder.map(f => (
+                    <button
+                      class="composer-tile active"
+                      data-filter-type="format"
+                      data-filter-value={f.value}
+                      type="button"
+                      aria-pressed="true"
+                      title={f.title}
+                    >
+                      <span class="tile-icon-box"><i class={`fas ${f.icon} fa-fw`} aria-hidden="true"></i></span>
+                      <span class="tile-label">{f.label}</span>
+                    </button>
+                  ))}
+                </div>
+                <button
+                  id="vdb-shorts-toggle"
+                  class="shorts-toggle"
+                  type="button"
+                  aria-pressed="false"
+                  aria-label="Include videos shorter than two minutes"
+                >
+                  <span>Include Shorts (&lt;2 min)</span>
+                  <span class="shorts-toggle-knob" aria-hidden="true"></span>
+                </button>
+              </div>
+
+              <!-- YEAR -->
+              <div class="mb-4">
+                <div class="composer-section-label">Year</div>
+                <div class="composer-grid composer-grid-years" role="group" aria-label="Filter by year">
+                  {availableYears.map((year) => (
+                    <button
+                      class="composer-tile"
+                      data-filter-type="year"
+                      data-filter-value={String(year)}
+                      type="button"
+                      aria-pressed="false"
+                      title={`Videos from ${year}`}
+                    >
+                      <span class="tile-label" style="font-size:0.62rem; text-transform:none; letter-spacing:0.01em;">{year}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <!-- SORT -->
+              <div class="mb-5">
+                <div class="composer-section-label">Sort By</div>
+                <div class="flex flex-wrap gap-1.5">
+                  <button class="sort-pill active" data-sort="newest"    type="button">Newest</button>
+                  <button class="sort-pill"        data-sort="oldest"    type="button">Oldest</button>
+                  <button class="sort-pill"        data-sort="longest"   type="button">Longest</button>
+                  <button class="sort-pill"        data-sort="shortest"  type="button">Shortest</button>
+                  <button class="sort-pill"        data-sort="relevance" type="button">Relevance</button>
+                </div>
+              </div>
+
+            </div><!-- /composer-collapsible -->
+
+            <!-- Match count -->
+            <div class="border-t border-white/[0.05] pt-3">
+              <span class="match-counter" id="vdb-match-count">â€” videos match</span>
+            </div>
+
+          </div><!-- /composer-panel -->
+        </aside>
+
+        <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+             RESULTS AREA
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+        <div class="flex-1 min-w-0">
+
+          <!-- Active filter chips -->
+          <div id="vdb-active-chips" class="flex flex-wrap items-center gap-1.5 mb-3 min-h-[1.5rem]" aria-live="polite" aria-label="Active filters"></div>
+          <div class="results-summary mb-3" id="vdb-range-summary" aria-live="polite">Showing 0 of 0</div>
+          <p id="vdb-share-status" class="vdb-visually-hidden" role="status" aria-live="polite"></p>
+
+          <!-- Results grid -->
+          <div id="video-results-grid" role="list" aria-label="Video results" aria-live="polite" aria-busy="true">
+            {Array.from({ length: 16 }).map(() => (
+              <div class="rounded-xl overflow-hidden" aria-hidden="true">
+                <div class="skeleton" style="aspect-ratio:16/9"></div>
+                <div class="mt-2 px-1 space-y-1.5">
+                  <div class="skeleton h-3 rounded w-full"></div>
+                  <div class="skeleton h-3 rounded w-3/4"></div>
+                  <div class="skeleton h-2 rounded w-1/3 mt-1"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <nav id="vdb-pagination" class="vdb-pagination hidden" aria-label="Video pagination">
+            <div id="vdb-pagination-controls" class="vdb-pagination-controls"></div>
+          </nav>
+
+        </div>
+
+      </div><!-- /flex row -->
+    </main>
+
+    <div class="mt-12">
+      <Footer />
+    </div>
+  </div>
+  <button id="vdb-scroll-top" class="vdb-scroll-top" type="button" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <!-- Data island -->
+  <script type="application/json" id="vdb-data" set:html={videoJson}></script>
+
+  <script define:vars={{ _unused: null }}>
+    // Video database client logic
+    const GAME_LABELS = {
+      'halo-wars-2': 'Halo Wars 2', 'halo-wars-1': 'Halo Wars',
+      aoe4: 'AoE IV', aoe2: 'AoE II',
+      aom: 'Age of Mythology', 'halo-fps': 'Halo FPS',
+      gears: 'Gears of War', 'goblin-commander': 'Goblin Commander',
+      'command-and-conquer': 'C&C', 'company-of-heroes': 'CoH',
+      'tempest-rising': 'Tempest Rising', spellforce: 'Spellforce',
+      ashes: 'Ashes of the Singularity',
+      other: 'Other',
+    };
+    const SERIES_LABELS = {
+      mythbusters: 'Mythbusters', 'super-turtle': 'Super Turtle',
+      walkthrough: 'Walkthrough', guide: 'Guide',
+      review: 'Review', general: 'General',
+    };
+    const SERIES_ICONS = {
+      mythbusters: 'fa-flask', 'super-turtle': 'fa-shield-halved',
+      walkthrough: 'fa-film', guide: 'fa-lightbulb',
+      review: 'fa-star', general: 'fa-gamepad',
+    };
+    const FORMAT_LABELS = {
+      short: '<2 min',
+      medium: '2-30 min',
+      long: '30 min+',
+    };
+
+    const DEFAULT_FORMATS = new Set(['medium', 'long']);
+    const DEFAULT_SORT = 'newest';
+    const PAGE_SIZE = 50;
+    const VALID_SORTS = new Set(['newest', 'oldest', 'longest', 'shortest', 'relevance']);
+    const VALID_DURATION_FILTERS = new Set(['medium', 'long']);
+
+    const state = {
+      query: '',
+      games: new Set(),
+      series: new Set(),
+      formats: new Set(DEFAULT_FORMATS),
+      years: new Set(),
+      includeShorts: false,
+      sort: DEFAULT_SORT,
+      page: 1,
+    };
+
+    let allVideos = [];
+    try {
+      allVideos = JSON.parse(document.getElementById('vdb-data').textContent || '[]');
+      if (!Array.isArray(allVideos)) allVideos = [];
+    } catch (e) {
+      console.error('vdb: failed to parse video data', e);
+      allVideos = [];
+    }
+
+    const grid               = document.getElementById('video-results-grid');
+    const countEl            = document.getElementById('vdb-match-count');
+    const chipsEl            = document.getElementById('vdb-active-chips');
+    const searchInput        = document.getElementById('vdb-search-input');
+    const searchClear        = document.getElementById('vdb-search-clear');
+    const clearAllBtn        = document.getElementById('vdb-clear-all');
+    const shortsToggle       = document.getElementById('vdb-shorts-toggle');
+    const rangeSummaryEl     = document.getElementById('vdb-range-summary');
+    const paginationNav      = document.getElementById('vdb-pagination');
+    const paginationControls = document.getElementById('vdb-pagination-controls');
+    const shareStatusEl      = document.getElementById('vdb-share-status');
+    const scrollTopBtn       = document.getElementById('vdb-scroll-top');
+
+    const VALID_GAMES = new Set(Object.keys(GAME_LABELS));
+    const VALID_SERIES = new Set(Object.keys(SERIES_LABELS));
+    const AVAILABLE_YEARS = new Set(
+      allVideos.map(v => Number(v.year)).filter(y => Number.isInteger(y) && y > 0)
+    );
+
+    function esc(s) {
+      return String(s || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function fmtDuration(ms) {
+      if (ms === null || ms === undefined || Number.isNaN(ms)) return '';
+      const totalSec = Math.floor(ms / 1000);
+      const h = Math.floor(totalSec / 3600);
+      const m = Math.floor((totalSec % 3600) / 60);
+      const s = totalSec % 60;
+      if (h > 0) return m > 0 ? `${h}h ${m}m` : `${h}h`;
+      if (m > 0) return s > 0 ? `${m}m ${s}s` : `${m}m`;
+      return `${s}s`;
+    }
+
+    function fmtDate(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return '';
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function hasKnownDuration(video) {
+      return typeof video.durationMs === 'number' && Number.isFinite(video.durationMs);
+    }
+
+    function compareDurationDesc(a, b) {
+      const aKnown = hasKnownDuration(a);
+      const bKnown = hasKnownDuration(b);
+      if (aKnown && bKnown) return b.durationMs - a.durationMs;
+      if (aKnown !== bKnown) return aKnown ? -1 : 1;
+      return b.publishedAt.localeCompare(a.publishedAt);
+    }
+
+    function compareDurationAsc(a, b) {
+      const aKnown = hasKnownDuration(a);
+      const bKnown = hasKnownDuration(b);
+      if (aKnown && bKnown) return a.durationMs - b.durationMs;
+      if (aKnown !== bKnown) return aKnown ? -1 : 1;
+      return b.publishedAt.localeCompare(a.publishedAt);
+    }
+
+    function getSearchableText(video) {
+      const gameLabel = GAME_LABELS[video.game] || '';
+      const seriesLabel = SERIES_LABELS[video.series] || '';
+      return `${video.title || ''} ${gameLabel} ${seriesLabel}`.toLowerCase();
+    }
+
+    function scoreVideo(video, query) {
+      if (!query) return 0;
+      const q = query.toLowerCase().trim();
+      if (!q) return 0;
+      const title = String(video.title || '').toLowerCase();
+      const searchable = getSearchableText(video);
+      let score = 0;
+      if (title === q) score += 200;
+      if (title.startsWith(q)) score += 80;
+      if (searchable.includes(q)) score += 40;
+      q.split(/\s+/).forEach((word) => {
+        if (word && searchable.includes(word)) score += 20;
+      });
+      return score;
+    }
+
+    function parseCsvParam(value, validSet, mapFn) {
+      if (!value) return [];
+      const raw = String(value).split(',').map(v => v.trim()).filter(Boolean);
+      const parsed = mapFn ? raw.map(mapFn) : raw;
+      return parsed.filter(v => validSet.has(v));
+    }
+
+    function setEquals(a, b) {
+      if (a.size !== b.size) return false;
+      for (const value of a) {
+        if (!b.has(value)) return false;
+      }
+      return true;
+    }
+
+    function serializeSet(set) {
+      return [...set].sort().join(',');
+    }
+
+    function hydrateStateFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      state.query = (params.get('q') || '').trim();
+      state.games = new Set(parseCsvParam(params.get('games'), VALID_GAMES));
+      state.series = new Set(parseCsvParam(params.get('series'), VALID_SERIES));
+      state.years = new Set(parseCsvParam(params.get('years'), AVAILABLE_YEARS, value => Number(value)));
+      state.includeShorts = params.get('shorts') === '1';
+
+      if (params.has('dur')) {
+        state.formats = new Set(parseCsvParam(params.get('dur'), VALID_DURATION_FILTERS));
+      } else {
+        state.formats = new Set(DEFAULT_FORMATS);
+      }
+
+      const sortParam = (params.get('sort') || '').toLowerCase();
+      state.sort = VALID_SORTS.has(sortParam) ? sortParam : DEFAULT_SORT;
+
+      const pageParam = Number(params.get('page'));
+      state.page = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
+    }
+
+    function syncStateToUrl() {
+      const params = new URLSearchParams();
+      if (state.query) params.set('q', state.query);
+      if (state.games.size) params.set('games', serializeSet(state.games));
+      if (state.series.size) params.set('series', serializeSet(state.series));
+      if (state.years.size) params.set('years', serializeSet(state.years));
+      if (!setEquals(state.formats, DEFAULT_FORMATS)) params.set('dur', serializeSet(state.formats));
+      if (state.includeShorts) params.set('shorts', '1');
+      if (state.sort !== DEFAULT_SORT) params.set('sort', state.sort);
+      if (state.page > 1) params.set('page', String(state.page));
+
+      const query = params.toString();
+      const hash = window.location.hash || '';
+      const nextUrl = query ? `${window.location.pathname}?${query}${hash}` : `${window.location.pathname}${hash}`;
+      const currentUrl = `${window.location.pathname}${window.location.search}${hash}`;
+      if (nextUrl !== currentUrl) {
+        window.history.replaceState(null, '', nextUrl);
+      }
+    }
+
+    function applyStateToUi() {
+      searchInput.value = state.query;
+      searchClear.classList.toggle('hidden', !state.query);
+
+      document.querySelectorAll('.composer-tile[data-filter-type]').forEach((btn) => {
+        const type = btn.dataset.filterType;
+        const value = btn.dataset.filterValue;
+        let isActive = false;
+        if (type === 'game') isActive = state.games.has(value);
+        if (type === 'series') isActive = state.series.has(value);
+        if (type === 'year') isActive = state.years.has(parseInt(value, 10));
+        if (type === 'format') isActive = state.formats.has(value);
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-pressed', String(isActive));
+      });
+
+      if (shortsToggle) {
+        shortsToggle.classList.toggle('active', state.includeShorts);
+        shortsToggle.setAttribute('aria-pressed', String(state.includeShorts));
+      }
+
+      document.querySelectorAll('.sort-pill').forEach((pill) => {
+        pill.classList.toggle('active', pill.dataset.sort === state.sort);
+      });
+    }
+
+    function getFilteredAndSorted() {
+      let results = allVideos.slice();
+
+      if (state.games.size) results = results.filter(v => state.games.has(v.game));
+      if (state.series.size) results = results.filter(v => state.series.has(v.series));
+      if (state.years.size) results = results.filter(v => state.years.has(v.year));
+
+      const allowedFormats = new Set(state.formats);
+      if (state.includeShorts) allowedFormats.add('short');
+      if (allowedFormats.size) results = results.filter(v => allowedFormats.has(v.format));
+      else results = [];
+
+      if (state.query) {
+        const q = state.query.toLowerCase();
+        results = results.filter(v => getSearchableText(v).includes(q));
+      }
+
+      if (state.sort === 'newest') results.sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+      else if (state.sort === 'oldest') results.sort((a, b) => a.publishedAt.localeCompare(b.publishedAt));
+      else if (state.sort === 'longest') results.sort(compareDurationDesc);
+      else if (state.sort === 'shortest') results.sort(compareDurationAsc);
+      else if (state.sort === 'relevance') {
+        if (state.query) results.sort((a, b) => scoreVideo(b, state.query) - scoreVideo(a, state.query));
+        else results.sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+      }
+
+      return results;
+    }
+
+    function getPaginationWindow(totalPages, currentPage) {
+      if (totalPages <= 7) {
+        return Array.from({ length: totalPages }, (_, i) => i + 1);
+      }
+      const pages = new Set([1, totalPages, currentPage]);
+      if (currentPage - 1 > 1) pages.add(currentPage - 1);
+      if (currentPage + 1 < totalPages) pages.add(currentPage + 1);
+      if (currentPage <= 3) pages.add(2);
+      if (currentPage >= totalPages - 2) pages.add(totalPages - 1);
+      return [...pages].sort((a, b) => a - b);
+    }
+
+    function renderPagination(totalPages) {
+      if (!paginationNav || !paginationControls) return;
+      paginationControls.innerHTML = '';
+      if (totalPages <= 1) {
+        paginationNav.classList.add('hidden');
+        return;
+      }
+
+      paginationNav.classList.remove('hidden');
+
+      const addButton = (label, page, disabled, ariaCurrent = false) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'vdb-page-btn';
+        button.textContent = label;
+        button.dataset.page = String(page);
+        if (disabled) button.disabled = true;
+        if (ariaCurrent) button.setAttribute('aria-current', 'page');
+        paginationControls.appendChild(button);
+      };
+
+      addButton('Previous', Math.max(1, state.page - 1), state.page === 1);
+
+      const pages = getPaginationWindow(totalPages, state.page);
+      let prevPage = 0;
+      pages.forEach((page) => {
+        if (prevPage && page - prevPage > 1) {
+          const ellipsis = document.createElement('span');
+          ellipsis.className = 'vdb-page-ellipsis';
+          ellipsis.textContent = '...';
+          paginationControls.appendChild(ellipsis);
+        }
+        addButton(String(page), page, false, page === state.page);
+        prevPage = page;
+      });
+
+      addButton('Next', Math.min(totalPages, state.page + 1), state.page === totalPages);
+    }
+
+    function renderChips() {
+      const chips = [];
+      state.games.forEach(v => chips.push({ label: GAME_LABELS[v] || v, type: 'game', value: v }));
+      state.series.forEach(v => chips.push({ label: SERIES_LABELS[v] || v, type: 'series', value: v }));
+      state.formats.forEach(v => chips.push({ label: FORMAT_LABELS[v] || v, type: 'format', value: v }));
+      if (state.includeShorts) chips.push({ label: 'Shorts included', type: 'shorts', value: '1' });
+      state.years.forEach(v => chips.push({ label: String(v), type: 'year', value: v }));
+
+      if (!chips.length) {
+        chipsEl.innerHTML = '';
+        return;
+      }
+
+      chipsEl.innerHTML = chips.map(chip => `
+        <div
+          class="active-chip"
+          data-chip-type="${esc(chip.type)}"
+          data-chip-value="${esc(String(chip.value))}"
+        >
+          <span class="active-chip-label">${esc(chip.label)}</span>
+          <button type="button" class="active-chip-remove" aria-label="Remove filter: ${esc(chip.label)}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function renderResults() {
+      const results = getFilteredAndSorted();
+      const total = results.length;
+      countEl.textContent = `${total.toLocaleString()} video${total === 1 ? '' : 's'} match`;
+      grid.setAttribute('aria-busy', 'false');
+
+      const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+      if (state.page > totalPages) state.page = totalPages;
+
+      if (total === 0) {
+        rangeSummaryEl.textContent = 'Showing 0 of 0';
+        const hasFilters = state.games.size || state.series.size || state.formats.size !== DEFAULT_FORMATS.size || state.includeShorts || state.years.size || state.query.trim();
+        grid.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-magnifying-glass text-4xl mb-3 opacity-20 block"></i>
+            <p class="text-base font-semibold text-slate-400 mb-1">No videos match</p>
+            ${hasFilters ? '<p class="text-sm text-slate-600">Try removing a filter or broadening your search.</p>' : ''}
+          </div>`;
+        renderPagination(0);
+        return;
+      }
+
+      const startIndex = (state.page - 1) * PAGE_SIZE;
+      const endIndex = Math.min(startIndex + PAGE_SIZE, total);
+      rangeSummaryEl.textContent = `Showing ${startIndex + 1}-${endIndex} of ${total.toLocaleString()}`;
+
+      const pageResults = results.slice(startIndex, endIndex);
+      const fragment = document.createDocumentFragment();
+
+      pageResults.forEach((video) => {
+        const thumb = `https://i.ytimg.com/vi/${video.videoId}/mqdefault.jpg`;
+        const dur = fmtDuration(video.durationMs);
+        const date = fmtDate(video.publishedAt);
+        const gameLabel = GAME_LABELS[video.game] || video.game;
+        const seriesLabel = SERIES_LABELS[video.series] || video.series;
+        const seriesIcon = SERIES_ICONS[video.series] || 'fa-gamepad';
+        const videoUrl = `https://www.youtube.com/watch?v=${video.videoId}`;
+        const seriesMeta = video.series !== 'general'
+          ? `<span class="video-meta-series"><i class="fas ${esc(seriesIcon)}" aria-hidden="true"></i>${esc(seriesLabel)}</span><span class="video-meta-sep">•</span>`
+          : '';
+
+        const card = document.createElement('article');
+        card.className = 'video-card';
+        card.setAttribute('role', 'listitem');
+        card.innerHTML = `
+          <a href="${esc(videoUrl)}" target="_blank" rel="noopener noreferrer" class="video-card-link" aria-label="${esc(video.title)} - ${esc(gameLabel)}, ${esc(date)}">
+            <div class="video-thumb-wrap">
+              <img src="${esc(thumb)}" alt="" loading="lazy" width="320" height="180" />
+              ${dur ? `<div class="video-duration-overlay">${esc(dur)}</div>` : ''}
+            </div>
+          </a>
+          <div class="video-card-body">
+            <a href="${esc(videoUrl)}" target="_blank" rel="noopener noreferrer" class="video-card-link">
+              <div class="video-card-title">${esc(video.title)}</div>
+            </a>
+            <div class="video-card-meta">
+              ${seriesMeta}
+              <span class="video-meta-date"><i class="fas fa-calendar-days" aria-hidden="true"></i>${esc(date)}</span>
+            </div>
+            <div class="video-card-actions">
+              <button type="button" class="video-share-btn" data-video-url="${esc(videoUrl)}" aria-label="Copy YouTube link">
+                <i class="fas fa-link" aria-hidden="true"></i>
+                <span class="video-share-label">Copy Link</span>
+              </button>
+            </div>
+          </div>
+        `;
+        fragment.appendChild(card);
+      });
+
+      grid.innerHTML = '';
+      grid.appendChild(fragment);
+      renderPagination(totalPages);
+    }
+
+    function renderAll({ syncUrl = true } = {}) {
+      applyStateToUi();
+      renderChips();
+      renderResults();
+      if (syncUrl) syncStateToUrl();
+    }
+
+    function toggleTile(button) {
+      const type = button.dataset.filterType;
+      const value = button.dataset.filterValue;
+      const setMap = { game: state.games, series: state.series, format: state.formats, year: state.years };
+      const setRef = setMap[type];
+      if (!setRef) return;
+      const parsedValue = type === 'year' ? parseInt(value, 10) : value;
+      if (setRef.has(parsedValue)) setRef.delete(parsedValue);
+      else setRef.add(parsedValue);
+      state.page = 1;
+      renderAll();
+    }
+
+    function resetToDefaults() {
+      state.query = '';
+      state.games.clear();
+      state.series.clear();
+      state.formats = new Set(DEFAULT_FORMATS);
+      state.years.clear();
+      state.includeShorts = false;
+      state.sort = DEFAULT_SORT;
+      state.page = 1;
+      renderAll();
+    }
+
+    async function copyVideoUrl(url, button) {
+      let copied = false;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        try {
+          await navigator.clipboard.writeText(url);
+          copied = true;
+        } catch (err) {
+          copied = false;
+        }
+      }
+
+      if (!copied) {
+        window.prompt('Copy this YouTube link:', url);
+        if (shareStatusEl) shareStatusEl.textContent = 'Copy link prompt opened.';
+        return;
+      }
+
+      if (shareStatusEl) shareStatusEl.textContent = 'YouTube link copied to clipboard.';
+      button.classList.add('copied');
+      const label = button.querySelector('.video-share-label');
+      if (label) label.textContent = 'Copied';
+      window.setTimeout(() => {
+        button.classList.remove('copied');
+        if (label) label.textContent = 'Copy Link';
+      }, 1800);
+    }
+
+    function updateScrollTopVisibility() {
+      if (!scrollTopBtn) return;
+      scrollTopBtn.classList.toggle('visible', window.scrollY > 400);
+    }
+
+    chipsEl.addEventListener('click', (event) => {
+      const removeBtn = event.target.closest('.active-chip-remove');
+      if (!removeBtn) return;
+      const chip = event.target.closest('.active-chip');
+      if (!chip) return;
+      const type = chip.dataset.chipType;
+      const value = chip.dataset.chipValue;
+
+      if (type === 'shorts') {
+        state.includeShorts = false;
+        state.page = 1;
+        renderAll();
+        return;
+      }
+
+      const setMap = { game: state.games, series: state.series, format: state.formats, year: state.years };
+      const setRef = setMap[type];
+      if (!setRef) return;
+      const parsedValue = type === 'year' ? parseInt(value, 10) : value;
+      setRef.delete(parsedValue);
+      state.page = 1;
+      renderAll();
+    });
+
+    document.querySelectorAll('.composer-tile[data-filter-type]').forEach((button) => {
+      button.addEventListener('click', () => toggleTile(button));
+    });
+
+    if (shortsToggle) {
+      shortsToggle.addEventListener('click', () => {
+        state.includeShorts = !state.includeShorts;
+        state.page = 1;
+        renderAll();
+      });
+    }
+
+    document.querySelectorAll('.sort-pill').forEach((pill) => {
+      pill.addEventListener('click', () => {
+        const nextSort = pill.dataset.sort;
+        if (!VALID_SORTS.has(nextSort)) return;
+        state.sort = nextSort;
+        state.page = 1;
+        renderAll();
+      });
+    });
+
+    let searchTimer;
+    searchInput.addEventListener('input', () => {
+      window.clearTimeout(searchTimer);
+      searchTimer = window.setTimeout(() => {
+        state.query = searchInput.value.trim();
+        if (state.query && state.sort === DEFAULT_SORT) state.sort = 'relevance';
+        if (!state.query && state.sort === 'relevance') state.sort = DEFAULT_SORT;
+        state.page = 1;
+        renderAll();
+      }, 180);
+    });
+
+    searchClear.addEventListener('click', () => {
+      searchInput.value = '';
+      state.query = '';
+      if (state.sort === 'relevance') state.sort = DEFAULT_SORT;
+      state.page = 1;
+      renderAll();
+    });
+
+    clearAllBtn.addEventListener('click', () => {
+      resetToDefaults();
+    });
+
+    if (paginationControls) {
+      paginationControls.addEventListener('click', (event) => {
+        const button = event.target.closest('.vdb-page-btn[data-page]');
+        if (!button || button.disabled) return;
+        const page = parseInt(button.dataset.page, 10);
+        if (!Number.isInteger(page) || page < 1 || page === state.page) return;
+        state.page = page;
+        renderAll();
+        grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+
+    if (grid) {
+      grid.addEventListener('click', (event) => {
+        const button = event.target.closest('.video-share-btn');
+        if (!button) return;
+        const url = button.dataset.videoUrl;
+        if (!url) return;
+        copyVideoUrl(url, button);
+      });
+    }
+
+    if (scrollTopBtn) {
+      scrollTopBtn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+      window.addEventListener('scroll', updateScrollTopVisibility, { passive: true });
+      updateScrollTopVisibility();
+    }
+
+    const composerToggle = document.getElementById('vdb-composer-toggle');
+    const composerBody = document.getElementById('vdb-composer-body');
+    const composerChevron = document.getElementById('vdb-composer-chevron');
+    if (composerToggle && composerBody) {
+      composerToggle.addEventListener('click', () => {
+        const open = composerBody.classList.toggle('open');
+        composerToggle.setAttribute('aria-expanded', String(open));
+        if (composerChevron) composerChevron.style.transform = open ? 'rotate(180deg)' : '';
+      });
+    }
+
+    hydrateStateFromUrl();
+    renderAll({ syncUrl: false });
+
+    window.addEventListener('popstate', () => {
+      hydrateStateFromUrl();
+      renderAll({ syncUrl: false });
+    });
+  </script>
+
+  <!-- Side panel + header functionality -->
+  <script src="/js/side-panel.js" is:inline></script>
+  <script src="/js/tabs.js" is:inline></script>
+  <script src="/js/dropdowns.js" is:inline></script>
+</BaseLayout>
+

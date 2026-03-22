@@ -42,11 +42,11 @@ const legalLinks = [
     <div class="grid gap-10 lg:grid-cols-[1.2fr_2fr]">
       <div class="space-y-4">
         <a href="/" aria-label="Team Respawn home" class="inline-flex items-center gap-3 group">
-          <img 
-            src="/content/Team-Respawn-Full.png" 
-            alt="Team Respawn logo" 
-            class="h-10 w-auto cursor-pointer transition-all duration-300 group-hover:scale-105 group-hover:drop-shadow-[0_0_12px_rgba(168,85,247,0.6)]" 
-            loading="lazy" 
+          <img
+            src="/content/Team-Respawn-Full.png"
+            alt="Team Respawn logo"
+            class="h-10 w-auto cursor-pointer transition-all duration-300 group-hover:scale-105 group-hover:drop-shadow-[0_0_12px_rgba(168,85,247,0.6)]"
+            loading="lazy"
           />
         </a>
         <p class="text-sm sm:text-base text-gray-300 leading-relaxed">
@@ -90,7 +90,11 @@ const legalLinks = [
     </div>
 
     <div class="mt-10 border-t border-white/10 pt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <p class="text-xs sm:text-sm text-gray-400">© {year} Team Respawn. All rights reserved.</p>
+      <p class="text-xs sm:text-sm text-gray-400">
+        &copy; {year} Team Respawn. All rights reserved.
+        <span class="mx-2" aria-hidden="true">•</span>
+        <span id="footer-tagline">RTS with a sprinkle of cringe.</span>
+      </p>
       <div class="flex flex-wrap gap-4 text-xs sm:text-sm">
         {legalLinks.map((link) => (
           <a href={link.href} class="text-gray-400 hover:text-white transition-colors duration-200">
@@ -101,3 +105,88 @@ const legalLinks = [
     </div>
   </div>
 </footer>
+
+<script is:inline>
+  (() => {
+    const TAGLINES_URL = '/data/taglines.json';
+    const FOOTER_TAGLINE_ID = 'footer-tagline';
+    const INIT_FLAG = '__teamRespawnFooterTaglineInit';
+    const LAST_TAGLINE_KEY = 'teamRespawnFooterTagline';
+    let cachedTaglines = null;
+
+    const selectRandomTagline = (taglines) => taglines[Math.floor(Math.random() * taglines.length)];
+
+    const loadTaglines = async () => {
+      if (Array.isArray(cachedTaglines) && cachedTaglines.length > 0) {
+        return cachedTaglines;
+      }
+
+      const response = await fetch(TAGLINES_URL);
+      if (!response.ok) {
+        return [];
+      }
+
+      const data = await response.json();
+      if (!Array.isArray(data)) {
+        return [];
+      }
+
+      cachedTaglines = data.filter((entry) => typeof entry === 'string' && entry.trim().length > 0);
+      return cachedTaglines;
+    };
+
+    const updateFooterTagline = async () => {
+      const taglineElement = document.getElementById(FOOTER_TAGLINE_ID);
+      if (!taglineElement) {
+        return;
+      }
+
+      try {
+        const taglines = await loadTaglines();
+        if (taglines.length === 0) {
+          return;
+        }
+
+        let previousTagline = '';
+        try {
+          previousTagline = sessionStorage.getItem(LAST_TAGLINE_KEY) || '';
+        } catch {
+          previousTagline = '';
+        }
+
+        let randomTagline = selectRandomTagline(taglines);
+        if (taglines.length > 1 && previousTagline) {
+          let safetyCounter = 0;
+          while (randomTagline === previousTagline && safetyCounter < 10) {
+            randomTagline = selectRandomTagline(taglines);
+            safetyCounter += 1;
+          }
+        }
+
+        if (randomTagline) {
+          taglineElement.textContent = randomTagline;
+          try {
+            sessionStorage.setItem(LAST_TAGLINE_KEY, randomTagline);
+          } catch {
+            // Ignore storage failures and keep rendering.
+          }
+        }
+      } catch {
+        // Keep default fallback tagline if loading fails.
+      }
+    };
+
+    const boot = () => {
+      void updateFooterTagline();
+    };
+
+    if (!window[INIT_FLAG]) {
+      window[INIT_FLAG] = true;
+      document.addEventListener('astro:page-load', boot);
+      document.addEventListener('astro:after-swap', boot);
+      document.addEventListener('DOMContentLoaded', boot);
+    }
+
+    boot();
+  })();
+</script>
