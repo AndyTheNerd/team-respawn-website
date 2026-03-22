@@ -6,6 +6,7 @@ import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import SidePanel from '../components/SidePanel.astro';
 import ShareButtons from '../components/ShareButtons.astro';
+import ScrollToTop from '../components/ScrollToTop.astro';
 import Author from '../blocks/Author/Author.astro';
 import CloudinaryImage from '../components/CloudinaryImage.astro';
 import authorInfo from '../data/authorInfo.js';
@@ -326,6 +327,7 @@ if (youtubeId) {
   </div>
 
   <SidePanel />
+  <ScrollToTop />
   <script src="/js/dropdowns.js" is:inline></script>
   <script src="/js/tabs.js" is:inline></script>
   <script src="/js/side-panel.js" is:inline></script>

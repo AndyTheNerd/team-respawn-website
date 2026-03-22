@@ -12,8 +12,8 @@ const hw2VideoList: VideoCta[] = (() => {
     if (!Array.isArray(parsed)) return [];
     return parsed.filter((entry) => {
       if (!entry?.title || !entry?.videoId) return false;
-      if (!Number.isFinite(entry.durationMs)) return false;
-      return entry.durationMs >= MIN_HW2_VIDEO_DURATION_MS;
+      if (entry.durationMs !== null && !Number.isFinite(entry.durationMs)) return false;
+      return entry.durationMs === null || entry.durationMs >= MIN_HW2_VIDEO_DURATION_MS;
     });
   } catch {
     return [];

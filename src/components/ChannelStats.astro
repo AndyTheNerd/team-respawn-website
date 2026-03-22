@@ -1,0 +1,28 @@
+---
+// Static channel stats strip — replaces JS-rendered version in home-content.js
+const stats = [
+  { icon: 'fa-users',    label: 'Subscribers',  value: '65K+', from: 'from-blue-500',   to: 'to-cyan-500'   },
+  { icon: 'fa-eye',      label: 'Total Views',   value: '23M+', from: 'from-purple-500', to: 'to-pink-500'   },
+  { icon: 'fa-video',    label: 'Videos',        value: '3K+',  from: 'from-pink-500',   to: 'to-red-500'    },
+  { icon: 'fa-calendar', label: 'Years Active',  value: '5+',   from: 'from-orange-500', to: 'to-yellow-500' },
+];
+---
+<section class="stats-section mb-8" aria-label="Channel statistics">
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+    {stats.map(stat => (
+      <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50 hover:border-gray-600 transition-all duration-300 hover:scale-105 hover:shadow-xl">
+        <div class="flex flex-col items-center text-center">
+          <div class={`w-16 h-16 rounded-full bg-gradient-to-br ${stat.from} ${stat.to} flex items-center justify-center mb-4 shadow-lg`}>
+            <i class={`fas ${stat.icon} text-2xl text-white`} aria-hidden="true"></i>
+          </div>
+          <div class={`text-3xl sm:text-4xl font-bold mb-2 bg-gradient-to-r ${stat.from} ${stat.to} bg-clip-text text-transparent`}>
+            {stat.value}
+          </div>
+          <div class="text-gray-400 text-sm sm:text-base font-semibold">
+            {stat.label}
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+</section>

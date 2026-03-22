@@ -1,0 +1,65 @@
+---
+import { videos } from '../data/videos.ts';
+
+// Latest 6 public videos longer than 3 minutes, sorted newest first
+const THREE_MINUTES_MS = 3 * 60 * 1000;
+const latestVideos = videos
+  .filter(v => v.privacy === 'Public' && (v.durationMs == null || v.durationMs > THREE_MINUTES_MS))
+  .sort((a, b) => {
+    const ta = new Date(a.publishedAt).getTime();
+    const tb = new Date(b.publishedAt).getTime();
+    return (isNaN(tb) ? -Infinity : tb) - (isNaN(ta) ? -Infinity : ta);
+  })
+  .slice(0, 6);
+
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+---
+<section class="mb-8" aria-labelledby="yt-latest-heading">
+  <div class="flex items-center justify-between mb-4">
+    <h2
+      id="yt-latest-heading"
+      class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-400 flex items-center gap-2"
+    >
+      <i class="fab fa-youtube text-red-500" aria-hidden="true"></i>
+      Latest Videos
+    </h2>
+    <a
+      href="https://www.youtube.com/@TeamRespawn"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="inline-flex items-center gap-1 text-sm text-red-400 hover:text-red-300 transition-colors duration-200"
+    >
+      View channel
+      <i class="fas fa-external-link-alt text-xs" aria-hidden="true"></i>
+    </a>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    {latestVideos.map(video => (
+      <a
+        href={`https://www.youtube.com/watch?v=${video.videoId}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="group bg-gray-800 rounded-xl overflow-hidden border border-gray-700/50
+               hover:border-red-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-red-900/20 hover:-translate-y-0.5"
+      >
+        <div class="aspect-video overflow-hidden bg-gray-700">
+          <img
+            src={`https://i.ytimg.com/vi/${video.videoId}/hqdefault.jpg`}
+            alt={video.title}
+            loading="lazy"
+            class="w-full h-full object-cover group-hover:opacity-90 transition-opacity duration-200"
+          />
+        </div>
+        <div class="p-3">
+          <p class="text-sm font-semibold text-gray-100 line-clamp-2 group-hover:text-red-300 transition-colors duration-200">
+            {video.title}
+          </p>
+          <p class="text-xs text-gray-500 mt-1">{formatDate(video.publishedAt)}</p>
+        </div>
+      </a>
+    ))}
+  </div>
+</section>

@@ -2,7 +2,7 @@ export type VideoCta = {
   title: string;
   publishedAt: string;
   videoId: string;
-  durationMs?: number;
+  durationMs?: number | null;
 };
 
 export type Hw2NameMappings = {

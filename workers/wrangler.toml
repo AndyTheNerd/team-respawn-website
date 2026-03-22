@@ -14,3 +14,6 @@ STORE_RAW_EVENTS = "1"
 CLEANUP_SECRET = ""
 GROQ_API_KEY = ""
 CEREBRAS_API_KEY = ""
+# YouTube channel ID (UCxxxxxxxxxxxxxxxxxx format) for the Latest Videos widget.
+# Find yours at: https://www.youtube.com/account_advanced (while signed in as the channel)
+YOUTUBE_CHANNEL_ID = ""
