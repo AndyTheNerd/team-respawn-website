@@ -1,0 +1,144 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import SidePanel from '../../components/SidePanel.astro';
+
+let monthlyVisitors = '—';
+
+const cfToken = import.meta.env.CLOUDFLARE_API_TOKEN;
+const cfZoneId = import.meta.env.CLOUDFLARE_ZONE_ID;
+
+if (cfToken && cfZoneId && !cfToken.startsWith('your-')) {
+  try {
+    const today = new Date();
+    const thirtyDaysAgo = new Date(today);
+    thirtyDaysAgo.setDate(today.getDate() - 30);
+
+    const startDate = thirtyDaysAgo.toISOString().split('T')[0];
+    const endDate = today.toISOString().split('T')[0];
+
+    const query = `{
+      viewer {
+        zones(filter: { zoneTag: "${cfZoneId}" }) {
+          httpRequests1dGroups(
+            limit: 30
+            filter: { date_geq: "${startDate}", date_leq: "${endDate}" }
+            orderBy: [date_ASC]
+          ) {
+            sum { visits }
+          }
+        }
+      }
+    }`;
+
+    const res = await fetch('https://api.cloudflare.com/client/v4/graphql', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${cfToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query }),
+    });
+
+    if (res.ok) {
+      const json = await res.json();
+      const groups = json?.data?.viewer?.zones?.[0]?.httpRequests1dGroups ?? [];
+      const total = groups.reduce((sum: number, g: any) => sum + (g.sum.visits ?? 0), 0);
+      if (total > 0) {
+        monthlyVisitors = total.toLocaleString('en-US');
+      }
+    }
+  } catch (_) {
+    // fall back to '—'
+  }
+}
+---
+<BaseLayout
+  title="Partner with Us | Team Respawn"
+  description="Partner with Team Respawn to reach the RTS gaming community through content, tools, and sponsorships."
+  keywords="Team Respawn, partner, sponsorship, brand, RTS gaming, Halo Wars 2"
+  canonical="https://www.teamrespawn.net/partner"
+  ogTitle="Partner with Us | Team Respawn"
+  ogDescription="Partner with Team Respawn to reach the RTS gaming community through content, tools, and sponsorships."
+  ogImage="https://www.teamrespawn.net/content/Banner.jpg"
+>
+  <a
+    href="#main-content"
+    class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-white focus:text-black focus:px-4 focus:py-2 focus:rounded"
+  >
+    Skip to main content
+  </a>
+
+  <div class="container mx-auto p-4 sm:p-8">
+    <Header />
+
+    <main id="main-content" class="max-w-4xl mx-auto mt-8" role="main" aria-label="Partner with Team Respawn">
+      <article class="bg-gray-800/60 border border-gray-700/60 rounded-xl p-6 sm:p-8 lg:p-10">
+        <header class="mb-8">
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+            Partner with Us
+          </h1>
+          <p class="text-gray-400 text-lg">
+            Reach a dedicated audience of RTS gamers through a brand that the community trusts.
+          </p>
+        </header>
+
+        <div class="prose prose-invert prose-lg max-w-none">
+          <section class="mb-8">
+            <h2 class="text-2xl sm:text-3xl font-bold mb-4 text-purple-300">Our Audience</h2>
+            <p class="text-gray-300 leading-relaxed mb-4">
+              Team Respawn's audience is made up of passionate RTS players across Halo Wars 2, Age of Empires II, Age of Empires IV, and Age of Mythology. They're engaged, loyal, and actively seeking tools and resources to improve their game.
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+              <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-700/60 hover:border-purple-500/40 transition-colors duration-300 text-center">
+                <p class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-1">67K+</p>
+                <p class="text-sm text-gray-400">YouTube subscribers</p>
+              </div>
+              <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-700/60 hover:border-purple-500/40 transition-colors duration-300 text-center">
+                <p class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-1">{monthlyVisitors}</p>
+                <p class="text-sm text-gray-400">Monthly website visitors</p>
+              </div>
+              <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-700/60 hover:border-purple-500/40 transition-colors duration-300 text-center">
+                <p class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-1">2017</p>
+                <p class="text-sm text-gray-400">Year established</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="mb-8">
+            <h2 class="text-2xl sm:text-3xl font-bold mb-4 text-purple-300">Partnership Opportunities</h2>
+            <ul class="list-disc list-inside mb-4 space-y-2 text-gray-300 ml-4">
+              <li>Sponsored video content and integrations</li>
+              <li>Website banner and sidebar placements</li>
+              <li>Discord bot mentions and tool integrations</li>
+              <li>Social media promotions</li>
+              <li>Custom community campaigns</li>
+            </ul>
+          </section>
+
+          <section class="mb-0">
+            <h2 class="text-2xl sm:text-3xl font-bold mb-4 text-purple-300">Get in Touch</h2>
+            <p class="text-gray-300 leading-relaxed mb-4">
+              Interested in working with us? Reach out and we'll get back to you with more details on rates, availability, and what a partnership could look like.
+            </p>
+            <div class="bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-xl p-6 border border-purple-500/30">
+              <p class="text-gray-300 mb-0">
+                Contact us at <span class="text-purple-300 font-semibold">[contact email placeholder]</span> or reach out via our social channels.
+              </p>
+            </div>
+          </section>
+        </div>
+      </article>
+    </main>
+
+    <Footer />
+  </div>
+
+  <SidePanel />
+
+  <script src="/js/side-panel.js" is:inline></script>
+  <script src="/js/tabs.js" is:inline></script>
+  <script src="/js/dropdowns.js" is:inline></script>
+  <script src="/js/secondary-init.js" is:inline></script>
+</BaseLayout>
