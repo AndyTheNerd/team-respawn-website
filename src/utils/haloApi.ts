@@ -215,7 +215,19 @@ export async function getPlayerMatches(
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ gamertag, count }),
     },
-    () => fetchMatchesBatched(gamertag, count)
+    async () => {
+      const result = await fetchMatchesBatched(gamertag, count);
+      if (result.ok) {
+        // CF Function was unavailable so D1 was never updated. Fire a background
+        // write-back so the next request that hits the CF Function serves fresh data.
+        fetch(`${PAGES_API_BASE}/matches`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ gamertag, count }),
+        }).catch(() => {/* best-effort, ignore failures */});
+      }
+      return result;
+    }
   );
 }
 

@@ -249,7 +249,8 @@ async function storeMatchSummaries(db: Env['DB'], gamertag: string, matches: Mat
          VALUES (?, ?, ?, ?)`
       ).bind(crypto.randomUUID(), playerId, now, matches.length),
     ]);
-  } catch {
+  } catch (cacheErr) {
+    console.error('[matches] player_matches_cache write failed; D1 will be stale:', cacheErr);
     await db.batch([
       db.prepare(
         `INSERT INTO players (player_id, gamertag, last_seen_at)
