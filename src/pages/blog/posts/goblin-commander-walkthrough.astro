@@ -1,0 +1,283 @@
+---
+import BlogPostLayout from '../../../layouts/BlogPostLayout.astro';
+---
+<BlogPostLayout
+  title="Goblin Commander: Unleash the Horde Full Campaign Walkthrough"
+  description="A full walkthrough of Goblin Commander: Unleash the Horde. Watch the complete campaign run below."
+  category="Walkthroughs"
+  tags={['Goblin Commander']}
+  publishedDate="Published on February 7, 2026"
+  dateIso="2026-02-07"
+  youtubeId="YNxJJ3U09VM"
+>
+  <p class="text-lg leading-relaxed mb-6 italic text-gray-300">A solo playthrough of the full campaign of <em>Goblin Commander: Unleash the Horde</em> (2003, PS2/Xbox/GameCube), played via PS2 emulation on a Steam Deck with an Xbox controller. The host is a childhood fan of the game and considers it a severely underappreciated console RTS, praising its innovative control scheme and the variety of its goblin clans. The campaign spans five acts and introduces a new enemy clan in each act.</p>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Core Mechanics &amp; Systems</h2>
+
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li><strong class="text-cyan-400">Clan control:</strong> Each clan is bound to a face button (X, Square, etc.). Pressing the button selects that clan; units then move and attack on command. You can control units like a traditional RTS or switch to <strong class="text-cyan-400">direct/third-person control</strong> using the analog sticks.</li>
+    <li><strong class="text-cyan-400">Titans:</strong> Super units, one per clan. Must be directly controlled. Each has a unique ability — the Stone Crusher Titan can <strong class="text-cyan-400">eat enemies to restore health</strong>, making it the strongest. Hellfire and Stormbringer Titans are weaker by comparison. Only one Titan can exist at a time.</li>
+    <li><strong class="text-cyan-400">Soul Fountains:</strong> Capture points that generate souls over time (similar to resource nodes in Halo Wars 2). Position your clan next to one until it turns blue. Soul flow slows to a trickle over time but never stops.</li>
+    <li><strong class="text-cyan-400">Gold:</strong> Earned by destroying environmental objects (rocks, barrels, structures). Does <strong class="text-cyan-400">not</strong> regenerate — finite per map. Should be used for clan upgrades before turrets.</li>
+    <li><strong class="text-cyan-400">Clan Shrines:</strong> Your main production building. Trains units and unlocks upgrades. Can be destroyed by enemies. Repair cost is 25 gold (may increase per destruction).</li>
+    <li><strong class="text-cyan-400">Upgrades:</strong> Purchasable from the Clan Shrine. Visually reflected on your units — equipment turns gold at max level. Upgrade clans fully before spending gold on turrets.</li>
+    <li><strong class="text-cyan-400">Turrets (Rock Lobbers):</strong> Placed on the map for static defense. Limited by available gold. You can only build one of each type. Cannot be built on all maps.</li>
+    <li><strong class="text-cyan-400">Drummer Unit:</strong> A special support unit that <strong class="text-cyan-400">actively heals nearby units during combat</strong>. Sound is synchronized to the drumming animation — a noted detail for a 2003 game. Considered a must-have. Appears to heal multiple clan types.</li>
+    <li><strong class="text-cyan-400">Rune Stones:</strong> Leader powers picked up from the map or purchased at the Alchemist Shop. Two can be carried at once (L2 and R2). Powers include healing, meteor strike, freeze, fog-of-war clear, earthquake, and more. Only 10 gold each at the shop.</li>
+    <li><strong class="text-cyan-400">Waypoints / Queue:</strong> Hold L1 to queue up movement waypoints. Useful for sending units on a path while you manage another clan.</li>
+    <li><strong class="text-cyan-400">Moon Gates:</strong> Teleporters. Either clan can use them regardless of color. Master Moon Gates teleport your units to linked locations on the map.</li>
+    <li><strong class="text-cyan-400">D-pad navigation:</strong> Up returns to base; Down returns to your last position. Considered forward-thinking for a console RTS.</li>
+    <li><strong class="text-cyan-400">Unit stats at mission end:</strong> Game tracks units built, units killed, and units lost per mission.</li>
+  </ul>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Clan Overview</h2>
+
+  <table class="w-full mb-6 text-sm border-collapse">
+    <thead>
+      <tr>
+        <th class="text-left text-cyan-300 border-b border-gray-600 pb-2 pr-4">Clan</th>
+        <th class="text-left text-cyan-300 border-b border-gray-600 pb-2 pr-4">Color</th>
+        <th class="text-left text-cyan-300 border-b border-gray-600 pb-2 pr-4">Role</th>
+        <th class="text-left text-cyan-300 border-b border-gray-600 pb-2 pr-4">Special Unit</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="py-2 pr-4 border-b border-gray-700">Stone Crusher</td>
+        <td class="py-2 pr-4 border-b border-gray-700">Gray/White</td>
+        <td class="py-2 pr-4 border-b border-gray-700">Melee tank, all-around</td>
+        <td class="py-2 pr-4 border-b border-gray-700">Pit Boss (high HP/damage), Drummer (healer)</td>
+      </tr>
+      <tr>
+        <td class="py-2 pr-4 border-b border-gray-700">Hellfire</td>
+        <td class="py-2 pr-4 border-b border-gray-700">Red</td>
+        <td class="py-2 pr-4 border-b border-gray-700">Ranged/anti-infantry</td>
+        <td class="py-2 pr-4 border-b border-gray-700">Chainsaw infantry, archers, gunpowder units</td>
+      </tr>
+      <tr>
+        <td class="py-2 pr-4 border-b border-gray-700">Stormbringer</td>
+        <td class="py-2 pr-4 border-b border-gray-700">Blue</td>
+        <td class="py-2 pr-4 border-b border-gray-700">Armor buffs, lightning</td>
+        <td class="py-2 pr-4 border-b border-gray-700">Wind Mage (armor/vision), Lightning Titan</td>
+      </tr>
+      <tr>
+        <td class="py-2 pr-4 border-b border-gray-700">Plague Spitter</td>
+        <td class="py-2 pr-4 border-b border-gray-700">Purple</td>
+        <td class="py-2 pr-4 border-b border-gray-700">Acid/ranged</td>
+        <td class="py-2 pr-4 border-b border-gray-700">Witch Doctor, Bombardier</td>
+      </tr>
+      <tr>
+        <td class="py-2 pr-4 border-b border-gray-700">Night Horde</td>
+        <td class="py-2 pr-4 border-b border-gray-700">Dark</td>
+        <td class="py-2 pr-4 border-b border-gray-700">— (unlocked late)</td>
+        <td class="py-2 pr-4 border-b border-gray-700">—</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="text-lg leading-relaxed mb-6"><strong class="text-cyan-400">Recommended compositions:</strong></p>
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li>Stone Crusher: Heavy melee (Pit Boss) + Drummer for sustain</li>
+    <li>Hellfire: Ranged-heavy (gunpowder hunters &gt; archers at max upgrade)</li>
+    <li>Split roles: Stone Crusher as frontline tank, Hellfire as ranged DPS from behind</li>
+  </ul>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Act 1 — Tutorial / Stone Crusher Introduction</h2>
+
+  <h3 class="text-xl font-bold mb-3 mt-6 text-cyan-200">Mission 1 (Tutorial — The Cave)</h3>
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li>Introduces direct unit control, gold collection from destructibles, and Titan mechanics.</li>
+    <li>Stone Crusher Titan introduced — eat enemies to restore health; objective is to clear critters from the room.</li>
+    <li>To have a clan follow the Titan: press L1, then double-tap the clan's face button.</li>
+  </ul>
+
+  <h3 class="text-xl font-bold mb-3 mt-6 text-cyan-200">Mission 2 (Tutorial — Base Building)</h3>
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li>Introduces the Clan Shrine, unit production, and Soul Fountains.</li>
+    <li>Upgrade visuals explained: equipment colors change through tiers, turning gold at max.</li>
+    <li>Rock Lobber turrets introduced; must be placed on glowing orbs.</li>
+    <li><strong class="text-cyan-400">Gold is finite on the map — upgrade your clan before building turrets.</strong></li>
+  </ul>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Act 1 — Hellfire Clan Conflict</h2>
+
+  <h3 class="text-xl font-bold mb-3 mt-6 text-cyan-200">Mission 1 — First Contact (Hellfire)</h3>
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li>First outdoor mission; make contact with the Hellfire Clan.</li>
+    <li>Objective: find the lumber encampment and destroy it.</li>
+    <li>Rune Stones introduced — found scattered on the map; L2/R2 to activate.</li>
+    <li>The Meteor Strike rune stone used to demolish the lumber camp.</li>
+    <li>Gold chests hidden around maps provide large lump sums.</li>
+  </ul>
+
+  <h3 class="text-xl font-bold mb-3 mt-6 text-cyan-200">Mission 2 — Gunpowder Factory</h3>
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li>Investigate the Hellfire Clan's gunpowder factory.</li>
+    <li>Multiple Soul Fountains available; capture as many as possible for sustained income.</li>
+    <li>Hellfire Clan: strong anti-infantry, specializes in ranged attacks (archers, chainsaw infantry).</li>
+    <li>Chainsaw units are strong anti-infantry.</li>
+    <li>Barrels on the map will blow up your units — avoid hitting them.</li>
+    <li>Mission ends when the factory area is cleared; somewhat abrupt conclusion.</li>
+  </ul>
+
+  <h3 class="text-xl font-bold mb-3 mt-6 text-cyan-200">Mission 3 — Grax's Fortress</h3>
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li>Grax is the Hellfire Clan leader.</li>
+    <li>Enemy can destroy your Clan Shrine buildings — they don't respawn, just disappear.</li>
+    <li>Captured enemy turrets can be turned against them (position commander over turret, press Triangle).</li>
+    <li>Scorched earth strategy: destroy all environmental objects on the way in for maximum gold.</li>
+    <li>Stone Crusher Titan's "eat" mechanic lets you out-sustain turret fire by continuously eating enemies.</li>
+  </ul>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Act 2 — Stormbringer Clan</h2>
+
+  <h3 class="text-xl font-bold mb-3 mt-6 text-cyan-200">Mission 1 — Investigate (Two Clans Unlocked)</h3>
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li>Hellfire Clan added to your roster (Square button). Now controlling two clans simultaneously.</li>
+    <li>Moon Gates introduced as teleporters — either clan can use either gate.</li>
+    <li>Objective: find and hold the Observatory and a Moon Gate for four full-moon cycles (~5 minutes).</li>
+    <li><strong class="text-cyan-400">Split the clans:</strong> Hellfire defends the lower Moon Gate; Stone Crusher holds the Observatory.</li>
+    <li>No turrets can be built on this map.</li>
+    <li>Recommended mix: heavy melee (Pit Boss) for Stone Crusher, ranged units for Hellfire.</li>
+    <li>Destroying lamps in the environment disables nearby traps.</li>
+  </ul>
+
+  <h3 class="text-xl font-bold mb-3 mt-6 text-cyan-200">Mission 2 — Stormbringer Counterattack</h3>
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li>Defend against Stormbringer assaults and capture the master Moon Gate to the north.</li>
+    <li>Lightning tower enemies (like mini-titans) can wipe an entire clan — retreat immediately if spotted.</li>
+    <li>Hellfire Titan unlocked during this mission.</li>
+    <li>Teleporting behind enemy lines via captured Moon Gate is effective.</li>
+  </ul>
+
+  <h3 class="text-xl font-bold mb-3 mt-6 text-cyan-200">Mission 3 — Thunderdome</h3>
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li>Objectives: destroy lightning generator, wind turbine, and rain collector.</li>
+    <li>Lightning strike environmental hazards can randomly kill units — frustrating but unavoidable.</li>
+    <li>Enemy Stormbringer Titan: spinning tornado unit. Treat as a priority target.</li>
+    <li>Scorched earth approach works well; destroy all structures for gold before pushing.</li>
+    <li>Once all three generators are destroyed, the path into Fane's Fortress opens.</li>
+  </ul>
+
+  <h3 class="text-xl font-bold mb-3 mt-6 text-cyan-200">Mission 4 — Fane's Fortress (Final Stormbringer Mission)</h3>
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li>Fight into the Stormbringer stronghold.</li>
+    <li>Enemy has multiple production buildings — locate and destroy all to stop unit waves.</li>
+    <li>Lens Cannon turret is highly effective in this mission.</li>
+    <li>Once all production buildings fall, the Stormbringer Clan is defeated.</li>
+  </ul>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Act 3 — Plague Spitter Clan</h2>
+
+  <h3 class="text-xl font-bold mb-3 mt-6 text-cyan-200">Mission 1 — Soul Fountain Poisoning</h3>
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li>Soul Fountains start tainted (red/corrupted) — can't be used until cleaned.</li>
+    <li>Find Soul Caches (one-time loot pickups) to get souls in lieu of fountains early on.</li>
+    <li>Drummer is critical for sustain — prioritize building one.</li>
+    <li>Objective: find what's polluting the Soul Fountains.</li>
+  </ul>
+
+  <h3 class="text-xl font-bold mb-3 mt-6 text-cyan-200">Mission 2 — Plague Spitter Territory</h3>
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li>Plague Spitter units use acid attacks and are visually distinct (purple).</li>
+    <li>Four clan shrines must be destroyed across the map to stop enemy production.</li>
+    <li>Hellfire clan recaptured/rejoined during this mission.</li>
+    <li>Soul Fountains become available once areas are cleared.</li>
+    <li>Plague Spitter production buildings are spread far apart — scout the full map.</li>
+  </ul>
+
+  <h3 class="text-xl font-bold mb-3 mt-6 text-cyan-200">Mission 3 — The Hive (Three Slimes Boss)</h3>
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li>Objective: kill three large slimes scattered around the map.</li>
+    <li>Slimes can absorb units and move; engage with full army and retreat to avoid attrition.</li>
+    <li>No Soul Fountains on this map — manage souls carefully.</li>
+    <li>Gather 300 gold and deliver to the Wise One's hovel (northeast corner) to unlock new intel.</li>
+  </ul>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Act 4 — Plague Spitter Stronghold</h2>
+
+  <h3 class="text-xl font-bold mb-3 mt-6 text-cyan-200">Mission 1 — Sissi's Hive Entrance</h3>
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li>Limited starting units; must rebuild economy quickly.</li>
+    <li>Objective: find a way into the hive.</li>
+    <li>Purple teleporters usable by any clan — navigate through them to access new areas.</li>
+    <li>Moon Gates connect to different sections of the map.</li>
+  </ul>
+
+  <h3 class="text-xl font-bold mb-3 mt-6 text-cyan-200">Mission 2 — Crops and Harvesting Encampment</h3>
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li>Destroy Plague Spitter crop fields (the harvesting encampment).</li>
+    <li>Enemy spawns from multiple bases — find and destroy all three production buildings to stop waves.</li>
+    <li>Hellfire Clan gunpowder hunters (max ranged upgrade) are the strongest ranged unit in the game.</li>
+    <li>Large number of enemies but manageable with focused clan composition.</li>
+  </ul>
+
+  <h3 class="text-xl font-bold mb-3 mt-6 text-cyan-200">Mission 3 — Kill the Three Slimes (Act Boss)</h3>
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li>Three giant slimes must be hunted and killed across the map.</li>
+    <li>Slimes walk and can absorb units — mass your army and all-in each one.</li>
+    <li>Once all three are killed, the Plague Spitter Clan is defeated.</li>
+  </ul>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Act 5 — Final Act (All Clans)</h2>
+
+  <h3 class="text-xl font-bold mb-3 mt-6 text-cyan-200">Mission 1 — Securing Resources</h3>
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li>Night Horde Clan introduced as a fifth playable faction.</li>
+    <li>Pressure plate mechanic: feed the slime by hovering near it, then bring it to the plate.</li>
+    <li>Purple teleporters are navigable by any clan.</li>
+    <li>Objective: find and activate the pressure plate.</li>
+  </ul>
+
+  <h3 class="text-xl font-bold mb-3 mt-6 text-cyan-200">Mission 2 — Cripple the Great Machine</h3>
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li>All four clans available.</li>
+    <li>No Soul Fountains initially — economy is tight early.</li>
+    <li>Enemy has multiple production buildings scattered around a large map — destroy them all to stop waves.</li>
+    <li>Turrets can be built on this map; use them to defend the Clan Shrine.</li>
+    <li>Once all enemy production buildings are destroyed, the objective completes.</li>
+    <li>Recommended: use Hellfire hunters (max damage) as primary DPS; Stone Crusher as frontline tank.</li>
+  </ul>
+
+  <h3 class="text-xl font-bold mb-3 mt-6 text-cyan-200">Mission 3 — Final Mission (Destroy the Detonators)</h3>
+  <p class="text-lg leading-relaxed mb-6"><strong class="text-cyan-400">Hardest mission in the game.</strong> 30-minute time limit. Five detonators must be disabled across the map; each is guarded by one of the five opposing clans.</p>
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li>Focus upgrades and population on Stone Crushers (Pit Boss + Drummer).</li>
+    <li>Keep moving — do not over-invest time clearing buildings.</li>
+    <li>Ignore most enemy units unless they directly block progress.</li>
+    <li>Use Moon Gates to teleport between detonator locations quickly.</li>
+    <li>Detonators are accessed via ramps leading to teleporters; once you reach the console, it disables automatically.</li>
+    <li>After all five detonators are destroyed, the game ends via cutscene.</li>
+  </ul>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 class="text-2xl font-bold mb-4 text-cyan-300 mt-8">General Tips</h2>
+
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li><strong class="text-cyan-400">Scorched earth early:</strong> Destroy every destructible object on the way to objectives for maximum gold income.</li>
+    <li><strong class="text-cyan-400">Upgrade clans before building turrets</strong> — gold is finite and turret spending can lock you out of upgrades.</li>
+    <li><strong class="text-cyan-400">Drummer is mandatory</strong> — the active heal during combat dramatically improves survivability.</li>
+    <li><strong class="text-cyan-400">Stone Crusher Titan is the best Titan</strong> — health regen via eating enemies makes it self-sustaining.</li>
+    <li><strong class="text-cyan-400">Don't split armies too thin early</strong> — combined arms (all clans together) is more effective than spread engagement.</li>
+    <li><strong class="text-cyan-400">When under attack at home:</strong> leave one clan to defend; push with the others.</li>
+    <li><strong class="text-cyan-400">Soul Fountains trump everything</strong> — capturing and holding them is the primary economic priority.</li>
+    <li><strong class="text-cyan-400">Attack-move behavior:</strong> units will stop to fight anything in their path. If you need to reach a destination quickly, manually path around enemies.</li>
+  </ul>
+</BlogPostLayout>

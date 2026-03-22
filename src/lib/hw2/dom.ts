@@ -6,6 +6,7 @@ export const staleBanner = document.getElementById('stale-banner') as HTMLElemen
 export const staleBannerMeta = document.getElementById('stale-banner-meta') as HTMLElement | null;
 export const staleBannerRetry = document.getElementById('stale-banner-retry') as HTMLButtonElement | null;
 export const recentSearchesEl = document.getElementById('recent-searches')!;
+export const recentHw2SearchesSectionEl = document.getElementById('recent-hw2-searches-section') as HTMLElement | null;
 export const videoCtaEl = document.getElementById('hw2-video-cta') as HTMLElement | null;
 export const videoThumbEl = document.getElementById('hw2-video-thumb') as HTMLImageElement | null;
 export const videoTitleEl = document.getElementById('hw2-video-title') as HTMLElement | null;

@@ -4,6 +4,12 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import SidePanel from '../components/SidePanel.astro';
 import StorehausPromo from '../components/StorehausPromo.astro';
+import AnnouncementBanner from '../components/AnnouncementBanner.astro';
+import TwitchEmbed from '../components/TwitchEmbed.astro';
+import HeroSection from '../components/HeroSection.astro';
+import ChannelStats from '../components/ChannelStats.astro';
+import YoutubeLatestVideos from '../components/YoutubeLatestVideos.astro';
+import RecentHW2Searches from '../components/RecentHW2Searches.astro';
 ---
 <BaseLayout
   title="Team Respawn - RTS Gaming with some cringe"
@@ -42,130 +48,59 @@ import StorehausPromo from '../components/StorehausPromo.astro';
   <div class="container mx-auto p-4 sm:p-8">
     <Header />
 
-    <main id="home-content" role="main" aria-label="Home content">
-      <section
-        id="hw2-announcement-banner"
-        class="mb-6 rounded-xl border border-cyan-400/30 bg-cyan-500/10 backdrop-blur-sm"
-        role="region"
-        aria-label="Halo Wars 2 stats announcement"
-      >
-        <div class="px-4 py-3 sm:px-5">
-          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div class="flex items-start gap-3">
-              <i class="fas fa-bullhorn text-cyan-300 mt-0.5" aria-hidden="true"></i>
-              <p class="text-sm sm:text-base text-cyan-100">
-                <span class="font-semibold text-white">New:</span>
-                Explore the HW2 Stats page to search any gamertag, check CSR, and review recent matches.
-              </p>
-            </div>
-            <div class="flex items-center gap-2 sm:flex-shrink-0">
-              <a
-                href="/halo-wars-stats"
-                class="inline-flex items-center justify-center gap-2 rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-semibold px-4 py-2 transition-colors duration-200 whitespace-nowrap"
-              >
-                Open HW2 Stats
-              </a>
-              <button
-                id="hw2-announcement-dismiss"
-                type="button"
-                class="inline-flex items-center justify-center rounded-lg border border-cyan-300/30 text-cyan-200 hover:text-white hover:bg-cyan-400/10 px-3 py-2 text-sm transition-colors duration-200"
-                aria-label="Dismiss Halo Wars 2 stats announcement"
-                title="Dismiss"
-              >
-                <i class="fas fa-times" aria-hidden="true"></i>
-              </button>
-            </div>
-          </div>
-        </div>
+    <main id="main-content" role="main" aria-label="Home page content">
+
+      <!-- Home tab panel -->
+      <section id="home-content" role="tabpanel" aria-labelledby="home-tab" aria-label="Home content">
+        <AnnouncementBanner
+          message="Explore the HW2 Stats page to search any gamertag, check CSR, and review recent matches."
+          href="/halo-wars-stats"
+          linkText="Open HW2 Stats"
+          storageKey="tr_hw2_announcement_dismissed_v1"
+        />
+        <HeroSection />
+        <ChannelStats />
+        <TwitchEmbed channel="teamrespawntv" />
       </section>
 
-      <section
-        id="twitch-embed-container"
-        class="mb-8 rounded-xl overflow-hidden border-2 border-purple-600 bg-gradient-to-br from-gray-800 via-gray-800 to-purple-900/20 shadow-2xl opacity-100 visible translate-y-0"
-      >
-        <div class="p-4 sm:p-6">
-          <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-3">
-              <h2 class="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 flex items-center gap-3">
-                <i class="fab fa-twitch text-purple-400" aria-hidden="true"></i>
-                Live on Twitch
-              </h2>
-              <button
-                id="twitch-collapse-toggle"
-                aria-label="Toggle Twitch stream visibility"
-                aria-expanded="true"
-                class="p-2 rounded-lg hover:bg-purple-600/30 transition-colors duration-200 text-purple-400 hover:text-purple-300"
-                type="button"
-              >
-                <i class="fas fa-chevron-up transition-transform duration-300" id="twitch-collapse-icon" aria-hidden="true"></i>
-              </button>
-            </div>
-            <a
-              href="https://www.twitch.tv/teamrespawntv"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300 text-sm sm:text-base"
-            >
-              <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-              Watch on Twitch
-            </a>
-          </div>
-          <div id="twitch-embed-content" class="twitch-content-expanded">
-            <div class="aspect-video rounded-lg overflow-hidden border border-purple-500/30 shadow-lg">
-              <iframe
-                src="https://player.twitch.tv/?channel=teamrespawntv&parent=localhost&parent=127.0.0.1&parent=teamrespawn.net&parent=www.teamrespawn.net&parent=andythenerd.github.io&muted=false"
-                frameborder="0"
-                allowfullscreen="true"
-                scrolling="no"
-                allow="autoplay; fullscreen"
-                title="Team Respawn TV Live Stream"
-                class="w-full h-full"
-              ></iframe>
-            </div>
-          </div>
-        </div>
-      </section>
-    </main>
+      <!-- Home-only featured content; hidden when switching tabs -->
+      <div id="home-featured-content">
 
-    <main id="home-featured-content" role="main" aria-label="Storehaus featured content">
-      <StorehausPromo class="mb-8" />
-    </main>
+        <!-- Dynamic showcase -->
+        <YoutubeLatestVideos />
+        <RecentHW2Searches showOpenStatsLink />
+        <!-- Storehaus CTA -->
+        <StorehausPromo class="mb-8" />
 
-    <main id="walkthroughs-content" class="hidden flex flex-col gap-4" role="main" aria-label="Walkthroughs content">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gray-800/60 border border-gray-700/60 rounded-xl px-4 py-3">
-        <div class="flex flex-col">
-          <span class="text-sm font-semibold text-gray-200">Sort walkthroughs</span>
-          <span class="text-xs text-gray-400">Default: A -> Z</span>
-        </div>
-        <label class="flex items-center gap-2 text-sm text-gray-200" for="walkthroughs-sort-select">
-          <span class="sr-only">Sort walkthroughs</span>
-          <select
-            id="walkthroughs-sort-select"
-            class="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
-            aria-label="Sort walkthroughs"
-          >
-            <option value="alpha">Alphabetical (A->Z)</option>
-            <option value="reverse-alpha">Alphabetical (Z->A)</option>
-            <option value="release-desc">Release date (newest)</option>
-            <option value="release-asc">Release date (oldest)</option>
-            <option value="series">Game series (A->Z)</option>
-          </select>
-        </label>
       </div>
-      <div id="walkthroughs-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8" aria-live="polite"></div>
-      
-      <StorehausPromo class="mt-8" />
-    </main>
 
-    <main id="halo-wars-content" class="hidden grid grid-cols-1 gap-8" role="main" aria-label="Halo Wars guides content"></main>
+      <!-- Halo Wars guides tab panel -->
+      <section
+        id="halo-wars-content"
+        class="hidden grid grid-cols-1 gap-8"
+        role="tabpanel"
+        aria-labelledby="halo-wars-tab"
+        aria-label="Halo Wars guides content"
+      ></section>
 
-    <main id="age-of-empires-content" class="hidden grid grid-cols-1 gap-8" role="main" aria-label="Age of Empires guides content"></main>
+      <!-- Age of Empires guides tab panel -->
+      <section
+        id="age-of-empires-content"
+        class="hidden grid grid-cols-1 gap-8"
+        role="tabpanel"
+        aria-labelledby="age-of-empires-tab"
+        aria-label="Age of Empires guides content"
+      ></section>
 
-    <main id="age-of-mythology-content" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" role="main" aria-label="Age of Mythology guides content"></main>
+      <!-- Age of Mythology guides tab panel -->
+      <section
+        id="age-of-mythology-content"
+        class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+        role="tabpanel"
+        aria-labelledby="age-of-mythology-tab"
+        aria-label="Age of Mythology guides content"
+      ></section>
 
-    <main id="other-projects-content" class="hidden" role="main" aria-label="Other projects content">
-      <StorehausPromo class="mb-8" />
-      <div id="other-projects-grid" class="other-projects-masonry"></div>
     </main>
 
     <Footer />
@@ -180,27 +115,4 @@ import StorehausPromo from '../components/StorehausPromo.astro';
   <script src="/js/project-card.js" is:inline></script>
   <script src="/js/home-content.js" is:inline></script>
   <script src="/js/main.js" is:inline></script>
-  <script is:inline>
-    (() => {
-      const storageKey = 'tr_hw2_announcement_dismissed_v1';
-      const banner = document.getElementById('hw2-announcement-banner');
-      const dismissButton = document.getElementById('hw2-announcement-dismiss');
-
-      if (!banner || !dismissButton) return;
-
-      try {
-        if (window.localStorage.getItem(storageKey) === '1') {
-          banner.classList.add('hidden');
-          return;
-        }
-      } catch {}
-
-      dismissButton.addEventListener('click', () => {
-        banner.classList.add('hidden');
-        try {
-          window.localStorage.setItem(storageKey, '1');
-        } catch {}
-      });
-    })();
-  </script>
 </BaseLayout>

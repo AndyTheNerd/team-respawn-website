@@ -11,11 +11,6 @@ const tabs = {
         content: null,
         summary: null
     },
-    'walkthroughs-tab': {
-        button: null,
-        content: null,
-        summary: null
-    },
     'halo-wars-tab': {
         button: null,
         content: null,
@@ -27,11 +22,6 @@ const tabs = {
         summary: null
     },
     'age-of-mythology-tab': {
-        button: null,
-        content: null,
-        summary: null
-    },
-    'other-projects-tab': {
         button: null,
         content: null,
         summary: null
@@ -133,11 +123,9 @@ function switchTab(activeTabId) {
     if (isHomePage) {
         const tabToHashMap = {
             'home-tab': '',
-            'walkthroughs-tab': 'walkthroughs',
             'halo-wars-tab': 'halo-wars',
             'age-of-empires-tab': 'age-of-empires',
-            'age-of-mythology-tab': 'age-of-mythology',
-            'other-projects-tab': 'other-projects'
+            'age-of-mythology-tab': 'age-of-mythology'
         };
         
         const hash = tabToHashMap[activeTabId] || '';
@@ -264,11 +252,9 @@ function handleHashNavigation() {
     
     // Map hash values to tab IDs
     const hashToTabMap = {
-        'walkthroughs': 'walkthroughs-tab',
         'halo-wars': 'halo-wars-tab',
         'age-of-empires': 'age-of-empires-tab',
-        'age-of-mythology': 'age-of-mythology-tab',
-        'other-projects': 'other-projects-tab'
+        'age-of-mythology': 'age-of-mythology-tab'
     };
     
     const tabId = hashToTabMap[hash];
@@ -357,11 +343,9 @@ function initTabs() {
     // Handle hash navigation first, then set default tab
     const hash = window.location.hash.substring(1);
     const hashToTabMap = {
-        'walkthroughs': 'walkthroughs-tab',
         'halo-wars': 'halo-wars-tab',
         'age-of-empires': 'age-of-empires-tab',
-        'age-of-mythology': 'age-of-mythology-tab',
-        'other-projects': 'other-projects-tab'
+        'age-of-mythology': 'age-of-mythology-tab'
     };
     
     const initialTabId = hash && hashToTabMap[hash] ? hashToTabMap[hash] : 'home-tab';

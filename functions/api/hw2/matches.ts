@@ -244,6 +244,10 @@ async function storeMatchSummaries(db: Env['DB'], gamertag: string, matches: Mat
            gamertag = excluded.gamertag,
            last_seen_at = excluded.last_seen_at`
       ).bind(playerId, gamertag, now),
+      db.prepare(
+        `INSERT INTO search_events (search_id, player_id, searched_at, match_count)
+         VALUES (?, ?, ?, ?)`
+      ).bind(crypto.randomUUID(), playerId, now, matches.length),
     ]);
   } catch {
     await db.batch([
@@ -254,6 +258,10 @@ async function storeMatchSummaries(db: Env['DB'], gamertag: string, matches: Mat
            gamertag = excluded.gamertag,
            last_seen_at = excluded.last_seen_at`
       ).bind(playerId, gamertag, now),
+      db.prepare(
+        `INSERT INTO search_events (search_id, player_id, searched_at, match_count)
+         VALUES (?, ?, ?, ?)`
+      ).bind(crypto.randomUUID(), playerId, now, matches.length),
     ]);
   }
 }
