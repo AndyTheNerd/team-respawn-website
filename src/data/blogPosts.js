@@ -190,7 +190,7 @@
     accentClass: 'text-emerald-400',
     buttonClass: 'bg-emerald-500 hover:bg-emerald-600',
     img: {
-      src: 'https://img.youtube.com/vi/VvD3M82_f_Q/maxresdefault.jpg',
+      src: 'https://img.youtube.com/vi/YNxJJ3U09VM/maxresdefault.jpg',
       alt: 'Goblin Commander: Unleash the Horde Full Campaign Walkthrough',
       width: 400,
       height: 225,
