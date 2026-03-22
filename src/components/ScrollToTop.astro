@@ -1,0 +1,26 @@
+<button
+  id="scroll-to-top"
+  aria-label="Scroll to top"
+  class="fixed bottom-6 right-6 z-50 p-3 rounded-full bg-gray-800 border border-cyan-500/40 text-cyan-400 shadow-lg opacity-0 pointer-events-none transition-all duration-300 hover:bg-gray-700 hover:border-cyan-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
+>
+  <i class="fas fa-chevron-up" aria-hidden="true"></i>
+</button>
+
+<script>
+  const btn = document.getElementById('scroll-to-top');
+  if (btn) {
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) {
+        btn.classList.remove('opacity-0', 'pointer-events-none');
+        btn.classList.add('opacity-100');
+      } else {
+        btn.classList.add('opacity-0', 'pointer-events-none');
+        btn.classList.remove('opacity-100');
+      }
+    }, { passive: true });
+
+    btn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+</script>

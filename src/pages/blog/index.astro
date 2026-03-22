@@ -3,6 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import BlogCard from '../../components/BlogCard/BlogCard.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
+import ScrollToTop from '../../components/ScrollToTop.astro';
 import SidePanel from '../../components/SidePanel.astro';
 import { Input, Select } from 'webcoreui/astro';
 import blogPosts from '../../data/blogPosts.js';
@@ -215,6 +216,7 @@ const blogStructuredData = {
   </div>
 
   <SidePanel />
+  <ScrollToTop />
 
   <script src="/js/dropdowns.js" is:inline></script>
   <script src="/js/tabs.js" is:inline></script>
