@@ -1,5 +1,5 @@
 import { MATCH_FETCH_COUNT, CURRENT_SEASON, state } from './state';
-import { globalError, resultsContainer, playerGamertagEl, playerContentCreatorIndicatorEl, playerCheaterIndicatorEl, playerLastSeenEl, profileShareBtn, videoCtaEl } from './dom';
+import { globalError, resultsContainer, playerGamertagEl, playerContentCreatorIndicatorEl, playerCheaterIndicatorEl, playerLastSeenEl, profileShareBtn, recentHw2SearchesSectionEl, videoCtaEl } from './dom';
 import { showSkeleton, hideSkeleton, showError, showStaleBanner, hideStaleBanner } from './uiState';
 import { destroyAllCharts } from './chartManager';
 import { updateLastSeen, isContentCreatorGamertag, isConfirmedCheaterGamertag } from './dataProcessing';
@@ -21,6 +21,7 @@ export async function performSearch(gamertag: string, options: { matchId?: strin
   globalError.classList.add('hidden');
   globalError.innerHTML = '';
   hideStaleBanner();
+  recentHw2SearchesSectionEl?.classList.add('hidden');
   resultsContainer.classList.remove('hidden');
 
   if (playerGamertagEl) playerGamertagEl.textContent = cleanGamertag;

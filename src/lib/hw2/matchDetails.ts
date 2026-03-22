@@ -678,7 +678,7 @@ export async function loadMatchDetails(matchId: string, detailsEl: HTMLElement) 
         <p class="text-[11px] uppercase tracking-wider text-gray-400">Match Summary + Build Order</p>
         <p class="text-xs text-gray-500">Loads with event data for this match.</p>
       </div>
-      <div id="match-summary-${matchId}" class="match-summary-content mt-3" data-loaded="false"></div>
+      <div id="match-details-summary-${matchId}" class="match-summary-content mt-3" data-loaded="false"></div>
     </div>
   `;
 

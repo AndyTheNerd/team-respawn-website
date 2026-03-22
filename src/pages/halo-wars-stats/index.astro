@@ -4,6 +4,8 @@ import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import SidePanel from '../../components/SidePanel.astro';
 import StorehausPromo from '../../components/StorehausPromo.astro';
+import RecentHW2Searches from '../../components/RecentHW2Searches.astro';
+import HW2CommunityStats from '../../components/HW2CommunityStats.astro';
 import { videos } from '../../data/videos';
 import { hw2NameMappings } from '../../data/haloWars2/nameMappings';
 import { confirmedCheaterGamertags } from '../../data/haloWars2/confirmedCheaters';
@@ -522,6 +524,11 @@ const hw2ContentCreatorGamertagsJson = JSON.stringify(contentCreatorGamertags).r
         </div>
       </section>
 
+      <div id="recent-hw2-searches-section" class="hidden">
+        <RecentHW2Searches />
+        <HW2CommunityStats />
+      </div>
+
       <!-- Results Container -->
       <div id="results-container" class="hidden space-y-6">
         <!-- Player Overview Card -->
@@ -990,6 +997,32 @@ const hw2ContentCreatorGamertagsJson = JSON.stringify(contentCreatorGamertags).r
     import { parseGamertagFromProfilePath } from '../../lib/hw2/urlProfile';
     import { performSearch } from '../../lib/hw2/search';
     import { runComparison } from '../../lib/hw2/comparePlayers';
+    import { getMatchResult } from '../../utils/haloApi';
+
+    function resolveGamertagFromMatch(matchPayload: any): string {
+      const rawPlayers = matchPayload?.Players;
+      const players = Array.isArray(rawPlayers)
+        ? rawPlayers
+        : (rawPlayers && typeof rawPlayers === 'object')
+          ? Object.values(rawPlayers)
+          : [];
+
+      const getPlayerId = (player: any): string => {
+        const value = player?.HumanPlayerId?.Gamertag
+          || (typeof player?.HumanPlayerId === 'string' ? player.HumanPlayerId : '')
+          || player?.Gamertag
+          || player?.PlayerId;
+        return String(value || '').trim();
+      };
+
+      const preferred = players.find((player: any) => {
+        const id = getPlayerId(player);
+        if (!id) return false;
+        return !/^ai\s+\d+$/i.test(id);
+      }) || players.find((player: any) => getPlayerId(player) !== '');
+
+      return preferred ? getPlayerId(preferred) : '';
+    }
 
     // --- Collapsible panels ---
     if (leadersToggle && leadersPanel) {
@@ -1103,6 +1136,10 @@ const hw2ContentCreatorGamertagsJson = JSON.stringify(contentCreatorGamertags).r
     renderRecentSearches();
 
     // --- URL-based initialization ---
+    const recentHw2SearchesSection = document.getElementById('recent-hw2-searches-section') as HTMLElement | null;
+    const setRecentHw2SearchesVisible = (visible: boolean) => {
+      recentHw2SearchesSection?.classList.toggle('hidden', !visible);
+    };
     const urlParams = new URLSearchParams(window.location.search);
     const pathGamertag = parseGamertagFromProfilePath(window.location.pathname);
     const queryGamertag = urlParams.get('gamertag')?.trim() || '';
@@ -1112,9 +1149,21 @@ const hw2ContentCreatorGamertagsJson = JSON.stringify(contentCreatorGamertags).r
       state.pendingDeepLinkMatchId = matchIdParam;
     }
     if (initialGamertag) {
+      setRecentHw2SearchesVisible(false);
       stopSearchPlaceholderRotation(false);
       searchInput.value = initialGamertag;
       performSearch(initialGamertag, { matchId: matchIdParam || null });
+    } else if (matchIdParam) {
+      setRecentHw2SearchesVisible(false);
+      const matchResult = await getMatchResult(matchIdParam);
+      const inferredGamertag = matchResult.ok ? resolveGamertagFromMatch(matchResult.data) : '';
+      if (inferredGamertag) {
+        stopSearchPlaceholderRotation(false);
+        searchInput.value = inferredGamertag;
+        performSearch(inferredGamertag, { matchId: matchIdParam });
+      }
+    } else {
+      setRecentHw2SearchesVisible(true);
     }
   </script>
 </BaseLayout>
