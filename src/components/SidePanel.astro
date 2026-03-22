@@ -10,6 +10,9 @@ const isStorehausInfo = pathname === '/storehaus-info' || pathname === '/storeha
 const isStorehausPrivacy = pathname === '/storehaus/privacy-policy' || pathname === '/storehaus/privacy-policy/';
 const isStorehausTerms = pathname === '/storehaus/terms-of-service' || pathname === '/storehaus/terms-of-service/';
 const isOtherProjects = isStorehausInfo || isStorehausPrivacy || isStorehausTerms;
+const isAbout = pathname.startsWith('/about');
+const isSupport = pathname.startsWith('/support');
+const isPartner = pathname.startsWith('/partner');
 ---
 <aside
   id="side-panel"
@@ -160,6 +163,36 @@ const isOtherProjects = isStorehausInfo || isStorehausPrivacy || isStorehausTerm
       >
         <i class="fab fa-github mr-2" aria-hidden="true"></i>
         GitHub ↗
+      </a>
+    </nav>
+  </div>
+
+  <div class="mb-8">
+    <h2 class="text-2xl font-extrabold mb-4 text-white">About</h2>
+    <nav class="flex flex-col space-y-2" aria-label="About navigation">
+      <a
+        href="/about"
+        class={`side-panel-tab-link ${isAbout ? 'side-panel-tab-active' : 'side-panel-tab-inactive'} text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50`}
+        role="menuitem"
+      >
+        <i class="fas fa-users mr-2" aria-hidden="true"></i>
+        About Us
+      </a>
+      <a
+        href="/support"
+        class={`side-panel-tab-link ${isSupport ? 'side-panel-tab-active' : 'side-panel-tab-inactive'} text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50`}
+        role="menuitem"
+      >
+        <i class="fas fa-heart mr-2" aria-hidden="true"></i>
+        Support Us
+      </a>
+      <a
+        href="/partner"
+        class={`side-panel-tab-link ${isPartner ? 'side-panel-tab-active' : 'side-panel-tab-inactive'} text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50`}
+        role="menuitem"
+      >
+        <i class="fas fa-handshake mr-2" aria-hidden="true"></i>
+        Partner with Us
       </a>
     </nav>
   </div>
