@@ -24,6 +24,7 @@ type MatchPlayerDetail = {
   LeaderId?: number;
   MatchOutcome?: number;
   IsHuman?: boolean;
+  PlayerType?: number;
   Gamertag?: string;
   HumanPlayerId?: { Gamertag?: string } | string;
   ComputerPlayerId?: number;
@@ -37,37 +38,146 @@ type CachedMatchRow = {
   fetched_at: string;
 };
 
+type MatchPlayerRow = {
+  player_key: string;
+  player_id: string | null;
+  player_name: string;
+  is_human: number;
+  team_id: number | null;
+  leader_id: number | null;
+  outcome: number | null;
+  units_destroyed: number;
+  units_lost: number;
+  player_index: number;
+};
+
+type LeaderPowerRow = {
+  player_key: string;
+  power_id: string;
+  times_cast: number;
+};
+
 function shouldUseCache(errorType: string): boolean {
   return errorType === 'rate_limit' || errorType === 'network' || errorType === 'auth';
+}
+
+function trimMatchPayload(payload: any): any {
+  const playersRaw = payload?.Players;
+  const players = Array.isArray(playersRaw)
+    ? playersRaw
+    : (playersRaw && typeof playersRaw === 'object')
+      ? Object.values(playersRaw)
+      : [];
+
+  return {
+    Players: players.map((p: any) => ({
+      PlayerIndex: p?.PlayerIndex,
+      TeamId: p?.TeamId,
+      LeaderId: p?.LeaderId,
+      MatchOutcome: p?.MatchOutcome,
+      HumanPlayerId: p?.HumanPlayerId,
+      Gamertag: p?.Gamertag,
+      IsHuman: p?.IsHuman,
+      ComputerPlayerId: p?.ComputerPlayerId,
+      PlayerType: p?.PlayerType,
+      UnitStats: p?.UnitStats,
+      LeaderPowerStats: p?.LeaderPowerStats,
+    })),
+  };
+}
+
+async function reconstructMatchFromDB(db: D1Database, matchId: string) {
+  const playerRows = await db.prepare(
+    `SELECT player_key, player_id, player_name, is_human, team_id, leader_id,
+            outcome, units_destroyed, units_lost, player_index
+     FROM match_players WHERE match_id = ?`
+  ).bind(matchId).all<MatchPlayerRow>();
+
+  if (!playerRows?.results?.length) return null;
+
+  const powerRows = await db.prepare(
+    'SELECT player_key, power_id, times_cast FROM player_leader_powers WHERE match_id = ?'
+  ).bind(matchId).all<LeaderPowerRow>();
+
+  const powersByPlayer = new Map<string, Record<string, number>>();
+  (powerRows?.results || []).forEach((row) => {
+    let map = powersByPlayer.get(row.player_key);
+    if (!map) {
+      map = {};
+      powersByPlayer.set(row.player_key, map);
+    }
+    map[row.power_id] = row.times_cast;
+  });
+
+  const players = playerRows.results
+    .sort((a, b) => a.player_index - b.player_index)
+    .map((row) => {
+      const isHuman = row.is_human === 1;
+      const player: any = {
+        PlayerIndex: row.player_index,
+        TeamId: row.team_id,
+        LeaderId: row.leader_id,
+        MatchOutcome: row.outcome,
+        IsHuman: isHuman,
+        PlayerType: isHuman ? 1 : 3,
+      };
+      if (isHuman && row.player_name) {
+        player.HumanPlayerId = row.player_name;
+        player.Gamertag = row.player_name;
+      } else if (!isHuman) {
+        player.ComputerPlayerId = row.player_key.startsWith('ai:')
+          ? parseInt(row.player_key.split(':')[1], 10) || 0
+          : 0;
+      }
+      player.UnitStats = {
+        _total: { TotalDestroyed: row.units_destroyed, TotalLost: row.units_lost },
+      };
+      const powers = powersByPlayer.get(row.player_key);
+      if (powers) {
+        player.LeaderPowerStats = powers;
+      }
+      return player;
+    });
+
+  const ingestedRow = await db.prepare(
+    'SELECT ingested_at FROM matches WHERE match_id = ?'
+  ).bind(matchId).first<{ ingested_at: string }>();
+
+  return {
+    payload: { Players: players },
+    fetchedAt: ingestedRow?.ingested_at || new Date().toISOString(),
+  };
 }
 
 async function loadCachedMatch(db: D1Database, matchId: string) {
   const row = await db.prepare(
     'SELECT payload_json, fetched_at FROM raw_match_payloads WHERE match_id = ?'
   ).bind(matchId).first<CachedMatchRow>();
-  if (!row?.payload_json) return null;
-  try {
-    const payload = JSON.parse(row.payload_json);
-    return { payload, fetchedAt: row.fetched_at };
-  } catch {
-    return null;
+  if (row?.payload_json) {
+    try {
+      const payload = JSON.parse(row.payload_json);
+      return { payload, fetchedAt: row.fetched_at };
+    } catch { /* fall through to reconstruction */ }
   }
+
+  return reconstructMatchFromDB(db, matchId);
 }
 
 function normalizePlayerId(gamertag: string): string {
   return gamertag.trim().toLowerCase();
 }
 
-function getPlayerName(player: MatchPlayerDetail): string {
+function getPlayerName(player: MatchPlayerDetail, isHuman: boolean): string {
   const humanId =
     (typeof player?.HumanPlayerId === 'string' && player.HumanPlayerId) ||
     (typeof player?.HumanPlayerId === 'object' && player.HumanPlayerId?.Gamertag) ||
     player?.Gamertag;
-  if (humanId) return String(humanId);
-  if (player?.IsHuman === false && player?.ComputerPlayerId != null) {
+  if (isHuman && humanId) return String(humanId);
+  if (!isHuman && player?.ComputerPlayerId != null) {
     return `AI ${player.ComputerPlayerId}`;
   }
-  if (player?.IsHuman === false) return 'AI';
+  if (!isHuman) return 'AI';
+  if (humanId) return String(humanId);
   return 'Unknown';
 }
 
@@ -80,9 +190,18 @@ function getPlayerId(player: MatchPlayerDetail): string | null {
   return normalizePlayerId(String(humanId));
 }
 
-function getPlayerKey(player: MatchPlayerDetail, index: number): string {
-  const humanId = getPlayerId(player);
-  if (humanId) return humanId;
+function resolveIsHuman(player: MatchPlayerDetail): boolean {
+  if (typeof player?.IsHuman === 'boolean') return player.IsHuman;
+  if (player?.PlayerType === 2 || player?.PlayerType === 3) return false;
+  if (player?.PlayerType === 0 || player?.PlayerType === 1) return true;
+  return getPlayerId(player) != null;
+}
+
+function getPlayerKey(player: MatchPlayerDetail, index: number, isHuman: boolean): string {
+  if (isHuman) {
+    const humanId = getPlayerId(player);
+    if (humanId) return humanId;
+  }
   if (player?.ComputerPlayerId != null) return `ai:${player.ComputerPlayerId}`;
   if (player?.TeamId != null) return `ai:${player.TeamId}:${index}`;
   return `ai:${index}`;
@@ -142,7 +261,7 @@ async function storeMatchDetail(
          ON CONFLICT(match_id) DO UPDATE SET
            payload_json = excluded.payload_json,
            fetched_at = excluded.fetched_at`
-      ).bind(matchId, JSON.stringify(payload), now)
+      ).bind(matchId, JSON.stringify(trimMatchPayload(payload)), now)
     );
   }
 
@@ -150,7 +269,7 @@ async function storeMatchDetail(
   const players = Array.isArray(playersRaw)
     ? playersRaw
     : (playersRaw && typeof playersRaw === 'object')
-      ? Object.values(playersRaw)
+      ? Object.values(playersRaw) as MatchPlayerDetail[]
       : [];
 
   const teamTotals = new Map<number, { destroyed: number; lost: number; powers: number }>();
@@ -159,10 +278,11 @@ async function storeMatchDetail(
     const teamId = player?.TeamId;
     const leaderId = player?.LeaderId ?? null;
     const outcome = player?.MatchOutcome ?? null;
-    const playerId = getPlayerId(player);
-    const playerName = getPlayerName(player);
-    const playerKey = getPlayerKey(player, index);
-    const isHuman = playerId ? 1 : 0;
+    const isHuman = resolveIsHuman(player);
+    const playerId = isHuman ? getPlayerId(player) : null;
+    const playerName = getPlayerName(player, isHuman);
+    const playerKey = getPlayerKey(player, index, isHuman);
+    const isHumanInt = isHuman ? 1 : 0;
     const { destroyed, lost } = sumUnitStats(player?.UnitStats);
     const powerEntries = extractLeaderPowers(player?.LeaderPowerStats);
     const powerCount = powerEntries.reduce((sum, entry) => sum + entry.times, 0);
@@ -211,7 +331,7 @@ async function storeMatchDetail(
         playerKey,
         playerId,
         playerName,
-        isHuman,
+        isHumanInt,
         teamId ?? null,
         leaderId,
         outcome,

@@ -44,6 +44,11 @@ async function fetchFromPagesFunction<T>(
     const isJson = contentType.includes('application/json');
     const data = isJson ? await response.json().catch(() => null) : null;
     if (response.ok) {
+      // In local dev, a misrouted /api call can return HTML with 200.
+      // Treat non-JSON success as invalid API response and use fallback if available.
+      if ((!isJson || data == null) && fallback) {
+        return fallback();
+      }
       return { ok: true, data: data as T };
     }
 
@@ -108,6 +113,23 @@ async function fetchWithKeyFallback<T>(url: string, extraHeaders: Record<string,
   };
 }
 
+export async function getCampaignProgress(gamertag: string): Promise<ApiResult<any>> {
+  const encoded = encodeURIComponent(gamertag);
+  return fetchFromPagesFunction<any>(
+    `${PAGES_API_BASE}/campaign-progress?gamertag=${encoded}`,
+    { method: 'GET' },
+    () => fetchWithKeyFallback<any>(`${SUMMARY_API_URL}/players/${encoded}/campaign-progress`)
+  );
+}
+
+export async function getCampaignLevels(): Promise<ApiResult<any>> {
+  return fetchFromPagesFunction<any>(
+    `${PAGES_API_BASE}/campaign-levels`,
+    { method: 'GET' },
+    () => fetchWithKeyFallback<any>(`${METADATA_API_URL}/campaign-levels`, { 'Accept-Language': 'en-US' })
+  );
+}
+
 export async function getPlayerStats(gamertag: string): Promise<ApiResult<WithMeta<PlayerStatsSummaryResponse>>> {
   const encoded = encodeURIComponent(gamertag);
   return fetchFromPagesFunction<WithMeta<PlayerStatsSummaryResponse>>(
@@ -150,11 +172,42 @@ export async function getMatchEvents(matchId: string): Promise<ApiResult<WithMet
   );
 }
 
+const MATCHES_API_PAGE_SIZE = 25;
+
+async function fetchMatchesBatched(
+  gamertag: string,
+  count: number
+): Promise<ApiResult<WithMeta<{ Results: MatchResult[] }>>> {
+  const encoded = encodeURIComponent(gamertag);
+  const collected: MatchResult[] = [];
+  let start = 0;
+
+  while (collected.length < count) {
+    const batchCount = Math.min(count - collected.length, MATCHES_API_PAGE_SIZE);
+    const result = await fetchWithKeyFallback<{ Results: MatchResult[] }>(
+      `${HALO_API_URL}/players/${encoded}/matches?start=${start}&count=${batchCount}`
+    );
+
+    if (!result.ok) {
+      if (collected.length > 0) break;
+      return result;
+    }
+
+    const batch = Array.isArray(result.data?.Results) ? result.data.Results : [];
+    if (batch.length === 0) break;
+
+    collected.push(...batch);
+    if (batch.length < batchCount) break;
+    start += batch.length;
+  }
+
+  return { ok: true, data: { Results: collected.slice(0, count) } };
+}
+
 export async function getPlayerMatches(
   gamertag: string,
   count = 10
 ): Promise<ApiResult<WithMeta<{ Results: MatchResult[] }>>> {
-  const encoded = encodeURIComponent(gamertag);
   return fetchFromPagesFunction<WithMeta<{ Results: MatchResult[] }>>(
     `${PAGES_API_BASE}/matches`,
     {
@@ -162,15 +215,62 @@ export async function getPlayerMatches(
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ gamertag, count }),
     },
-    () =>
-      fetchWithKeyFallback<WithMeta<{ Results: MatchResult[] }>>(
-        `${HALO_API_URL}/players/${encoded}/matches?start=0&count=${count}`
-      )
+    async () => {
+      const result = await fetchMatchesBatched(gamertag, count);
+      if (result.ok) {
+        // CF Function was unavailable so D1 was never updated. Fire a background
+        // write-back so the next request that hits the CF Function serves fresh data.
+        fetch(`${PAGES_API_BASE}/matches`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ gamertag, count }),
+        }).catch(() => {/* best-effort, ignore failures */});
+      }
+      return result;
+    }
   );
 }
 
 let leaderPowerMapCache: Record<string, string> | null = null;
 let leaderPowerMapPromise: Promise<ApiResult<Record<string, string>>> | null = null;
+
+async function fetchLeaderPowersDirect(): Promise<ApiResult<Record<string, string>>> {
+  const map: Record<string, string> = {};
+  let startAt = 0;
+  let totalCount = Infinity;
+
+  while (startAt < totalCount) {
+    const pageResult = await fetchWithKeyFallback<any>(
+      `${METADATA_API_URL}/leader-powers?startAt=${startAt}`,
+      { 'Accept-Language': 'en-US' }
+    );
+    if (!pageResult.ok) {
+      return pageResult as ApiResult<Record<string, string>>;
+    }
+
+    const data = pageResult.data;
+    const items = Array.isArray(data?.ContentItems) ? data.ContentItems : [];
+    items.forEach((item: any) => {
+      const objId = item?.View?.HW2LeaderPower?.ObjectTypeId;
+      const name =
+        item?.View?.HW2LeaderPower?.DisplayInfo?.View?.HW2LeaderPowerDisplayInfo?.Name
+        || item?.View?.HW2LeaderPower?.DisplayInfo?.View?.Title
+        || item?.View?.Title;
+      if (objId && name) {
+        map[String(objId)] = String(name);
+      }
+    });
+
+    const paging = data?.Paging || {};
+    const inlineCount = typeof paging.InlineCount === 'number' ? paging.InlineCount : items.length;
+    totalCount = typeof paging.TotalCount === 'number' ? paging.TotalCount : startAt + inlineCount;
+    startAt = (typeof paging.StartAt === 'number' ? paging.StartAt : startAt) + inlineCount;
+
+    if (inlineCount === 0) break;
+  }
+
+  return { ok: true, data: map };
+}
 
 export async function getLeaderPowerMap(): Promise<ApiResult<Record<string, string>>> {
   if (leaderPowerMapCache) {
@@ -182,42 +282,17 @@ export async function getLeaderPowerMap(): Promise<ApiResult<Record<string, stri
   }
 
   leaderPowerMapPromise = (async () => {
-    const map: Record<string, string> = {};
-    let startAt = 0;
-    let totalCount = Infinity;
-
-    while (startAt < totalCount) {
-      const pageResult = await fetchWithKeyFallback<any>(
-        `${METADATA_API_URL}/leader-powers?startAt=${startAt}`,
-        { 'Accept-Language': 'en-US' }
-      );
-      if (!pageResult.ok) {
-        return pageResult as ApiResult<Record<string, string>>;
-      }
-
-      const data = pageResult.data;
-      const items = Array.isArray(data?.ContentItems) ? data.ContentItems : [];
-      items.forEach((item: any) => {
-        const objId = item?.View?.HW2LeaderPower?.ObjectTypeId;
-        const name =
-          item?.View?.HW2LeaderPower?.DisplayInfo?.View?.HW2LeaderPowerDisplayInfo?.Name
-          || item?.View?.HW2LeaderPower?.DisplayInfo?.View?.Title
-          || item?.View?.Title;
-        if (objId && name) {
-          map[String(objId)] = String(name);
-        }
-      });
-
-      const paging = data?.Paging || {};
-      const inlineCount = typeof paging.InlineCount === 'number' ? paging.InlineCount : items.length;
-      totalCount = typeof paging.TotalCount === 'number' ? paging.TotalCount : startAt + inlineCount;
-      startAt = (typeof paging.StartAt === 'number' ? paging.StartAt : startAt) + inlineCount;
-
-      if (inlineCount === 0) break;
+    const result = await fetchFromPagesFunction<{ data: Record<string, string> }>(
+      `${PAGES_API_BASE}/leader-powers`,
+      { method: 'GET' },
+      fetchLeaderPowersDirect
+    );
+    if (result.ok) {
+      const map = (result.data as any).data || result.data;
+      leaderPowerMapCache = map;
+      return { ok: true as const, data: map };
     }
-
-    leaderPowerMapCache = map;
-    return { ok: true, data: map };
+    return result as ApiResult<Record<string, string>>;
   })();
 
   const result = await leaderPowerMapPromise;
@@ -230,6 +305,54 @@ export async function getLeaderPowerMap(): Promise<ApiResult<Record<string, stri
 let gameObjectMapCache: Record<string, string> | null = null;
 let gameObjectMapPromise: Promise<ApiResult<Record<string, string>>> | null = null;
 
+async function fetchGameObjectsDirect(): Promise<ApiResult<Record<string, string>>> {
+  const map: Record<string, string> = {};
+  let startAt = 0;
+  let totalCount = Infinity;
+
+  while (startAt < totalCount) {
+    const pageResult = await fetchWithKeyFallback<any>(
+      `${METADATA_API_URL}/game-objects?startAt=${startAt}`,
+      { 'Accept-Language': 'en-US' }
+    );
+    if (!pageResult.ok) {
+      return pageResult as ApiResult<Record<string, string>>;
+    }
+
+    const data = pageResult.data;
+    const items = Array.isArray(data?.ContentItems) ? data.ContentItems : [];
+    items.forEach((item: any) => {
+      const view = item?.View || {};
+      const obj = view?.HW2Object || view?.HW2GameObject || view?.GameObject || view;
+      const objId = obj?.ObjectTypeId || view?.HW2Object?.ObjectTypeId || view?.ObjectTypeId;
+      const displayInfo =
+        obj?.DisplayInfo
+        || view?.HW2Object?.DisplayInfo
+        || view?.DisplayInfo;
+      const displayView = displayInfo?.View || displayInfo;
+      const name =
+        displayView?.HW2ObjectDisplayInfo?.Name
+        || displayView?.HW2GameObjectDisplayInfo?.Name
+        || displayView?.Name
+        || displayView?.Title
+        || view?.Title
+        || obj?.Name;
+      if (objId && name) {
+        map[String(objId)] = String(name);
+      }
+    });
+
+    const paging = data?.Paging || {};
+    const inlineCount = typeof paging.InlineCount === 'number' ? paging.InlineCount : items.length;
+    totalCount = typeof paging.TotalCount === 'number' ? paging.TotalCount : startAt + inlineCount;
+    startAt = (typeof paging.StartAt === 'number' ? paging.StartAt : startAt) + inlineCount;
+
+    if (inlineCount === 0) break;
+  }
+
+  return { ok: true, data: map };
+}
+
 export async function getGameObjectMap(): Promise<ApiResult<Record<string, string>>> {
   if (gameObjectMapCache) {
     return { ok: true, data: gameObjectMapCache };
@@ -240,52 +363,17 @@ export async function getGameObjectMap(): Promise<ApiResult<Record<string, strin
   }
 
   gameObjectMapPromise = (async () => {
-    const map: Record<string, string> = {};
-    let startAt = 0;
-    let totalCount = Infinity;
-
-    while (startAt < totalCount) {
-      const pageResult = await fetchWithKeyFallback<any>(
-        `${METADATA_API_URL}/game-objects?startAt=${startAt}`,
-        { 'Accept-Language': 'en-US' }
-      );
-      if (!pageResult.ok) {
-        return pageResult as ApiResult<Record<string, string>>;
-      }
-
-      const data = pageResult.data;
-      const items = Array.isArray(data?.ContentItems) ? data.ContentItems : [];
-      items.forEach((item: any) => {
-        const view = item?.View || {};
-        const obj = view?.HW2Object || view?.HW2GameObject || view?.GameObject || view;
-        const objId = obj?.ObjectTypeId || view?.HW2Object?.ObjectTypeId || view?.ObjectTypeId;
-        const displayInfo =
-          obj?.DisplayInfo
-          || view?.HW2Object?.DisplayInfo
-          || view?.DisplayInfo;
-        const displayView = displayInfo?.View || displayInfo;
-        const name =
-          displayView?.HW2ObjectDisplayInfo?.Name
-          || displayView?.HW2GameObjectDisplayInfo?.Name
-          || displayView?.Name
-          || displayView?.Title
-          || view?.Title
-          || obj?.Name;
-        if (objId && name) {
-          map[String(objId)] = String(name);
-        }
-      });
-
-      const paging = data?.Paging || {};
-      const inlineCount = typeof paging.InlineCount === 'number' ? paging.InlineCount : items.length;
-      totalCount = typeof paging.TotalCount === 'number' ? paging.TotalCount : startAt + inlineCount;
-      startAt = (typeof paging.StartAt === 'number' ? paging.StartAt : startAt) + inlineCount;
-
-      if (inlineCount === 0) break;
+    const result = await fetchFromPagesFunction<{ data: Record<string, string> }>(
+      `${PAGES_API_BASE}/game-objects`,
+      { method: 'GET' },
+      fetchGameObjectsDirect
+    );
+    if (result.ok) {
+      const map = (result.data as any).data || result.data;
+      gameObjectMapCache = map;
+      return { ok: true as const, data: map };
     }
-
-    gameObjectMapCache = map;
-    return { ok: true, data: map };
+    return result as ApiResult<Record<string, string>>;
   })();
 
   const result = await gameObjectMapPromise;
@@ -298,6 +386,53 @@ export async function getGameObjectMap(): Promise<ApiResult<Record<string, strin
 let techMapCache: Record<string, string> | null = null;
 let techMapPromise: Promise<ApiResult<Record<string, string>>> | null = null;
 
+async function fetchTechsDirect(): Promise<ApiResult<Record<string, string>>> {
+  const map: Record<string, string> = {};
+  let startAt = 0;
+  let totalCount = Infinity;
+
+  while (startAt < totalCount) {
+    const pageResult = await fetchWithKeyFallback<any>(
+      `${METADATA_API_URL}/techs?startAt=${startAt}`,
+      { 'Accept-Language': 'en-US' }
+    );
+    if (!pageResult.ok) {
+      return pageResult as ApiResult<Record<string, string>>;
+    }
+
+    const data = pageResult.data;
+    const items = Array.isArray(data?.ContentItems) ? data.ContentItems : [];
+    items.forEach((item: any) => {
+      const view = item?.View || {};
+      const tech = view?.HW2Tech || view?.Tech || view;
+      const techId = tech?.TechId || tech?.ObjectTypeId || view?.HW2Tech?.TechId || view?.HW2Tech?.ObjectTypeId || view?.TechId;
+      const displayInfo =
+        tech?.DisplayInfo
+        || view?.HW2Tech?.DisplayInfo
+        || view?.DisplayInfo;
+      const displayView = displayInfo?.View || displayInfo;
+      const name =
+        displayView?.HW2TechDisplayInfo?.Name
+        || displayView?.Name
+        || displayView?.Title
+        || view?.Title
+        || tech?.Name;
+      if (techId && name) {
+        map[String(techId)] = String(name);
+      }
+    });
+
+    const paging = data?.Paging || {};
+    const inlineCount = typeof paging.InlineCount === 'number' ? paging.InlineCount : items.length;
+    totalCount = typeof paging.TotalCount === 'number' ? paging.TotalCount : startAt + inlineCount;
+    startAt = (typeof paging.StartAt === 'number' ? paging.StartAt : startAt) + inlineCount;
+
+    if (inlineCount === 0) break;
+  }
+
+  return { ok: true, data: map };
+}
+
 export async function getTechMap(): Promise<ApiResult<Record<string, string>>> {
   if (techMapCache) {
     return { ok: true, data: techMapCache };
@@ -308,51 +443,17 @@ export async function getTechMap(): Promise<ApiResult<Record<string, string>>> {
   }
 
   techMapPromise = (async () => {
-    const map: Record<string, string> = {};
-    let startAt = 0;
-    let totalCount = Infinity;
-
-    while (startAt < totalCount) {
-      const pageResult = await fetchWithKeyFallback<any>(
-        `${METADATA_API_URL}/techs?startAt=${startAt}`,
-        { 'Accept-Language': 'en-US' }
-      );
-      if (!pageResult.ok) {
-        return pageResult as ApiResult<Record<string, string>>;
-      }
-
-      const data = pageResult.data;
-      const items = Array.isArray(data?.ContentItems) ? data.ContentItems : [];
-      items.forEach((item: any) => {
-        const view = item?.View || {};
-        const tech = view?.HW2Tech || view?.Tech || view;
-        const techId = tech?.TechId || tech?.ObjectTypeId || view?.HW2Tech?.TechId || view?.HW2Tech?.ObjectTypeId || view?.TechId;
-        const displayInfo =
-          tech?.DisplayInfo
-          || view?.HW2Tech?.DisplayInfo
-          || view?.DisplayInfo;
-        const displayView = displayInfo?.View || displayInfo;
-        const name =
-          displayView?.HW2TechDisplayInfo?.Name
-          || displayView?.Name
-          || displayView?.Title
-          || view?.Title
-          || tech?.Name;
-        if (techId && name) {
-          map[String(techId)] = String(name);
-        }
-      });
-
-      const paging = data?.Paging || {};
-      const inlineCount = typeof paging.InlineCount === 'number' ? paging.InlineCount : items.length;
-      totalCount = typeof paging.TotalCount === 'number' ? paging.TotalCount : startAt + inlineCount;
-      startAt = (typeof paging.StartAt === 'number' ? paging.StartAt : startAt) + inlineCount;
-
-      if (inlineCount === 0) break;
+    const result = await fetchFromPagesFunction<{ data: Record<string, string> }>(
+      `${PAGES_API_BASE}/techs`,
+      { method: 'GET' },
+      fetchTechsDirect
+    );
+    if (result.ok) {
+      const map = (result.data as any).data || result.data;
+      techMapCache = map;
+      return { ok: true as const, data: map };
     }
-
-    techMapCache = map;
-    return { ok: true, data: map };
+    return result as ApiResult<Record<string, string>>;
   })();
 
   const result = await techMapPromise;

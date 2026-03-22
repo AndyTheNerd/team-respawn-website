@@ -80,7 +80,7 @@ textarea {
     max-width: 320px;
     height: 100vh; /* Full viewport height */
     background-color: #1a202c; /* Matches bg-gray-900 */
-    z-index: 50;
+    z-index: 1100;
     transition: left 0.3s ease-in-out;
     box-shadow: 4px 0 10px rgba(0, 0, 0, 0.5); /* Shadow on the right side of the panel */
     padding: 1.5rem;
@@ -101,7 +101,7 @@ textarea {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.7);
-    z-index: 40;
+    z-index: 1090;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease-in-out, visibility 0s 0.3s;
@@ -1060,7 +1060,7 @@ textarea {
     text-align: left;
     padding: 0.5rem 0.75rem;
     border-radius: 0.5rem;
-    color: rgba(209, 213, 219, 0.95);
+    color: #ffffff;
     font-size: 0.875rem;
     font-weight: 500;
     transition: background 0.2s ease, color 0.2s ease;
@@ -1076,6 +1076,96 @@ textarea {
 .nav-dropdown-item-active {
     background: rgba(168, 85, 247, 0.15);
     color: white;
+}
+
+/* Rich multi-column dropdown */
+
+/* Escape the nav-dropdown positioning context so the menu can
+   position itself relative to the full-width header-content-wrapper */
+.nav-dropdown:has(.nav-dropdown-menu--rich) {
+    position: static;
+}
+
+.nav-dropdown-menu--rich {
+    min-width: 760px;
+    padding: 1.25rem;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%) translateY(-8px);
+}
+
+.nav-dropdown.open .nav-dropdown-menu--rich,
+.nav-dropdown:hover .nav-dropdown-menu--rich,
+.nav-dropdown:focus-within .nav-dropdown-menu--rich {
+    transform: translateX(-50%) translateY(0);
+}
+
+.nav-dropdown.lock-closed .nav-dropdown-menu--rich {
+    transform: translateX(-50%) translateY(-8px);
+}
+
+.nav-dropdown-rich-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0 0.75rem;
+}
+
+.nav-dropdown-section {
+    display: flex;
+    flex-direction: column;
+    padding: 0 0.25rem;
+}
+
+.nav-dropdown-section + .nav-dropdown-section {
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+    padding-left: 0.75rem;
+}
+
+.nav-dropdown-section-heading {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(168, 85, 247, 0.85);
+    padding: 0 0.25rem 0.35rem;
+    margin-bottom: 0.25rem;
+}
+
+.nav-dropdown-section-desc {
+    font-size: 0.72rem;
+    color: #ffffff;
+    padding: 0 0.25rem 0.6rem;
+    line-height: 1.4;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    margin-bottom: 0.35rem;
+}
+
+/* Icon-style nav item */
+.nav-dropdown-item--icon {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.45rem 0.5rem;
+}
+
+.nav-dropdown-item-icon {
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.4rem;
+    background: rgba(168, 85, 247, 0.12);
+    color: rgba(168, 85, 247, 0.85);
+    font-size: 0.8rem;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.nav-dropdown-item--icon:hover .nav-dropdown-item-icon,
+.nav-dropdown-item--icon:focus .nav-dropdown-item-icon {
+    background: rgba(168, 85, 247, 0.25);
+    color: #fff;
 }
 
 /* Compact Social Icons Container */
