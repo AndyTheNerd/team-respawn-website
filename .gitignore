@@ -11,8 +11,5 @@ nul
 .claude/
 REFACTOR_CHANGELOG.md
 changelogs/
-test-results/
-playwright-report/
-blob-report/
 scripts/
 .astro/settings.json
