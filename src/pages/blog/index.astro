@@ -1,10 +1,6 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
+import SecondaryPageLayout from '../../layouts/SecondaryPageLayout.astro';
 import BlogCard from '../../components/BlogCard/BlogCard.astro';
-import Header from '../../components/Header.astro';
-import Footer from '../../components/Footer.astro';
-import ScrollToTop from '../../components/ScrollToTop.astro';
-import SidePanel from '../../components/SidePanel.astro';
 import { Input, Select } from 'webcoreui/astro';
 import blogPosts from '../../data/blogPosts.js';
 import '../../styles/webcore.scss';
@@ -96,138 +92,121 @@ const blogStructuredData = {
     }))
   }))
 };
-
 ---
-<BaseLayout
+<SecondaryPageLayout
   title="Team Respawn Blog | Gaming Guides & Strategy Articles"
   description={metaDescription}
   canonical="https://www.teamrespawn.net/blog"
   ogTitle="Team Respawn Blog"
   ogDescription={metaDescription}
-  bodyClass="blog-page"
+  showScrollToTop
 >
   <Fragment slot="head">
     <script type="application/ld+json" set:html={JSON.stringify(blogStructuredData)} />
   </Fragment>
-  <div class="container mx-auto p-4 sm:p-8">
-    <Header />
 
-    <main class="pt-8">
-      <!-- Search and Filter Section -->
-      <div class="blog-search-filter mb-8 bg-gray-800/50 border border-gray-700 rounded-lg p-4 sm:p-6">
-        <div class="flex flex-col lg:flex-row gap-4">
-          <div class="flex-1">
-            <Input
-              type="search"
-              id="blog-search"
-              placeholder="Search articles..."
-              className="w-full"
-            />
-          </div>
-          <div class="sm:w-48">
-            <Select
-              name="category-filter"
-              placeholder="All Categories"
-              itemGroups={[{ items: categoryItems }]}
-            />
-          </div>
-          <div class="sm:w-48">
-            <Select
-              name="tag-filter"
-              placeholder="All Tags"
-              itemGroups={[{ items: tagItems }]}
-            />
-          </div>
-          <div class="sm:w-40">
-            <Select
-              name="sort-filter"
-              placeholder="Newest"
-              itemGroups={[{ items: sortItems }]}
-            />
-          </div>
+  <main id="main-content" class="pt-8">
+    <!-- Search and Filter Section -->
+    <div class="blog-search-filter mb-8 bg-gray-800/50 border border-gray-700 rounded-lg p-4 sm:p-6">
+      <div class="flex flex-col lg:flex-row gap-4">
+        <div class="flex-1">
+          <Input
+            type="search"
+            id="blog-search"
+            placeholder="Search articles..."
+            className="w-full"
+          />
         </div>
-        <div id="blog-active-filters" class="blog-active-filters">
-          <span class="blog-active-label">Active filters</span>
-          <div id="blog-active-filter-list" class="blog-active-list" aria-live="polite"></div>
-          <div class="blog-controls-row">
-            <label class="blog-featured-toggle">
-              <input type="checkbox" id="featured-toggle" checked>
-              <span class="checkmark"></span>
-              <span>⭐ Featured</span>
-            </label>
-            <button id="blog-clear-filters" class="blog-active-clear" type="button">
-              Clear
-            </button>
-          </div>
+        <div class="sm:w-48">
+          <Select
+            name="category-filter"
+            placeholder="All Categories"
+            itemGroups={[{ items: categoryItems }]}
+          />
+        </div>
+        <div class="sm:w-48">
+          <Select
+            name="tag-filter"
+            placeholder="All Tags"
+            itemGroups={[{ items: tagItems }]}
+          />
+        </div>
+        <div class="sm:w-40">
+          <Select
+            name="sort-filter"
+            placeholder="Newest"
+            itemGroups={[{ items: sortItems }]}
+          />
         </div>
       </div>
+      <div id="blog-active-filters" class="blog-active-filters">
+        <span class="blog-active-label">Active filters</span>
+        <div id="blog-active-filter-list" class="blog-active-list" aria-live="polite"></div>
+        <div class="blog-controls-row">
+          <label class="blog-featured-toggle">
+            <input type="checkbox" id="featured-toggle" checked>
+            <span class="checkmark"></span>
+            <span>⭐ Featured</span>
+          </label>
+          <button id="blog-clear-filters" class="blog-active-clear" type="button">
+            Clear
+          </button>
+        </div>
+      </div>
+    </div>
 
-      <!-- Latest Articles Section -->
-      <div class="flex justify-between items-center mb-8">
-        <h2 class="text-2xl font-bold text-white">Latest Articles</h2>
-        <a 
-          href="/rss.xml" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300 text-sm"
+    <!-- Latest Articles Section -->
+    <div class="flex justify-between items-center mb-8">
+      <h2 class="text-2xl font-bold text-white">Latest Articles</h2>
+      <a
+        href="/rss.xml"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300 text-sm"
+      >
+        <i class="fas fa-rss" aria-hidden="true"></i>
+        Subscribe via RSS
+      </a>
+    </div>
+
+    <div id="blog-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {sortedPosts.map((post) => (
+        <div
+          class="blog-card-wrapper"
+          data-title={post.title.toLowerCase()}
+          data-category={post.category}
+          data-excerpt={post.excerpt.toLowerCase()}
+          data-tags={(post.tags || []).join('|').toLowerCase()}
+          data-date={post.dateIso}
+          data-featured={post.featured ? 'true' : 'false'}
+          data-featured-enabled="true"
         >
-          <i class="fas fa-rss" aria-hidden="true"></i>
-          Subscribe via RSS
-        </a>
-      </div>
+          <BlogCard
+            href={post.href}
+            img={post.img}
+            title={post.title}
+            text={`<span class="blog-category">${post.category}</span><br/>${post.excerpt}`}
+            featured={post.featured}
+          />
+        </div>
+      ))}
+    </div>
 
-      <div id="blog-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {sortedPosts.map((post, index) => (
-          <div
-            class="blog-card-wrapper"
-            data-title={post.title.toLowerCase()}
-            data-category={post.category}
-            data-excerpt={post.excerpt.toLowerCase()}
-            data-tags={(post.tags || []).join('|').toLowerCase()}
-            data-date={post.dateIso}
-            data-featured={post.featured ? 'true' : 'false'}
-            data-featured-enabled="true"
-          >
-            <BlogCard
-              href={post.href}
-              img={post.img}
-              title={post.title}
-              text={`<span class="blog-category">${post.category}</span><br/>${post.excerpt}`}
-              featured={post.featured}
-            />
-          </div>
-        ))}
-      </div>
+    <!-- No results message -->
+    <div id="no-results" class="hidden text-center py-12">
+      <p class="text-xl text-gray-400">No articles found matching your criteria.</p>
+    </div>
 
-      <!-- No results message -->
-      <div id="no-results" class="hidden text-center py-12">
-        <p class="text-xl text-gray-400">No articles found matching your criteria.</p>
-      </div>
+    <!-- Pagination (rendered client-side) -->
+    <nav id="blog-pagination" class="mt-12 flex justify-center" aria-label="Blog pagination">
+      <div id="pagination-controls" class="inline-flex flex-wrap items-center gap-2"></div>
+    </nav>
+  </main>
 
-      <!-- Pagination (rendered client-side) -->
-      <nav id="blog-pagination" class="mt-12 flex justify-center" aria-label="Blog pagination">
-        <div id="pagination-controls" class="inline-flex flex-wrap items-center gap-2"></div>
-      </nav>
-
-
-    </main>
-
-    <Footer />
-  </div>
-
-  <SidePanel />
-  <ScrollToTop />
-
-  <script src="/js/dropdowns.js" is:inline></script>
-  <script src="/js/tabs.js" is:inline></script>
-  <script src="/js/side-panel.js" is:inline></script>
-  <script src="/js/secondary-init.js" is:inline></script>
-
-  <!-- Blog post data for client-side filtering and pagination -->
-  <script define:vars={{ blogPosts, pageSize }}>
-    window.blogPostsData = blogPosts;
-    window.blogPageSize = pageSize;
-  </script>
-  <script src="/js/blog-search.js" is:inline></script>
-  
-</BaseLayout>
+  <Fragment slot="scripts">
+    <script define:vars={{ pageSize }}>
+      window.blogPageSize = pageSize;
+    </script>
+    <script src="/js/blog-search.js" is:inline></script>
+  </Fragment>
+</SecondaryPageLayout>

@@ -6,42 +6,6 @@
 let walkthroughsData = [];
 
 /**
- * Loads taglines from JSON and randomly selects one to update the header
- */
-async function loadAndUpdateTagline() {
-    try {
-        const response = await fetch('/data/taglines.json');
-        
-        if (!response.ok) {
-            // Silently fail if taglines.json doesn't exist - use default tagline
-            console.warn('Taglines file not found, using default tagline');
-            return;
-        }
-        
-        const taglines = await response.json();
-        
-        // Validate that taglines is an array
-        if (!Array.isArray(taglines) || taglines.length === 0) {
-            console.warn('Invalid taglines format, using default tagline');
-            return;
-        }
-        
-        // Select a random tagline
-        const randomIndex = Math.floor(Math.random() * taglines.length);
-        const selectedTagline = taglines[randomIndex];
-        
-        // Update the tagline element if it exists
-        const taglineElement = document.getElementById('header-tagline');
-        if (taglineElement && selectedTagline) {
-            taglineElement.textContent = selectedTagline;
-        }
-    } catch (error) {
-        // Silently fail if there's an error - use default tagline
-        console.warn('Error loading taglines, using default tagline:', error);
-    }
-}
-
-/**
  * Loads video data from JSON and renders it
  */
 async function loadAndRenderVideos() {
@@ -55,11 +19,6 @@ async function loadAndRenderVideos() {
         // Validate that data is an object
         if (!data || typeof data !== 'object') {
             throw new Error('Invalid video data format');
-        }
-
-        // Render home content with all video data
-        if (typeof renderHomeContent === 'function') {
-            renderHomeContent(data);
         }
 
         // Render walkthroughs
@@ -142,7 +101,6 @@ async function loadAndRenderProjects() {
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-        await loadAndUpdateTagline();
         initSidePanel();
         initTabs();
         await loadAndRenderVideos();

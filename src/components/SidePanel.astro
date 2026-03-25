@@ -1,18 +1,52 @@
 ---
 import SocialIcons from './SocialIcons.astro';
+import {
+  aboutLinks,
+  hw2GuideSections,
+  isNavLinkActive,
+  normalizePathname,
+  otherProjectSections,
+  sidePanelPrimaryLinks,
+} from '../data/navigation';
 
 const pathname = Astro.url?.pathname ?? '';
+const normalizedPath = normalizePathname(pathname);
 const isHome = pathname === '/' || pathname === '/index.html';
-const isBlog = pathname.startsWith('/blog');
-const isHw2Stats = pathname === '/halo-wars-stats' || pathname === '/halo-wars-stats/';
+const isHw2Stats = normalizedPath === '/halo-wars-stats';
 const isVideos = pathname.startsWith('/videos');
-const isStorehausInfo = pathname === '/storehaus-info' || pathname === '/storehaus-info/';
-const isStorehausPrivacy = pathname === '/storehaus/privacy-policy' || pathname === '/storehaus/privacy-policy/';
-const isStorehausTerms = pathname === '/storehaus/terms-of-service' || pathname === '/storehaus/terms-of-service/';
-const isOtherProjects = isStorehausInfo || isStorehausPrivacy || isStorehausTerms;
-const isAbout = pathname.startsWith('/about');
-const isSupport = pathname.startsWith('/support');
-const isPartner = pathname.startsWith('/partner');
+const navFlags = { isVideos, isHw2Stats };
+
+const primaryLinks = sidePanelPrimaryLinks.map((link) => ({
+  ...link,
+  active: isNavLinkActive(link, pathname, navFlags),
+}));
+
+const panelOtherProjectSections = otherProjectSections.map((section) => ({
+  ...section,
+  links: section.links.map((link) => ({
+    ...link,
+    active: isNavLinkActive(link, pathname, navFlags),
+  })),
+}));
+
+const panelHw2Sections = hw2GuideSections.map((section) => ({
+  ...section,
+  links: section.links.map((link) => ({
+    ...link,
+    active: isNavLinkActive(link, pathname, navFlags),
+  })),
+}));
+
+const panelAboutLinks = aboutLinks.map((link) => ({
+  ...link,
+  active: isNavLinkActive(link, pathname, navFlags),
+}));
+
+const primaryLinkClass = (active: boolean) =>
+  `side-panel-tab-link ${active ? 'side-panel-tab-active' : 'side-panel-tab-inactive'} text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50`;
+
+const sectionLinkClass = (active: boolean) =>
+  `text-lg font-semibold transition-all duration-200 py-2 px-3 rounded-lg ${active ? 'side-panel-tab-active' : 'text-gray-400 hover:text-white hover:bg-gray-800/50'}`;
 ---
 <aside
   id="side-panel"
@@ -46,123 +80,65 @@ const isPartner = pathname.startsWith('/partner');
         <i class="fas fa-home mr-2" aria-hidden="true"></i>
         Home
       </button>
-      <a
-        href="/blog"
-        class={`side-panel-tab-link ${isBlog ? 'side-panel-tab-active' : 'side-panel-tab-inactive'} text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50`}
-        role="menuitem"
-      >
-        <i class="fas fa-blog mr-2" aria-hidden="true"></i>
-        Blog
-      </a>
-      <a
-        href="/halo-wars-stats"
-        class={`side-panel-tab-link ${isHw2Stats ? 'side-panel-tab-active' : 'side-panel-tab-inactive'} text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50`}
-        role="menuitem"
-      >
-        <i class="fas fa-chart-bar mr-2" aria-hidden="true"></i>
-        HW2 Stats
-      </a>
-      <a
-        href="/videos"
-        class={`side-panel-tab-link ${isVideos ? 'side-panel-tab-active' : 'side-panel-tab-inactive'} text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50`}
-        role="menuitem"
-      >
-        <i class="fas fa-database mr-2" aria-hidden="true"></i>
-        Video Database
-      </a>
-      <a
-        href="/blog?category=Guides"
-        class="side-panel-tab-link side-panel-tab-inactive text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50"
-        role="menuitem"
-      >
-        <i class="fas fa-gamepad mr-2" aria-hidden="true"></i>
-        All Guides
-      </a>
+      {primaryLinks.map((link) => (
+        <a
+          href={link.href}
+          class={primaryLinkClass(link.active)}
+          role="menuitem"
+        >
+          <i class={`${link.icon} mr-2`} aria-hidden="true"></i>
+          {link.panelLabel ?? link.label}
+        </a>
+      ))}
     </nav>
   </div>
 
   <div class="mb-8">
     <h2 class="text-2xl font-extrabold mb-4 text-white">Other Projects</h2>
     <nav class="flex flex-col space-y-1" aria-label="Other projects navigation">
-      <p class="text-xs uppercase tracking-wider text-gray-500 px-3 pb-1">Storehaus Bot</p>
-      <a
-        href="/storehaus-info"
-        class={`text-lg font-semibold transition-all duration-200 py-2 px-3 rounded-lg ${isStorehausInfo ? 'side-panel-tab-active' : 'text-gray-400 hover:text-white hover:bg-gray-800/50'}`}
-      >
-        <i class="fas fa-info-circle mr-2" aria-hidden="true"></i>
-        Summary
-      </a>
-      <a
-        href="/storehaus/privacy-policy"
-        class={`text-lg font-semibold transition-all duration-200 py-2 px-3 rounded-lg ${isStorehausPrivacy ? 'side-panel-tab-active' : 'text-gray-400 hover:text-white hover:bg-gray-800/50'}`}
-      >
-        <i class="fas fa-shield-alt mr-2" aria-hidden="true"></i>
-        Privacy Policy
-      </a>
-      <a
-        href="/storehaus/terms-of-service"
-        class={`text-lg font-semibold transition-all duration-200 py-2 px-3 rounded-lg ${isStorehausTerms ? 'side-panel-tab-active' : 'text-gray-400 hover:text-white hover:bg-gray-800/50'}`}
-      >
-        <i class="fas fa-file-contract mr-2" aria-hidden="true"></i>
-        Terms of Service
-      </a>
-      <a
-        href="/storehaus"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50"
-      >
-        <i class="fas fa-link mr-2" aria-hidden="true"></i>
-        Add to Server ↗
-      </a>
+      {panelOtherProjectSections.map((section, sectionIndex) => (
+        <Fragment>
+          <p class={`text-xs uppercase tracking-wider text-gray-500 px-3 ${sectionIndex === 0 ? 'pb-1' : 'pt-4 pb-1'}`}>{section.title}</p>
+          {section.links.map((link) => (
+            <a
+              href={link.href}
+              target={link.external ? '_blank' : undefined}
+              rel={link.external ? 'noopener noreferrer' : undefined}
+              class={sectionLinkClass(link.active)}
+            >
+              <i class={`${link.icon} mr-2`} aria-hidden="true"></i>
+              {link.label}
+            </a>
+          ))}
+        </Fragment>
+      ))}
+    </nav>
+  </div>
 
-      <p class="text-xs uppercase tracking-wider text-gray-500 px-3 pt-4 pb-1">Halo Quotes</p>
+  <div class="mb-8">
+    <h2 class="text-2xl font-extrabold mb-4 text-white">Halo Wars 2</h2>
+    <nav class="flex flex-col space-y-1" aria-label="Halo Wars 2 navigation">
+      {panelHw2Sections.map((section, sectionIndex) => (
+        <Fragment>
+          <p class={`text-xs uppercase tracking-wider text-cyan-400/80 px-3 ${sectionIndex === 0 ? 'pb-1' : 'pt-4 pb-1'}`}>{section.panelTitle ?? section.title}</p>
+          {section.links.map((link) => (
+            <a
+              href={link.href}
+              class={sectionLinkClass(link.active)}
+            >
+              <i class={`${link.icon} mr-2`} aria-hidden="true"></i>
+              {link.panelLabel ?? link.label}
+            </a>
+          ))}
+        </Fragment>
+      ))}
+      <p class="text-xs uppercase tracking-wider text-cyan-400/80 px-3 pt-4 pb-1">Tools</p>
       <a
-        href="https://haloquotes.teamrespawntv.com/"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50"
+        href="/halo-wars-stats"
+        class={sectionLinkClass(isHw2Stats)}
       >
-        <i class="fas fa-globe mr-2" aria-hidden="true"></i>
-        Website ↗
-      </a>
-      <a
-        href="https://api.haloquotes.teamrespawntv.com/"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50"
-      >
-        <i class="fas fa-code mr-2" aria-hidden="true"></i>
-        API ↗
-      </a>
-      <a
-        href="https://github.com/AndyTheNerd/Halo-Quotes"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50"
-      >
-        <i class="fab fa-github mr-2" aria-hidden="true"></i>
-        GitHub ↗
-      </a>
-
-      <p class="text-xs uppercase tracking-wider text-gray-500 px-3 pt-4 pb-1">AOE2 API</p>
-      <a
-        href="https://aoe2api.teamrespawntv.com/"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50"
-      >
-        <i class="fas fa-code mr-2" aria-hidden="true"></i>
-        API ↗
-      </a>
-      <a
-        href="https://github.com/AndyTheNerd/age-of-empires-II-api"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50"
-      >
-        <i class="fab fa-github mr-2" aria-hidden="true"></i>
-        GitHub ↗
+        <i class="fas fa-chart-bar mr-2" aria-hidden="true"></i>
+        HW2 Stats
       </a>
     </nav>
   </div>
@@ -170,30 +146,16 @@ const isPartner = pathname.startsWith('/partner');
   <div class="mb-8">
     <h2 class="text-2xl font-extrabold mb-4 text-white">About</h2>
     <nav class="flex flex-col space-y-2" aria-label="About navigation">
-      <a
-        href="/about"
-        class={`side-panel-tab-link ${isAbout ? 'side-panel-tab-active' : 'side-panel-tab-inactive'} text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50`}
-        role="menuitem"
-      >
-        <i class="fas fa-users mr-2" aria-hidden="true"></i>
-        About Us
-      </a>
-      <a
-        href="/support"
-        class={`side-panel-tab-link ${isSupport ? 'side-panel-tab-active' : 'side-panel-tab-inactive'} text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50`}
-        role="menuitem"
-      >
-        <i class="fas fa-heart mr-2" aria-hidden="true"></i>
-        Support Us
-      </a>
-      <a
-        href="/partner"
-        class={`side-panel-tab-link ${isPartner ? 'side-panel-tab-active' : 'side-panel-tab-inactive'} text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50`}
-        role="menuitem"
-      >
-        <i class="fas fa-handshake mr-2" aria-hidden="true"></i>
-        Partner with Us
-      </a>
+      {panelAboutLinks.map((link) => (
+        <a
+          href={link.href}
+          class={primaryLinkClass(link.active)}
+          role="menuitem"
+        >
+          <i class={`${link.icon} mr-2`} aria-hidden="true"></i>
+          {link.label}
+        </a>
+      ))}
     </nav>
   </div>
 

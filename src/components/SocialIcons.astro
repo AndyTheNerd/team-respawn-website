@@ -1,60 +1,74 @@
 ---
 interface Props {
   compact?: boolean;
+  links?: Array<'youtube' | 'twitch' | 'discord' | 'rss' | 'shop'>;
 }
 
-const { compact = false } = Astro.props;
+const {
+  compact = false,
+  links = ['youtube', 'twitch', 'discord', 'rss', 'shop'],
+} = Astro.props;
 ---
 
 <div class={`flex text-gray-400 justify-center sm:justify-end ${compact ? 'space-x-2' : 'space-x-4'}`} role="list" data-compact={compact}>
-  <a
-    href="https://www.youtube.com/@TeamRespawn"
-    target="_blank"
-    rel="noopener noreferrer"
-    aria-label="Visit Team Respawn on YouTube (opens in new tab)"
-    class="hover:text-red-500"
-    role="listitem"
-  >
-    <i class="fab fa-youtube fa-lg" aria-hidden="true"></i>
-  </a>
-  <a
-    href="https://www.twitch.tv/TeamRespawnTV"
-    target="_blank"
-    rel="noopener noreferrer"
-    aria-label="Visit Team Respawn on Twitch (opens in new tab)"
-    class="hover:text-purple-500"
-    role="listitem"
-  >
-    <i class="fab fa-twitch fa-lg" aria-hidden="true"></i>
-  </a>
-  <a
-    href="https://discord.gg/TeamRespawn"
-    target="_blank"
-    rel="noopener noreferrer"
-    aria-label="Join Team Respawn Discord server (opens in new tab)"
-    class="hover:text-indigo-500"
-    role="listitem"
-  >
-    <i class="fab fa-discord fa-lg" aria-hidden="true"></i>
-  </a>
-  <a
-    href="/rss.xml"
-    target="_blank"
-    rel="noopener noreferrer"
-    aria-label="Subscribe to Team Respawn RSS feed (opens in new tab)"
-    class="hover:text-orange-500"
-    role="listitem"
-  >
-    <i class="fas fa-rss fa-lg" aria-hidden="true"></i>
-  </a>
-  <a
-    href="https://www.teamrespawn.shop"
-    target="_blank"
-    rel="noopener noreferrer"
-    aria-label="Visit Team Respawn shop (opens in new tab)"
-    class="hover:text-green-400"
-    role="listitem"
-  >
-    <i class="fas fa-shopping-cart fa-lg" aria-hidden="true"></i>
-  </a>
+  {links.includes('youtube') && (
+    <a
+      href="https://www.youtube.com/@TeamRespawn"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Visit Team Respawn on YouTube (opens in new tab)"
+      class="hover:text-red-500"
+      role="listitem"
+    >
+      <i class="fab fa-youtube fa-lg" aria-hidden="true"></i>
+    </a>
+  )}
+  {links.includes('twitch') && (
+    <a
+      href="https://www.twitch.tv/TeamRespawnTV"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Visit Team Respawn on Twitch (opens in new tab)"
+      class="hover:text-purple-500"
+      role="listitem"
+    >
+      <i class="fab fa-twitch fa-lg" aria-hidden="true"></i>
+    </a>
+  )}
+  {links.includes('discord') && (
+    <a
+      href="https://discord.gg/TeamRespawn"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Join Team Respawn Discord server (opens in new tab)"
+      class="hover:text-indigo-500"
+      role="listitem"
+    >
+      <i class="fab fa-discord fa-lg" aria-hidden="true"></i>
+    </a>
+  )}
+  {links.includes('rss') && (
+    <a
+      href="/rss.xml"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Subscribe to Team Respawn RSS feed (opens in new tab)"
+      class="hover:text-orange-500"
+      role="listitem"
+    >
+      <i class="fas fa-rss fa-lg" aria-hidden="true"></i>
+    </a>
+  )}
+  {links.includes('shop') && (
+    <a
+      href="https://www.teamrespawn.shop"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Visit Team Respawn shop (opens in new tab)"
+      class="hover:text-green-400"
+      role="listitem"
+    >
+      <i class="fas fa-shopping-cart fa-lg" aria-hidden="true"></i>
+    </a>
+  )}
 </div>

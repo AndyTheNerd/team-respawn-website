@@ -1,5 +1,9 @@
 ---
-import { getOptimizedImage, getResponsiveImageSet, getArtDirectionImageSet } from '../utils/cloudinary.js';
+import {
+  getOptimizedImage,
+  getResponsiveImageSet,
+  getArtDirectionImageSet
+} from '../utils/cloudinary.js';
 
 interface Props {
   publicId: string;
@@ -48,15 +52,17 @@ const baseOptions = {
 
 const defaultSrc = getOptimizedImage(publicId, baseOptions);
 const srcSet = getResponsiveImageSet(publicId, baseOptions);
+const artDirectionSources = artDirection ? getArtDirectionImageSet(artDirection, baseOptions) : [];
+const resolvedSrc = defaultSrc || fallbackSrc || '';
 ---
 
 <picture>
-  {artDirection && artDirection.map(({ media, srcSet }) => (
+  {artDirectionSources.map(({ media, srcSet }) => (
     <source media={media} srcset={srcSet} />
   ))}
-  <source srcset={srcSet} />
+  {srcSet && <source srcset={srcSet} />}
   <img 
-    src={fallbackSrc || defaultSrc}
+    src={resolvedSrc}
     alt={alt}
     class={className}
     loading={loading}

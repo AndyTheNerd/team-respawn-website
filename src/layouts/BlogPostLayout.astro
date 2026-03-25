@@ -1,15 +1,11 @@
 ---
-import BaseLayout from './BaseLayout.astro';
+import SecondaryPageLayout from './SecondaryPageLayout.astro';
 import BlogHeader from '../components/BlogHeader.astro';
 import BlogSidebar from '../components/BlogSidebar.astro';
-import Footer from '../components/Footer.astro';
-import Header from '../components/Header.astro';
-import SidePanel from '../components/SidePanel.astro';
 import ShareButtons from '../components/ShareButtons.astro';
-import ScrollToTop from '../components/ScrollToTop.astro';
 import Author from '../blocks/Author/Author.astro';
-import CloudinaryImage from '../components/CloudinaryImage.astro';
 import authorInfo from '../data/authorInfo.js';
+import { getBlogPromo } from '../data/blogPromos';
 
 interface Props {
   title: string;
@@ -33,9 +29,9 @@ const {
   tags
 } = Astro.props;
 
-const slug = Astro.url.pathname.split('/').pop();
 const canonical = `https://www.teamrespawn.net${Astro.url.pathname}`;
 const resolvedOgImage = ogImage ? `https://www.teamrespawn.net${ogImage}` : undefined;
+const blogPromo = getBlogPromo(category, tags ?? []);
 
 // JSON-LD structured data for Article
 const jsonLd = {
@@ -77,7 +73,7 @@ if (youtubeId) {
   };
 }
 ---
-<BaseLayout
+<SecondaryPageLayout
   title={`${title} | Team Respawn Blog`}
   description={description}
   canonical={canonical}
@@ -85,251 +81,107 @@ if (youtubeId) {
   ogDescription={description}
   ogImage={resolvedOgImage}
   ogType="article"
-  bodyClass="blog-page"
+  showScrollToTop
 >
   <Fragment slot="head">
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   </Fragment>
 
-  <div class="container mx-auto p-4 sm:p-8">
-    <Header />
-    <BlogHeader />
+  <BlogHeader />
 
-    <div class="max-w-6xl mx-auto flex flex-col lg:flex-row gap-8">
-      <!-- Sidebar (appears first on mobile, moves to right on desktop) -->
-      <div class="lg:order-2 lg:w-64 lg:flex-shrink-0">
-        <BlogSidebar category={category} title={title}>
-          <ShareButtons url={canonical} title={title} />
-        </BlogSidebar>
+  <div class="max-w-6xl mx-auto flex flex-col lg:flex-row gap-8">
+    <!-- Sidebar (appears first on mobile, moves to right on desktop) -->
+    <div class="lg:order-2 lg:w-64 lg:flex-shrink-0">
+      <BlogSidebar category={category} title={title}>
+        <ShareButtons url={canonical} title={title} />
+      </BlogSidebar>
+    </div>
+
+    <!-- Main Content -->
+    <main id="main-content" class="flex-1 min-w-0">
+      <h1 class="text-4xl font-bold mb-2 text-cyan-400">{title}</h1>
+      <p class="text-gray-400 text-sm mb-8">
+        <time datetime={dateIso}>{publishedDate}</time> by Team Respawn
+      </p>
+
+      {tags?.length ? (
+        <div class="flex flex-wrap gap-2 mb-6">
+          {tags.map(tag => (
+            <a
+              href={`/blog?tag=${encodeURIComponent(tag.toLowerCase())}`}
+              class="text-xs font-semibold uppercase tracking-wide bg-gray-800 text-cyan-200 border border-cyan-500/30 rounded-full px-3 py-1 inline-block transition-all duration-200 hover:bg-cyan-800 hover:border-cyan-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-gray-900"
+            >
+              {tag}
+            </a>
+          ))}
+        </div>
+      ) : null}
+
+      {youtubeId && (
+        <div class="aspect-video mb-8 rounded-lg overflow-hidden shadow-lg">
+          <iframe
+            src={`https://www.youtube.com/embed/${youtubeId}`}
+            title={title}
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+            class="w-full h-full"
+          ></iframe>
+        </div>
+      )}
+
+      <div class="prose prose-invert text-gray-300">
+        <slot />
       </div>
 
-      <!-- Main Content -->
-      <main class="flex-1 min-w-0">
-        <h1 class="text-4xl font-bold mb-2 text-cyan-400">{title}</h1>
-        <p class="text-gray-400 text-sm mb-8">
-          <time datetime={dateIso}>{publishedDate}</time> by Team Respawn
-        </p>
-
-        {tags?.length ? (
-          <div class="flex flex-wrap gap-2 mb-6">
-            {tags.map(tag => (
-              <a 
-                href={`/blog?tag=${encodeURIComponent(tag.toLowerCase())}`}
-                class="text-xs font-semibold uppercase tracking-wide bg-gray-800 text-cyan-200 border border-cyan-500/30 rounded-full px-3 py-1 inline-block transition-all duration-200 hover:bg-cyan-800 hover:border-cyan-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-gray-900"
+      {blogPromo && (
+        <section class={`mt-8 bg-gradient-to-r rounded-xl p-6 border ${blogPromo.sectionClass}`}>
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+            <div class="flex items-center gap-3">
+              <i class={`fab fa-discord ${blogPromo.accentClass} text-3xl`} aria-hidden="true"></i>
+              <h2 class={`text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r ${blogPromo.titleClass}`}>
+                {blogPromo.title}
+              </h2>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-2">
+              <a
+                href="/storehaus-info"
+                class={`inline-flex items-center justify-center px-4 py-2 rounded-lg text-white font-semibold transition-colors duration-300 ${blogPromo.learnMoreClass}`}
               >
-                {tag}
+                <i class="fas fa-info-circle mr-2" aria-hidden="true"></i>
+                Learn More
               </a>
+              <a
+                href="/storehaus"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center justify-center bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg text-white font-semibold transition-colors duration-300"
+              >
+                <i class="fab fa-discord mr-2" aria-hidden="true"></i>
+                Add to Discord
+              </a>
+            </div>
+          </div>
+          <p class="text-gray-300 mb-6 text-base sm:text-lg">
+            {blogPromo.description}
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {blogPromo.features.map((feature) => (
+              <div class={`bg-gray-800/60 p-4 rounded-lg border border-gray-700/60 transition-colors duration-300 ${blogPromo.featureCardClass}`}>
+                <i class={`${feature.icon} ${blogPromo.accentClass} text-2xl mb-2`} aria-hidden="true"></i>
+                <h3 class={`font-semibold mb-1 ${blogPromo.featureTitleClass}`}>{feature.title}</h3>
+                <p class="text-sm text-gray-400">{feature.description}</p>
+              </div>
             ))}
           </div>
-        ) : null}
+        </section>
+      )}
 
-        {youtubeId && (
-          <div class="aspect-video mb-8 rounded-lg overflow-hidden shadow-lg">
-            <iframe
-              src={`https://www.youtube.com/embed/${youtubeId}`}
-              title={title}
-              frameborder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowfullscreen
-              class="w-full h-full"
-            ></iframe>
-          </div>
-        )}
-
-        <div class="prose prose-invert text-gray-300">
-          <slot />
-        </div>
-
-        <!-- Halo Wars 2 Strategy AI Call to Action -->
-        {tags?.includes('Halo Wars 2') && (
-          <section class="mt-8 bg-gradient-to-r from-cyan-900/30 to-blue-900/30 rounded-xl p-6 border border-cyan-500/30">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-              <div class="flex items-center gap-3">
-                <i class="fab fa-discord text-cyan-400 text-3xl" aria-hidden="true"></i>
-                <h2 class="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">
-                  Master Halo Wars 2 with AI
-                </h2>
-              </div>
-              <div class="flex flex-col sm:flex-row gap-2">
-                <a href="/storehaus-info" class="inline-flex items-center justify-center bg-cyan-600 hover:bg-cyan-700 px-4 py-2 rounded-lg text-white font-semibold transition-colors duration-300">
-                  <i class="fas fa-info-circle mr-2" aria-hidden="true"></i>
-                  Learn More
-                </a>
-                <a href="/storehaus" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg text-white font-semibold transition-colors duration-300">
-                  <i class="fab fa-discord mr-2" aria-hidden="true"></i>
-                  Add to Discord
-                </a>
-              </div>
-            </div>
-            <p class="text-gray-300 mb-6 text-base sm:text-lg">
-              Level up your Halo Wars 2 gameplay with our AI-powered strategy advisor Storehaus! Get instant answers to your tactical questions, leader guides, and advanced strategies.
-            </p>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-700/60 hover:border-cyan-500/40 transition-colors duration-300">
-                <i class="fas fa-robot text-cyan-400 text-2xl mb-2" aria-hidden="true"></i>
-                <h3 class="font-semibold text-cyan-200 mb-1">AI Strategy Advisor</h3>
-                <p class="text-sm text-gray-400">RAG-powered tactical tips and build orders</p>
-              </div>
-              <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-700/60 hover:border-cyan-500/40 transition-colors duration-300">
-                <i class="fas fa-chess text-cyan-400 text-2xl mb-2" aria-hidden="true"></i>
-                <h3 class="font-semibold text-cyan-200 mb-1">Leader Guides</h3>
-                <p class="text-sm text-gray-400">Detailed strategies for all UNSC & Banished leaders</p>
-              </div>
-              <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-700/60 hover:border-cyan-500/40 transition-colors duration-300">
-                <i class="fas fa-lightbulb text-cyan-400 text-2xl mb-2" aria-hidden="true"></i>
-                <h3 class="font-semibold text-cyan-200 mb-1">Tactical Questions</h3>
-                <p class="text-sm text-gray-400">Instant answers to your gameplay questions</p>
-              </div>
-            </div>
-          </section>
-        )}
-
-        <!-- Age of Empires II Database Call to Action -->
-        {tags?.includes('Age of Empires II') && (
-          <section class="mt-8 bg-gradient-to-r from-green-900/30 to-emerald-900/30 rounded-xl p-6 border border-green-500/30">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-              <div class="flex items-center gap-3">
-                <i class="fab fa-discord text-green-400 text-3xl" aria-hidden="true"></i>
-                <h2 class="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">
-                  Master Age of Empires II
-                </h2>
-              </div>
-              <div class="flex flex-col sm:flex-row gap-2">
-                <a href="/storehaus-info" class="inline-flex items-center justify-center bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-white font-semibold transition-colors duration-300">
-                  <i class="fas fa-info-circle mr-2" aria-hidden="true"></i>
-                  Learn More
-                </a>
-                <a href="/storehaus" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg text-white font-semibold transition-colors duration-300">
-                  <i class="fab fa-discord mr-2" aria-hidden="true"></i>
-                  Add to Discord
-                </a>
-              </div>
-            </div>
-            <p class="text-gray-300 mb-6 text-base sm:text-lg">
-              Access the complete Age of Empires II database with Storehaus! Get instant unit stats, technology trees, civilization bonuses, and building costs right in your Discord server.
-            </p>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-700/60 hover:border-green-500/40 transition-colors duration-300">
-                <i class="fas fa-database text-green-400 text-2xl mb-2" aria-hidden="true"></i>
-                <h3 class="font-semibold text-green-200 mb-1">Complete Database</h3>
-                <p class="text-sm text-gray-400">Units, technologies, structures, and civilizations</p>
-              </div>
-              <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-700/60 hover:border-green-500/40 transition-colors duration-300">
-                <i class="fas fa-calculator text-green-400 text-2xl mb-2" aria-hidden="true"></i>
-                <h3 class="font-semibold text-green-200 mb-1">Unit Stats</h3>
-                <p class="text-sm text-gray-400">Costs, attack, armor, and combat calculations</p>
-              </div>
-              <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-700/60 hover:border-green-500/40 transition-colors duration-300">
-                <i class="fas fa-globe text-green-400 text-2xl mb-2" aria-hidden="true"></i>
-                <h3 class="font-semibold text-green-200 mb-1">Civ Bonuses</h3>
-                <p class="text-sm text-gray-400">Unique units and civilization advantages</p>
-              </div>
-            </div>
-          </section>
-        )}
-
-        <!-- Age of Empires IV Statistics Call to Action -->
-        {tags?.includes('Age of Empires IV') && (
-          <section class="mt-8 bg-gradient-to-r from-blue-900/30 to-indigo-900/30 rounded-xl p-6 border border-blue-500/30">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-              <div class="flex items-center gap-3">
-                <i class="fab fa-discord text-blue-400 text-3xl" aria-hidden="true"></i>
-                <h2 class="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">
-                  Master Age of Empires IV
-                </h2>
-              </div>
-              <div class="flex flex-col sm:flex-row gap-2">
-                <a href="/storehaus-info" class="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-white font-semibold transition-colors duration-300">
-                  <i class="fas fa-info-circle mr-2" aria-hidden="true"></i>
-                  Learn More
-                </a>
-                <a href="/storehaus" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg text-white font-semibold transition-colors duration-300">
-                  <i class="fab fa-discord mr-2" aria-hidden="true"></i>
-                  Add to Discord
-                </a>
-              </div>
-            </div>
-            <p class="text-gray-300 mb-6 text-base sm:text-lg">
-              Track your Age of Empires IV performance with Storehaus! Get real-time player statistics, civilization win rates, match history, and detailed game analysis from aoe4world.com data.
-            </p>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-700/60 hover:border-blue-500/40 transition-colors duration-300">
-                <i class="fas fa-chart-line text-blue-400 text-2xl mb-2" aria-hidden="true"></i>
-                <h3 class="font-semibold text-blue-200 mb-1">Player Statistics</h3>
-                <p class="text-sm text-gray-400">ELO rating, win rates, and match history</p>
-              </div>
-              <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-700/60 hover:border-blue-500/40 transition-colors duration-300">
-                <i class="fas fa-globe-americas text-blue-400 text-2xl mb-2" aria-hidden="true"></i>
-                <h3 class="font-semibold text-blue-200 mb-1">Civilization Data</h3>
-                <p class="text-sm text-gray-400">Civ stats and balance analysis for all modes</p>
-              </div>
-              <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-700/60 hover:border-blue-500/40 transition-colors duration-300">
-                <i class="fas fa-search text-blue-400 text-2xl mb-2" aria-hidden="true"></i>
-                <h3 class="font-semibold text-blue-200 mb-1">Player Search</h3>
-                <p class="text-sm text-gray-400">Find and compare players across all ranks</p>
-              </div>
-            </div>
-          </section>
-        )}
-
-        <!-- Storehaus Promo for Walkthroughs (only when no tag-specific promo is shown) -->
-        {category === 'Walkthroughs' && !tags?.includes('Halo Wars 2') && !tags?.includes('Age of Empires II') && !tags?.includes('Age of Empires IV') && (
-          <section class="mt-8 bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-xl p-6 border border-purple-500/30">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-              <div class="flex items-center gap-3">
-                <i class="fab fa-discord text-purple-400 text-3xl" aria-hidden="true"></i>
-                <h2 class="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
-                  Featured: Storehaus RTS Bot
-                </h2>
-              </div>
-              <div class="flex flex-col sm:flex-row gap-2">
-                <a href="/storehaus-info" class="inline-flex items-center justify-center bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-white font-semibold transition-colors duration-300">
-                  <i class="fas fa-info-circle mr-2" aria-hidden="true"></i>
-                  Learn More
-                </a>
-                <a href="/storehaus" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg text-white font-semibold transition-colors duration-300">
-                  <i class="fab fa-discord mr-2" aria-hidden="true"></i>
-                  Add to Discord
-                </a>
-              </div>
-            </div>
-            <p class="text-gray-300 mb-6 text-base sm:text-lg">
-              The ultimate Discord bot for RTS gamers! Get real-time AoE4 statistics, comprehensive AoE2 database lookups, and AI-powered Halo Wars 2 strategy advice.
-            </p>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-700/60 hover:border-purple-500/40 transition-colors duration-300">
-                <i class="fas fa-chart-line text-purple-400 text-2xl mb-2" aria-hidden="true"></i>
-                <h3 class="font-semibold text-purple-200 mb-1">AoE4 Statistics</h3>
-                <p class="text-sm text-gray-400">Player stats, civ data, game history from aoe4world.com</p>
-              </div>
-              <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-700/60 hover:border-purple-500/40 transition-colors duration-300">
-                <i class="fas fa-database text-purple-400 text-2xl mb-2" aria-hidden="true"></i>
-                <h3 class="font-semibold text-purple-200 mb-1">AoE2 Database</h3>
-                <p class="text-sm text-gray-400">Units, technologies, structures, and civilizations</p>
-              </div>
-              <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-700/60 hover:border-purple-500/40 transition-colors duration-300">
-                <i class="fas fa-robot text-purple-400 text-2xl mb-2" aria-hidden="true"></i>
-                <h3 class="font-semibold text-purple-200 mb-1">HW2 AI Advisor</h3>
-                <p class="text-sm text-gray-400">AI-powered strategy tips with RAG technology</p>
-              </div>
-            </div>
-          </section>
-        )}
-
-        <!-- Author Block -->
-        <div class="mt-12 pt-8 border-t border-gray-700">
-          <h2 class="text-lg font-semibold text-gray-400 mb-4">About the Author</h2>
-          <Author {...authorInfo} className="bg-gray-800/50 border border-gray-700" />
-        </div>
-      </main>
-    </div>
-    <Footer />
+      <!-- Author Block -->
+      <div class="mt-12 pt-8 border-t border-gray-700">
+        <h2 class="text-lg font-semibold text-gray-400 mb-4">About the Author</h2>
+        <Author {...authorInfo} className="bg-gray-800/50 border border-gray-700" />
+      </div>
+    </main>
   </div>
-
-  <SidePanel />
-  <ScrollToTop />
-  <script src="/js/dropdowns.js" is:inline></script>
-  <script src="/js/tabs.js" is:inline></script>
-  <script src="/js/side-panel.js" is:inline></script>
-  <script src="/js/secondary-init.js" is:inline></script>
-</BaseLayout>
+</SecondaryPageLayout>

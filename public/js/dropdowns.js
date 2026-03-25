@@ -51,11 +51,61 @@ function setupNavDropdown(dropdown) {
         return;
     }
 
+    let openTimer = null;
+    let closeTimer = null;
+
+    function clearOpenTimer() {
+        if (openTimer) {
+            window.clearTimeout(openTimer);
+            openTimer = null;
+        }
+    }
+
+    function clearCloseTimer() {
+        if (closeTimer) {
+            window.clearTimeout(closeTimer);
+            closeTimer = null;
+        }
+    }
+
+    function clearTimers() {
+        clearOpenTimer();
+        clearCloseTimer();
+    }
+
+    function openDropdownImmediately() {
+        clearTimers();
+        closeAllNavDropdowns(dropdown);
+        setDropdownOpen(dropdown, true);
+    }
+
+    function scheduleOpen() {
+        clearCloseTimer();
+        clearOpenTimer();
+        openTimer = window.setTimeout(() => {
+            openTimer = null;
+            closeAllNavDropdowns(dropdown);
+            setDropdownOpen(dropdown, true);
+        }, 120);
+    }
+
+    function scheduleClose() {
+        clearOpenTimer();
+        clearCloseTimer();
+        closeTimer = window.setTimeout(() => {
+            closeTimer = null;
+            if (!dropdown.matches(':focus-within')) {
+                setDropdownOpen(dropdown, false);
+            }
+        }, 160);
+    }
+
     dropdown.dataset.dropdownReady = 'true';
 
     toggle.addEventListener('click', (event) => {
         event.preventDefault();
         event.stopPropagation();
+        clearTimers();
         const isOpen = dropdown.classList.contains('open');
         if (isOpen) {
             closeAllNavDropdowns();
@@ -65,34 +115,48 @@ function setupNavDropdown(dropdown) {
         }
     });
 
-    dropdown.addEventListener('mouseenter', () => {
-        closeAllNavDropdowns(dropdown);
+    toggle.addEventListener('pointerenter', () => {
+        if (dropdown.classList.contains('open')) {
+            clearCloseTimer();
+            return;
+        }
+        scheduleOpen();
+    });
+
+    toggle.addEventListener('pointerleave', () => {
+        scheduleClose();
+    });
+
+    menu.addEventListener('pointerenter', () => {
+        clearTimers();
         setDropdownOpen(dropdown, true);
     });
 
-    dropdown.addEventListener('mouseleave', () => {
-        setDropdownOpen(dropdown, false);
+    menu.addEventListener('pointerleave', () => {
+        scheduleClose();
     });
 
     dropdown.addEventListener('focusin', () => {
-        closeAllNavDropdowns(dropdown);
-        setDropdownOpen(dropdown, true);
+        openDropdownImmediately();
     });
 
     dropdown.addEventListener('focusout', (event) => {
         if (!dropdown.contains(event.relatedTarget)) {
+            clearTimers();
             setDropdownOpen(dropdown, false);
         }
     });
 
     dropdown.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
+            clearTimers();
             closeAllNavDropdowns();
             toggle.focus();
         }
     });
 
     menu.addEventListener('click', () => {
+        clearTimers();
         closeAllNavDropdowns();
         lockDropdownClosed(dropdown);
     });

@@ -1,20 +1,48 @@
 ---
 import SocialIcons from './SocialIcons.astro';
 import SearchBar from './SearchBar.astro';
+import {
+  aboutLinks,
+  hw2GuideSections,
+  isNavLinkActive,
+  normalizePathname,
+  otherProjectSections,
+} from '../data/navigation';
 
 const { showPanelButton = true } = Astro.props;
 const pathname = Astro.url?.pathname ?? '';
+const normalizedPath = normalizePathname(pathname);
 const isHome = pathname === '/' || pathname === '/index.html';
 const isBlog = pathname.startsWith('/blog');
-const isStorehaus = pathname.startsWith('/storehaus') || pathname.startsWith('/storehaus-info');
-const isHaloQuotes = false; // external site
 const isHw2Stats = pathname.startsWith('/halo-wars-stats');
 const isVideos = pathname.startsWith('/videos');
-const isOtherProjects = isStorehaus || isHaloQuotes;
-const isAbout = pathname.startsWith('/about');
-const isSupport = pathname.startsWith('/support');
-const isPartner = pathname.startsWith('/partner');
-const isAboutSection = isAbout || isSupport || isPartner;
+const navFlags = { isVideos, isHw2Stats };
+
+const headerHw2Sections = hw2GuideSections.map((section) => ({
+  ...section,
+  links: section.links.map((link) => ({
+    ...link,
+    active: isNavLinkActive(link, pathname, navFlags),
+  })),
+}));
+
+const headerOtherProjectSections = otherProjectSections.map((section) => ({
+  ...section,
+  links: section.links.map((link) => ({
+    ...link,
+    active: isNavLinkActive(link, pathname, navFlags),
+  })),
+}));
+
+const headerAboutLinks = aboutLinks.map((link) => ({
+  ...link,
+  active: isNavLinkActive(link, pathname, navFlags),
+}));
+
+const isStorehausRoute = normalizedPath === '/storehaus' || normalizedPath === '/storehaus-info' || normalizedPath.startsWith('/storehaus/');
+const isOtherProjects = isStorehausRoute || headerOtherProjectSections.some((section) => section.links.some((link) => link.active));
+const isAboutSection = headerAboutLinks.some((link) => link.active);
+const isHaloWars2Section = isHw2Stats || headerHw2Sections.some((section) => section.links.some((link) => link.active));
 ---
 
 <header class="compact-header relative w-full mb-6">
@@ -51,7 +79,7 @@ const isAboutSection = isAbout || isSupport || isPartner;
       </div>
 
       <!-- Center Section: Main Navigation (hidden on mobile) -->
-      <nav class="hidden lg:flex items-center gap-1 flex-1 justify-center" role="tablist" aria-label="Main navigation">
+      <nav class="hidden lg:flex items-center gap-1 flex-1 min-w-0 justify-center" role="tablist" aria-label="Main navigation">
         <button
           id="home-tab"
           data-tab-link="/"
@@ -72,17 +100,84 @@ const isAboutSection = isAbout || isSupport || isPartner;
           Blog
         </a>
         <a
-          href="/halo-wars-stats"
-          class={`nav-link ${isHw2Stats ? 'nav-link-active' : ''}`}
-        >
-          HW2 Stats
-        </a>
-        <a
           href="/videos"
           class={`nav-link ${isVideos ? 'nav-link-active' : ''}`}
         >
           Videos
         </a>
+        <a
+          href="/halo-wars-stats"
+          class={`nav-link ${isHw2Stats ? 'nav-link-active' : ''}`}
+        >
+          HW2 Stats
+        </a>
+        <div class="nav-dropdown" data-dropdown>
+          <button
+            class={`nav-link nav-dropdown-toggle ${isHaloWars2Section ? 'nav-link-active' : ''}`}
+            type="button"
+            aria-expanded="false"
+            aria-controls="halo-wars-2-dropdown-menu"
+            data-dropdown-toggle
+          >
+            Halo Wars 2
+            <svg class="nav-dropdown-icon h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div id="halo-wars-2-dropdown-menu" class="nav-dropdown-menu nav-dropdown-menu--hw2" role="menu" aria-label="Halo Wars 2" data-dropdown-menu>
+            <div class="nav-dropdown-hw2-shell">
+              <div class="nav-dropdown-hw2-header">
+                <span class="nav-dropdown-hw2-kicker">Franchise Hub</span>
+                <div>
+                  <p class="nav-dropdown-hw2-title">Halo Wars 2 Guides, Stats, and Strategy</p>
+                  <p class="nav-dropdown-hw2-copy">Jump straight into beginner guides, ranked improvement, leader picks, and the stats tool without digging through the whole site.</p>
+                </div>
+              </div>
+
+              <div class="nav-dropdown-hw2-grid">
+                {headerHw2Sections.map((section) => (
+                  <div class="nav-dropdown-hw2-zone">
+                    <span class="nav-dropdown-hw2-zone-label">{section.headerTitle ?? section.title}</span>
+                    <p class="nav-dropdown-hw2-zone-copy">{section.description}</p>
+                    {section.chips && section.chips.length > 0 && (
+                      <div class="nav-dropdown-hw2-chip-row" aria-hidden="true">
+                        {section.chips.map((chip) => (
+                          <span class={`nav-dropdown-hw2-chip ${chip.variant === 'banished' ? 'nav-dropdown-hw2-chip--banished' : ''}`}>
+                            {chip.label}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {section.links.map((link) => (
+                      <a href={link.href} class={`nav-dropdown-item nav-dropdown-item--icon ${link.active ? 'nav-dropdown-item-active' : ''}`} role="menuitem">
+                        <span class="nav-dropdown-item-icon"><i class={link.icon} aria-hidden="true"></i></span>
+                        {link.headerLabel ?? link.label}
+                      </a>
+                    ))}
+                  </div>
+                ))}
+
+                <div class="nav-dropdown-hw2-tools">
+                  <span class="nav-dropdown-hw2-tools-kicker">Tools</span>
+                  <h3 class="nav-dropdown-hw2-tools-title">HW2 Stats</h3>
+                  <p class="nav-dropdown-hw2-tools-copy">Search any gamertag, review CSR, check leader usage, and inspect recent match history in seconds.</p>
+                  <div class="nav-dropdown-hw2-tools-list" aria-hidden="true">
+                    <span><i class="fas fa-chart-line" aria-hidden="true"></i> CSR lookup</span>
+                    <span><i class="fas fa-users" aria-hidden="true"></i> Leader usage</span>
+                    <span><i class="fas fa-clock-rotate-left" aria-hidden="true"></i> Recent matches</span>
+                  </div>
+                  <a href="/halo-wars-stats" class="nav-dropdown-hw2-tools-cta" role="menuitem">
+                    Open HW2 Stats
+                    <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                  </a>
+                  <a href="/videos?games=halo-wars-2" class={`nav-dropdown-hw2-tools-secondary ${isVideos ? 'nav-dropdown-hw2-tools-secondary-active' : ''}`} role="menuitem">
+                    Browse all HW2 videos
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="nav-dropdown" data-dropdown>
           <button
             class={`nav-link nav-dropdown-toggle ${isOtherProjects ? 'nav-link-active' : ''}`}
@@ -98,57 +193,24 @@ const isAboutSection = isAbout || isSupport || isPartner;
           </button>
           <div id="other-projects-dropdown-menu" class="nav-dropdown-menu nav-dropdown-menu--rich" role="menu" aria-label="Other projects" data-dropdown-menu>
             <div class="nav-dropdown-rich-grid">
-              <!-- Storehaus Bot -->
-              <div class="nav-dropdown-section">
-                <span class="nav-dropdown-section-heading">Storehaus Bot</span>
-                <p class="nav-dropdown-section-desc">Discord bot for HW2, AoE II &amp; IV — stats, player search, and AI strategy.</p>
-                <a href="/storehaus-info" class={`nav-dropdown-item nav-dropdown-item--icon ${pathname.startsWith('/storehaus-info') ? 'nav-dropdown-item-active' : ''}`} role="menuitem">
-                  <span class="nav-dropdown-item-icon"><i class="fas fa-info-circle" aria-hidden="true"></i></span>
-                  Summary
-                </a>
-                <a href="/storehaus/privacy-policy" class={`nav-dropdown-item nav-dropdown-item--icon ${pathname === '/storehaus/privacy-policy' || pathname === '/storehaus/privacy-policy/' ? 'nav-dropdown-item-active' : ''}`} role="menuitem">
-                  <span class="nav-dropdown-item-icon"><i class="fas fa-shield-alt" aria-hidden="true"></i></span>
-                  Privacy Policy
-                </a>
-                <a href="/storehaus/terms-of-service" class={`nav-dropdown-item nav-dropdown-item--icon ${pathname === '/storehaus/terms-of-service' || pathname === '/storehaus/terms-of-service/' ? 'nav-dropdown-item-active' : ''}`} role="menuitem">
-                  <span class="nav-dropdown-item-icon"><i class="fas fa-file-contract" aria-hidden="true"></i></span>
-                  Terms of Service
-                </a>
-                <a href="/storehaus" class="nav-dropdown-item nav-dropdown-item--icon" role="menuitem" target="_blank" rel="noopener noreferrer">
-                  <span class="nav-dropdown-item-icon"><i class="fab fa-discord" aria-hidden="true"></i></span>
-                  Add to Server ↗
-                </a>
-              </div>
-              <!-- Halo Quotes -->
-              <div class="nav-dropdown-section">
-                <span class="nav-dropdown-section-heading">Halo Quotes</span>
-                <p class="nav-dropdown-section-desc">Website, API, and bots for random quotes from the Halo series.</p>
-                <a href="https://haloquotes.teamrespawntv.com/" class="nav-dropdown-item nav-dropdown-item--icon" role="menuitem" target="_blank" rel="noopener noreferrer">
-                  <span class="nav-dropdown-item-icon"><i class="fas fa-quote-left" aria-hidden="true"></i></span>
-                  Website ↗
-                </a>
-                <a href="https://api.haloquotes.teamrespawntv.com/" class="nav-dropdown-item nav-dropdown-item--icon" role="menuitem" target="_blank" rel="noopener noreferrer">
-                  <span class="nav-dropdown-item-icon"><i class="fas fa-code" aria-hidden="true"></i></span>
-                  API ↗
-                </a>
-                <a href="https://github.com/AndyTheNerd/Halo-Quotes" class="nav-dropdown-item nav-dropdown-item--icon" role="menuitem" target="_blank" rel="noopener noreferrer">
-                  <span class="nav-dropdown-item-icon"><i class="fab fa-github" aria-hidden="true"></i></span>
-                  GitHub ↗
-                </a>
-              </div>
-              <!-- AOE2 API -->
-              <div class="nav-dropdown-section">
-                <span class="nav-dropdown-section-heading">AOE2 API</span>
-                <p class="nav-dropdown-section-desc">Self-hosted REST API serving AoE II civs, units, techs, and structures.</p>
-                <a href="https://aoe2api.teamrespawntv.com/" class="nav-dropdown-item nav-dropdown-item--icon" role="menuitem" target="_blank" rel="noopener noreferrer">
-                  <span class="nav-dropdown-item-icon"><i class="fas fa-code" aria-hidden="true"></i></span>
-                  API ↗
-                </a>
-                <a href="https://github.com/AndyTheNerd/age-of-empires-II-api" class="nav-dropdown-item nav-dropdown-item--icon" role="menuitem" target="_blank" rel="noopener noreferrer">
-                  <span class="nav-dropdown-item-icon"><i class="fab fa-github" aria-hidden="true"></i></span>
-                  GitHub ↗
-                </a>
-              </div>
+              {headerOtherProjectSections.map((section) => (
+                <div class="nav-dropdown-section">
+                  <span class="nav-dropdown-section-heading">{section.title}</span>
+                  <p class="nav-dropdown-section-desc">{section.description}</p>
+                  {section.links.map((link) => (
+                    <a
+                      href={link.href}
+                      class={`nav-dropdown-item nav-dropdown-item--icon ${link.active ? 'nav-dropdown-item-active' : ''}`}
+                      role="menuitem"
+                      target={link.external ? '_blank' : undefined}
+                      rel={link.external ? 'noopener noreferrer' : undefined}
+                    >
+                      <span class="nav-dropdown-item-icon"><i class={link.icon} aria-hidden="true"></i></span>
+                      {link.label}
+                    </a>
+                  ))}
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -170,18 +232,12 @@ const isAboutSection = isAbout || isSupport || isPartner;
               <div class="nav-dropdown-section">
                 <span class="nav-dropdown-section-heading">Team Respawn</span>
                 <p class="nav-dropdown-section-desc">RTS strategy content, tools, and community since 2017.</p>
-                <a href="/about" class={`nav-dropdown-item nav-dropdown-item--icon ${isAbout ? 'nav-dropdown-item-active' : ''}`} role="menuitem">
-                  <span class="nav-dropdown-item-icon"><i class="fas fa-users" aria-hidden="true"></i></span>
-                  About Us
-                </a>
-                <a href="/support" class={`nav-dropdown-item nav-dropdown-item--icon ${isSupport ? 'nav-dropdown-item-active' : ''}`} role="menuitem">
-                  <span class="nav-dropdown-item-icon"><i class="fas fa-heart" aria-hidden="true"></i></span>
-                  Support Us
-                </a>
-                <a href="/partner" class={`nav-dropdown-item nav-dropdown-item--icon ${isPartner ? 'nav-dropdown-item-active' : ''}`} role="menuitem">
-                  <span class="nav-dropdown-item-icon"><i class="fas fa-handshake" aria-hidden="true"></i></span>
-                  Partner with Us
-                </a>
+                {headerAboutLinks.map((link) => (
+                  <a href={link.href} class={`nav-dropdown-item nav-dropdown-item--icon ${link.active ? 'nav-dropdown-item-active' : ''}`} role="menuitem">
+                    <span class="nav-dropdown-item-icon"><i class={link.icon} aria-hidden="true"></i></span>
+                    {link.label}
+                  </a>
+                ))}
               </div>
             </div>
           </div>
@@ -189,10 +245,13 @@ const isAboutSection = isAbout || isSupport || isPartner;
       </nav>
 
       <!-- Right Section: Search + Social Icons -->
-      <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+      <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-shrink-0">
         <SearchBar />
-        <div class="header-social-container-compact hidden xl:block" aria-label="Social media links">
-          <SocialIcons compact />
+        <div class="header-social-container-compact hidden xl:block 2xl:hidden" aria-label="Primary social media links">
+          <SocialIcons compact links={['youtube', 'twitch', 'discord']} />
+        </div>
+        <div class="header-social-container-compact hidden 2xl:block" aria-label="Social media links">
+          <SocialIcons compact links={['youtube', 'twitch', 'discord', 'rss', 'shop']} />
         </div>
       </div>
     </div>

@@ -1,10 +1,7 @@
 ---
-import BaseLayout from '../../../layouts/BaseLayout.astro';
-import Header from '../../../components/Header.astro';
-import Footer from '../../../components/Footer.astro';
-import SidePanel from '../../../components/SidePanel.astro';
+import SecondaryPageLayout from '../../../layouts/SecondaryPageLayout.astro';
 ---
-<BaseLayout
+<SecondaryPageLayout
   title="Storehaus RTS Privacy Policy | Team Respawn"
   description="Privacy Policy for the Storehaus RTS Discord Bot. Learn how we collect, use, and protect your information."
   keywords="Storehaus RTS, privacy policy, Discord bot, data protection"
@@ -13,26 +10,16 @@ import SidePanel from '../../../components/SidePanel.astro';
   ogDescription="Privacy Policy for the Storehaus RTS Discord Bot. Learn how we collect, use, and protect your information."
   ogImage="https://www.teamrespawn.net/content/Team-Respawn-Full.png"
 >
-  <a
-    href="#main-content"
-    class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-white focus:text-black focus:px-4 focus:py-2 focus:rounded"
-  >
-    Skip to main content
-  </a>
-
-  <div class="container mx-auto p-4 sm:p-8">
-    <Header />
-
-    <main id="main-content" class="max-w-4xl mx-auto mt-8" role="main" aria-label="Privacy Policy content">
-      <article class="bg-gray-800/60 border border-gray-700/60 rounded-xl p-6 sm:p-8 lg:p-10">
-        <header class="mb-8">
-          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
-            Privacy Policy
-          </h1>
-          <p class="text-gray-400 text-lg">
-            <strong>Last Updated:</strong> January 2026
-          </p>
-        </header>
+  <main id="main-content" class="max-w-4xl mx-auto mt-8" aria-label="Privacy Policy content">
+    <article class="bg-gray-800/60 border border-gray-700/60 rounded-xl p-6 sm:p-8 lg:p-10">
+      <header class="mb-8">
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+          Privacy Policy
+        </h1>
+        <p class="text-gray-400 text-lg">
+          <strong>Last Updated:</strong> January 2026
+        </p>
+      </header>
 
         <div class="prose prose-invert prose-lg max-w-none">
           <section class="mb-8">
@@ -261,16 +248,6 @@ import SidePanel from '../../../components/SidePanel.astro';
             </p>
           </footer>
         </div>
-      </article>
-    </main>
-
-    <Footer />
-  </div>
-
-  <SidePanel />
-
-  <script src="/js/side-panel.js" is:inline></script>
-  <script src="/js/tabs.js" is:inline></script>
-  <script src="/js/dropdowns.js" is:inline></script>
-  <script src="/js/secondary-init.js" is:inline></script>
-</BaseLayout>
+    </article>
+  </main>
+</SecondaryPageLayout>

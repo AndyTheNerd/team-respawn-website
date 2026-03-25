@@ -8,7 +8,69 @@ interface Props {
   className?: string;
 }
 
+interface SearchItem {
+  title: string;
+  href: string;
+  category: string;
+  excerpt: string;
+}
+
 const { placeholder = 'Search...', className = '' } = Astro.props;
+
+function getBlogSlugFromHref(href: string) {
+  return String(href || '').replace(/\/+$/, '').split('/').pop() || '';
+}
+
+function extractYoutubeId(url: string) {
+  if (!url) return '';
+
+  try {
+    const parsed = new URL(url);
+    const hostname = parsed.hostname.replace(/^www\./, '');
+
+    if (hostname === 'youtu.be') {
+      return parsed.pathname.replace(/^\/+/, '').split('/')[0] || '';
+    }
+
+    if (hostname === 'youtube.com' || hostname === 'm.youtube.com') {
+      if (parsed.pathname === '/watch') {
+        return parsed.searchParams.get('v') || '';
+      }
+
+      const pathParts = parsed.pathname.split('/').filter(Boolean);
+      if (pathParts[0] === 'embed' || pathParts[0] === 'shorts') {
+        return pathParts[1] || '';
+      }
+    }
+  } catch {
+    return '';
+  }
+
+  return '';
+}
+
+const blogPostVideoIds = new Map<string, string>();
+try {
+  const blogPostsDir = new URL('../pages/blog/posts/', import.meta.url);
+  fs.readdirSync(blogPostsDir)
+    .filter((file) => file.endsWith('.astro'))
+    .forEach((file) => {
+      const source = fs.readFileSync(new URL(file, blogPostsDir), 'utf-8');
+      const match = source.match(/youtubeId\s*=\s*["']([^"']+)["']/);
+
+      if (match?.[1]) {
+        blogPostVideoIds.set(file.replace(/\.astro$/, ''), match[1]);
+      }
+    });
+} catch (error) {
+  console.warn('SearchBar: unable to load blog post video metadata for search dedupe.', error);
+}
+
+const linkedBlogVideoIds = new Set(
+  blogPosts
+    .map((post) => blogPostVideoIds.get(getBlogSlugFromHref(post.href)))
+    .filter(Boolean)
+);
 
 // Load walkthrough + guide videos for search
 let videosData: any = {};
@@ -19,7 +81,41 @@ try {
   console.warn('SearchBar: unable to load videos.json for search data.', error);
 }
 
-const videoSearchItems: Array<{ title: string; href: string; category: string; excerpt: string }> = [];
+const videoSearchItems: SearchItem[] = [];
+
+function normalizeSearchTitle(title: string) {
+  return String(title || '')
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function getSearchItemPriority(item: SearchItem) {
+  if (item.href.startsWith('/blog/posts/')) return 3;
+  if (!/^https?:\/\//i.test(item.href)) return 2;
+  return 1;
+}
+
+function dedupeSearchItems(items: SearchItem[]) {
+  const deduped = new Map<string, SearchItem>();
+
+  items.forEach((item) => {
+    const key = normalizeSearchTitle(item.title);
+    const existing = deduped.get(key);
+
+    if (!existing) {
+      deduped.set(key, item);
+      return;
+    }
+
+    if (getSearchItemPriority(item) > getSearchItemPriority(existing)) {
+      deduped.set(key, item);
+    }
+  });
+
+  return Array.from(deduped.values());
+}
 
 function addVideoItem(
   video: any,
@@ -27,6 +123,8 @@ function addVideoItem(
   extraKeywords: string[] = []
 ) {
   if (!video || !video.title || !video.youtubeUrl) return;
+  const youtubeId = extractYoutubeId(video.youtubeUrl);
+  if (youtubeId && linkedBlogVideoIds.has(youtubeId)) return;
   const keywords = extraKeywords.filter(Boolean).join(' ');
   const description = video.description ? `${video.description} ` : '';
   videoSearchItems.push({
@@ -90,7 +188,7 @@ flattenVideos(videosData);
 
 
 // Build search data from blog posts, videos, and static pages
-const searchData: Array<{ title: string; href: string; category: string; excerpt: string }> = [
+const searchData: SearchItem[] = [
   ...blogPosts.map(post => ({
     title: post.title,
     href: post.href,
@@ -110,9 +208,11 @@ searchData.push(
   { title: "Guides", href: "/blog?category=Guides", category: "Page", excerpt: "Browse all game guides in the blog." },
   { title: "Storehaus Bot", href: "/storehaus-info", category: "Page", excerpt: "Discord bot for Xbox store deals." },
 );
+
+const dedupedSearchData = dedupeSearchItems(searchData);
 ---
 
-<div class={`search-bar-container ${className}`} data-search-data={JSON.stringify(searchData)}>
+<div class={`search-bar-container ${className}`} data-search-data={JSON.stringify(dedupedSearchData)}>
   <!-- Desktop: visible search input with dropdown -->
   <div class="search-bar-desktop hidden xl:block relative">
     <div class="search-input-wrapper">
@@ -197,7 +297,7 @@ searchData.push(
     outline: none;
     color: white;
     font-size: 0.875rem;
-    width: 140px;
+    width: 112px;
     transition: width 0.3s ease-in-out;
   }
 
@@ -206,7 +306,17 @@ searchData.push(
   }
 
   .search-input:focus {
-    width: 180px;
+    width: 148px;
+  }
+
+  @media (min-width: 1536px) {
+    .search-input {
+      width: 140px;
+    }
+
+    .search-input:focus {
+      width: 180px;
+    }
   }
 
   .search-bar-mobile :global(svg) {
