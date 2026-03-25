@@ -139,7 +139,11 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
             <strong>Search Composer</strong>
             <small>Filter and sort the archive</small>
           </span>
-          <i class="fas fa-sliders" aria-hidden="true"></i>
+          <span class="vdb-composer-toggle" aria-hidden="true">
+            <span class="vdb-composer-toggle-label vdb-composer-toggle-label-collapse">Collapse</span>
+            <span class="vdb-composer-toggle-label vdb-composer-toggle-label-expand">Expand</span>
+            <span class="vdb-composer-toggle-chevron">&#x25BC;</span>
+          </span>
         </summary>
 
         <div class="vdb-composer-body" id="vdb-composer-body">
@@ -317,7 +321,7 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
           <p id="vdb-range-summary" class="vdb-range-summary">{rangeSummary}</p>
         </div>
         <div class="vdb-results-status">
-          <span class="vdb-results-badge">
+          <span id="vdb-results-badge" class="vdb-results-badge">
             <i class="fas fa-arrow-down-wide-short" aria-hidden="true"></i>
             {getSortStatusLabel(clampedState.sort)}
           </span>
@@ -484,6 +488,7 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
     display: grid;
     gap: 1.5rem;
     position: relative;
+    isolation: isolate;
   }
 
   .vdb-shell::before {
@@ -504,6 +509,18 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
   .vdb-layout {
     position: relative;
     z-index: 1;
+  }
+
+  .vdb-hero-copy,
+  .vdb-search-panel,
+  .vdb-stat-grid,
+  .vdb-sidebar,
+  .vdb-results,
+  .vdb-composer-summary span,
+  .vdb-format-copy,
+  .vdb-option-copy,
+  .vdb-card-title {
+    min-width: 0;
   }
 
   .vdb-hero {
@@ -711,7 +728,7 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
   .vdb-layout {
     display: grid;
     gap: 1.25rem;
-    margin-top: 0.6rem;
+    margin-top: 0.9rem;
     grid-template-columns: minmax(18rem, 22rem) minmax(0, 1fr);
     align-items: start;
   }
@@ -756,6 +773,40 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
 
   .vdb-composer-summary i {
     color: var(--vdb-accent);
+  }
+
+  .vdb-composer-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.38rem;
+    color: var(--vdb-accent);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .vdb-composer-toggle-label-expand {
+    display: none;
+  }
+
+  .vdb-composer-toggle-chevron {
+    display: inline-block;
+    transition: transform 0.2s ease;
+    transform: rotate(180deg);
+  }
+
+  .vdb-composer:not([open]) .vdb-composer-toggle-label-collapse {
+    display: none;
+  }
+
+  .vdb-composer:not([open]) .vdb-composer-toggle-label-expand {
+    display: inline;
+  }
+
+  .vdb-composer:not([open]) .vdb-composer-toggle-chevron {
+    transform: rotate(0deg);
   }
 
   .vdb-composer-body {
@@ -921,6 +972,14 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
   .vdb-option-copy small {
     color: var(--vdb-text-dim);
     line-height: 1.45;
+  }
+
+  .vdb-format-copy strong,
+  .vdb-format-copy small,
+  .vdb-option-copy strong,
+  .vdb-option-copy small,
+  .vdb-card-title a {
+    overflow-wrap: anywhere;
   }
 
   .vdb-option-count {
@@ -1350,9 +1409,19 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
   }
 
   @media (max-width: 720px) {
+    .vdb-shell::before {
+      display: none;
+    }
+
     .vdb-hero {
       padding: 1.1rem;
       border-radius: 1.1rem;
+      background:
+        radial-gradient(circle at top left, rgba(245, 164, 74, 0.18), transparent 38%),
+        radial-gradient(circle at top right, rgba(111, 208, 255, 0.16), transparent 34%),
+        linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(7, 13, 24, 0.95));
+      border: 1px solid var(--vdb-border);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
     }
 
     .vdb-results {
@@ -1364,8 +1433,37 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
       flex-direction: column;
     }
 
+    .vdb-composer-summary,
+    .vdb-composer-header,
+    .vdb-group-head {
+      align-items: start;
+      flex-direction: column;
+    }
+
+    .vdb-clear-all,
+    .vdb-results-status,
+    .vdb-results-badge {
+      width: 100%;
+    }
+
+    .vdb-clear-all,
+    .vdb-results-badge {
+      justify-content: center;
+    }
+
     .vdb-stat-grid {
       grid-template-columns: 1fr;
+    }
+
+    .vdb-format-card,
+    .vdb-option-card {
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: start;
+    }
+
+    .vdb-option-count {
+      grid-column: 2;
+      justify-self: start;
     }
 
     .vdb-year-grid {
@@ -1377,11 +1475,21 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
     }
 
     .vdb-card-actions {
+      flex-direction: column;
       gap: 0.5rem;
     }
 
+    .vdb-watch-link,
     .vdb-copy-link {
-      width: auto;
+      width: 100%;
+    }
+
+    .vdb-search-panel,
+    .vdb-stat-card,
+    .vdb-composer,
+    .vdb-results {
+      backdrop-filter: none;
+      box-shadow: none;
     }
   }
 
@@ -1392,6 +1500,17 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
 
     .vdb-composer-body {
       padding-top: 0.2rem;
+    }
+
+    .vdb-year-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .vdb-scroll-top {
+      right: 0.85rem;
+      bottom: 0.85rem;
+      width: 2.6rem;
+      height: 2.6rem;
     }
   }
 </style>
