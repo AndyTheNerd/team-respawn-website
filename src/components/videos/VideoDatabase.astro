@@ -1,0 +1,1397 @@
+---
+import type {
+  FormatTag,
+  GameTag,
+  SeriesTag,
+  VideoComposerCountOption,
+  VideoDatabasePagination,
+  VideoDatabaseState,
+  VideoLibraryStats,
+  VideoSearchRecord,
+} from '../../lib/videoUtils';
+import {
+  SORT_OPTIONS,
+  getActiveFilterChips,
+  getPageHref,
+  getPaginationWindow,
+  getSortStatusLabel,
+  isDefaultFormatSelection,
+} from '../../lib/videoUtils';
+
+interface Props {
+  videos: VideoSearchRecord[];
+  initialState: VideoDatabaseState;
+  pagination: VideoDatabasePagination<VideoSearchRecord>;
+  totalMatches: number;
+  stats: VideoLibraryStats;
+  gameOptions: VideoComposerCountOption<GameTag>[];
+  seriesOptions: VideoComposerCountOption<SeriesTag>[];
+  formatOptions: VideoComposerCountOption<FormatTag>[];
+  yearOptions: VideoComposerCountOption<number>[];
+}
+
+const {
+  videos,
+  initialState,
+  pagination,
+  totalMatches,
+  stats,
+  gameOptions,
+  seriesOptions,
+  formatOptions,
+  yearOptions,
+} = Astro.props;
+
+const clampedState: VideoDatabaseState = {
+  ...initialState,
+  page: pagination.page,
+};
+
+const activeChips = getActiveFilterChips(clampedState);
+const hasActiveFilters = activeChips.length > 0;
+const hasDefaultFormatView = isDefaultFormatSelection(clampedState.formats);
+const rangeSummary =
+  totalMatches === 0
+    ? 'Showing 0 of 0'
+    : `Showing ${pagination.startIndex + 1}-${pagination.endIndex} of ${totalMatches.toLocaleString()}`;
+
+const videoJson = JSON.stringify(videos).replace(/</g, '\\u003c');
+const stateJson = JSON.stringify(clampedState).replace(/</g, '\\u003c');
+
+function isSelected<T>(values: T[], value: T) {
+  return values.includes(value);
+}
+
+const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.page);
+---
+
+<section class="vdb-shell" data-video-database>
+  <div class="vdb-hero">
+    <div class="vdb-hero-copy">
+      <p class="vdb-kicker">Channel Archive</p>
+      <h1>Video Database</h1>
+      <p class="vdb-lede">
+        Search the Team Respawn archive by game, series, release window, and format. The composer runs on the typed
+        `videos.ts` catalog, so everything here stays fast and local.
+      </p>
+      <div class="vdb-hero-notes">
+        <span><i class="fas fa-layer-group" aria-hidden="true"></i>{stats.totalVideos.toLocaleString()} public uploads</span>
+        <span><i class="fas fa-calendar-days" aria-hidden="true"></i>Latest: {stats.latestPublishedLabel}</span>
+        <span><i class="fas fa-clapperboard" aria-hidden="true"></i>{stats.longFormCount.toLocaleString()} long-form videos</span>
+      </div>
+    </div>
+
+    <div class="vdb-search-panel" role="search" aria-label="Search the video archive">
+      <label class="vdb-search-label" for="vdb-search-input">Search titles, game names, and series names</label>
+      <div class="vdb-search-field">
+        <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+        <input
+          id="vdb-search-input"
+          class="vdb-search-input"
+          type="text"
+          placeholder="Halo Wars 2, Mythbusters, Super Turtle..."
+          autocomplete="off"
+          value={clampedState.query}
+        />
+        <button
+          id="vdb-search-clear"
+          class:list={['vdb-search-clear', { 'is-hidden': clampedState.query.length === 0 }]}
+          type="button"
+          aria-label="Clear search"
+        >
+          <i class="fas fa-xmark" aria-hidden="true"></i>
+        </button>
+      </div>
+      <p class="vdb-search-caption">
+        Use the search bar for broad discovery, then tighten the result set with the composer on the left.
+      </p>
+    </div>
+
+    <div class="vdb-stat-grid" aria-label="Video archive summary">
+      <article class="vdb-stat-card">
+        <span class="vdb-stat-label">Videos</span>
+        <strong>{stats.totalVideos.toLocaleString()}</strong>
+        <span class="vdb-stat-meta">Public uploads in the archive</span>
+      </article>
+      <article class="vdb-stat-card">
+        <span class="vdb-stat-label">Games</span>
+        <strong>{stats.gamesCovered.toLocaleString()}</strong>
+        <span class="vdb-stat-meta">Major game buckets tracked</span>
+      </article>
+      <article class="vdb-stat-card">
+        <span class="vdb-stat-label">Years</span>
+        <strong>{stats.yearsCovered.toLocaleString()}</strong>
+        <span class="vdb-stat-meta">Archive years available</span>
+      </article>
+      <article class="vdb-stat-card">
+        <span class="vdb-stat-label">Shorts</span>
+        <strong>{stats.shortsCount.toLocaleString()}</strong>
+        <span class="vdb-stat-meta">Short-form uploads in the catalog</span>
+      </article>
+    </div>
+  </div>
+
+  <div class="vdb-layout">
+    <aside class="vdb-sidebar">
+      <details class="vdb-composer" open>
+        <summary class="vdb-composer-summary">
+          <span>
+            <strong>Search Composer</strong>
+            <small>Filter and sort the archive</small>
+          </span>
+          <i class="fas fa-sliders" aria-hidden="true"></i>
+        </summary>
+
+        <div class="vdb-composer-body" id="vdb-composer-body">
+          <div class="vdb-composer-header">
+            <div>
+              <p class="vdb-section-kicker">Refine the result set</p>
+              <p class="vdb-section-copy">Choose a format, then narrow by game, series, and year.</p>
+            </div>
+            <button id="vdb-clear-all" class="vdb-clear-all" type="button">Reset</button>
+          </div>
+
+          <section class="vdb-filter-group" aria-labelledby="vdb-format-heading">
+            <div class="vdb-group-head">
+              <div>
+                <p class="vdb-group-kicker">Format</p>
+                <h2 id="vdb-format-heading">Shorts or long form</h2>
+              </div>
+            </div>
+            <div class="vdb-format-grid">
+              {formatOptions.map((option) => {
+                const active = isSelected(clampedState.formats, option.value);
+                const isDisabled = active && clampedState.formats.length === 1;
+                return (
+                  <button
+                    class:list={['vdb-format-card', { 'is-active': active, 'is-disabled': isDisabled }]}
+                    type="button"
+                    data-filter-type="format"
+                    data-filter-value={option.value}
+                    aria-pressed={active ? 'true' : 'false'}
+                    aria-disabled={isDisabled ? 'true' : 'false'}
+                    title={option.title}
+                  >
+                    <span class="vdb-format-icon"><i class={`fas ${option.icon || 'fa-circle'}`} aria-hidden="true"></i></span>
+                    <span class="vdb-format-copy">
+                      <strong>{option.label}</strong>
+                      <small>{option.description}</small>
+                    </span>
+                    <span class="vdb-option-count">{option.count.toLocaleString()}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          <section class="vdb-filter-group" aria-labelledby="vdb-games-heading">
+            <div class="vdb-group-head">
+              <div>
+                <p class="vdb-group-kicker">Games</p>
+                <h2 id="vdb-games-heading">Browse by game</h2>
+              </div>
+            </div>
+            <div class="vdb-option-list">
+              {gameOptions.map((option) => {
+                const active = isSelected(clampedState.games, option.value);
+                return (
+                  <button
+                    class:list={['vdb-option-card', { 'is-active': active }]}
+                    type="button"
+                    data-filter-type="game"
+                    data-filter-value={option.value}
+                    aria-pressed={active ? 'true' : 'false'}
+                    title={option.title}
+                  >
+                    <span class="vdb-option-icon" aria-hidden="true">
+                      {option.image ? (
+                        <img src={option.image} alt="" width="36" height="24" loading="lazy" />
+                      ) : (
+                        <i class={`fas ${option.icon || 'fa-gamepad'}`}></i>
+                      )}
+                    </span>
+                    <span class="vdb-option-copy">
+                      <strong>{option.label}</strong>
+                      <small>{option.description}</small>
+                    </span>
+                    <span class="vdb-option-count">{option.count.toLocaleString()}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          <section class="vdb-filter-group" aria-labelledby="vdb-series-heading">
+            <div class="vdb-group-head">
+              <div>
+                <p class="vdb-group-kicker">Series</p>
+                <h2 id="vdb-series-heading">Content type and recurring series</h2>
+              </div>
+            </div>
+            <div class="vdb-option-list">
+              {seriesOptions.map((option) => {
+                const active = isSelected(clampedState.series, option.value);
+                return (
+                  <button
+                    class:list={['vdb-option-card', { 'is-active': active }]}
+                    type="button"
+                    data-filter-type="series"
+                    data-filter-value={option.value}
+                    aria-pressed={active ? 'true' : 'false'}
+                    title={option.title}
+                  >
+                    <span class="vdb-option-icon" aria-hidden="true">
+                      <i class={`fas ${option.icon || 'fa-tag'}`}></i>
+                    </span>
+                    <span class="vdb-option-copy">
+                      <strong>{option.label}</strong>
+                      <small>{option.description}</small>
+                    </span>
+                    <span class="vdb-option-count">{option.count.toLocaleString()}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          <section class="vdb-filter-group" aria-labelledby="vdb-years-heading">
+            <div class="vdb-group-head">
+              <div>
+                <p class="vdb-group-kicker">Release Window</p>
+                <h2 id="vdb-years-heading">Choose a year</h2>
+              </div>
+            </div>
+            <div class="vdb-year-grid">
+              {yearOptions.map((option) => {
+                const active = isSelected(clampedState.years, option.value);
+                return (
+                  <button
+                    class:list={['vdb-year-chip', { 'is-active': active }]}
+                    type="button"
+                    data-filter-type="year"
+                    data-filter-value={String(option.value)}
+                    aria-pressed={active ? 'true' : 'false'}
+                    title={option.title}
+                  >
+                    <span>{option.label}</span>
+                    <strong>{option.count.toLocaleString()}</strong>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          <section class="vdb-filter-group" aria-labelledby="vdb-sort-heading">
+            <div class="vdb-group-head">
+              <div>
+                <p class="vdb-group-kicker">Sort</p>
+                <h2 id="vdb-sort-heading">Choose an order</h2>
+              </div>
+            </div>
+            <div class="vdb-sort-grid">
+              {SORT_OPTIONS.map((option) => {
+                const active = clampedState.sort === option.value;
+                return (
+                  <button
+                    class:list={['vdb-sort-pill', { 'is-active': active }]}
+                    type="button"
+                    data-sort={option.value}
+                    aria-pressed={active ? 'true' : 'false'}
+                    title={option.title}
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        </div>
+      </details>
+    </aside>
+
+    <section class="vdb-results">
+      <div class="vdb-results-header">
+        <div>
+          <p class="vdb-results-kicker">Archive Results</p>
+          <h2><span id="vdb-match-count">{totalMatches.toLocaleString()}</span> matching videos</h2>
+          <p id="vdb-range-summary" class="vdb-range-summary">{rangeSummary}</p>
+        </div>
+        <div class="vdb-results-status">
+          <span class="vdb-results-badge">
+            <i class="fas fa-arrow-down-wide-short" aria-hidden="true"></i>
+            {getSortStatusLabel(clampedState.sort)}
+          </span>
+        </div>
+      </div>
+
+      <div
+        id="vdb-active-chips"
+        class:list={['vdb-chip-row', { 'is-empty': !hasActiveFilters }]}
+        aria-live="polite"
+        aria-label="Active filters"
+      >
+        {hasActiveFilters ? (
+          activeChips.map((chip) => (
+            <button
+              type="button"
+              class="vdb-chip"
+              data-chip-type={chip.type}
+              data-chip-value={chip.value}
+              aria-label={`Remove filter: ${chip.label}`}
+            >
+              <span>{chip.label}</span>
+              <i class="fas fa-xmark" aria-hidden="true"></i>
+            </button>
+          ))
+        ) : (
+          <p class="vdb-chip-empty">
+            {hasDefaultFormatView
+              ? 'Showing the default archive view: Long Form is enabled. Shorts are any videos under two minutes.'
+              : 'No filters applied. Start with the search bar or pick a game.'}
+          </p>
+        )}
+      </div>
+
+      <p id="vdb-share-status" class="vdb-visually-hidden" role="status" aria-live="polite"></p>
+
+      <div id="video-results-grid" class="vdb-results-grid" role="list" aria-live="polite" aria-busy="false">
+        {pagination.items.length > 0 ? (
+          pagination.items.map((video) => (
+            <article class="vdb-card" role="listitem">
+              <a
+                href={video.youtubeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="vdb-card-thumb"
+                aria-label={`Watch ${video.title} on YouTube`}
+              >
+                <img src={video.thumbnailUrl} alt="" width="480" height="270" loading="lazy" />
+                {video.durationLabel && <span class="vdb-duration-badge">{video.durationLabel}</span>}
+              </a>
+              <div class="vdb-card-body">
+                <div class="vdb-card-tags">
+                  <span class="vdb-card-tag is-game">{video.gameLabel}</span>
+                  <span class="vdb-card-tag is-format">{video.formatLabel}</span>
+                  {video.series !== 'general' && <span class="vdb-card-tag is-series">{video.seriesLabel}</span>}
+                </div>
+                <h3 class="vdb-card-title">
+                  <a href={video.youtubeUrl} target="_blank" rel="noopener noreferrer">
+                    {video.title}
+                  </a>
+                </h3>
+                <div class="vdb-card-meta">
+                  {video.publishedLabel && (
+                    <span class="vdb-card-detail is-date">
+                      <i class="fas fa-calendar-days" aria-hidden="true"></i>
+                      {video.publishedLabel}
+                    </span>
+                  )}
+                </div>
+                <div class="vdb-card-actions">
+                  <a href={video.youtubeUrl} target="_blank" rel="noopener noreferrer" class="vdb-watch-link">
+                    <i class="fab fa-youtube" aria-hidden="true"></i>
+                    <span>Watch on YouTube</span>
+                  </a>
+                  <button type="button" class="vdb-copy-link" data-video-url={video.youtubeUrl}>
+                    <i class="fas fa-link" aria-hidden="true"></i>
+                    <span class="vdb-copy-link-label">Copy link</span>
+                  </button>
+                </div>
+              </div>
+            </article>
+          ))
+        ) : (
+          <div class="vdb-empty-state">
+            <i class="fas fa-satellite-dish" aria-hidden="true"></i>
+            <h3>No videos match this combination</h3>
+            <p>Try widening the search, removing a filter, or switching the sort back to newest.</p>
+          </div>
+        )}
+      </div>
+
+      <nav
+        id="vdb-pagination"
+        class:list={['vdb-pagination', { 'is-hidden': pagination.totalPages <= 1 }]}
+        aria-label="Video pagination"
+      >
+        <div id="vdb-pagination-controls" class="vdb-pagination-controls">
+          {pagination.totalPages > 1 && (
+            <>
+              <a
+                href={getPageHref(clampedState, Math.max(1, pagination.page - 1))}
+                class:list={['vdb-page-btn', { 'is-disabled': pagination.page === 1 }]}
+                data-page={String(Math.max(1, pagination.page - 1))}
+                aria-disabled={pagination.page === 1 ? 'true' : 'false'}
+              >
+                Previous
+              </a>
+              {paginationWindow.map((page, index) => (
+                <Fragment>
+                  {index > 0 && page - paginationWindow[index - 1] > 1 && <span class="vdb-page-gap">...</span>}
+                  <a
+                    href={getPageHref(clampedState, page)}
+                    class:list={['vdb-page-btn', { 'is-current': page === pagination.page }]}
+                    data-page={String(page)}
+                    aria-current={page === pagination.page ? 'page' : undefined}
+                  >
+                    {page}
+                  </a>
+                </Fragment>
+              ))}
+              <a
+                href={getPageHref(clampedState, Math.min(pagination.totalPages, pagination.page + 1))}
+                class:list={['vdb-page-btn', { 'is-disabled': pagination.page === pagination.totalPages }]}
+                data-page={String(Math.min(pagination.totalPages, pagination.page + 1))}
+                aria-disabled={pagination.page === pagination.totalPages ? 'true' : 'false'}
+              >
+                Next
+              </a>
+            </>
+          )}
+        </div>
+      </nav>
+    </section>
+  </div>
+
+  <button id="vdb-scroll-top" class="vdb-scroll-top" type="button" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <script type="application/json" id="vdb-data" set:html={videoJson}></script>
+  <script type="application/json" id="vdb-state" set:html={stateJson}></script>
+
+  <script>
+    import { initVideoDatabase } from '../../lib/videoDatabaseClient';
+
+    initVideoDatabase();
+  </script>
+</section>
+
+<style is:global>
+  .vdb-shell {
+    --vdb-bg: rgba(9, 15, 28, 0.88);
+    --vdb-panel: rgba(10, 18, 34, 0.78);
+    --vdb-panel-strong: rgba(7, 13, 24, 0.94);
+    --vdb-border: rgba(135, 161, 197, 0.16);
+    --vdb-border-strong: rgba(245, 164, 74, 0.38);
+    --vdb-text: #edf3fb;
+    --vdb-text-soft: rgba(220, 230, 244, 0.74);
+    --vdb-text-dim: rgba(159, 177, 201, 0.62);
+    --vdb-accent: #f5a44a;
+    --vdb-accent-soft: rgba(245, 164, 74, 0.16);
+    --vdb-cool: #6fd0ff;
+    --vdb-cool-soft: rgba(111, 208, 255, 0.14);
+    display: grid;
+    gap: 1.5rem;
+    position: relative;
+  }
+
+  .vdb-shell::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 26rem;
+    border-radius: 1.5rem;
+    background:
+      radial-gradient(circle at top left, rgba(245, 164, 74, 0.24), transparent 38%),
+      radial-gradient(circle at top right, rgba(111, 208, 255, 0.2), transparent 34%),
+      linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(7, 13, 24, 0.92));
+    border: 1px solid var(--vdb-border);
+    pointer-events: none;
+  }
+
+  .vdb-hero,
+  .vdb-layout {
+    position: relative;
+    z-index: 1;
+  }
+
+  .vdb-hero {
+    padding: 1.75rem;
+    border-radius: 1.5rem;
+    display: grid;
+    gap: 1.2rem;
+    grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+    align-items: end;
+    overflow: hidden;
+  }
+
+  .vdb-kicker,
+  .vdb-group-kicker,
+  .vdb-results-kicker,
+  .vdb-section-kicker {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--vdb-accent);
+    margin: 0 0 0.45rem;
+  }
+
+  .vdb-hero-copy h1 {
+    margin: 0;
+    font-size: clamp(2rem, 4vw, 3.35rem);
+    line-height: 0.95;
+    color: var(--vdb-text);
+  }
+
+  .vdb-lede {
+    margin: 0.95rem 0 0;
+    max-width: 48rem;
+    color: var(--vdb-text-soft);
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .vdb-hero-notes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    margin-top: 1rem;
+  }
+
+  .vdb-hero-notes span,
+  .vdb-results-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.55rem 0.8rem;
+    border-radius: 999px;
+    background: rgba(7, 13, 24, 0.56);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--vdb-text-soft);
+    font-size: 0.85rem;
+  }
+
+  .vdb-hero-notes i,
+  .vdb-results-badge i {
+    color: var(--vdb-cool);
+  }
+
+  .vdb-search-panel,
+  .vdb-stat-card,
+  .vdb-composer,
+  .vdb-results {
+    background:
+      linear-gradient(180deg, rgba(16, 24, 42, 0.82), rgba(7, 13, 24, 0.94));
+    border: 1px solid var(--vdb-border);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
+    backdrop-filter: blur(16px);
+  }
+
+  .vdb-search-panel {
+    padding: 1.05rem;
+    border-radius: 1.15rem;
+  }
+
+  .vdb-search-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--vdb-text-soft);
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+
+  .vdb-search-field {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.9rem 1rem;
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    background: rgba(4, 9, 18, 0.72);
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+  }
+
+  .vdb-search-field:focus-within {
+    border-color: var(--vdb-accent);
+    box-shadow: 0 0 0 3px rgba(245, 164, 74, 0.12);
+  }
+
+  .vdb-search-field i {
+    color: var(--vdb-accent);
+    font-size: 0.95rem;
+  }
+
+  .vdb-search-input {
+    width: 100%;
+    background: transparent;
+    border: 0 !important;
+    box-shadow: none !important;
+    color: var(--vdb-text);
+    font-size: 1rem;
+    outline: none !important;
+    padding: 0;
+    margin: 0;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .vdb-search-input:focus,
+  .vdb-search-input:focus-visible,
+  .vdb-search-input:active {
+    border: 0 !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  .vdb-search-input::placeholder {
+    color: rgba(159, 177, 201, 0.44);
+  }
+
+  .vdb-search-input::-webkit-search-decoration,
+  .vdb-search-input::-webkit-search-cancel-button,
+  .vdb-search-input::-webkit-search-results-button,
+  .vdb-search-input::-webkit-search-results-decoration {
+    display: none;
+    -webkit-appearance: none;
+  }
+
+  .vdb-search-clear {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+    border: 0;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--vdb-text-soft);
+    transition: background 0.18s ease, color 0.18s ease;
+  }
+
+  .vdb-search-clear:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--vdb-text);
+  }
+
+  .vdb-search-clear.is-hidden {
+    display: none;
+  }
+
+  .vdb-search-caption {
+    margin: 0.7rem 0 0;
+    color: var(--vdb-text-dim);
+    font-size: 0.82rem;
+    line-height: 1.5;
+  }
+
+  .vdb-stat-grid {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: 0.9rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .vdb-stat-card {
+    border-radius: 1rem;
+    padding: 1rem;
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .vdb-stat-label {
+    font-size: 0.76rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--vdb-text-dim);
+  }
+
+  .vdb-stat-card strong {
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    line-height: 1;
+    color: var(--vdb-text);
+  }
+
+  .vdb-stat-meta {
+    color: var(--vdb-text-soft);
+    font-size: 0.82rem;
+  }
+
+  .vdb-layout {
+    display: grid;
+    gap: 1.25rem;
+    margin-top: 0.6rem;
+    grid-template-columns: minmax(18rem, 22rem) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .vdb-sidebar {
+    position: sticky;
+    top: 1.5rem;
+  }
+
+  .vdb-composer {
+    border-radius: 1.25rem;
+    overflow: hidden;
+  }
+
+  .vdb-composer-summary {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.15rem;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .vdb-composer-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .vdb-composer-summary strong {
+    display: block;
+    color: var(--vdb-text);
+    font-size: 1rem;
+  }
+
+  .vdb-composer-summary small {
+    display: block;
+    margin-top: 0.2rem;
+    color: var(--vdb-text-dim);
+    font-size: 0.8rem;
+  }
+
+  .vdb-composer-summary i {
+    color: var(--vdb-accent);
+  }
+
+  .vdb-composer-body {
+    display: grid;
+    gap: 1rem;
+    padding: 0 1rem 1rem;
+    max-height: calc(100vh - 3rem);
+    overflow: auto;
+  }
+
+  .vdb-composer-header,
+  .vdb-group-head {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .vdb-section-copy {
+    margin: 0;
+    color: var(--vdb-text-dim);
+    font-size: 0.84rem;
+    line-height: 1.5;
+  }
+
+  .vdb-clear-all {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--vdb-text-soft);
+    padding: 0.5rem 0.85rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: border-color 0.18s ease, color 0.18s ease, background 0.18s ease;
+  }
+
+  .vdb-clear-all:hover {
+    border-color: var(--vdb-accent);
+    color: var(--vdb-text);
+    background: rgba(245, 164, 74, 0.12);
+  }
+
+  .vdb-filter-group {
+    display: grid;
+    gap: 0.75rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  .vdb-filter-group h2 {
+    margin: 0;
+    color: var(--vdb-text);
+    font-size: 1rem;
+  }
+
+  .vdb-format-grid,
+  .vdb-option-list {
+    display: grid;
+    gap: 0.65rem;
+  }
+
+  .vdb-format-card,
+  .vdb-option-card,
+  .vdb-year-chip,
+  .vdb-sort-pill,
+  .vdb-chip,
+  .vdb-copy-link,
+  .vdb-watch-link,
+  .vdb-page-btn,
+  .vdb-scroll-top {
+    transition:
+      transform 0.18s ease,
+      border-color 0.18s ease,
+      color 0.18s ease,
+      background 0.18s ease,
+      box-shadow 0.18s ease;
+  }
+
+  .vdb-format-card,
+  .vdb-option-card {
+    display: grid;
+    align-items: center;
+    gap: 0.8rem;
+    width: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1rem;
+    background: rgba(6, 11, 21, 0.68);
+    color: inherit;
+    text-align: left;
+  }
+
+  .vdb-format-card {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    padding: 0.9rem;
+  }
+
+  .vdb-option-card {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    padding: 0.78rem 0.85rem;
+  }
+
+  .vdb-format-card:hover,
+  .vdb-format-card.is-active,
+  .vdb-option-card:hover,
+  .vdb-option-card.is-active,
+  .vdb-year-chip:hover,
+  .vdb-year-chip.is-active,
+  .vdb-sort-pill:hover,
+  .vdb-sort-pill.is-active {
+    border-color: var(--vdb-border-strong);
+    background: linear-gradient(135deg, rgba(245, 164, 74, 0.14), rgba(111, 208, 255, 0.1));
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+  }
+
+  .vdb-format-card:hover,
+  .vdb-option-card:hover,
+  .vdb-year-chip:hover,
+  .vdb-sort-pill:hover {
+    transform: translateY(-1px);
+  }
+
+  .vdb-format-card.is-disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    transform: none;
+  }
+
+  .vdb-format-icon,
+  .vdb-option-icon {
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    color: var(--vdb-cool);
+    overflow: hidden;
+  }
+
+  .vdb-option-icon img {
+    width: 1.85rem;
+    height: 1.3rem;
+    object-fit: contain;
+    display: block;
+  }
+
+  .vdb-format-copy,
+  .vdb-option-copy {
+    display: grid;
+    gap: 0.14rem;
+    min-width: 0;
+  }
+
+  .vdb-format-copy strong,
+  .vdb-option-copy strong {
+    color: var(--vdb-text);
+    font-size: 0.95rem;
+  }
+
+  .vdb-format-copy small,
+  .vdb-option-copy small {
+    color: var(--vdb-text-dim);
+    line-height: 1.45;
+  }
+
+  .vdb-option-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.5rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--vdb-text-soft);
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  .vdb-year-grid {
+    display: grid;
+    gap: 0.55rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .vdb-year-chip {
+    display: grid;
+    gap: 0.12rem;
+    justify-items: start;
+    padding: 0.75rem 0.8rem;
+    border-radius: 0.9rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(6, 11, 21, 0.68);
+    color: var(--vdb-text-soft);
+    text-align: left;
+  }
+
+  .vdb-year-chip strong {
+    color: var(--vdb-text);
+    font-size: 0.74rem;
+  }
+
+  .vdb-sort-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+  }
+
+  .vdb-sort-pill {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    background: rgba(6, 11, 21, 0.68);
+    color: var(--vdb-text-soft);
+    padding: 0.55rem 0.82rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .vdb-results {
+    border-radius: 1.35rem;
+    padding: 1.2rem;
+    display: grid;
+    gap: 1rem;
+  }
+
+  .vdb-results-header {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .vdb-results-header h2 {
+    margin: 0;
+    color: var(--vdb-text);
+    font-size: clamp(1.35rem, 2vw, 1.85rem);
+  }
+
+  .vdb-range-summary {
+    margin: 0.35rem 0 0;
+    color: var(--vdb-text-dim);
+    font-size: 0.9rem;
+  }
+
+  .vdb-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+  }
+
+  .vdb-chip-row.is-empty {
+    padding: 0.95rem 1rem;
+    border-radius: 1rem;
+    border: 1px dashed rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .vdb-chip-empty {
+    margin: 0;
+    color: var(--vdb-text-dim);
+    font-size: 0.88rem;
+  }
+
+  .vdb-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid rgba(111, 208, 255, 0.22);
+    border-radius: 999px;
+    background: var(--vdb-cool-soft);
+    color: var(--vdb-text);
+    padding: 0.5rem 0.8rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+
+  .vdb-chip:hover {
+    border-color: var(--vdb-accent);
+    background: rgba(245, 164, 74, 0.12);
+  }
+
+  .vdb-results-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+
+  .vdb-card {
+    display: grid;
+    border-radius: 1.1rem;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(5, 10, 20, 0.88);
+    min-height: 100%;
+  }
+
+  .vdb-card-thumb {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: transparent;
+  }
+
+  .vdb-card-thumb img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    transition: transform 0.25s ease;
+  }
+
+  .vdb-card:hover .vdb-card-thumb img {
+    transform: scale(1.03);
+  }
+
+  .vdb-duration-badge {
+    position: absolute;
+    bottom: 0.7rem;
+    padding: 0.28rem 0.45rem;
+    border-radius: 0.5rem;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: white;
+    background: rgba(0, 0, 0, 0.78);
+  }
+
+  .vdb-duration-badge {
+    right: 0.7rem;
+  }
+
+  .vdb-card-body {
+    display: grid;
+    gap: 0.72rem;
+    padding: 0.95rem;
+  }
+
+  .vdb-card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .vdb-card-tag {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.9rem;
+    padding: 0.28rem 0.58rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  .vdb-card-tag.is-game {
+    background: rgba(111, 208, 255, 0.14);
+    color: var(--vdb-cool);
+  }
+
+  .vdb-card-tag.is-format {
+    background: rgba(245, 164, 74, 0.12);
+    color: #ffd09d;
+  }
+
+  .vdb-card-tag.is-series {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--vdb-text-soft);
+  }
+
+  .vdb-card-title {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.45;
+  }
+
+  .vdb-card-title a {
+    color: var(--vdb-text);
+    text-decoration: none;
+  }
+
+  .vdb-card-title a:hover {
+    color: #ffd09d;
+  }
+
+  .vdb-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    font-size: 0.78rem;
+  }
+
+  .vdb-card-detail {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.38rem;
+    min-height: 2rem;
+    padding: 0.34rem 0.72rem;
+    border-radius: 999px;
+    background: rgba(15, 24, 39, 0.96);
+    color: var(--vdb-text-soft);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-weight: 600;
+    line-height: 1;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.015);
+  }
+
+  .vdb-card-detail i {
+    font-size: 0.78rem;
+  }
+
+  .vdb-card-detail.is-date {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.08);
+    color: #d8e1ee;
+  }
+
+  .vdb-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin-top: auto;
+  }
+
+  .vdb-watch-link,
+  .vdb-copy-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 2rem;
+    padding: 0.36rem 0.8rem;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.79rem;
+    line-height: 1;
+  }
+
+  .vdb-watch-link {
+    border: 1px solid rgba(255, 80, 80, 0.25);
+    background: rgba(255, 80, 80, 0.12);
+    color: #ffd1d1;
+  }
+
+  .vdb-copy-link {
+    border: 1px solid rgba(111, 208, 255, 0.24);
+    background: rgba(111, 208, 255, 0.11);
+    color: #c6efff;
+  }
+
+  .vdb-watch-link:hover,
+  .vdb-copy-link:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+  }
+
+  .vdb-copy-link.is-copied {
+    border-color: rgba(87, 225, 146, 0.42);
+    background: rgba(87, 225, 146, 0.12);
+    color: #bbf7d0;
+  }
+
+  .vdb-empty-state {
+    grid-column: 1 / -1;
+    display: grid;
+    justify-items: center;
+    gap: 0.65rem;
+    padding: 4rem 1rem;
+    text-align: center;
+    border-radius: 1.1rem;
+    border: 1px dashed rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .vdb-empty-state i {
+    font-size: 2.2rem;
+    color: var(--vdb-accent);
+  }
+
+  .vdb-empty-state h3,
+  .vdb-empty-state p {
+    margin: 0;
+  }
+
+  .vdb-empty-state p {
+    color: var(--vdb-text-dim);
+    max-width: 32rem;
+  }
+
+  .vdb-pagination.is-hidden {
+    display: none;
+  }
+
+  .vdb-pagination-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    align-items: center;
+  }
+
+  .vdb-page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.35rem;
+    min-height: 2.35rem;
+    padding: 0 0.9rem;
+    border-radius: 0.8rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--vdb-text-soft);
+    text-decoration: none;
+    font-weight: 700;
+  }
+
+  .vdb-page-btn:hover,
+  .vdb-page-btn.is-current {
+    border-color: var(--vdb-border-strong);
+    background: rgba(245, 164, 74, 0.12);
+    color: var(--vdb-text);
+  }
+
+  .vdb-page-btn.is-disabled {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+
+  .vdb-page-gap {
+    color: var(--vdb-text-dim);
+    padding: 0 0.2rem;
+  }
+
+  .vdb-scroll-top {
+    position: fixed;
+    right: 1.2rem;
+    bottom: 1.2rem;
+    width: 2.9rem;
+    height: 2.9rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(7, 13, 24, 0.92);
+    color: var(--vdb-text);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(0.45rem);
+    z-index: 30;
+  }
+
+  .vdb-scroll-top.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .vdb-scroll-top:hover {
+    border-color: var(--vdb-accent);
+    background: rgba(245, 164, 74, 0.16);
+  }
+
+  .vdb-visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (max-width: 1100px) {
+    .vdb-hero,
+    .vdb-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .vdb-stat-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .vdb-sidebar {
+      position: static;
+    }
+
+    .vdb-composer-body {
+      max-height: none;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .vdb-hero {
+      padding: 1.1rem;
+      border-radius: 1.1rem;
+    }
+
+    .vdb-results {
+      padding: 1rem;
+    }
+
+    .vdb-results-header {
+      align-items: start;
+      flex-direction: column;
+    }
+
+    .vdb-stat-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .vdb-year-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .vdb-results-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .vdb-card-actions {
+      gap: 0.5rem;
+    }
+
+    .vdb-copy-link {
+      width: auto;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .vdb-composer:not([open]) .vdb-composer-summary {
+      border-bottom: 0;
+    }
+
+    .vdb-composer-body {
+      padding-top: 0.2rem;
+    }
+  }
+</style>
