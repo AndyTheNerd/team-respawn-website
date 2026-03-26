@@ -1,0 +1,165 @@
+---
+import SecondaryPageLayout from '../../layouts/SecondaryPageLayout.astro';
+---
+<SecondaryPageLayout
+  title="Halo Wars DE Steam Player Count | Team Respawn"
+  description="Live Steam player count tracker for Halo Wars: Definitive Edition using the official Steam current player endpoint."
+  keywords="Halo Wars Definitive Edition player count, Halo Wars DE Steam players, Halo Wars DE concurrency"
+  canonical="https://www.teamrespawn.net/halo-wars-de-player-count"
+  ogTitle="Halo Wars DE Steam Player Count | Team Respawn"
+  ogDescription="Live Steam concurrent player count for Halo Wars: Definitive Edition."
+  ogImage="https://www.teamrespawn.net/content/Banner.jpg"
+>
+  <main id="main-content" class="mx-auto mt-8 max-w-5xl" aria-label="Halo Wars Definitive Edition Steam player count">
+    <article class="overflow-hidden rounded-[28px] border border-cyan-500/20 bg-slate-950 text-slate-100 shadow-[0_30px_80px_rgba(2,6,23,0.45)]">
+      <section class="relative border-b border-cyan-500/15 bg-[radial-gradient(circle_at_top_left,_rgba(34,211,238,0.18),_transparent_38%),linear-gradient(135deg,_rgba(15,23,42,0.98),_rgba(8,47,73,0.92))] px-6 py-10 sm:px-8 lg:px-10">
+        <div class="absolute inset-0 bg-[linear-gradient(rgba(148,163,184,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.06)_1px,transparent_1px)] bg-[size:24px_24px] opacity-20"></div>
+        <div class="relative">
+          <p class="mb-3 inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-cyan-200">
+            Official Steam Signal
+          </p>
+          <h1 class="max-w-3xl text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl">
+            Halo Wars: Definitive Edition live player count
+          </h1>
+          <p class="mt-4 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
+            This tracker reads the official Steam current-player endpoint for app <span class="font-semibold text-cyan-200">459220</span>.
+            It is reliable for <span class="font-semibold text-white">Steam concurrency</span>, but it is not a true multiplayer population API.
+          </p>
+        </div>
+      </section>
+
+      <section class="px-6 py-8 sm:px-8 lg:px-10">
+        <div class="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+          <div class="rounded-2xl border border-cyan-500/20 bg-slate-900/80 p-6">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p class="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">Current Steam players</p>
+                <div id="hwde-player-count" class="mt-3 text-5xl font-black text-cyan-300 sm:text-6xl">
+                  --
+                </div>
+              </div>
+              <button
+                id="hwde-refresh"
+                type="button"
+                class="inline-flex items-center gap-2 rounded-full border border-cyan-400/25 bg-cyan-400/10 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:border-cyan-300/40 hover:bg-cyan-400/15"
+              >
+                <i class="fas fa-rotate-right text-xs" aria-hidden="true"></i>
+                Refresh
+              </button>
+            </div>
+
+            <div class="mt-5 grid gap-3 sm:grid-cols-2">
+              <div class="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
+                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Source</p>
+                <p id="hwde-source" class="mt-2 text-sm text-slate-200">Steam Web API</p>
+              </div>
+              <div class="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
+                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Last updated</p>
+                <p id="hwde-updated" class="mt-2 text-sm text-slate-200">Waiting for first sample</p>
+              </div>
+            </div>
+
+            <p id="hwde-status" class="mt-4 text-sm text-slate-400">
+              Loading the latest Steam sample.
+            </p>
+          </div>
+
+          <div class="rounded-2xl border border-amber-400/20 bg-amber-400/5 p-6">
+            <p class="text-sm font-semibold uppercase tracking-[0.18em] text-amber-200">Important limitation</p>
+            <h2 class="mt-3 text-2xl font-bold text-white">This is not the matchmaking count</h2>
+            <p class="mt-3 text-sm leading-7 text-slate-300">
+              Steam exposes how many players are currently active in the app. It does not tell us how many are in ranked,
+              how many are searching, how many are in customs, or which playlist they are in.
+            </p>
+            <p class="mt-3 text-sm leading-7 text-slate-300">
+              If you want historical charts, the next step is to poll this endpoint on a schedule and persist the samples in a database.
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-6 grid gap-4 lg:grid-cols-2">
+          <section class="rounded-2xl border border-slate-800 bg-slate-900/70 p-6">
+            <h2 class="text-xl font-bold text-white">What this tracker can tell you</h2>
+            <ul class="mt-4 ml-4 list-disc space-y-2 text-sm leading-7 text-slate-300">
+              <li>How many Steam users are in the game right now</li>
+              <li>Whether the game is trending up or down once you store samples over time</li>
+              <li>Rough activity windows for the PC Steam audience</li>
+            </ul>
+          </section>
+
+          <section class="rounded-2xl border border-slate-800 bg-slate-900/70 p-6">
+            <h2 class="text-xl font-bold text-white">What it cannot tell you</h2>
+            <ul class="mt-4 ml-4 list-disc space-y-2 text-sm leading-7 text-slate-300">
+              <li>Exact multiplayer population</li>
+              <li>Queue health by mode or MMR bucket</li>
+              <li>Per-player match history, wins, losses, or leader usage</li>
+            </ul>
+          </section>
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <script is:inline>
+    (() => {
+      const countEl = document.getElementById('hwde-player-count');
+      const sourceEl = document.getElementById('hwde-source');
+      const updatedEl = document.getElementById('hwde-updated');
+      const statusEl = document.getElementById('hwde-status');
+      const refreshButton = document.getElementById('hwde-refresh');
+
+      if (!countEl || !sourceEl || !updatedEl || !statusEl || !refreshButton) return;
+
+      function formatTimestamp(iso) {
+        if (!iso) return 'Unknown';
+        const date = new Date(iso);
+        if (Number.isNaN(date.getTime())) return 'Unknown';
+        return new Intl.DateTimeFormat('en-US', {
+          dateStyle: 'medium',
+          timeStyle: 'medium',
+        }).format(date);
+      }
+
+      async function loadPlayerCount() {
+        statusEl.textContent = 'Refreshing from Steam...';
+        refreshButton.setAttribute('disabled', 'true');
+        refreshButton.classList.add('opacity-60', 'cursor-not-allowed');
+
+        try {
+          const res = await fetch('/api/hwde/steam-player-count', { cache: 'no-store' });
+          const data = await res.json().catch(() => ({}));
+
+          if (!res.ok) {
+            throw new Error(data?.error || 'Request failed');
+          }
+
+          const value = typeof data.currentPlayers === 'number'
+            ? data.currentPlayers.toLocaleString('en-US')
+            : '--';
+
+          countEl.textContent = value;
+          sourceEl.textContent = data?.source?.name
+            ? `${data.source.name} / ${data.source.endpoint}`
+            : 'Steam Web API';
+          updatedEl.textContent = formatTimestamp(data.fetchedAt);
+          statusEl.textContent = 'Live Steam concurrency sample loaded successfully.';
+        } catch (error) {
+          countEl.textContent = '--';
+          statusEl.textContent = error instanceof Error
+            ? `Could not load player count: ${error.message}`
+            : 'Could not load player count.';
+        } finally {
+          refreshButton.removeAttribute('disabled');
+          refreshButton.classList.remove('opacity-60', 'cursor-not-allowed');
+        }
+      }
+
+      refreshButton.addEventListener('click', () => {
+        loadPlayerCount();
+      });
+
+      loadPlayerCount();
+      window.setInterval(loadPlayerCount, 60000);
+    })();
+  </script>
+</SecondaryPageLayout>
