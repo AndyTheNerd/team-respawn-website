@@ -54,6 +54,7 @@ export function isNavLinkActive(
 export const sidePanelPrimaryLinks: NavLink[] = [
   { href: '/blog', label: 'Blog', icon: 'fas fa-blog', activeMatch: 'prefix' },
   { href: '/halo-wars-stats', label: 'HW2 Stats', icon: 'fas fa-chart-bar', activeMatch: 'hw2Stats' },
+  { href: '/halo-wars-de-player-count', label: 'HW1 Data', icon: 'fas fa-table', activeMatch: 'exact' },
   { href: '/videos', label: 'Video Database', icon: 'fas fa-database', activeMatch: 'videos' },
   { href: '/blog?category=Guides', label: 'All Guides', icon: 'fas fa-gamepad', activeMatch: 'never' },
 ];
