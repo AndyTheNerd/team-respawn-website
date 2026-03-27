@@ -1,13 +1,23 @@
 ---
 import SecondaryPageLayout from '../../layouts/SecondaryPageLayout.astro';
+import { haloWars1Units } from '../../data/haloWars1';
+
+const hw1UnitsDefault = [...haloWars1Units].sort((left, right) => {
+  return right.dpsValue - left.dpsValue || left.name.localeCompare(right.name);
+});
+
+const hw1FactionPillClasses: Record<string, string> = {
+  UNSC: 'border-cyan-400/25 bg-cyan-400/10 text-cyan-100',
+  Covenant: 'border-amber-400/25 bg-amber-400/10 text-amber-100',
+};
 ---
 <SecondaryPageLayout
   title="Halo Wars DE Steam Player Count | Team Respawn"
-  description="Live Steam player count tracker for Halo Wars: Definitive Edition using the official Steam current player endpoint."
+  description="Live Steam concurrency tracker for Halo Wars: Definitive Edition using the official Steam current-player endpoint."
   keywords="Halo Wars Definitive Edition player count, Halo Wars DE Steam players, Halo Wars DE concurrency"
   canonical="https://www.teamrespawn.net/halo-wars-de-player-count"
   ogTitle="Halo Wars DE Steam Player Count | Team Respawn"
-  ogDescription="Live Steam concurrent player count for Halo Wars: Definitive Edition."
+  ogDescription="Live Steam concurrency for Halo Wars: Definitive Edition."
   ogImage="https://www.teamrespawn.net/content/Banner.jpg"
 >
   <main id="main-content" class="mx-auto mt-8 max-w-5xl" aria-label="Halo Wars Definitive Edition Steam player count">
@@ -16,14 +26,13 @@ import SecondaryPageLayout from '../../layouts/SecondaryPageLayout.astro';
         <div class="absolute inset-0 bg-[linear-gradient(rgba(148,163,184,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.06)_1px,transparent_1px)] bg-[size:24px_24px] opacity-20"></div>
         <div class="relative">
           <p class="mb-3 inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-cyan-200">
-            Official Steam Signal
+            Unofficial HWDE Population Tracker
           </p>
           <h1 class="max-w-3xl text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl">
             Halo Wars: Definitive Edition live player count
           </h1>
           <p class="mt-4 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
-            This tracker reads the official Steam current-player endpoint for app <span class="font-semibold text-cyan-200">459220</span>.
-            It is reliable for <span class="font-semibold text-white">Steam concurrency</span>, but it is not a true multiplayer population API.
+            This page reads the official Steam current-player endpoint for <span class="font-semibold text-cyan-200">Halo Wars: Definitive Edition</span>.
           </p>
         </div>
       </section>
@@ -50,8 +59,8 @@ import SecondaryPageLayout from '../../layouts/SecondaryPageLayout.astro';
 
             <div class="mt-5 grid gap-3 sm:grid-cols-2">
               <div class="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Source</p>
-                <p id="hwde-source" class="mt-2 text-sm text-slate-200">Steam Web API</p>
+                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Observed daily high (ET)</p>
+                <p id="hwde-daily-high" class="mt-2 text-sm text-slate-200">--</p>
               </div>
               <div class="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
                 <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Last updated</p>
@@ -62,40 +71,167 @@ import SecondaryPageLayout from '../../layouts/SecondaryPageLayout.astro';
             <p id="hwde-status" class="mt-4 text-sm text-slate-400">
               Loading the latest Steam sample.
             </p>
+            <p class="mt-2 text-xs leading-6 text-slate-500">
+              Daily high reflects the highest sample Team Respawn has stored today and resets at midnight Eastern Time.
+            </p>
           </div>
 
           <div class="rounded-2xl border border-amber-400/20 bg-amber-400/5 p-6">
             <p class="text-sm font-semibold uppercase tracking-[0.18em] text-amber-200">Important limitation</p>
-            <h2 class="mt-3 text-2xl font-bold text-white">This is not the matchmaking count</h2>
+            <h2 class="mt-3 text-2xl font-bold text-white">This is not a live matchmaking count</h2>
             <p class="mt-3 text-sm leading-7 text-slate-300">
-              Steam exposes how many players are currently active in the app. It does not tell us how many are in ranked,
-              how many are searching, how many are in customs, or which playlist they are in.
+              Steam reports how many players are currently active in the app through Steam. It does not tell us how many
+              are in ranked, searching for a match, playing customs, or sitting in a specific playlist.
             </p>
             <p class="mt-3 text-sm leading-7 text-slate-300">
-              If you want historical charts, the next step is to poll this endpoint on a schedule and persist the samples in a database.
+              The daily high shown here is an observed peak from stored samples, not an official Steam end-of-day peak value.
             </p>
           </div>
         </div>
 
-        <div class="mt-6 grid gap-4 lg:grid-cols-2">
-          <section class="rounded-2xl border border-slate-800 bg-slate-900/70 p-6">
-            <h2 class="text-xl font-bold text-white">What this tracker can tell you</h2>
-            <ul class="mt-4 ml-4 list-disc space-y-2 text-sm leading-7 text-slate-300">
-              <li>How many Steam users are in the game right now</li>
-              <li>Whether the game is trending up or down once you store samples over time</li>
-              <li>Rough activity windows for the PC Steam audience</li>
-            </ul>
-          </section>
+        <section class="mt-6 rounded-2xl border border-slate-800 bg-slate-900/70 p-6">
+          <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <p class="text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200">30-day trend</p>
+              <h2 class="mt-3 text-2xl font-bold text-white">Observed daily highs</h2>
+              <p id="hwde-history-summary" class="mt-3 max-w-2xl text-sm leading-7 text-slate-300">
+                Daily highs will populate here as Team Respawn stores more Steam samples over time.
+              </p>
+            </div>
 
-          <section class="rounded-2xl border border-slate-800 bg-slate-900/70 p-6">
-            <h2 class="text-xl font-bold text-white">What it cannot tell you</h2>
-            <ul class="mt-4 ml-4 list-disc space-y-2 text-sm leading-7 text-slate-300">
-              <li>Exact multiplayer population</li>
-              <li>Queue health by mode or MMR bucket</li>
-              <li>Per-player match history, wins, losses, or leader usage</li>
-            </ul>
-          </section>
-        </div>
+            <div class="grid gap-3 sm:grid-cols-2 lg:min-w-[18rem]">
+              <div class="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
+                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Tracking started</p>
+                <p id="hwde-history-start" class="mt-2 text-sm text-slate-200">Today</p>
+              </div>
+              <div class="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
+                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Days with data</p>
+                <p id="hwde-history-coverage" class="mt-2 text-sm text-slate-200">0 / 30</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 rounded-2xl border border-slate-800 bg-slate-950/70 p-4 sm:p-5">
+            <div class="relative">
+              <div class="pointer-events-none absolute inset-0 flex flex-col justify-between">
+                <div class="border-t border-slate-800/80"></div>
+                <div class="border-t border-slate-800/70"></div>
+                <div class="border-t border-slate-800/60"></div>
+                <div class="border-t border-slate-800/50"></div>
+              </div>
+
+              <div
+                id="hwde-history-chart"
+                class="relative grid h-64 items-end gap-1 sm:gap-1.5"
+                style="grid-template-columns: repeat(30, minmax(0, 1fr));"
+                aria-live="polite"
+              ></div>
+            </div>
+
+            <div class="mt-4 flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+              <span id="hwde-history-label-start">30 days ago</span>
+              <span id="hwde-history-label-mid">Midpoint</span>
+              <span id="hwde-history-label-end">Today</span>
+            </div>
+
+            <div class="mt-4 flex flex-wrap items-center gap-4 text-xs text-slate-400">
+              <span class="inline-flex items-center gap-2">
+                <span class="h-2.5 w-2.5 rounded-full bg-cyan-300"></span>
+                Observed daily high
+              </span>
+              <span class="inline-flex items-center gap-2">
+                <span class="h-2.5 w-2.5 rounded-full border border-dashed border-slate-600 bg-slate-900"></span>
+                No stored data yet
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <section class="mt-6 rounded-2xl border border-slate-800 bg-slate-900/70 p-6">
+          <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p class="text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200">Halo Wars 1 Unit Table</p>
+              <h2 class="mt-3 text-2xl font-bold text-white">Filter the Halo Wars 1 roster</h2>
+              <p id="hw1-unit-results" class="mt-3 max-w-3xl text-sm leading-7 text-slate-300">
+                Showing {hw1UnitsDefault.length} tracked units with base DPS from the Storehaus unit file and curated cost displays for quick comparison.
+              </p>
+            </div>
+
+            <div class="grid gap-3 sm:grid-cols-2 lg:min-w-[24rem]">
+              <label class="block">
+                <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Search units</span>
+                <input
+                  id="hw1-unit-search"
+                  type="search"
+                  placeholder="Warthog, Hunter, Hornet..."
+                  class="w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-cyan-400/40 focus:ring-2 focus:ring-cyan-400/10"
+                />
+              </label>
+
+              <label class="block">
+                <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Sort by</span>
+                <select
+                  id="hw1-unit-sort"
+                  class="w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-400/40 focus:ring-2 focus:ring-cyan-400/10"
+                >
+                  <option value="dps-desc">Highest DPS</option>
+                  <option value="cost-asc">Lowest cost</option>
+                  <option value="upgrades-desc">Most upgrades</option>
+                  <option value="name-asc">Name A-Z</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <div class="mt-5 flex flex-wrap gap-2">
+            <div class="flex flex-wrap gap-2" aria-label="Filter units by faction">
+              <button type="button" data-hw1-faction-filter="all" class="hw1-filter-chip rounded-full border border-cyan-400/25 bg-cyan-400/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-cyan-100">All factions</button>
+              <button type="button" data-hw1-faction-filter="UNSC" class="hw1-filter-chip rounded-full border border-slate-700 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-slate-300 transition hover:border-cyan-400/30 hover:text-cyan-100">UNSC</button>
+              <button type="button" data-hw1-faction-filter="Covenant" class="hw1-filter-chip rounded-full border border-slate-700 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-slate-300 transition hover:border-cyan-400/30 hover:text-cyan-100">Covenant</button>
+            </div>
+            <div class="flex flex-wrap gap-2" aria-label="Filter units by type">
+              <button type="button" data-hw1-type-filter="all" class="hw1-filter-chip rounded-full border border-cyan-400/25 bg-cyan-400/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-cyan-100">All types</button>
+              <button type="button" data-hw1-type-filter="Infantry" class="hw1-filter-chip rounded-full border border-slate-700 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-slate-300 transition hover:border-cyan-400/30 hover:text-cyan-100">Infantry</button>
+              <button type="button" data-hw1-type-filter="Vehicle" class="hw1-filter-chip rounded-full border border-slate-700 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-slate-300 transition hover:border-cyan-400/30 hover:text-cyan-100">Vehicle</button>
+              <button type="button" data-hw1-type-filter="Aircraft" class="hw1-filter-chip rounded-full border border-slate-700 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-slate-300 transition hover:border-cyan-400/30 hover:text-cyan-100">Aircraft</button>
+            </div>
+          </div>
+
+          <div class="mt-5 overflow-x-auto rounded-2xl border border-slate-800">
+            <table class="min-w-full divide-y divide-slate-800 text-left text-sm">
+              <thead class="bg-slate-900/90 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                <tr>
+                  <th class="px-4 py-3">Unit</th>
+                  <th class="px-4 py-3">Faction</th>
+                  <th class="px-4 py-3">Type</th>
+                  <th class="px-4 py-3 text-right">DPS</th>
+                  <th class="px-4 py-3 text-right">Upgrades</th>
+                  <th class="px-4 py-3">Cost</th>
+                </tr>
+              </thead>
+              <tbody id="hw1-unit-table-body" class="divide-y divide-slate-800 bg-slate-950/50 text-slate-200">
+                {hw1UnitsDefault.map((unit) => (
+                  <tr class="transition hover:bg-slate-900/70">
+                    <td class="px-4 py-3 font-semibold text-white">{unit.name}</td>
+                    <td class="px-4 py-3">
+                      <span class={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${hw1FactionPillClasses[unit.faction]}`}>
+                        {unit.faction}
+                      </span>
+                    </td>
+                    <td class="px-4 py-3 text-slate-300">{unit.type}</td>
+                    <td class="px-4 py-3 text-right font-semibold text-cyan-100">{unit.dpsDisplay}</td>
+                    <td class="px-4 py-3 text-right">{unit.upgradeCount}</td>
+                    <td class="px-4 py-3 text-slate-300">{unit.costDisplay}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div id="hw1-unit-empty" class="mt-4 hidden rounded-2xl border border-dashed border-slate-700 bg-slate-900/70 p-5 text-sm text-slate-400">
+            No units match the current search and filter combination.
+          </div>
+        </section>
       </section>
     </article>
   </main>
@@ -103,12 +239,32 @@ import SecondaryPageLayout from '../../layouts/SecondaryPageLayout.astro';
   <script is:inline>
     (() => {
       const countEl = document.getElementById('hwde-player-count');
-      const sourceEl = document.getElementById('hwde-source');
+      const dailyHighEl = document.getElementById('hwde-daily-high');
       const updatedEl = document.getElementById('hwde-updated');
       const statusEl = document.getElementById('hwde-status');
       const refreshButton = document.getElementById('hwde-refresh');
+      const historyChartEl = document.getElementById('hwde-history-chart');
+      const historySummaryEl = document.getElementById('hwde-history-summary');
+      const historyStartEl = document.getElementById('hwde-history-start');
+      const historyCoverageEl = document.getElementById('hwde-history-coverage');
+      const historyLabelStartEl = document.getElementById('hwde-history-label-start');
+      const historyLabelMidEl = document.getElementById('hwde-history-label-mid');
+      const historyLabelEndEl = document.getElementById('hwde-history-label-end');
 
-      if (!countEl || !sourceEl || !updatedEl || !statusEl || !refreshButton) return;
+      if (
+        !countEl ||
+        !dailyHighEl ||
+        !updatedEl ||
+        !statusEl ||
+        !refreshButton ||
+        !historyChartEl ||
+        !historySummaryEl ||
+        !historyStartEl ||
+        !historyCoverageEl ||
+        !historyLabelStartEl ||
+        !historyLabelMidEl ||
+        !historyLabelEndEl
+      ) return;
 
       function formatTimestamp(iso) {
         if (!iso) return 'Unknown';
@@ -120,46 +276,290 @@ import SecondaryPageLayout from '../../layouts/SecondaryPageLayout.astro';
         }).format(date);
       }
 
-      async function loadPlayerCount() {
-        statusEl.textContent = 'Refreshing from Steam...';
-        refreshButton.setAttribute('disabled', 'true');
-        refreshButton.classList.add('opacity-60', 'cursor-not-allowed');
+      function formatShortDate(dayKey) {
+        if (!dayKey) return 'Unknown';
+        const date = new Date(`${dayKey}T12:00:00Z`);
+        if (Number.isNaN(date.getTime())) return 'Unknown';
+        return new Intl.DateTimeFormat('en-US', {
+          month: 'short',
+          day: 'numeric',
+          timeZone: 'UTC',
+        }).format(date);
+      }
 
-        try {
-          const res = await fetch('/api/hwde/steam-player-count', { cache: 'no-store' });
-          const data = await res.json().catch(() => ({}));
-
-          if (!res.ok) {
-            throw new Error(data?.error || 'Request failed');
-          }
-
-          const value = typeof data.currentPlayers === 'number'
-            ? data.currentPlayers.toLocaleString('en-US')
-            : '--';
-
-          countEl.textContent = value;
-          sourceEl.textContent = data?.source?.name
-            ? `${data.source.name} / ${data.source.endpoint}`
-            : 'Steam Web API';
-          updatedEl.textContent = formatTimestamp(data.fetchedAt);
-          statusEl.textContent = 'Live Steam concurrency sample loaded successfully.';
-        } catch (error) {
-          countEl.textContent = '--';
-          statusEl.textContent = error instanceof Error
-            ? `Could not load player count: ${error.message}`
-            : 'Could not load player count.';
-        } finally {
-          refreshButton.removeAttribute('disabled');
-          refreshButton.classList.remove('opacity-60', 'cursor-not-allowed');
+      function setButtonLoading(isLoading) {
+        if (isLoading) {
+          refreshButton.setAttribute('disabled', 'true');
+          refreshButton.classList.add('opacity-60', 'cursor-not-allowed');
+          return;
         }
+
+        refreshButton.removeAttribute('disabled');
+        refreshButton.classList.remove('opacity-60', 'cursor-not-allowed');
+      }
+
+      function renderHistory(history) {
+        const days = Array.isArray(history?.days) ? history.days : [];
+        const availableDays = typeof history?.availableDays === 'number' ? history.availableDays : 0;
+        const maxValue = days.reduce((max, day) => {
+          return typeof day?.observedDailyHigh === 'number' ? Math.max(max, day.observedDailyHigh) : max;
+        }, 0);
+        const chartMax = Math.max(maxValue, 10);
+        const midpointIndex = days.length > 0 ? Math.floor((days.length - 1) / 2) : 0;
+
+        historyChartEl.innerHTML = '';
+
+        for (const day of days) {
+          const hasValue = typeof day?.observedDailyHigh === 'number';
+          const value = hasValue ? day.observedDailyHigh : 0;
+          const barHeight = hasValue
+            ? `${Math.max((value / chartMax) * 100, 6)}%`
+            : '14%';
+          const label = hasValue
+            ? `${formatShortDate(day.day)} observed daily high: ${value.toLocaleString('en-US')} players`
+            : `${formatShortDate(day.day)} has no stored data yet`;
+          const barClass = hasValue
+            ? 'bg-[linear-gradient(180deg,rgba(34,211,238,0.95),rgba(8,145,178,0.72))] shadow-[0_0_20px_rgba(34,211,238,0.18)]'
+            : 'border border-dashed border-slate-700 bg-slate-900/70';
+
+          const column = document.createElement('div');
+          column.className = 'flex h-full items-end';
+          column.innerHTML = `
+            <div class="group flex w-full items-end" title="${label}">
+              <div
+                class="w-full rounded-t-md transition ${barClass}"
+                style="height: ${barHeight};"
+                aria-label="${label}"
+              ></div>
+            </div>
+          `;
+          historyChartEl.appendChild(column);
+        }
+
+        historyCoverageEl.textContent = `${availableDays.toLocaleString('en-US')} / ${days.length.toLocaleString('en-US')}`;
+        historyStartEl.textContent = history?.trackingStartedAt ? formatShortDate(history.trackingStartedAt) : 'Today';
+        historyLabelStartEl.textContent = days[0]?.day ? formatShortDate(days[0].day) : '30 days ago';
+        historyLabelMidEl.textContent = days[midpointIndex]?.day ? formatShortDate(days[midpointIndex].day) : 'Midpoint';
+        historyLabelEndEl.textContent = days[days.length - 1]?.day ? formatShortDate(days[days.length - 1].day) : 'Today';
+
+        historySummaryEl.textContent = availableDays <= 1
+          ? `Tracking began ${history?.trackingStartedAt ? formatShortDate(history.trackingStartedAt) : 'today'}. Earlier days are shown as placeholders until more daily samples accumulate.`
+          : `Showing observed daily highs for the last ${days.length.toLocaleString('en-US')} Eastern Time days. Days without stored samples remain as placeholders.`;
+      }
+
+      async function loadPlayerCount() {
+        const res = await fetch('/api/hwde/steam-player-count', { cache: 'no-store' });
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          throw new Error(data?.error || 'Request failed');
+        }
+
+        const value = typeof data.currentPlayers === 'number'
+          ? data.currentPlayers.toLocaleString('en-US')
+          : '--';
+        const dailyHighValue = typeof data?.dailyHigh?.value === 'number'
+          ? data.dailyHigh.value.toLocaleString('en-US')
+          : '--';
+
+        countEl.textContent = value;
+        dailyHighEl.textContent = dailyHighValue;
+        updatedEl.textContent = formatTimestamp(data.fetchedAt);
+
+        return data;
+      }
+
+      async function loadHistory() {
+        const res = await fetch('/api/hwde/steam-player-history', { cache: 'no-store' });
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          throw new Error(data?.error || 'Could not load 30-day history.');
+        }
+
+        renderHistory(data);
+        return data;
+      }
+
+      function resetCountUi() {
+        countEl.textContent = '--';
+        dailyHighEl.textContent = '--';
+      }
+
+      function renderHistoryError(message) {
+        historyChartEl.innerHTML = `
+          <div class="col-span-full flex h-full items-center justify-center rounded-2xl border border-dashed border-slate-700 bg-slate-950/70 p-6 text-center text-sm text-slate-400">
+            ${message}
+          </div>
+        `;
+        historySummaryEl.textContent = 'Thirty-day history is unavailable right now.';
+        historyStartEl.textContent = 'Unknown';
+        historyCoverageEl.textContent = '0 / 30';
+        historyLabelStartEl.textContent = '30 days ago';
+        historyLabelMidEl.textContent = 'Midpoint';
+        historyLabelEndEl.textContent = 'Today';
+      }
+
+      async function refreshAll() {
+        statusEl.textContent = 'Refreshing from Steam...';
+        setButtonLoading(true);
+
+        const [countResult, historyResult] = await Promise.allSettled([
+          loadPlayerCount(),
+          loadHistory(),
+        ]);
+
+        if (countResult.status === 'fulfilled') {
+          statusEl.textContent = typeof countResult.value?.dailyHigh?.value === 'number'
+            ? `Live Steam sample loaded. ${countResult.value.dailyHigh.sampleCount.toLocaleString('en-US')} samples stored today.`
+            : 'Live Steam sample loaded successfully.';
+        } else {
+          resetCountUi();
+          countEl.textContent = '--';
+          dailyHighEl.textContent = '--';
+          statusEl.textContent = countResult.reason instanceof Error
+            ? `Could not load player count: ${countResult.reason.message}`
+            : 'Could not load player count.';
+        }
+
+        if (historyResult.status === 'rejected') {
+          renderHistoryError(
+            historyResult.reason instanceof Error
+              ? historyResult.reason.message
+              : 'Could not load 30-day history.'
+          );
+        }
+
+        setButtonLoading(false);
       }
 
       refreshButton.addEventListener('click', () => {
-        loadPlayerCount();
+        refreshAll();
       });
 
-      loadPlayerCount();
-      window.setInterval(loadPlayerCount, 60000);
+      refreshAll();
+      window.setInterval(refreshAll, 60000);
+    })();
+  </script>
+
+  <script is:inline define:vars={{ haloWars1Units }}>
+    (() => {
+      const units = Array.isArray(haloWars1Units) ? [...haloWars1Units] : [];
+
+      const unitSearchEl = document.getElementById('hw1-unit-search');
+      const unitSortEl = document.getElementById('hw1-unit-sort');
+      const unitResultsEl = document.getElementById('hw1-unit-results');
+      const unitTableBodyEl = document.getElementById('hw1-unit-table-body');
+      const unitEmptyEl = document.getElementById('hw1-unit-empty');
+      const factionFilterButtons = Array.from(document.querySelectorAll('[data-hw1-faction-filter]'));
+      const typeFilterButtons = Array.from(document.querySelectorAll('[data-hw1-type-filter]'));
+
+      let activeFaction = 'all';
+      let activeType = 'all';
+
+      function setChipState(buttons, activeValue, attributeName) {
+        buttons.forEach((button) => {
+          const isActive = button.getAttribute(attributeName) === activeValue;
+          button.classList.toggle('border-cyan-400/25', isActive);
+          button.classList.toggle('bg-cyan-400/10', isActive);
+          button.classList.toggle('text-cyan-100', isActive);
+          button.classList.toggle('border-slate-700', !isActive);
+          button.classList.toggle('text-slate-300', !isActive);
+        });
+      }
+
+      function renderUnitRows(rows) {
+        if (!unitTableBodyEl || !unitResultsEl || !unitEmptyEl) return;
+
+        if (!rows.length) {
+          unitTableBodyEl.innerHTML = '';
+          unitEmptyEl.classList.remove('hidden');
+          unitResultsEl.textContent = 'No tracked Halo Wars 1 units match the current filters.';
+          return;
+        }
+
+        unitEmptyEl.classList.add('hidden');
+        unitResultsEl.textContent = `Showing ${rows.length.toLocaleString('en-US')} tracked units from the imported reference data.`;
+        unitTableBodyEl.innerHTML = rows.map((unit) => {
+          const factionClasses = unit.faction === 'UNSC'
+            ? 'border-cyan-400/25 bg-cyan-400/10 text-cyan-100'
+            : 'border-amber-400/25 bg-amber-400/10 text-amber-100';
+
+          return `
+            <tr class="transition hover:bg-slate-900/70">
+              <td class="px-4 py-3 font-semibold text-white">${unit.name}</td>
+              <td class="px-4 py-3">
+                <span class="inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${factionClasses}">
+                  ${unit.faction}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-slate-300">${unit.type}</td>
+              <td class="px-4 py-3 text-right font-semibold text-cyan-100">${unit.dpsDisplay}</td>
+              <td class="px-4 py-3 text-right">${unit.upgradeCount}</td>
+              <td class="px-4 py-3 text-slate-300">${unit.costDisplay}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      function applyUnitFilters() {
+        const searchTerm = unitSearchEl instanceof HTMLInputElement ? unitSearchEl.value.trim().toLowerCase() : '';
+        const sortValue = unitSortEl instanceof HTMLSelectElement ? unitSortEl.value : 'dps-desc';
+
+        const filtered = units.filter((unit) => {
+          if (activeFaction !== 'all' && unit.faction !== activeFaction) return false;
+          if (activeType !== 'all' && unit.type !== activeType) return false;
+          if (searchTerm && !`${unit.name} ${unit.faction} ${unit.type} ${unit.costDisplay}`.toLowerCase().includes(searchTerm)) return false;
+          return true;
+        });
+
+        filtered.sort((left, right) => {
+          switch (sortValue) {
+            case 'dps-desc':
+              return right.dpsValue - left.dpsValue || left.name.localeCompare(right.name);
+            case 'cost-asc': {
+              const leftCost = left.costValue ?? Number.POSITIVE_INFINITY;
+              const rightCost = right.costValue ?? Number.POSITIVE_INFINITY;
+              return leftCost - rightCost || left.name.localeCompare(right.name);
+            }
+            case 'name-asc':
+              return left.name.localeCompare(right.name);
+            case 'upgrades-desc':
+            default:
+              return right.upgradeCount - left.upgradeCount || left.name.localeCompare(right.name);
+          }
+        });
+
+        renderUnitRows(filtered);
+      }
+
+      factionFilterButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          activeFaction = button.getAttribute('data-hw1-faction-filter') || 'all';
+          setChipState(factionFilterButtons, activeFaction, 'data-hw1-faction-filter');
+          applyUnitFilters();
+        });
+      });
+
+      typeFilterButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          activeType = button.getAttribute('data-hw1-type-filter') || 'all';
+          setChipState(typeFilterButtons, activeType, 'data-hw1-type-filter');
+          applyUnitFilters();
+        });
+      });
+
+      if (unitSearchEl instanceof HTMLInputElement) {
+        unitSearchEl.addEventListener('input', applyUnitFilters);
+      }
+
+      if (unitSortEl instanceof HTMLSelectElement) {
+        unitSortEl.addEventListener('change', applyUnitFilters);
+      }
+
+      setChipState(factionFilterButtons, activeFaction, 'data-hw1-faction-filter');
+      setChipState(typeFilterButtons, activeType, 'data-hw1-type-filter');
+      applyUnitFilters();
     })();
   </script>
 </SecondaryPageLayout>
