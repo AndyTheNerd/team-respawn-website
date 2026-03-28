@@ -3,7 +3,7 @@ export type ActiveMatch = 'never' | 'exact' | 'prefix' | 'videos' | 'hw2Stats';
 export interface NavLink {
   href: string;
   label: string;
-  icon: string;
+  icon?: string;
   activeMatch?: ActiveMatch;
   external?: boolean;
   headerLabel?: string;
@@ -51,6 +51,16 @@ export function isNavLinkActive(
   }
 }
 
+export const STOREHAUS_INVITE_URL =
+  'https://discord.com/oauth2/authorize?client_id=1446587655541227552&permissions=117760&integration_type=0&scope=bot';
+
+export const headerPrimaryLinks: NavLink[] = [
+  { href: '/blog', label: 'Blog', activeMatch: 'prefix' },
+  { href: '/videos', label: 'Videos', activeMatch: 'videos' },
+  { href: '/halo-wars-stats', label: 'HW2 Stats', activeMatch: 'hw2Stats' },
+  { href: '/halo-wars-de-player-count', label: 'HW1 Data', activeMatch: 'exact' },
+];
+
 export const sidePanelPrimaryLinks: NavLink[] = [
   { href: '/blog', label: 'Blog', icon: 'fas fa-blog', activeMatch: 'prefix' },
   { href: '/halo-wars-stats', label: 'HW2 Stats', icon: 'fas fa-chart-bar', activeMatch: 'hw2Stats' },
@@ -68,29 +78,29 @@ export const aboutLinks: NavLink[] = [
 export const otherProjectSections: NavSection[] = [
   {
     title: 'Storehaus Bot',
-    description: 'Discord bot for HW2, AoE II & IV — stats, player search, and AI strategy.',
+    description: 'Discord bot for HW2, AoE II, and AoE IV - stats, player search, and AI strategy.',
     links: [
-      { href: '/storehaus-info', label: 'Summary', icon: 'fas fa-info-circle', activeMatch: 'exact' },
+      { href: '/storehaus', label: 'Summary', icon: 'fas fa-info-circle', activeMatch: 'exact' },
       { href: '/storehaus/privacy-policy', label: 'Privacy Policy', icon: 'fas fa-shield-alt', activeMatch: 'exact' },
       { href: '/storehaus/terms-of-service', label: 'Terms of Service', icon: 'fas fa-file-contract', activeMatch: 'exact' },
-      { href: '/storehaus', label: 'Add to Server ↗', icon: 'fab fa-discord', external: true, activeMatch: 'never' },
+      { href: STOREHAUS_INVITE_URL, label: 'Add to Server', icon: 'fab fa-discord', external: true, activeMatch: 'never' },
     ],
   },
   {
     title: 'Halo Quotes',
     description: 'Website, API, and bots for random quotes from the Halo series.',
     links: [
-      { href: 'https://haloquotes.teamrespawntv.com/', label: 'Website ↗', icon: 'fas fa-quote-left', external: true, activeMatch: 'never' },
-      { href: 'https://api.haloquotes.teamrespawntv.com/', label: 'API ↗', icon: 'fas fa-code', external: true, activeMatch: 'never' },
-      { href: 'https://github.com/AndyTheNerd/Halo-Quotes', label: 'GitHub ↗', icon: 'fab fa-github', external: true, activeMatch: 'never' },
+      { href: 'https://haloquotes.teamrespawntv.com/', label: 'Website', icon: 'fas fa-quote-left', external: true, activeMatch: 'never' },
+      { href: 'https://api.haloquotes.teamrespawntv.com/', label: 'API', icon: 'fas fa-code', external: true, activeMatch: 'never' },
+      { href: 'https://github.com/AndyTheNerd/Halo-Quotes', label: 'GitHub', icon: 'fab fa-github', external: true, activeMatch: 'never' },
     ],
   },
   {
     title: 'AOE2 API',
     description: 'Self-hosted REST API serving AoE II civs, units, techs, and structures.',
     links: [
-      { href: 'https://aoe2api.teamrespawntv.com/', label: 'API ↗', icon: 'fas fa-code', external: true, activeMatch: 'never' },
-      { href: 'https://github.com/AndyTheNerd/age-of-empires-II-api', label: 'GitHub ↗', icon: 'fab fa-github', external: true, activeMatch: 'never' },
+      { href: 'https://aoe2api.teamrespawntv.com/', label: 'API', icon: 'fas fa-code', external: true, activeMatch: 'never' },
+      { href: 'https://github.com/AndyTheNerd/age-of-empires-II-api', label: 'GitHub', icon: 'fab fa-github', external: true, activeMatch: 'never' },
     ],
   },
 ];
