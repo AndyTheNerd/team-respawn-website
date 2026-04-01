@@ -1,324 +1,79 @@
-import type { TimelineEntry, PlayerInfo } from './types';
 import { state } from './state';
 import { formatMatchClock } from './dataProcessing';
 import { ensureChartJs, destroyChart, chartInstances } from './chartManager';
 import { getMatchResult } from '../../utils/haloApi';
 import { fetchMatchEventsPayload, buildEventEntries } from './matchEventProcessing';
+import {
+  buildMatchGraphModel,
+  clampGraphWindow,
+  filterPointsForWindow,
+  getPhaseWindow,
+  type GraphWindow,
+  type MatchGraphModel,
+  type PlayerGraphSeries,
+  type TimelineAnnotationLane,
+} from './matchGraphModel';
 
-function renderUnitsChart(Chart: any, matchId: string, matchResult: any) {
-  const canvasEl = document.getElementById(`chart-units-${matchId}`) as HTMLCanvasElement | null;
-  const wrapperEl = canvasEl?.closest('[id^="graph-units"]');
-  const emptyEl = wrapperEl?.querySelector('.chart-empty') as HTMLElement | null;
-  if (!canvasEl) return;
-
-  const playersRaw = matchResult?.Players;
-  const players = Array.isArray(playersRaw)
-    ? playersRaw
-    : (playersRaw && typeof playersRaw === 'object')
-      ? Object.values(playersRaw)
-      : [];
-
-  type UnitRow = { name: string; teamId: number; destroyed: number; lost: number };
-  const rows: UnitRow[] = [];
-
-  players.forEach((p: any) => {
-    if (p.PlayerType === 3) return;
-    const gamertag = p?.HumanPlayerId?.Gamertag
-      || p?.Gamertag
-      || (typeof p?.HumanPlayerId === 'string' ? p.HumanPlayerId : '')
-      || 'Unknown';
-    let destroyed = 0;
-    let lost = 0;
-    const unitStats = p?.UnitStats;
-    if (unitStats && typeof unitStats === 'object') {
-      Object.values(unitStats).forEach((u: any) => {
-        destroyed += u?.TotalDestroyed || 0;
-        lost += u?.TotalLost || 0;
-      });
-    }
-    rows.push({ name: gamertag, teamId: p.TeamId ?? 0, destroyed, lost });
-  });
-
-  if (rows.length === 0) {
-    canvasEl.parentElement!.classList.add('hidden');
-    if (emptyEl) emptyEl.classList.remove('hidden');
-    return;
-  }
-
-  rows.sort((a, b) => a.teamId - b.teamId);
-
-  const labels = rows.map(r => r.name);
-  const destroyedData = rows.map(r => r.destroyed);
-  const lostData = rows.map(r => -r.lost);
-
-  destroyChart(`chart-units-${matchId}`);
-  const chart = new Chart(canvasEl, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        {
-          label: 'Units Destroyed',
-          data: destroyedData,
-          backgroundColor: 'rgba(34, 197, 94, 0.6)',
-          borderColor: 'rgba(34, 197, 94, 1)',
-          borderWidth: 1,
-          borderRadius: 4,
-        },
-        {
-          label: 'Units Lost',
-          data: lostData,
-          backgroundColor: 'rgba(239, 68, 68, 0.6)',
-          borderColor: 'rgba(239, 68, 68, 1)',
-          borderWidth: 1,
-          borderRadius: 4,
-        },
-      ],
-    },
-    options: {
-      indexAxis: 'y',
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          labels: { color: '#94a3b8', font: { size: 11 } },
-          position: 'top',
-        },
-        tooltip: {
-          backgroundColor: 'rgba(15, 23, 42, 0.95)',
-          titleColor: '#f8fafc',
-          bodyColor: '#e2e8f0',
-          borderColor: 'rgba(6, 182, 212, 0.3)',
-          borderWidth: 1,
-          callbacks: {
-            label: (context: any) => {
-              const value = Math.abs(context.raw);
-              return `${context.dataset.label}: ${value}`;
-            },
-          },
-        },
-      },
-      scales: {
-        x: {
-          grid: { color: 'rgba(148, 163, 184, 0.1)' },
-          ticks: {
-            color: '#94a3b8',
-            callback: (value: any) => Math.abs(Number(value)),
-          },
-          title: { display: true, text: 'Units', color: '#94a3b8' },
-        },
-        y: {
-          grid: { color: 'rgba(148, 163, 184, 0.1)' },
-          ticks: { color: '#e2e8f0', font: { size: 11 } },
-        },
-      },
-    },
-  });
-  chartInstances.set(`chart-units-${matchId}`, chart);
-}
-
-function renderActivityChart(
-  Chart: any,
-  matchId: string,
-  entries: TimelineEntry[],
-  playersByIndex: Map<number, PlayerInfo>,
-  timeWindow?: TimeWindow
-) {
-  const canvasEl = document.getElementById(`chart-activity-${matchId}`) as HTMLCanvasElement | null;
-  const wrapperEl = canvasEl?.closest('[id^="graph-activity"]');
-  const emptyEl = wrapperEl?.querySelector('.chart-empty') as HTMLElement | null;
-  if (!canvasEl) return;
-
-  if (entries.length === 0) {
-    canvasEl.parentElement!.classList.add('hidden');
-    if (emptyEl) emptyEl.classList.remove('hidden');
-    return;
-  }
-
-  const maxTimeMs = entries.reduce((max, e) => Math.max(max, e.timeMs), 0);
-  const maxMinutes = Math.max(1, maxTimeMs / 60000);
-  const boundedWindow = clampTimeWindow(timeWindow?.startMin ?? 0, timeWindow?.endMin ?? maxMinutes, maxMinutes);
-  const bucketSizeMs = 60000;
-  const bucketCount = Math.max(1, Math.ceil(maxTimeMs / bucketSizeMs));
-
-  const playerBuckets = new Map<number, number[]>();
-  const sorted = [...entries].sort((a, b) => a.timeMs - b.timeMs);
-
-  sorted.forEach((entry) => {
-    if (entry.playerIndex == null) return;
-    if (!playerBuckets.has(entry.playerIndex)) {
-      playerBuckets.set(entry.playerIndex, new Array(bucketCount).fill(0));
-    }
-    const bucketIdx = Math.min(Math.floor(entry.timeMs / bucketSizeMs), bucketCount - 1);
-    playerBuckets.get(entry.playerIndex)![bucketIdx]++;
-  });
-
-  playerBuckets.forEach((buckets) => {
-    for (let i = 1; i < buckets.length; i++) {
-      buckets[i] += buckets[i - 1];
-    }
-  });
-
-  const team1Colors = ['rgba(56, 189, 248, 0.9)', 'rgba(14, 165, 233, 0.9)', 'rgba(2, 132, 199, 0.9)'];
-  const team2Colors = ['rgba(251, 113, 133, 0.9)', 'rgba(244, 63, 94, 0.9)', 'rgba(225, 29, 72, 0.9)'];
-  let t1idx = 0, t2idx = 0;
-
-  const datasets = [...playerBuckets.entries()]
-    .sort((a, b) => a[0] - b[0])
-    .map(([playerIndex, cumulativeBuckets]) => {
-      const info = playersByIndex.get(playerIndex);
-      const name = info?.name || `Player ${playerIndex}`;
-      const teamId = info?.teamId;
-      let color: string;
-      if (teamId === 1) {
-        color = team1Colors[t1idx % team1Colors.length];
-        t1idx++;
-      } else if (teamId === 2) {
-        color = team2Colors[t2idx % team2Colors.length];
-        t2idx++;
-      } else {
-        color = 'rgba(148, 163, 184, 0.7)';
-      }
-
-      return {
-        label: name,
-        data: cumulativeBuckets.map((value, idx) => ({ x: idx + 1, y: value })),
-        borderColor: color,
-        backgroundColor: color.replace(/[\d.]+\)$/, '0.1)'),
-        fill: false,
-        tension: 0.3,
-        pointRadius: 0,
-        borderWidth: 2,
-      };
-    });
-
-  canvasEl.parentElement!.classList.remove('hidden');
-  if (emptyEl) emptyEl.classList.add('hidden');
-
-  destroyChart(`chart-activity-${matchId}`);
-  const chart = new Chart(canvasEl, {
-    type: 'line',
-    data: { datasets },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: {
-          labels: { color: '#94a3b8', font: { size: 10 }, usePointStyle: true, pointStyle: 'line' },
-          position: 'top',
-        },
-        tooltip: {
-          backgroundColor: 'rgba(15, 23, 42, 0.95)',
-          titleColor: '#f8fafc',
-          bodyColor: '#e2e8f0',
-          borderColor: 'rgba(6, 182, 212, 0.3)',
-          borderWidth: 1,
-          callbacks: {
-            title: (items: any[]) => {
-              if (!items.length) return '';
-              const minuteValue = Number(items[0]?.parsed?.x);
-              if (!Number.isFinite(minuteValue)) return '';
-              return formatMatchClock(minuteValue * 60000);
-            },
-          },
-        },
-      },
-      scales: {
-        x: {
-          type: 'linear',
-          min: boundedWindow.startMin,
-          max: boundedWindow.endMin,
-          grid: { color: 'rgba(148, 163, 184, 0.08)' },
-          ticks: {
-            color: '#94a3b8',
-            font: { size: 10 },
-            maxTicksLimit: 15,
-            callback: (value: any) => {
-              const minutes = Number(value);
-              if (!Number.isFinite(minutes)) return '';
-              if (minutes >= 60) {
-                const hours = Math.floor(minutes / 60);
-                const mins = Math.round(minutes % 60);
-                return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-              }
-              return `${Math.round(minutes)}m`;
-            },
-          },
-          title: { display: true, text: 'Match Time', color: '#94a3b8' },
-        },
-        y: {
-          beginAtZero: true,
-          grid: { color: 'rgba(148, 163, 184, 0.08)' },
-          ticks: { color: '#94a3b8', font: { size: 10 } },
-          title: { display: true, text: 'Cumulative Actions', color: '#94a3b8' },
-        },
-      },
-    },
-  });
-  chartInstances.set(`chart-activity-${matchId}`, chart);
-}
-
-type ResourcePoint = { x: number; y: number };
-type ResourceSeries = {
-  playerIndex: number;
-  playerName: string;
-  teamId: number | null;
-  baseColor: string;
-  supplyPoints: ResourcePoint[];
-  energyPoints: ResourcePoint[];
+type PhaseKey = 'full' | 'opening' | 'midgame' | 'late' | 'custom';
+type EconomyMetric = 'supply' | 'power';
+type GraphViewState = {
+  phase: PhaseKey;
+  window: GraphWindow;
+  economyMetric: EconomyMetric;
+  overlayPlayerIndex: number | null;
+  hoverMinute: number | null;
+  customEnabled: boolean;
 };
-type TimeWindow = { startMin: number; endMin: number };
-const LEADER_POINT_XP_THRESHOLDS = [0, 600, 1300, 2000, 3000, 4000, 5000, 6000, 7000, 7900, 8900];
 
-function clampTimeWindow(startMin: number, endMin: number, maxMinutes: number): TimeWindow {
-  const safeMax = Math.max(1, Number.isFinite(maxMinutes) ? maxMinutes : 1);
-  let start = Number.isFinite(startMin) ? startMin : 0;
-  let end = Number.isFinite(endMin) ? endMin : safeMax;
-  start = Math.min(Math.max(0, start), safeMax);
-  end = Math.min(Math.max(0, end), safeMax);
-  if (end <= start) {
-    if (start >= safeMax) start = Math.max(0, safeMax - 1);
-    end = Math.min(safeMax, start + 1);
-  }
-  return { startMin: start, endMin: end };
-}
+type ContributionRow = {
+  playerName: string;
+  teamId: 1 | 2 | null;
+  destroyed: number;
+  lost: number;
+  differential: number;
+};
 
-function getSelectedTimeWindow(matchId: string, maxMinutes: number): TimeWindow {
-  const startEl = document.getElementById(`graph-time-start-${matchId}`) as HTMLInputElement | null;
-  const endEl = document.getElementById(`graph-time-end-${matchId}`) as HTMLInputElement | null;
-  const start = Number(startEl?.value ?? 0);
-  const end = Number(endEl?.value ?? maxMinutes);
-  return clampTimeWindow(start, end, maxMinutes);
-}
+const TEAM_1_COLOR = 'rgba(56, 189, 248, 0.95)';
+const TEAM_2_COLOR = 'rgba(251, 113, 133, 0.95)';
+const TEAM_1_FILL = 'rgba(56, 189, 248, 0.18)';
+const TEAM_2_FILL = 'rgba(251, 113, 133, 0.18)';
+const OVERLAY_COLOR = 'rgba(250, 204, 21, 0.95)';
+const GRID_COLOR = 'rgba(148, 163, 184, 0.08)';
+const TICK_COLOR = '#94a3b8';
+const TITLE_COLOR = '#cbd5e1';
 
-function syncTimeWindowInputs(matchId: string, window: TimeWindow, maxMinutes: number) {
-  const startEl = document.getElementById(`graph-time-start-${matchId}`) as HTMLInputElement | null;
-  const endEl = document.getElementById(`graph-time-end-${matchId}`) as HTMLInputElement | null;
-  const labelEl = document.getElementById(`graph-time-window-label-${matchId}`) as HTMLElement | null;
-  if (startEl) {
-    startEl.min = '0';
-    startEl.max = String(Math.ceil(maxMinutes));
-    startEl.value = String(Math.round(window.startMin));
-  }
-  if (endEl) {
-    endEl.min = '0';
-    endEl.max = String(Math.ceil(maxMinutes));
-    endEl.value = String(Math.round(window.endMin));
-  }
-  if (labelEl) {
-    labelEl.textContent = `${formatMatchClock(window.startMin * 60000)} to ${formatMatchClock(window.endMin * 60000)}`;
-  }
-}
+const momentumBackgroundPlugin = {
+  id: 'momentumBackground',
+  beforeDraw(chart: any) {
+    const { ctx, chartArea, scales } = chart;
+    if (!chartArea || !scales?.y) return;
+    const zeroPixel = scales.y.getPixelForValue(0);
+    ctx.save();
+    ctx.fillStyle = 'rgba(56, 189, 248, 0.04)';
+    ctx.fillRect(chartArea.left, chartArea.top, chartArea.right - chartArea.left, Math.max(0, zeroPixel - chartArea.top));
+    ctx.fillStyle = 'rgba(251, 113, 133, 0.04)';
+    ctx.fillRect(chartArea.left, zeroPixel, chartArea.right - chartArea.left, Math.max(0, chartArea.bottom - zeroPixel));
+    ctx.restore();
+  },
+};
 
-function getLeaderPointsUnlocked(commandXp: number): number {
-  if (!Number.isFinite(commandXp)) return 0;
-  let unlocked = 0;
-  LEADER_POINT_XP_THRESHOLDS.forEach((threshold) => {
-    if (commandXp >= threshold) unlocked += 1;
-  });
-  return unlocked;
-}
+const sharedCrosshairPlugin = {
+  id: 'sharedCrosshair',
+  afterDatasetsDraw(chart: any, _args: any, options: any) {
+    const minute = options?.minute;
+    if (!Number.isFinite(minute) || !chart?.chartArea || !chart?.scales?.x) return;
+    const xPixel = chart.scales.x.getPixelForValue(minute);
+    const { ctx, chartArea } = chart;
+    ctx.save();
+    ctx.strokeStyle = options?.color || 'rgba(34, 211, 238, 0.55)';
+    ctx.setLineDash(options?.dash || [5, 4]);
+    ctx.beginPath();
+    ctx.moveTo(xPixel, chartArea.top);
+    ctx.lineTo(xPixel, chartArea.bottom);
+    ctx.stroke();
+    ctx.restore();
+  },
+};
 
 function withAlpha(color: string, alpha: number): string {
   const match = color.match(/^rgba\(([^)]+)\)$/i);
@@ -328,695 +83,432 @@ function withAlpha(color: string, alpha: number): string {
   return `rgba(${parts[0]}, ${parts[1]}, ${parts[2]}, ${alpha})`;
 }
 
-function downsamplePoints(points: ResourcePoint[], maxPoints: number): ResourcePoint[] {
+function getChartIds(matchId: string) {
+  return {
+    momentum: `chart-momentum-${matchId}`,
+    economy: `chart-economy-${matchId}`,
+    army: `chart-army-${matchId}`,
+    contribution: `chart-contribution-${matchId}`,
+  };
+}
+
+function getPhaseLabel(phase: PhaseKey): string {
+  switch (phase) {
+    case 'opening':
+      return 'Opening';
+    case 'midgame':
+      return 'Midgame';
+    case 'late':
+      return 'Late';
+    case 'custom':
+      return 'Custom';
+    case 'full':
+    default:
+      return 'Full';
+  }
+}
+
+function formatAxisMinutes(value: number): string {
+  if (!Number.isFinite(value)) return '';
+  if (value >= 60) {
+    const hours = Math.floor(value / 60);
+    const mins = Math.round(value % 60);
+    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+  }
+  return `${Math.round(value)}m`;
+}
+
+function downsamplePoints<T extends { x: number }>(points: T[], maxPoints: number): T[] {
   if (!Number.isFinite(maxPoints) || maxPoints <= 0 || points.length <= maxPoints) return points;
   if (maxPoints === 1) return [points[points.length - 1]];
-  const result: ResourcePoint[] = [points[0]];
+  const result: T[] = [points[0]];
   const interior = maxPoints - 2;
-  let lastIdx = 0;
-  for (let i = 1; i <= interior; i++) {
-    const idx = Math.round((i * (points.length - 1)) / (interior + 1));
-    if (idx <= lastIdx || idx >= points.length - 1) continue;
-    result.push(points[idx]);
-    lastIdx = idx;
+  let lastIndex = 0;
+  for (let index = 1; index <= interior; index++) {
+    const pointIndex = Math.round((index * (points.length - 1)) / (interior + 1));
+    if (pointIndex <= lastIndex || pointIndex >= points.length - 1) continue;
+    result.push(points[pointIndex]);
+    lastIndex = pointIndex;
   }
   result.push(points[points.length - 1]);
   return result;
 }
 
-function resolveMaxPointsPerSeries(
-  mode: string,
-  longestSeriesLength: number,
-  maxTimeMinutes: number
-): number {
-  if (mode === 'all') return Number.POSITIVE_INFINITY;
-  if (mode !== 'auto') {
-    const parsed = Number(mode);
-    if (Number.isFinite(parsed) && parsed > 0) return parsed;
-  }
-  if (longestSeriesLength <= 180) return longestSeriesLength;
-  if (maxTimeMinutes >= 120) return 160;
-  if (maxTimeMinutes >= 75) return 200;
-  if (maxTimeMinutes >= 45) return 240;
-  return 300;
+function resolveMaxPoints(maxTimeMin: number): number {
+  if (maxTimeMin >= 120) return 180;
+  if (maxTimeMin >= 75) return 220;
+  if (maxTimeMin >= 45) return 260;
+  return 320;
 }
 
-function buildIncomeRatePoints(points: ResourcePoint[]): ResourcePoint[] {
-  if (!Array.isArray(points) || points.length < 2) return [];
-  const sorted = [...points].sort((a, b) => a.x - b.x);
-  const rates: ResourcePoint[] = [];
-  for (let i = 1; i < sorted.length; i++) {
-    const prev = sorted[i - 1];
-    const curr = sorted[i];
-    const deltaMinutes = curr.x - prev.x;
-    if (!Number.isFinite(deltaMinutes) || deltaMinutes <= 0) continue;
-    const deltaValue = curr.y - prev.y;
-    if (!Number.isFinite(deltaValue)) continue;
-    // TotalSupply/TotalEnergy should be monotonic; clamp negative jitter to 0.
-    const perMinute = Math.max(0, deltaValue / deltaMinutes);
-    rates.push({ x: curr.x, y: perMinute });
-  }
-  return rates;
-}
-
-function renderResourcesChart(
-  Chart: any,
-  matchId: string,
-  entries: TimelineEntry[],
-  playersByIndex: Map<number, PlayerInfo>,
-  getTimeWindow?: () => TimeWindow,
-  extraRenderTriggers: Array<HTMLElement | null> = []
-) {
-  const canvasEl = document.getElementById(`chart-resources-${matchId}`) as HTMLCanvasElement | null;
-  const wrapperEl = canvasEl?.closest('[id^="graph-resources"]');
-  const emptyEl = wrapperEl?.querySelector('.chart-empty') as HTMLElement | null;
-  const showSupplyEl = document.getElementById(`resource-show-supply-${matchId}`) as HTMLInputElement | null;
-  const showPowerEl = document.getElementById(`resource-show-power-${matchId}`) as HTMLInputElement | null;
-  const metricEl = document.getElementById(`resource-metric-${matchId}`) as HTMLSelectElement | null;
-  const smoothingEl = document.getElementById(`resource-smoothing-${matchId}`) as HTMLSelectElement | null;
-  const downsampleEl = document.getElementById(`resource-downsample-${matchId}`) as HTMLSelectElement | null;
-  const downsampleHintEl = document.getElementById(`resource-downsample-hint-${matchId}`) as HTMLElement | null;
-  if (!canvasEl) return;
-
-  const resourceEntries = entries
-    .filter((entry) => entry.kind === 'resource' && entry.playerIndex != null)
-    .filter((entry) => {
-      const hasSupply = Number.isFinite(Number(entry.supply));
-      const hasEnergy = Number.isFinite(Number(entry.energy));
-      return hasSupply || hasEnergy;
-    });
-
-  if (resourceEntries.length === 0) {
-    canvasEl.parentElement!.classList.add('hidden');
-    if (emptyEl) emptyEl.classList.remove('hidden');
-    return;
-  }
-
-  const sorted = [...resourceEntries].sort((a, b) => a.timeMs - b.timeMs);
-  const supplyByPlayer = new Map<number, Array<{ x: number; y: number }>>();
-  const energyByPlayer = new Map<number, Array<{ x: number; y: number }>>();
-
-  sorted.forEach((entry) => {
-    const playerIndex = entry.playerIndex!;
-    const timeMinutes = entry.timeMs / 60000;
-    const supply = Number(entry.supply);
-    const energy = Number(entry.energy);
-
-    if (Number.isFinite(supply)) {
-      const list = supplyByPlayer.get(playerIndex) || [];
-      list.push({ x: timeMinutes, y: supply });
-      supplyByPlayer.set(playerIndex, list);
-    }
-
-    if (Number.isFinite(energy)) {
-      const list = energyByPlayer.get(playerIndex) || [];
-      list.push({ x: timeMinutes, y: energy });
-      energyByPlayer.set(playerIndex, list);
-    }
-  });
-
-  const playerIndices = [...new Set([...supplyByPlayer.keys(), ...energyByPlayer.keys()])].sort((a, b) => a - b);
-  if (playerIndices.length === 0) {
-    canvasEl.parentElement!.classList.add('hidden');
-    if (emptyEl) emptyEl.classList.remove('hidden');
-    return;
-  }
-
-  const team1Colors = ['rgba(56, 189, 248, 0.9)', 'rgba(14, 165, 233, 0.9)', 'rgba(2, 132, 199, 0.9)'];
-  const team2Colors = ['rgba(251, 113, 133, 0.9)', 'rgba(244, 63, 94, 0.9)', 'rgba(225, 29, 72, 0.9)'];
-  let t1idx = 0;
-  let t2idx = 0;
-
-  const resolveBaseColor = (playerIndex: number) => {
-    const teamId = playersByIndex.get(playerIndex)?.teamId;
-    if (teamId === 1) {
-      const color = team1Colors[t1idx % team1Colors.length];
-      t1idx++;
-      return color;
-    }
-    if (teamId === 2) {
-      const color = team2Colors[t2idx % team2Colors.length];
-      t2idx++;
-      return color;
-    }
-    return 'rgba(148, 163, 184, 0.85)';
+function getSharedPluginOptions(viewState: GraphViewState) {
+  return {
+    sharedCrosshair: {
+      minute: viewState.hoverMinute,
+      color: 'rgba(34, 211, 238, 0.45)',
+      dash: [4, 4],
+    },
   };
+}
 
-  const resourceSeries: ResourceSeries[] = playerIndices.map((playerIndex) => {
-    const info = playersByIndex.get(playerIndex);
-    return {
-      playerIndex,
-      playerName: info?.name || `Player ${playerIndex}`,
-      teamId: info?.teamId ?? null,
-      baseColor: resolveBaseColor(playerIndex),
-      supplyPoints: supplyByPlayer.get(playerIndex) || [],
-      energyPoints: energyByPlayer.get(playerIndex) || [],
-    };
+function buildContributionRows(matchResult: any): ContributionRow[] {
+  const playersRaw = matchResult?.Players;
+  const players = Array.isArray(playersRaw)
+    ? playersRaw
+    : (playersRaw && typeof playersRaw === 'object')
+      ? Object.values(playersRaw)
+      : [];
+
+  const distinctTeamIds = [...new Set(
+    players
+      .filter((player: any) => player?.PlayerType !== 3)
+      .map((player: any) => player?.TeamId)
+      .filter((teamId: any) => typeof teamId === 'number')
+  )].sort((a, b) => a - b);
+  const teamLookup = new Map<number, 1 | 2>();
+  distinctTeamIds.slice(0, 2).forEach((teamId, index) => {
+    teamLookup.set(teamId, index === 0 ? 1 : 2);
   });
 
-  const maxTimeMinutes = sorted.reduce((max, entry) => Math.max(max, entry.timeMs / 60000), 0);
-  const longestSeriesLength = resourceSeries.reduce((max, series) => {
-    return Math.max(max, series.supplyPoints.length, series.energyPoints.length);
-  }, 0);
-
-  const render = () => {
-    const selectedWindow = getTimeWindow
-      ? getTimeWindow()
-      : clampTimeWindow(0, maxTimeMinutes || 1, maxTimeMinutes || 1);
-    const showSupply = showSupplyEl?.checked ?? true;
-    const showPower = showPowerEl?.checked ?? true;
-    const metric = metricEl?.value === 'rate' ? 'rate' : 'total';
-    const isRateMetric = metric === 'rate';
-    const smoothing = Number(smoothingEl?.value ?? '0.25');
-    const downsampleMode = downsampleEl?.value ?? 'auto';
-    const maxPointsPerSeries = resolveMaxPointsPerSeries(downsampleMode, longestSeriesLength, maxTimeMinutes);
-
-    if (downsampleHintEl) {
-      downsampleHintEl.textContent = Number.isFinite(maxPointsPerSeries)
-        ? `Up to ${maxPointsPerSeries} points per series`
-        : 'All points per series';
-    }
-
-    const datasets = resourceSeries.flatMap((series) => {
-      const rows: any[] = [];
-      const supplySourcePoints = isRateMetric ? buildIncomeRatePoints(series.supplyPoints) : series.supplyPoints;
-      const energySourcePoints = isRateMetric ? buildIncomeRatePoints(series.energyPoints) : series.energyPoints;
-      const supplyVisiblePoints = supplySourcePoints.filter((point) => point.x >= selectedWindow.startMin && point.x <= selectedWindow.endMin);
-      const energyVisiblePoints = energySourcePoints.filter((point) => point.x >= selectedWindow.startMin && point.x <= selectedWindow.endMin);
-      if (showSupply && supplyVisiblePoints.length > 0) {
-        rows.push({
-          label: `${series.playerName} ${isRateMetric ? 'Supply Rate' : 'Supply'}`,
-          data: downsamplePoints(supplyVisiblePoints, maxPointsPerSeries),
-          borderColor: series.baseColor,
-          backgroundColor: withAlpha(series.baseColor, 0.15),
-          yAxisID: 'ySupply',
-          tension: Number.isFinite(smoothing) ? smoothing : 0.25,
-          pointRadius: 0,
-          pointHoverRadius: 3,
-          borderWidth: 2,
+  return players
+    .filter((player: any) => player?.PlayerType !== 3)
+    .map((player: any) => {
+      const gamertag = player?.HumanPlayerId?.Gamertag
+        || player?.Gamertag
+        || (typeof player?.HumanPlayerId === 'string' ? player.HumanPlayerId : '')
+        || 'Unknown';
+      let destroyed = 0;
+      let lost = 0;
+      const unitStats = player?.UnitStats;
+      if (unitStats && typeof unitStats === 'object') {
+        Object.values(unitStats).forEach((unit: any) => {
+          destroyed += unit?.TotalDestroyed || 0;
+          lost += unit?.TotalLost || 0;
         });
       }
-      if (showPower && energyVisiblePoints.length > 0) {
-        rows.push({
-          label: `${series.playerName} ${isRateMetric ? 'Power Rate' : 'Power'}`,
-          data: downsamplePoints(energyVisiblePoints, maxPointsPerSeries),
-          borderColor: withAlpha(series.baseColor, 0.65),
-          backgroundColor: 'transparent',
-          yAxisID: 'yEnergy',
-          borderDash: [6, 4],
-          tension: Number.isFinite(smoothing) ? smoothing : 0.25,
-          pointRadius: 0,
-          pointHoverRadius: 3,
-          borderWidth: 2,
-        });
-      }
-      return rows;
+      return {
+        playerName: gamertag,
+        teamId: teamLookup.get(player?.TeamId) ?? null,
+        destroyed,
+        lost,
+        differential: destroyed - lost,
+      };
+    })
+    .sort((a, b) => {
+      const teamA = a.teamId ?? 99;
+      const teamB = b.teamId ?? 99;
+      if (teamA !== teamB) return teamA - teamB;
+      return b.differential - a.differential;
     });
+}
 
-    if (datasets.length === 0) {
-      destroyChart(`chart-resources-${matchId}`);
-      canvasEl.parentElement!.classList.add('hidden');
-      if (emptyEl) {
-        emptyEl.textContent = 'No visible series in this time window. Adjust graph window or enable Supply/Power.';
-        emptyEl.classList.remove('hidden');
-      }
+function setChartEmpty(wrapperId: string, canvasId: string, message: string, visible: boolean) {
+  const wrapperEl = document.getElementById(wrapperId);
+  const canvasWrapper = document.getElementById(canvasId)?.parentElement as HTMLElement | null;
+  const emptyEl = wrapperEl?.querySelector('.chart-empty') as HTMLElement | null;
+  if (canvasWrapper) canvasWrapper.classList.toggle('hidden', visible);
+  if (emptyEl) {
+    emptyEl.textContent = message;
+    emptyEl.classList.toggle('hidden', !visible);
+  }
+}
+
+function updateRangeBrush(matchId: string, viewState: GraphViewState, maxTimeMin: number) {
+  const startEl = document.getElementById(`graph-brush-start-${matchId}`) as HTMLInputElement | null;
+  const endEl = document.getElementById(`graph-brush-end-${matchId}`) as HTMLInputElement | null;
+  const labelEl = document.getElementById(`graph-brush-label-${matchId}`) as HTMLElement | null;
+  if (startEl) {
+    startEl.min = '0';
+    startEl.max = String(maxTimeMin);
+    startEl.step = '0.5';
+    startEl.value = String(viewState.window.startMin);
+  }
+  if (endEl) {
+    endEl.min = '0.5';
+    endEl.max = String(maxTimeMin);
+    endEl.step = '0.5';
+    endEl.value = String(viewState.window.endMin);
+  }
+  if (labelEl) {
+    labelEl.textContent = `${formatMatchClock(viewState.window.startMin * 60000)} to ${formatMatchClock(viewState.window.endMin * 60000)}`;
+  }
+}
+
+function updatePhaseButtons(matchId: string, viewState: GraphViewState) {
+  document.querySelectorAll<HTMLButtonElement>(`#graph-phase-controls-${matchId} [data-phase]`).forEach((button) => {
+    const phase = button.dataset.phase as PhaseKey | undefined;
+    button.textContent = phase ? getPhaseLabel(phase) : 'Phase';
+    const isActive = phase === viewState.phase;
+    const isCustomLocked = phase === 'custom' && !viewState.customEnabled;
+    button.className = `graph-chip rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider transition-colors ${
+      isActive
+        ? 'border-cyan-300 bg-cyan-400/15 text-cyan-100'
+        : 'border-slate-700/60 bg-slate-900/60 text-gray-400 hover:border-slate-500/70 hover:text-gray-200'
+    } ${isCustomLocked ? 'opacity-50 cursor-not-allowed hover:border-slate-700/60 hover:text-gray-400' : ''}`;
+    button.disabled = isCustomLocked;
+  });
+}
+
+function updateEconomyButtons(matchId: string, viewState: GraphViewState) {
+  document.querySelectorAll<HTMLButtonElement>(`#graph-economy-controls-${matchId} [data-economy-metric]`).forEach((button) => {
+    const metric = button.dataset.economyMetric as EconomyMetric | undefined;
+    button.textContent = metric === 'power' ? 'Power/min' : 'Supply/min';
+    const isActive = metric === viewState.economyMetric;
+    button.className = `rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider transition-colors ${
+      isActive
+        ? 'border-cyan-300 bg-cyan-400/15 text-cyan-100'
+        : 'border-slate-700/60 bg-slate-900/60 text-gray-400 hover:border-slate-500/70 hover:text-gray-200'
+    }`;
+  });
+}
+
+function updateHoverReadout(matchId: string, viewState: GraphViewState) {
+  const hoverEl = document.getElementById(`graph-hover-readout-${matchId}`);
+  if (!hoverEl) return;
+  hoverEl.textContent = Number.isFinite(viewState.hoverMinute)
+    ? `Hover ${formatMatchClock((viewState.hoverMinute || 0) * 60000)}`
+    : `${getPhaseLabel(viewState.phase)} window`;
+}
+
+function updateRailHoverGuides(matchId: string, viewState: GraphViewState) {
+  const guides = document.querySelectorAll<HTMLElement>(`#graph-event-rail-${matchId} .graph-rail-guide`);
+  const span = Math.max(0.5, viewState.window.endMin - viewState.window.startMin);
+  const hoverMinute = viewState.hoverMinute;
+  guides.forEach((guide) => {
+    if (!Number.isFinite(hoverMinute) || hoverMinute == null || hoverMinute < viewState.window.startMin || hoverMinute > viewState.window.endMin) {
+      guide.classList.add('hidden');
       return;
     }
+    const percent = ((hoverMinute - viewState.window.startMin) / span) * 100;
+    guide.style.left = `${Math.max(0, Math.min(100, percent))}%`;
+    guide.classList.remove('hidden');
+  });
+}
 
-    canvasEl.parentElement!.classList.remove('hidden');
-    if (emptyEl) {
-      emptyEl.textContent = 'No resource heartbeat data available.';
-      emptyEl.classList.add('hidden');
-    }
+function redrawSyncedCharts(matchId: string, viewState: GraphViewState) {
+  const chartIds = getChartIds(matchId);
+  [chartIds.momentum, chartIds.economy, chartIds.army].forEach((chartId) => {
+    const chart = chartInstances.get(chartId);
+    if (!chart) return;
+    chart.options.plugins = {
+      ...(chart.options.plugins || {}),
+      ...getSharedPluginOptions(viewState),
+    };
+    chart.draw();
+  });
+  updateHoverReadout(matchId, viewState);
+  updateRailHoverGuides(matchId, viewState);
+}
 
-    destroyChart(`chart-resources-${matchId}`);
-    const chart = new Chart(canvasEl, {
-      type: 'line',
-      data: { datasets },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: { mode: 'index', intersect: false },
-        plugins: {
-          legend: {
-            labels: { color: '#94a3b8', font: { size: 10 }, usePointStyle: true, pointStyle: 'line' },
-            position: 'top',
-          },
-          tooltip: {
-            backgroundColor: 'rgba(15, 23, 42, 0.95)',
-            titleColor: '#f8fafc',
-            bodyColor: '#e2e8f0',
-            borderColor: 'rgba(6, 182, 212, 0.3)',
-            borderWidth: 1,
-            callbacks: {
-              title: (items: any[]) => {
-                if (!items.length) return '';
-                const minuteValue = Number(items[0]?.parsed?.x);
-                if (!Number.isFinite(minuteValue)) return '';
-                return formatMatchClock(minuteValue * 60000);
-              },
-              label: (context: any) => {
-                const value = Number(context?.parsed?.y);
-                const suffix = isRateMetric ? ' / min' : '';
-                if (!Number.isFinite(value)) return context.dataset.label;
-                const display = isRateMetric ? value.toFixed(1) : Math.round(value).toString();
-                return `${context.dataset.label}: ${display}${suffix}`;
-              },
-            },
-          },
+function bindSharedHover(matchId: string, viewState: GraphViewState) {
+  const chartIds = getChartIds(matchId);
+  [chartIds.momentum, chartIds.economy, chartIds.army].forEach((chartId) => {
+    const canvasEl = document.getElementById(chartId) as HTMLCanvasElement | null;
+    if (!canvasEl || canvasEl.dataset.hoverBound === 'true') return;
+    canvasEl.dataset.hoverBound = 'true';
+
+    canvasEl.addEventListener('mousemove', (event) => {
+      const chart = chartInstances.get(chartId);
+      const xScale = chart?.scales?.x;
+      if (!chart || !xScale) return;
+      const rect = canvasEl.getBoundingClientRect();
+      const pixel = event.clientX - rect.left;
+      const minute = xScale.getValueForPixel(pixel);
+      if (!Number.isFinite(minute)) return;
+      viewState.hoverMinute = Math.max(viewState.window.startMin, Math.min(viewState.window.endMin, Number(minute)));
+      redrawSyncedCharts(matchId, viewState);
+    });
+
+    canvasEl.addEventListener('mouseleave', () => {
+      viewState.hoverMinute = null;
+      redrawSyncedCharts(matchId, viewState);
+    });
+  });
+}
+
+function renderContributionChart(Chart: any, matchId: string, rows: ContributionRow[]) {
+  const canvasId = getChartIds(matchId).contribution;
+  const wrapperId = `graph-contribution-${matchId}`;
+  const canvasEl = document.getElementById(canvasId) as HTMLCanvasElement | null;
+  if (!canvasEl) return;
+
+  if (rows.length === 0) {
+    destroyChart(canvasId);
+    setChartEmpty(wrapperId, canvasId, 'No contribution data available.', true);
+    return;
+  }
+
+  setChartEmpty(wrapperId, canvasId, '', false);
+  const labels = rows.map((row) => `${row.teamId ? `T${row.teamId}` : 'NA'} · ${row.playerName}`);
+
+  destroyChart(canvasId);
+  const chart = new Chart(canvasEl, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Destroyed',
+          data: rows.map((row) => row.destroyed),
+          backgroundColor: 'rgba(74, 222, 128, 0.7)',
+          borderColor: 'rgba(34, 197, 94, 1)',
+          borderWidth: 1,
+          borderRadius: 4,
         },
-        scales: {
-          x: {
-            type: 'linear',
-            min: selectedWindow.startMin,
-            max: selectedWindow.endMin,
-            grid: { color: 'rgba(148, 163, 184, 0.08)' },
-            ticks: {
-              color: '#94a3b8',
-              font: { size: 10 },
-              callback: (value: any) => {
-                const minutes = Number(value);
-                if (!Number.isFinite(minutes)) return '';
-                if (minutes >= 60) {
-                  const hours = Math.floor(minutes / 60);
-                  const mins = Math.round(minutes % 60);
-                  return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-                }
-                return `${Math.round(minutes)}m`;
-              },
-            },
-            title: { display: true, text: 'Match Time', color: '#94a3b8' },
-          },
-          ySupply: {
-            type: 'linear',
-            position: 'left',
-            beginAtZero: true,
-            grid: { color: 'rgba(148, 163, 184, 0.08)' },
-            ticks: { color: '#94a3b8', font: { size: 10 } },
-            title: { display: true, text: isRateMetric ? 'Supply / min' : 'Supply', color: '#94a3b8' },
-          },
-          yEnergy: {
-            type: 'linear',
-            position: 'right',
-            beginAtZero: true,
-            grid: { drawOnChartArea: false },
-            ticks: { color: '#94a3b8', font: { size: 10 } },
-            title: { display: true, text: isRateMetric ? 'Power / min' : 'Power', color: '#94a3b8' },
+        {
+          label: 'Lost',
+          data: rows.map((row) => -row.lost),
+          backgroundColor: 'rgba(248, 113, 113, 0.6)',
+          borderColor: 'rgba(239, 68, 68, 1)',
+          borderWidth: 1,
+          borderRadius: 4,
+        },
+        {
+          label: 'Differential',
+          data: rows.map((row) => row.differential),
+          backgroundColor: rows.map((row) => row.differential >= 0 ? 'rgba(34, 211, 238, 0.35)' : 'rgba(251, 191, 36, 0.35)'),
+          borderColor: rows.map((row) => row.differential >= 0 ? 'rgba(34, 211, 238, 1)' : 'rgba(251, 191, 36, 1)'),
+          borderWidth: 1,
+          borderRadius: 4,
+        },
+      ],
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          labels: { color: TICK_COLOR, font: { size: 10 } },
+          position: 'top',
+        },
+        tooltip: {
+          backgroundColor: 'rgba(15, 23, 42, 0.95)',
+          titleColor: '#f8fafc',
+          bodyColor: '#e2e8f0',
+          borderColor: 'rgba(6, 182, 212, 0.3)',
+          borderWidth: 1,
+          callbacks: {
+            label: (context: any) => `${context.dataset.label}: ${Math.abs(Number(context.raw))}`,
           },
         },
       },
-    });
-    chartInstances.set(`chart-resources-${matchId}`, chart);
-  };
-
-  [...[showSupplyEl, showPowerEl, metricEl, smoothingEl, downsampleEl], ...extraRenderTriggers].forEach((el) => {
-    if (!el) return;
-    el.addEventListener('change', render);
-    if (el instanceof HTMLInputElement && (el.type === 'number' || el.type === 'range')) {
-      el.addEventListener('input', render);
-    }
-  });
-
-  render();
-}
-
-function renderPopulationChart(
-  Chart: any,
-  matchId: string,
-  entries: TimelineEntry[],
-  playersByIndex: Map<number, PlayerInfo>,
-  getTimeWindow?: () => TimeWindow,
-  extraRenderTriggers: Array<HTMLElement | null> = []
-) {
-  const canvasEl = document.getElementById(`chart-population-${matchId}`) as HTMLCanvasElement | null;
-  const wrapperEl = canvasEl?.closest('[id^="graph-population"]');
-  const emptyEl = wrapperEl?.querySelector('.chart-empty') as HTMLElement | null;
-  const showPopulationEl = document.getElementById(`population-show-population-${matchId}`) as HTMLInputElement | null;
-  const showCapEl = document.getElementById(`population-show-cap-${matchId}`) as HTMLInputElement | null;
-  const smoothingEl = document.getElementById(`population-smoothing-${matchId}`) as HTMLSelectElement | null;
-  const downsampleEl = document.getElementById(`population-downsample-${matchId}`) as HTMLSelectElement | null;
-  const downsampleHintEl = document.getElementById(`population-downsample-hint-${matchId}`) as HTMLElement | null;
-  if (!canvasEl) return;
-
-  const resourceEntries = entries
-    .filter((entry) => entry.kind === 'resource' && entry.playerIndex != null)
-    .filter((entry) => {
-      const hasPopulation = Number.isFinite(Number(entry.population));
-      const hasPopulationCap = Number.isFinite(Number(entry.populationCap));
-      return hasPopulation || hasPopulationCap;
-    });
-
-  if (resourceEntries.length === 0) {
-    canvasEl.parentElement!.classList.add('hidden');
-    if (emptyEl) emptyEl.classList.remove('hidden');
-    return;
-  }
-
-  const sorted = [...resourceEntries].sort((a, b) => a.timeMs - b.timeMs);
-  const populationByPlayer = new Map<number, ResourcePoint[]>();
-  const populationCapByPlayer = new Map<number, ResourcePoint[]>();
-
-  sorted.forEach((entry) => {
-    const playerIndex = entry.playerIndex!;
-    const timeMinutes = entry.timeMs / 60000;
-    const population = Number(entry.population);
-    const populationCap = Number(entry.populationCap);
-
-    if (Number.isFinite(population)) {
-      const list = populationByPlayer.get(playerIndex) || [];
-      list.push({ x: timeMinutes, y: population });
-      populationByPlayer.set(playerIndex, list);
-    }
-    if (Number.isFinite(populationCap)) {
-      const list = populationCapByPlayer.get(playerIndex) || [];
-      list.push({ x: timeMinutes, y: populationCap });
-      populationCapByPlayer.set(playerIndex, list);
-    }
-  });
-
-  const playerIndices = [...new Set([...populationByPlayer.keys(), ...populationCapByPlayer.keys()])].sort((a, b) => a - b);
-  if (playerIndices.length === 0) {
-    canvasEl.parentElement!.classList.add('hidden');
-    if (emptyEl) emptyEl.classList.remove('hidden');
-    return;
-  }
-
-  const team1Colors = ['rgba(56, 189, 248, 0.9)', 'rgba(14, 165, 233, 0.9)', 'rgba(2, 132, 199, 0.9)'];
-  const team2Colors = ['rgba(251, 113, 133, 0.9)', 'rgba(244, 63, 94, 0.9)', 'rgba(225, 29, 72, 0.9)'];
-  let t1idx = 0;
-  let t2idx = 0;
-
-  const resolveBaseColor = (playerIndex: number) => {
-    const teamId = playersByIndex.get(playerIndex)?.teamId;
-    if (teamId === 1) {
-      const color = team1Colors[t1idx % team1Colors.length];
-      t1idx++;
-      return color;
-    }
-    if (teamId === 2) {
-      const color = team2Colors[t2idx % team2Colors.length];
-      t2idx++;
-      return color;
-    }
-    return 'rgba(148, 163, 184, 0.85)';
-  };
-
-  const populationSeries = playerIndices.map((playerIndex) => {
-    const info = playersByIndex.get(playerIndex);
-    return {
-      playerName: info?.name || `Player ${playerIndex}`,
-      baseColor: resolveBaseColor(playerIndex),
-      populationPoints: populationByPlayer.get(playerIndex) || [],
-      populationCapPoints: populationCapByPlayer.get(playerIndex) || [],
-    };
-  });
-
-  const maxTimeMinutes = sorted.reduce((max, entry) => Math.max(max, entry.timeMs / 60000), 0);
-  const longestSeriesLength = populationSeries.reduce((max, series) => {
-    return Math.max(max, series.populationPoints.length, series.populationCapPoints.length);
-  }, 0);
-
-  const render = () => {
-    const selectedWindow = getTimeWindow
-      ? getTimeWindow()
-      : clampTimeWindow(0, maxTimeMinutes || 1, maxTimeMinutes || 1);
-    const showPopulation = showPopulationEl?.checked ?? true;
-    const showCap = showCapEl?.checked ?? true;
-    const smoothing = Number(smoothingEl?.value ?? '0.25');
-    const downsampleMode = downsampleEl?.value ?? 'auto';
-    const maxPointsPerSeries = resolveMaxPointsPerSeries(downsampleMode, longestSeriesLength, maxTimeMinutes);
-
-    if (downsampleHintEl) {
-      downsampleHintEl.textContent = Number.isFinite(maxPointsPerSeries)
-        ? `Up to ${maxPointsPerSeries} points per series`
-        : 'All points per series';
-    }
-
-    const datasets = populationSeries.flatMap((series) => {
-      const rows: any[] = [];
-      const populationVisible = series.populationPoints.filter((point) => point.x >= selectedWindow.startMin && point.x <= selectedWindow.endMin);
-      const populationCapVisible = series.populationCapPoints.filter((point) => point.x >= selectedWindow.startMin && point.x <= selectedWindow.endMin);
-
-      if (showPopulation && populationVisible.length > 0) {
-        rows.push({
-          label: `${series.playerName} Population`,
-          data: downsamplePoints(populationVisible, maxPointsPerSeries),
-          borderColor: series.baseColor,
-          backgroundColor: withAlpha(series.baseColor, 0.15),
-          yAxisID: 'yPopulation',
-          tension: Number.isFinite(smoothing) ? smoothing : 0.25,
-          pointRadius: 0,
-          pointHoverRadius: 3,
-          borderWidth: 2,
-        });
-      }
-
-      if (showCap && populationCapVisible.length > 0) {
-        rows.push({
-          label: `${series.playerName} Population Cap`,
-          data: downsamplePoints(populationCapVisible, maxPointsPerSeries),
-          borderColor: withAlpha(series.baseColor, 0.65),
-          backgroundColor: 'transparent',
-          yAxisID: 'yPopulation',
-          borderDash: [6, 4],
-          tension: Number.isFinite(smoothing) ? smoothing : 0.25,
-          pointRadius: 0,
-          pointHoverRadius: 3,
-          borderWidth: 2,
-        });
-      }
-
-      return rows;
-    });
-
-    if (datasets.length === 0) {
-      destroyChart(`chart-population-${matchId}`);
-      canvasEl.parentElement!.classList.add('hidden');
-      if (emptyEl) {
-        emptyEl.textContent = 'No visible population series in this time window.';
-        emptyEl.classList.remove('hidden');
-      }
-      return;
-    }
-
-    canvasEl.parentElement!.classList.remove('hidden');
-    if (emptyEl) {
-      emptyEl.textContent = 'No population heartbeat data available.';
-      emptyEl.classList.add('hidden');
-    }
-
-    destroyChart(`chart-population-${matchId}`);
-    const chart = new Chart(canvasEl, {
-      type: 'line',
-      data: { datasets },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: { mode: 'index', intersect: false },
-        plugins: {
-          legend: {
-            labels: { color: '#94a3b8', font: { size: 10 }, usePointStyle: true, pointStyle: 'line' },
-            position: 'top',
+      scales: {
+        x: {
+          grid: { color: GRID_COLOR },
+          ticks: {
+            color: TICK_COLOR,
+            callback: (value: any) => Math.abs(Number(value)),
           },
-          tooltip: {
-            backgroundColor: 'rgba(15, 23, 42, 0.95)',
-            titleColor: '#f8fafc',
-            bodyColor: '#e2e8f0',
-            borderColor: 'rgba(6, 182, 212, 0.3)',
-            borderWidth: 1,
-            callbacks: {
-              title: (items: any[]) => {
-                if (!items.length) return '';
-                const minuteValue = Number(items[0]?.parsed?.x);
-                if (!Number.isFinite(minuteValue)) return '';
-                return formatMatchClock(minuteValue * 60000);
-              },
-              label: (context: any) => {
-                const value = Number(context?.parsed?.y);
-                if (!Number.isFinite(value)) return context.dataset.label;
-                return `${context.dataset.label}: ${Math.round(value)}`;
-              },
-            },
-          },
+          title: { display: true, text: 'Units', color: TITLE_COLOR },
         },
-        scales: {
-          x: {
-            type: 'linear',
-            min: selectedWindow.startMin,
-            max: selectedWindow.endMin,
-            grid: { color: 'rgba(148, 163, 184, 0.08)' },
-            ticks: {
-              color: '#94a3b8',
-              font: { size: 10 },
-              callback: (value: any) => {
-                const minutes = Number(value);
-                if (!Number.isFinite(minutes)) return '';
-                if (minutes >= 60) {
-                  const hours = Math.floor(minutes / 60);
-                  const mins = Math.round(minutes % 60);
-                  return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-                }
-                return `${Math.round(minutes)}m`;
-              },
-            },
-            title: { display: true, text: 'Match Time', color: '#94a3b8' },
-          },
-          yPopulation: {
-            type: 'linear',
-            beginAtZero: true,
-            grid: { color: 'rgba(148, 163, 184, 0.08)' },
-            ticks: { color: '#94a3b8', font: { size: 10 } },
-            title: { display: true, text: 'Population', color: '#94a3b8' },
-          },
+        y: {
+          grid: { color: GRID_COLOR },
+          ticks: { color: '#e2e8f0', font: { size: 11 } },
         },
       },
-    });
-    chartInstances.set(`chart-population-${matchId}`, chart);
-  };
-
-  [...[showPopulationEl, showCapEl, smoothingEl, downsampleEl], ...extraRenderTriggers].forEach((el) => {
-    if (!el) return;
-    el.addEventListener('change', render);
-    if (el instanceof HTMLInputElement && (el.type === 'number' || el.type === 'range')) {
-      el.addEventListener('input', render);
-    }
+    },
   });
-
-  render();
+  chartInstances.set(canvasId, chart);
 }
 
-function renderLeaderPointsChart(
-  Chart: any,
-  matchId: string,
-  entries: TimelineEntry[],
-  playersByIndex: Map<number, PlayerInfo>,
-  timeWindow?: TimeWindow
-) {
-  const canvasEl = document.getElementById(`chart-leaderpoints-${matchId}`) as HTMLCanvasElement | null;
-  const wrapperEl = canvasEl?.closest('[id^="graph-leaderpoints"]');
-  const emptyEl = wrapperEl?.querySelector('.chart-empty') as HTMLElement | null;
+function renderMomentumChart(Chart: any, matchId: string, model: MatchGraphModel, viewState: GraphViewState, hasHeartbeatData: boolean) {
+  const canvasId = getChartIds(matchId).momentum;
+  const wrapperId = `graph-momentum-${matchId}`;
+  const badgeEl = document.getElementById(`graph-decisive-swing-${matchId}`);
+  const canvasEl = document.getElementById(canvasId) as HTMLCanvasElement | null;
   if (!canvasEl) return;
 
-  const resourceEntries = entries
-    .filter((entry) => entry.kind === 'resource' && entry.playerIndex != null)
-    .filter((entry) => Number.isFinite(Number(entry.commandXp)));
-
-  if (resourceEntries.length === 0) {
-    canvasEl.parentElement!.classList.add('hidden');
-    if (emptyEl) emptyEl.classList.remove('hidden');
+  if (!hasHeartbeatData) {
+    destroyChart(canvasId);
+    setChartEmpty(wrapperId, canvasId, 'No resource heartbeat data available for team momentum.', true);
+    if (badgeEl) badgeEl.textContent = 'Heartbeat data unavailable';
     return;
   }
 
-  const sorted = [...resourceEntries].sort((a, b) => a.timeMs - b.timeMs);
-  const commandXpByPlayer = new Map<number, ResourcePoint[]>();
-
-  sorted.forEach((entry) => {
-    const playerIndex = entry.playerIndex!;
-    const timeMinutes = entry.timeMs / 60000;
-    const commandXp = Number(entry.commandXp);
-    if (!Number.isFinite(commandXp)) return;
-    const list = commandXpByPlayer.get(playerIndex) || [];
-    list.push({ x: timeMinutes, y: commandXp });
-    commandXpByPlayer.set(playerIndex, list);
-  });
-
-  const playerIndices = [...commandXpByPlayer.keys()].sort((a, b) => a - b);
-  if (playerIndices.length === 0) {
-    canvasEl.parentElement!.classList.add('hidden');
-    if (emptyEl) emptyEl.classList.remove('hidden');
-    return;
-  }
-
-  const team1Colors = ['rgba(56, 189, 248, 0.9)', 'rgba(14, 165, 233, 0.9)', 'rgba(2, 132, 199, 0.9)'];
-  const team2Colors = ['rgba(251, 113, 133, 0.9)', 'rgba(244, 63, 94, 0.9)', 'rgba(225, 29, 72, 0.9)'];
-  let t1idx = 0;
-  let t2idx = 0;
-
-  const resolveBaseColor = (playerIndex: number) => {
-    const teamId = playersByIndex.get(playerIndex)?.teamId;
-    if (teamId === 1) {
-      const color = team1Colors[t1idx % team1Colors.length];
-      t1idx++;
-      return color;
-    }
-    if (teamId === 2) {
-      const color = team2Colors[t2idx % team2Colors.length];
-      t2idx++;
-      return color;
-    }
-    return 'rgba(148, 163, 184, 0.85)';
-  };
-
-  const xpSeries = playerIndices.map((playerIndex) => {
-    const info = playersByIndex.get(playerIndex);
-    return {
-      playerName: info?.name || `Player ${playerIndex}`,
-      baseColor: resolveBaseColor(playerIndex),
-      points: commandXpByPlayer.get(playerIndex) || [],
-    };
-  });
-
-  const maxTimeMinutes = sorted.reduce((max, entry) => Math.max(max, entry.timeMs / 60000), 0);
-  const boundedWindow = clampTimeWindow(timeWindow?.startMin ?? 0, timeWindow?.endMin ?? (maxTimeMinutes || 1), maxTimeMinutes || 1);
-  const longestSeriesLength = xpSeries.reduce((max, series) => Math.max(max, series.points.length), 0);
-  const maxPointsPerSeries = resolveMaxPointsPerSeries('auto', longestSeriesLength, maxTimeMinutes);
-  const maxSeriesXp = xpSeries.reduce((max, series) => {
-    const visiblePoints = series.points.filter((point) => point.x >= boundedWindow.startMin && point.x <= boundedWindow.endMin);
-    const seriesMax = visiblePoints.reduce((pointMax, point) => Math.max(pointMax, point.y), 0);
-    return Math.max(max, seriesMax);
-  }, 0);
-  const thresholdCeiling = LEADER_POINT_XP_THRESHOLDS[LEADER_POINT_XP_THRESHOLDS.length - 1] || 0;
-  const chartMaxXp = Math.max(maxSeriesXp, thresholdCeiling);
-  const chartMaxTime = boundedWindow.endMin;
-
-  const playerDatasets = xpSeries.map((series) => ({
-    label: series.playerName,
-    data: downsamplePoints(
-      series.points.filter((point) => point.x >= boundedWindow.startMin && point.x <= boundedWindow.endMin),
-      maxPointsPerSeries
-    ),
-    borderColor: series.baseColor,
-    backgroundColor: withAlpha(series.baseColor, 0.12),
-    tension: 0.2,
-    pointRadius: 0,
-    pointHoverRadius: 3,
-    borderWidth: 2,
-    fill: false,
-  })).filter((dataset) => Array.isArray(dataset.data) && dataset.data.length > 0);
-
-  if (playerDatasets.length === 0) {
-    destroyChart(`chart-leaderpoints-${matchId}`);
-    canvasEl.parentElement!.classList.add('hidden');
-    if (emptyEl) {
-      emptyEl.textContent = 'No leader point heartbeat data in this time window.';
-      emptyEl.classList.remove('hidden');
-    }
-    return;
-  }
-
-  const thresholdDatasets = LEADER_POINT_XP_THRESHOLDS.map((threshold, idx) => ({
-    label: `Leader Point ${idx + 1} Unlock`,
-    data: [{ x: boundedWindow.startMin, y: threshold }, { x: chartMaxTime, y: threshold }],
-    borderColor: withAlpha('rgba(148, 163, 184, 0.75)', threshold === 0 ? 0.45 : 0.28),
-    borderDash: [5, 4],
-    borderWidth: 1,
-    pointRadius: 0,
-    pointHoverRadius: 0,
-    tension: 0,
-    fill: false,
-    isThresholdGuide: true,
+  const momentumPoints = downsamplePoints(
+    filterPointsForWindow(model.momentum, viewState.window).map((point) => ({
+      x: point.timeMin,
+      y: point.score,
+      components: point.components,
+      leaderTeam: point.leaderTeam,
+    })),
+    resolveMaxPoints(model.maxTimeMin)
+  );
+  const swingMarkers = filterPointsForWindow(model.swingMarkers, viewState.window).map((point) => ({
+    x: point.timeMin,
+    y: point.score,
+    leaderTeam: point.leaderTeam,
+    label: point.label,
+    magnitude: point.magnitude,
   }));
 
-  canvasEl.parentElement!.classList.remove('hidden');
-  if (emptyEl) {
-    emptyEl.textContent = 'No leader point heartbeat data available.';
-    emptyEl.classList.add('hidden');
+  if (momentumPoints.length === 0) {
+    destroyChart(canvasId);
+    setChartEmpty(wrapperId, canvasId, 'No momentum data in this phase.', true);
+    if (badgeEl) badgeEl.textContent = 'No decisive swing in view';
+    return;
   }
 
-  destroyChart(`chart-leaderpoints-${matchId}`);
+  const decisiveSwing = filterPointsForWindow(model.swingMarkers, viewState.window)
+    .filter((point) => point.timeMin >= 5)
+    .sort((a, b) => b.magnitude - a.magnitude)[0] || model.decisiveSwing;
+
+  if (badgeEl) {
+    badgeEl.textContent = decisiveSwing
+      ? `Decisive swing: ${decisiveSwing.leaderTeam === 1 ? 'Team 1' : 'Team 2'} at ${formatMatchClock(decisiveSwing.timeMin * 60000)}`
+      : 'No decisive swing identified';
+  }
+
+  setChartEmpty(wrapperId, canvasId, '', false);
+  destroyChart(canvasId);
   const chart = new Chart(canvasEl, {
     type: 'line',
-    data: { datasets: [...playerDatasets, ...thresholdDatasets] },
+    data: {
+      datasets: [
+        {
+          label: 'Team 1 Edge Fill',
+          data: momentumPoints.map((point) => ({ x: point.x, y: Math.max(point.y, 0) })),
+          borderWidth: 0,
+          pointRadius: 0,
+          fill: 'origin',
+          backgroundColor: TEAM_1_FILL,
+          isGuide: true,
+        },
+        {
+          label: 'Team 2 Edge Fill',
+          data: momentumPoints.map((point) => ({ x: point.x, y: Math.min(point.y, 0) })),
+          borderWidth: 0,
+          pointRadius: 0,
+          fill: 'origin',
+          backgroundColor: TEAM_2_FILL,
+          isGuide: true,
+        },
+        {
+          label: 'Momentum Score',
+          data: momentumPoints,
+          borderColor: 'rgba(226, 232, 240, 0.95)',
+          backgroundColor: 'rgba(226, 232, 240, 0.12)',
+          tension: 0.2,
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          borderWidth: 2.5,
+        },
+        {
+          type: 'scatter',
+          label: 'Swing Marker',
+          data: swingMarkers,
+          pointRadius: 5,
+          pointHoverRadius: 6,
+          pointStyle: 'triangle',
+          borderWidth: 1.5,
+          backgroundColor: swingMarkers.map((point) => point.leaderTeam === 1 ? TEAM_1_COLOR : TEAM_2_COLOR),
+          borderColor: swingMarkers.map((point) => point.leaderTeam === 1 ? withAlpha(TEAM_1_COLOR, 1) : withAlpha(TEAM_2_COLOR, 1)),
+        },
+      ],
+    },
+    plugins: [momentumBackgroundPlugin, sharedCrosshairPlugin],
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -1024,14 +516,9 @@ function renderLeaderPointsChart(
       plugins: {
         legend: {
           labels: {
-            color: '#94a3b8',
+            color: TICK_COLOR,
             font: { size: 10 },
-            usePointStyle: true,
-            pointStyle: 'line',
-            filter: (item: any, data: any) => {
-              const dataset = data?.datasets?.[item?.datasetIndex];
-              return !dataset?.isThresholdGuide;
-            },
+            filter: (item: any, data: any) => !data?.datasets?.[item?.datasetIndex]?.isGuide,
           },
           position: 'top',
         },
@@ -1041,156 +528,150 @@ function renderLeaderPointsChart(
           bodyColor: '#e2e8f0',
           borderColor: 'rgba(6, 182, 212, 0.3)',
           borderWidth: 1,
-          filter: (item: any) => !item?.dataset?.isThresholdGuide,
+          filter: (item: any) => !item?.dataset?.isGuide,
           callbacks: {
             title: (items: any[]) => {
-              if (!items.length) return '';
-              const minuteValue = Number(items[0]?.parsed?.x);
-              if (!Number.isFinite(minuteValue)) return '';
-              return formatMatchClock(minuteValue * 60000);
+              const minute = Number(items?.[0]?.parsed?.x);
+              return Number.isFinite(minute) ? formatMatchClock(minute * 60000) : '';
             },
             label: (context: any) => {
-              const value = Number(context?.parsed?.y);
-              if (!Number.isFinite(value)) return context.dataset.label;
-              const roundedXp = Math.round(value);
-              const unlocked = getLeaderPointsUnlocked(roundedXp);
-              return `${context.dataset.label}: ${roundedXp} XP (LP ${unlocked})`;
+              const score = Number(context?.parsed?.y);
+              if (context.dataset.label === 'Swing Marker') {
+                return `${context.raw.label}: ${Math.round(Math.abs(score))}`;
+              }
+              const edgeLabel = score > 0 ? 'Team 1 edge' : score < 0 ? 'Team 2 edge' : 'Even';
+              return `Momentum score: ${Math.round(score)} (${edgeLabel})`;
+            },
+            afterBody: (items: any[]) => {
+              const point = items?.[0]?.raw;
+              const components = point?.components;
+              if (!components) return [];
+              return [
+                `Supply pace: ${Math.round(components.supply * 100)}%`,
+                `Power pace: ${Math.round(components.power * 100)}%`,
+                `Population: ${Math.round(components.population * 100)}%`,
+                `Command XP: ${Math.round(components.commandXp * 100)}%`,
+              ];
             },
           },
         },
+        ...getSharedPluginOptions(viewState),
       },
       scales: {
         x: {
           type: 'linear',
-          min: boundedWindow.startMin,
-          max: chartMaxTime,
-          grid: { color: 'rgba(148, 163, 184, 0.08)' },
+          min: viewState.window.startMin,
+          max: viewState.window.endMin,
+          grid: { color: GRID_COLOR },
           ticks: {
-            color: '#94a3b8',
+            color: TICK_COLOR,
             font: { size: 10 },
-            callback: (value: any) => {
-              const minutes = Number(value);
-              if (!Number.isFinite(minutes)) return '';
-              if (minutes >= 60) {
-                const hours = Math.floor(minutes / 60);
-                const mins = Math.round(minutes % 60);
-                return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-              }
-              return `${Math.round(minutes)}m`;
-            },
+            callback: (value: any) => formatAxisMinutes(Number(value)),
           },
-          title: { display: true, text: 'Match Time', color: '#94a3b8' },
+          title: { display: true, text: 'Match Time', color: TITLE_COLOR },
         },
         y: {
-          type: 'linear',
-          min: 0,
-          max: chartMaxXp,
-          grid: { color: 'rgba(148, 163, 184, 0.08)' },
-          ticks: { color: '#94a3b8', font: { size: 10 } },
-          title: { display: true, text: 'Command XP', color: '#94a3b8' },
+          min: -100,
+          max: 100,
+          grid: { color: GRID_COLOR },
+          ticks: {
+            color: TICK_COLOR,
+            callback: (value: any) => `${Math.abs(Number(value))}`,
+          },
+          title: { display: true, text: 'Composite Edge', color: TITLE_COLOR },
         },
       },
     },
   });
-  chartInstances.set(`chart-leaderpoints-${matchId}`, chart);
+  chartInstances.set(canvasId, chart);
 }
 
-function renderBuildOrderChart(
-  Chart: any,
-  matchId: string,
-  entries: TimelineEntry[],
-  playersByIndex: Map<number, PlayerInfo>,
-  timeWindow?: TimeWindow
-) {
-  const canvasEl = document.getElementById(`chart-buildorder-${matchId}`) as HTMLCanvasElement | null;
-  const wrapperEl = canvasEl?.closest('[id^="graph-buildorder"]');
-  const emptyEl = wrapperEl?.querySelector('.chart-empty') as HTMLElement | null;
+function findOverlayPlayer(model: MatchGraphModel, overlayPlayerIndex: number | null): PlayerGraphSeries | null {
+  if (overlayPlayerIndex == null) return null;
+  return model.playerSeries.find((series) => series.playerIndex === overlayPlayerIndex) || null;
+}
+
+function renderEconomyChart(Chart: any, matchId: string, model: MatchGraphModel, viewState: GraphViewState, hasHeartbeatData: boolean) {
+  const canvasId = getChartIds(matchId).economy;
+  const wrapperId = `graph-economy-${matchId}`;
+  const canvasEl = document.getElementById(canvasId) as HTMLCanvasElement | null;
   if (!canvasEl) return;
 
-  const buildKinds = new Set(['building', 'unit', 'upgrade', 'unit_upgrade', 'power']);
-  const allBuildEntries = entries.filter(e => e.playerIndex != null && buildKinds.has(e.kind));
-  const maxTimeMinutes = allBuildEntries.reduce((max, e) => Math.max(max, e.timeMs / 60000), 0);
-  const boundedWindow = clampTimeWindow(timeWindow?.startMin ?? 0, timeWindow?.endMin ?? (maxTimeMinutes || 1), maxTimeMinutes || 1);
-  const buildEntries = allBuildEntries.filter((entry) => {
-    const minute = entry.timeMs / 60000;
-    return minute >= boundedWindow.startMin && minute <= boundedWindow.endMin;
-  });
-
-  if (buildEntries.length === 0) {
-    destroyChart(`chart-buildorder-${matchId}`);
-    canvasEl.parentElement!.classList.add('hidden');
-    if (emptyEl) {
-      emptyEl.textContent = 'No build data in this time window.';
-      emptyEl.classList.remove('hidden');
-    }
+  if (!hasHeartbeatData) {
+    destroyChart(canvasId);
+    setChartEmpty(wrapperId, canvasId, 'No economy heartbeat data available.', true);
     return;
   }
 
-  canvasEl.parentElement!.classList.remove('hidden');
-  if (emptyEl) emptyEl.classList.add('hidden');
+  const visibleAggregates = downsamplePoints(filterPointsForWindow(model.teamAggregates, viewState.window).map((point) => ({
+    x: point.timeMin,
+    team1: viewState.economyMetric === 'supply' ? point.team1.supplyRate : point.team1.powerRate,
+    team2: viewState.economyMetric === 'supply' ? point.team2.supplyRate : point.team2.powerRate,
+  })), resolveMaxPoints(model.maxTimeMin));
 
-  const playerIndices = [...new Set(buildEntries.map(e => e.playerIndex!))].sort((a, b) => a - b);
-  const playerRowMap = new Map<number, number>();
-  const playerLabels: string[] = [];
-  playerIndices.forEach((idx, row) => {
-    playerRowMap.set(idx, row);
-    const info = playersByIndex.get(idx);
-    playerLabels.push(info?.name || `Player ${idx}`);
-  });
+  if (!visibleAggregates.length) {
+    destroyChart(canvasId);
+    setChartEmpty(wrapperId, canvasId, 'No economy data in this phase.', true);
+    return;
+  }
 
-  const kindColorMap: Record<string, string> = {
-    building:     'rgba(52, 211, 153, 0.8)',
-    upgrade:      'rgba(251, 146, 60, 0.8)',
-    unit:         'rgba(56, 189, 248, 0.8)',
-    unit_upgrade: 'rgba(45, 212, 191, 0.8)',
-    power:        'rgba(251, 191, 36, 0.8)',
-  };
+  const overlayPlayer = findOverlayPlayer(model, viewState.overlayPlayerIndex);
+  const overlayData = overlayPlayer
+    ? downsamplePoints(filterPointsForWindow(overlayPlayer.points, viewState.window).map((point) => ({
+        x: point.timeMin,
+        y: viewState.economyMetric === 'supply' ? point.supplyRate : point.powerRate,
+      })), resolveMaxPoints(model.maxTimeMin))
+    : [];
 
-  const kindLabelMap: Record<string, string> = {
-    building: 'Building',
-    upgrade: 'Upgrade',
-    unit: 'Unit',
-    unit_upgrade: 'Tech',
-    power: 'Power',
-  };
-
-  const dataByKind = new Map<string, Array<{ x: number; y: number; label: string }>>();
-
-  buildEntries.forEach((entry) => {
-    const row = playerRowMap.get(entry.playerIndex!);
-    if (row == null) return;
-    const kind = entry.kind;
-    if (!dataByKind.has(kind)) dataByKind.set(kind, []);
-    dataByKind.get(kind)!.push({
-      x: entry.timeMs / 60000,
-      y: row,
-      label: entry.label,
-    });
-  });
-
-  const datasets = [...dataByKind.entries()].map(([kind, points]) => ({
-    label: kindLabelMap[kind] || kind,
-    data: points,
-    backgroundColor: kindColorMap[kind] || 'rgba(148, 163, 184, 0.6)',
-    borderColor: (kindColorMap[kind] || 'rgba(148, 163, 184, 0.6)').replace(/[\d.]+\)$/, '1)'),
-    borderWidth: 1,
-    pointRadius: 4,
-    pointHoverRadius: 6,
-  }));
-
-  const dynamicHeight = Math.max(200, playerLabels.length * 50);
-  canvasEl.parentElement!.style.height = `${dynamicHeight}px`;
-
-  destroyChart(`chart-buildorder-${matchId}`);
+  setChartEmpty(wrapperId, canvasId, '', false);
+  destroyChart(canvasId);
   const chart = new Chart(canvasEl, {
-    type: 'scatter',
-    data: { datasets },
+    type: 'line',
+    data: {
+      datasets: [
+        {
+          label: 'Team 1',
+          data: visibleAggregates.map((point) => ({ x: point.x, y: point.team1 })),
+          borderColor: TEAM_1_COLOR,
+          backgroundColor: TEAM_1_FILL,
+          tension: 0.18,
+          pointRadius: 0,
+          pointHoverRadius: 3,
+          borderWidth: 2.5,
+        },
+        {
+          label: 'Team 2',
+          data: visibleAggregates.map((point) => ({ x: point.x, y: point.team2 })),
+          borderColor: TEAM_2_COLOR,
+          backgroundColor: TEAM_2_FILL,
+          tension: 0.18,
+          pointRadius: 0,
+          pointHoverRadius: 3,
+          borderWidth: 2.5,
+        },
+        ...(overlayPlayer && overlayData.length
+          ? [{
+              label: `${overlayPlayer.playerName} Overlay`,
+              data: overlayData,
+              borderColor: OVERLAY_COLOR,
+              backgroundColor: 'transparent',
+              borderDash: [6, 4],
+              tension: 0.18,
+              pointRadius: 0,
+              pointHoverRadius: 3,
+              borderWidth: 2,
+            }]
+          : []),
+      ],
+    },
+    plugins: [sharedCrosshairPlugin],
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: {
-          labels: { color: '#94a3b8', font: { size: 10 }, usePointStyle: true },
+          labels: { color: TICK_COLOR, font: { size: 10 }, usePointStyle: true, pointStyle: 'line' },
           position: 'top',
         },
         tooltip: {
@@ -1201,44 +682,357 @@ function renderBuildOrderChart(
           borderWidth: 1,
           callbacks: {
             title: (items: any[]) => {
-              if (!items.length) return '';
-              const pt = items[0].raw;
-              const playerName = playerLabels[pt.y] || '';
-              const time = formatMatchClock(pt.x * 60000);
-              return `${playerName} @ ${time}`;
+              const minute = Number(items?.[0]?.parsed?.x);
+              return Number.isFinite(minute) ? formatMatchClock(minute * 60000) : '';
             },
-            label: (context: any) => context.raw.label || '',
+            label: (context: any) => {
+              const value = Number(context?.parsed?.y);
+              const suffix = viewState.economyMetric === 'supply' ? 'supply/min' : 'power/min';
+              return `${context.dataset.label}: ${value.toFixed(1)} ${suffix}`;
+            },
           },
         },
+        ...getSharedPluginOptions(viewState),
       },
       scales: {
         x: {
-          min: boundedWindow.startMin,
-          max: boundedWindow.endMin,
-          grid: { color: 'rgba(148, 163, 184, 0.08)' },
+          type: 'linear',
+          min: viewState.window.startMin,
+          max: viewState.window.endMin,
+          grid: { color: GRID_COLOR },
           ticks: {
-            color: '#94a3b8',
+            color: TICK_COLOR,
             font: { size: 10 },
-            callback: (value: any) => `${Math.round(Number(value))}m`,
+            callback: (value: any) => formatAxisMinutes(Number(value)),
           },
-          title: { display: true, text: 'Match Time (minutes)', color: '#94a3b8' },
+          title: { display: true, text: 'Match Time', color: TITLE_COLOR },
         },
         y: {
-          grid: { color: 'rgba(148, 163, 184, 0.08)' },
-          ticks: {
-            color: '#e2e8f0',
-            font: { size: 10 },
-            callback: (_: any, index: number) => playerLabels[index] || '',
-            stepSize: 1,
+          beginAtZero: true,
+          grid: { color: GRID_COLOR },
+          ticks: { color: TICK_COLOR, font: { size: 10 } },
+          title: {
+            display: true,
+            text: viewState.economyMetric === 'supply' ? 'Supply / min' : 'Power / min',
+            color: TITLE_COLOR,
           },
-          min: -0.5,
-          max: playerLabels.length - 0.5,
-          reverse: false,
         },
       },
     },
   });
-  chartInstances.set(`chart-buildorder-${matchId}`, chart);
+  chartInstances.set(canvasId, chart);
+}
+
+function renderArmyChart(Chart: any, matchId: string, model: MatchGraphModel, viewState: GraphViewState, hasHeartbeatData: boolean) {
+  const canvasId = getChartIds(matchId).army;
+  const wrapperId = `graph-army-${matchId}`;
+  const canvasEl = document.getElementById(canvasId) as HTMLCanvasElement | null;
+  if (!canvasEl) return;
+
+  if (!hasHeartbeatData) {
+    destroyChart(canvasId);
+    setChartEmpty(wrapperId, canvasId, 'No army-pressure heartbeat data available.', true);
+    return;
+  }
+
+  const visibleAggregates = downsamplePoints(filterPointsForWindow(model.teamAggregates, viewState.window).map((point) => ({
+    x: point.timeMin,
+    team1Population: point.team1.population,
+    team2Population: point.team2.population,
+    deathDifferential: point.team2.cumulativeDeaths - point.team1.cumulativeDeaths,
+  })), resolveMaxPoints(model.maxTimeMin));
+
+  if (!visibleAggregates.length) {
+    destroyChart(canvasId);
+    setChartEmpty(wrapperId, canvasId, 'No army-pressure data in this phase.', true);
+    return;
+  }
+
+  const overlayPlayer = findOverlayPlayer(model, viewState.overlayPlayerIndex);
+  const overlayData = overlayPlayer
+    ? downsamplePoints(filterPointsForWindow(overlayPlayer.points, viewState.window).map((point) => ({
+        x: point.timeMin,
+        y: point.population,
+      })), resolveMaxPoints(model.maxTimeMin))
+    : [];
+
+  setChartEmpty(wrapperId, canvasId, '', false);
+  destroyChart(canvasId);
+  const chart = new Chart(canvasEl, {
+    type: 'line',
+    data: {
+      datasets: [
+        {
+          label: 'Team 1 Population',
+          data: visibleAggregates.map((point) => ({ x: point.x, y: point.team1Population })),
+          borderColor: TEAM_1_COLOR,
+          backgroundColor: TEAM_1_FILL,
+          pointRadius: 0,
+          pointHoverRadius: 3,
+          tension: 0.18,
+          borderWidth: 2.5,
+          yAxisID: 'yPopulation',
+        },
+        {
+          label: 'Team 2 Population',
+          data: visibleAggregates.map((point) => ({ x: point.x, y: point.team2Population })),
+          borderColor: TEAM_2_COLOR,
+          backgroundColor: TEAM_2_FILL,
+          pointRadius: 0,
+          pointHoverRadius: 3,
+          tension: 0.18,
+          borderWidth: 2.5,
+          yAxisID: 'yPopulation',
+        },
+        {
+          label: 'Death Differential',
+          data: visibleAggregates.map((point) => ({ x: point.x, y: point.deathDifferential })),
+          borderColor: 'rgba(251, 191, 36, 0.95)',
+          backgroundColor: 'rgba(251, 191, 36, 0.12)',
+          pointRadius: 0,
+          pointHoverRadius: 3,
+          tension: 0.15,
+          borderDash: [5, 4],
+          borderWidth: 2,
+          yAxisID: 'yDeaths',
+        },
+        ...(overlayPlayer && overlayData.length
+          ? [{
+              label: `${overlayPlayer.playerName} Population`,
+              data: overlayData,
+              borderColor: OVERLAY_COLOR,
+              backgroundColor: 'transparent',
+              borderDash: [6, 4],
+              pointRadius: 0,
+              pointHoverRadius: 3,
+              tension: 0.18,
+              borderWidth: 2,
+              yAxisID: 'yPopulation',
+            }]
+          : []),
+      ],
+    },
+    plugins: [sharedCrosshairPlugin],
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          labels: { color: TICK_COLOR, font: { size: 10 }, usePointStyle: true, pointStyle: 'line' },
+          position: 'top',
+        },
+        tooltip: {
+          backgroundColor: 'rgba(15, 23, 42, 0.95)',
+          titleColor: '#f8fafc',
+          bodyColor: '#e2e8f0',
+          borderColor: 'rgba(6, 182, 212, 0.3)',
+          borderWidth: 1,
+          callbacks: {
+            title: (items: any[]) => {
+              const minute = Number(items?.[0]?.parsed?.x);
+              return Number.isFinite(minute) ? formatMatchClock(minute * 60000) : '';
+            },
+            label: (context: any) => {
+              const value = Number(context?.parsed?.y);
+              if (context.dataset.yAxisID === 'yDeaths') {
+                const edgeLabel = value > 0 ? 'Team 1 edge' : value < 0 ? 'Team 2 edge' : 'Even';
+                return `${context.dataset.label}: ${Math.round(value)} (${edgeLabel})`;
+              }
+              return `${context.dataset.label}: ${Math.round(value)}`;
+            },
+          },
+        },
+        ...getSharedPluginOptions(viewState),
+      },
+      scales: {
+        x: {
+          type: 'linear',
+          min: viewState.window.startMin,
+          max: viewState.window.endMin,
+          grid: { color: GRID_COLOR },
+          ticks: {
+            color: TICK_COLOR,
+            font: { size: 10 },
+            callback: (value: any) => formatAxisMinutes(Number(value)),
+          },
+          title: { display: true, text: 'Match Time', color: TITLE_COLOR },
+        },
+        yPopulation: {
+          beginAtZero: true,
+          grid: { color: GRID_COLOR },
+          ticks: { color: TICK_COLOR, font: { size: 10 } },
+          title: { display: true, text: 'Population', color: TITLE_COLOR },
+        },
+        yDeaths: {
+          position: 'right',
+          grid: { drawOnChartArea: false },
+          ticks: { color: TICK_COLOR, font: { size: 10 } },
+          title: { display: true, text: 'Death Differential', color: TITLE_COLOR },
+        },
+      },
+    },
+  });
+  chartInstances.set(canvasId, chart);
+}
+
+function renderEventRail(matchId: string, model: MatchGraphModel, viewState: GraphViewState, isCompleteSet: boolean | undefined) {
+  const containerEl = document.getElementById(`graph-event-rail-${matchId}`);
+  if (!containerEl) return;
+
+  const annotations = filterPointsForWindow(model.annotations, viewState.window);
+  const span = Math.max(0.5, viewState.window.endMin - viewState.window.startMin);
+  const laneTitles: Array<{ key: TimelineAnnotationLane; label: string }> = [
+    { key: 'tech', label: 'Tech' },
+    { key: 'powers', label: 'Powers' },
+    { key: 'population', label: 'Peak Pop' },
+    { key: 'deaths', label: 'Spikes' },
+  ];
+
+  if (!annotations.length) {
+    containerEl.innerHTML = `
+      <div class="rounded-lg border border-slate-700/40 bg-slate-900/40 p-3 text-sm text-gray-400">
+        No milestone markers available in this phase.
+        ${isCompleteSet === false ? '<span class="block mt-2 text-[11px] uppercase tracking-wider text-amber-300">Event feed incomplete</span>' : ''}
+      </div>
+    `;
+    return;
+  }
+
+  containerEl.innerHTML = `
+    <div class="space-y-3">
+      ${isCompleteSet === false ? '<div class="text-[11px] uppercase tracking-wider text-amber-300">Event feed incomplete</div>' : ''}
+      ${laneTitles.map((lane) => {
+        const laneAnnotations = annotations.filter((annotation) => annotation.lane === lane.key);
+        return `
+          <div class="grid grid-cols-[72px_1fr] items-center gap-3">
+            <div class="text-[10px] uppercase tracking-wider text-gray-500">${lane.label}</div>
+            <div class="relative h-9 overflow-hidden rounded-lg border border-slate-700/40 bg-slate-900/55">
+              <div class="graph-rail-guide pointer-events-none absolute inset-y-0 hidden w-px bg-cyan-300/45"></div>
+              ${laneAnnotations.map((annotation) => {
+                const percent = ((annotation.timeMin - viewState.window.startMin) / span) * 100;
+                const teamClass = annotation.teamId === 1
+                  ? 'border-cyan-300/70 bg-cyan-400/15 text-cyan-100'
+                  : annotation.teamId === 2
+                    ? 'border-rose-300/70 bg-rose-400/15 text-rose-100'
+                    : 'border-slate-500/70 bg-slate-700/40 text-gray-100';
+                return `
+                  <div
+                    class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border px-2 py-1 text-[10px] font-semibold ${teamClass}"
+                    style="left: ${Math.max(0, Math.min(100, percent))}%;"
+                    title="${annotation.label}"
+                  >
+                    ${annotation.shortLabel}
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+  updateRailHoverGuides(matchId, viewState);
+}
+
+function attachControls(
+  matchId: string,
+  model: MatchGraphModel,
+  viewState: GraphViewState,
+  rerender: () => void
+) {
+  document.querySelectorAll<HTMLButtonElement>(`#graph-phase-controls-${matchId} [data-phase]`).forEach((button) => {
+    if (button.dataset.bound === 'true') return;
+    button.dataset.bound = 'true';
+    button.addEventListener('click', () => {
+      const phase = button.dataset.phase as PhaseKey | undefined;
+      if (!phase) return;
+      if (phase === 'custom' && !viewState.customEnabled) return;
+      viewState.phase = phase;
+      if (phase !== 'custom') {
+        viewState.window = getPhaseWindow(phase, model.maxTimeMin);
+      }
+      updatePhaseButtons(matchId, viewState);
+      updateRangeBrush(matchId, viewState, model.maxTimeMin);
+      rerender();
+    });
+  });
+
+  document.querySelectorAll<HTMLButtonElement>(`#graph-economy-controls-${matchId} [data-economy-metric]`).forEach((button) => {
+    if (button.dataset.bound === 'true') return;
+    button.dataset.bound = 'true';
+    button.addEventListener('click', () => {
+      const metric = button.dataset.economyMetric as EconomyMetric | undefined;
+      if (!metric) return;
+      viewState.economyMetric = metric;
+      updateEconomyButtons(matchId, viewState);
+      rerender();
+    });
+  });
+
+  const overlayEl = document.getElementById(`graph-player-overlay-${matchId}`) as HTMLSelectElement | null;
+  if (overlayEl && overlayEl.dataset.bound !== 'true') {
+    overlayEl.dataset.bound = 'true';
+    overlayEl.addEventListener('change', () => {
+      const nextValue = Number(overlayEl.value);
+      viewState.overlayPlayerIndex = Number.isFinite(nextValue) ? nextValue : null;
+      rerender();
+    });
+  }
+
+  const startEl = document.getElementById(`graph-brush-start-${matchId}`) as HTMLInputElement | null;
+  const endEl = document.getElementById(`graph-brush-end-${matchId}`) as HTMLInputElement | null;
+  const handleBrushChange = () => {
+    const start = Number(startEl?.value ?? viewState.window.startMin);
+    const end = Number(endEl?.value ?? viewState.window.endMin);
+    viewState.customEnabled = true;
+    viewState.phase = 'custom';
+    viewState.window = clampGraphWindow(start, end, model.maxTimeMin);
+    updatePhaseButtons(matchId, viewState);
+    updateRangeBrush(matchId, viewState, model.maxTimeMin);
+    rerender();
+  };
+
+  [startEl, endEl].forEach((input) => {
+    if (!input || input.dataset.bound === 'true') return;
+    input.dataset.bound = 'true';
+    input.addEventListener('input', handleBrushChange);
+    input.addEventListener('change', handleBrushChange);
+  });
+}
+
+function renderGraphDashboard(
+  Chart: any,
+  matchId: string,
+  model: MatchGraphModel,
+  contributions: ContributionRow[],
+  options: { hasHeartbeatData: boolean; isCompleteSet: boolean | undefined; }
+) {
+  const viewState: GraphViewState = {
+    phase: 'full',
+    window: getPhaseWindow('full', model.maxTimeMin),
+    economyMetric: 'supply',
+    overlayPlayerIndex: null,
+    hoverMinute: null,
+    customEnabled: false,
+  };
+
+  const rerender = () => {
+    renderMomentumChart(Chart, matchId, model, viewState, options.hasHeartbeatData);
+    renderEconomyChart(Chart, matchId, model, viewState, options.hasHeartbeatData);
+    renderArmyChart(Chart, matchId, model, viewState, options.hasHeartbeatData);
+    renderEventRail(matchId, model, viewState, options.isCompleteSet);
+    renderContributionChart(Chart, matchId, contributions);
+    redrawSyncedCharts(matchId, viewState);
+  };
+
+  updatePhaseButtons(matchId, viewState);
+  updateEconomyButtons(matchId, viewState);
+  updateRangeBrush(matchId, viewState, model.maxTimeMin);
+  updateHoverReadout(matchId, viewState);
+  bindSharedHover(matchId, viewState);
+  attachControls(matchId, model, viewState, rerender);
+  rerender();
 }
 
 export async function loadMatchGraphs(matchId: string, graphsEl: HTMLElement) {
@@ -1246,13 +1040,11 @@ export async function loadMatchGraphs(matchId: string, graphsEl: HTMLElement) {
   graphsEl.setAttribute('data-loading', 'true');
   graphsEl.innerHTML = `
     <div class="space-y-3 animate-pulse">
-      <div class="h-48 bg-slate-700/50 rounded"></div>
-      <div class="h-48 bg-slate-700/50 rounded"></div>
-      <div class="h-48 bg-slate-700/50 rounded"></div>
-      <div class="h-48 bg-slate-700/50 rounded"></div>
-      <div class="h-48 bg-slate-700/50 rounded"></div>
-      <div class="h-48 bg-slate-700/50 rounded"></div>
-      <div class="h-48 bg-slate-700/50 rounded"></div>
+      <div class="h-56 rounded-xl bg-slate-700/40"></div>
+      <div class="h-44 rounded-xl bg-slate-700/40"></div>
+      <div class="h-44 rounded-xl bg-slate-700/40"></div>
+      <div class="h-36 rounded-xl bg-slate-700/40"></div>
+      <div class="h-56 rounded-xl bg-slate-700/40"></div>
     </div>
   `;
 
@@ -1279,275 +1071,152 @@ export async function loadMatchGraphs(matchId: string, graphsEl: HTMLElement) {
     return;
   }
 
+  const chartIds = getChartIds(matchId);
   graphsEl.innerHTML = `
     <div class="space-y-6">
-      <div id="graph-units-${matchId}" class="rounded-lg border border-slate-700/40 bg-slate-800/40 p-3">
-        <h4 class="text-[10px] uppercase tracking-wider text-gray-400 mb-2">Units Destroyed vs Lost</h4>
-        <div class="relative" style="height: 240px;">
-          <canvas id="chart-units-${matchId}"></canvas>
-        </div>
-        <div class="chart-empty hidden text-center py-4 text-xs text-gray-500">No unit data available.</div>
-      </div>
-      <div id="graph-timewindow-${matchId}" class="sticky top-3 z-20 rounded-lg border border-slate-700/50 bg-slate-900/85 backdrop-blur-sm p-3">
-        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-          <h4 class="text-[10px] uppercase tracking-wider text-gray-400">Graph Time Window</h4>
-          <span id="graph-time-window-label-${matchId}" class="text-[10px] uppercase tracking-wider text-gray-500"></span>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
-          <label class="flex items-center gap-2 rounded-md border border-slate-700/40 bg-slate-900/40 px-2 py-1 text-gray-300">
-            <span class="text-[10px] uppercase tracking-wider text-gray-500">Preset</span>
-            <select id="graph-time-preset-${matchId}" class="ml-auto rounded border border-slate-700/60 bg-slate-950/70 px-2 py-1 text-[11px] text-gray-200">
-              <option value="full" selected>Full Match</option>
-              <option value="opening30">Opening 30m</option>
-              <option value="opening60">Opening 60m</option>
-              <option value="last30">Last 30m</option>
-              <option value="last60">Last 60m</option>
-              <option value="custom">Custom</option>
-            </select>
-          </label>
-          <label class="flex items-center gap-2 rounded-md border border-slate-700/40 bg-slate-900/40 px-2 py-1 text-gray-300">
-            <span class="text-[10px] uppercase tracking-wider text-gray-500">Start (min)</span>
-            <input id="graph-time-start-${matchId}" type="number" min="0" step="1" value="0" class="ml-auto w-20 rounded border border-slate-700/60 bg-slate-950/70 px-2 py-1 text-[11px] text-gray-200" />
-          </label>
-          <label class="flex items-center gap-2 rounded-md border border-slate-700/40 bg-slate-900/40 px-2 py-1 text-gray-300">
-            <span class="text-[10px] uppercase tracking-wider text-gray-500">End (min)</span>
-            <input id="graph-time-end-${matchId}" type="number" min="1" step="1" value="60" class="ml-auto w-20 rounded border border-slate-700/60 bg-slate-950/70 px-2 py-1 text-[11px] text-gray-200" />
-          </label>
-        </div>
-        <p class="text-[10px] uppercase tracking-wider text-gray-500 mt-2">Applies to Resources, Population, Leader Points, Build Order, and Activity graphs.</p>
-      </div>
-      <div id="graph-resources-${matchId}" class="rounded-lg border border-slate-700/40 bg-slate-800/40 p-3">
-        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-          <h4 class="text-[10px] uppercase tracking-wider text-gray-400">Resources Over Time</h4>
-          <div class="flex flex-wrap items-center gap-3 text-[10px] uppercase tracking-wider text-gray-500">
-            <span class="inline-flex items-center gap-2">
-              <span class="inline-block w-5 border-t-2 border-cyan-300"></span>
-              Supply
-            </span>
-            <span class="inline-flex items-center gap-2">
-              <span class="inline-block w-5 border-t-2 border-cyan-300 border-dashed"></span>
-              Power
-            </span>
+      <div id="graph-momentum-${matchId}" class="rounded-xl border border-slate-700/40 bg-slate-900/55 p-4">
+        <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
+          <div>
+            <p class="text-[10px] uppercase tracking-[0.24em] text-cyan-300">Match Momentum</p>
+            <h4 class="text-lg font-semibold text-white mt-1">Who is ahead, when it flips, and why</h4>
+          </div>
+          <div class="text-right">
+            <p id="graph-decisive-swing-${matchId}" class="text-xs font-medium text-cyan-100"></p>
+            <p id="graph-hover-readout-${matchId}" class="mt-1 text-[11px] uppercase tracking-wider text-gray-500"></p>
           </div>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 mb-3 text-xs">
-          <label class="inline-flex items-center gap-2 rounded-md border border-slate-700/40 bg-slate-900/40 px-2 py-1 text-gray-300">
-            <input id="resource-show-supply-${matchId}" type="checkbox" checked class="accent-cyan-400" />
-            <span>Show Supply</span>
+        <div id="graph-phase-controls-${matchId}" class="flex flex-wrap items-center gap-2 mb-4">
+          <button type="button" data-phase="full"></button>
+          <button type="button" data-phase="opening"></button>
+          <button type="button" data-phase="midgame"></button>
+          <button type="button" data-phase="late"></button>
+          <button type="button" data-phase="custom"></button>
+        </div>
+        <div class="relative" style="height: 280px;">
+          <canvas id="${chartIds.momentum}"></canvas>
+        </div>
+        <div class="chart-empty hidden text-center py-4 text-sm text-gray-400"></div>
+        <div class="hidden sm:grid grid-cols-2 gap-3 mt-4">
+          <label class="rounded-lg border border-slate-700/40 bg-slate-900/50 px-3 py-2">
+            <span class="block text-[10px] uppercase tracking-wider text-gray-500">Range Brush Start</span>
+            <input id="graph-brush-start-${matchId}" type="range" min="0" max="1" step="0.5" class="mt-2 w-full accent-cyan-400" />
           </label>
-          <label class="inline-flex items-center gap-2 rounded-md border border-slate-700/40 bg-slate-900/40 px-2 py-1 text-gray-300">
-            <input id="resource-show-power-${matchId}" type="checkbox" checked class="accent-cyan-400" />
-            <span>Show Power</span>
-          </label>
-          <label class="flex items-center gap-2 rounded-md border border-slate-700/40 bg-slate-900/40 px-2 py-1 text-gray-300">
-            <span class="text-[10px] uppercase tracking-wider text-gray-500">Metric</span>
-            <select id="resource-metric-${matchId}" class="ml-auto rounded border border-slate-700/60 bg-slate-950/70 px-2 py-1 text-[11px] text-gray-200">
-              <option value="total" selected>Total</option>
-              <option value="rate">Income Rate</option>
-            </select>
-          </label>
-          <label class="flex items-center gap-2 rounded-md border border-slate-700/40 bg-slate-900/40 px-2 py-1 text-gray-300">
-            <span class="text-[10px] uppercase tracking-wider text-gray-500">Smoothing</span>
-            <select id="resource-smoothing-${matchId}" class="ml-auto rounded border border-slate-700/60 bg-slate-950/70 px-2 py-1 text-[11px] text-gray-200">
-              <option value="0">Off</option>
-              <option value="0.15">Low</option>
-              <option value="0.25" selected>Medium</option>
-              <option value="0.4">High</option>
-            </select>
-          </label>
-          <label class="flex items-center gap-2 rounded-md border border-slate-700/40 bg-slate-900/40 px-2 py-1 text-gray-300">
-            <span class="text-[10px] uppercase tracking-wider text-gray-500">Downsample</span>
-            <select id="resource-downsample-${matchId}" class="ml-auto rounded border border-slate-700/60 bg-slate-950/70 px-2 py-1 text-[11px] text-gray-200">
-              <option value="auto" selected>Auto</option>
-              <option value="300">300</option>
-              <option value="240">240</option>
-              <option value="180">180</option>
-              <option value="120">120</option>
-              <option value="all">All</option>
-            </select>
+          <label class="rounded-lg border border-slate-700/40 bg-slate-900/50 px-3 py-2">
+            <div class="flex items-center justify-between gap-2">
+              <span class="block text-[10px] uppercase tracking-wider text-gray-500">Range Brush End</span>
+              <span id="graph-brush-label-${matchId}" class="text-[10px] uppercase tracking-wider text-gray-400"></span>
+            </div>
+            <input id="graph-brush-end-${matchId}" type="range" min="0.5" max="1" step="0.5" class="mt-2 w-full accent-cyan-400" />
           </label>
         </div>
-        <p id="resource-downsample-hint-${matchId}" class="text-[10px] uppercase tracking-wider text-gray-500 mb-2"></p>
-        <div class="relative" style="height: 260px;">
-          <canvas id="chart-resources-${matchId}"></canvas>
-        </div>
-        <div class="chart-empty hidden text-center py-4 text-xs text-gray-500">No resource heartbeat data available.</div>
       </div>
-      <div id="graph-population-${matchId}" class="rounded-lg border border-slate-700/40 bg-slate-800/40 p-3">
-        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-          <h4 class="text-[10px] uppercase tracking-wider text-gray-400">Population Over Time</h4>
-          <div class="flex flex-wrap items-center gap-3 text-[10px] uppercase tracking-wider text-gray-500">
-            <span class="inline-flex items-center gap-2">
-              <span class="inline-block w-5 border-t-2 border-cyan-300"></span>
-              Population
-            </span>
-            <span class="inline-flex items-center gap-2">
-              <span class="inline-block w-5 border-t-2 border-cyan-300 border-dashed"></span>
-              Population Cap
-            </span>
+
+      <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div id="graph-economy-${matchId}" class="rounded-xl border border-slate-700/40 bg-slate-900/55 p-4">
+          <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
+            <div>
+              <p class="text-[10px] uppercase tracking-[0.24em] text-gray-400">Economy Pace</p>
+              <h4 class="text-sm font-semibold text-white mt-1">Team-level resource tempo</h4>
+            </div>
+            <div id="graph-economy-controls-${matchId}" class="flex flex-wrap items-center gap-2">
+              <button type="button" data-economy-metric="supply"></button>
+              <button type="button" data-economy-metric="power"></button>
+            </div>
           </div>
+          <div class="mb-3">
+            <label class="flex items-center gap-2 rounded-lg border border-slate-700/40 bg-slate-900/50 px-3 py-2 text-xs text-gray-300">
+              <span class="text-[10px] uppercase tracking-wider text-gray-500">Player Overlay</span>
+              <select id="graph-player-overlay-${matchId}" class="ml-auto rounded border border-slate-700/60 bg-slate-950/70 px-2 py-1 text-[11px] text-gray-200">
+                <option value="">Team Only</option>
+                ${modelOptionMarkup([])}
+              </select>
+            </label>
+          </div>
+          <div class="relative" style="height: 240px;">
+            <canvas id="${chartIds.economy}"></canvas>
+          </div>
+          <div class="chart-empty hidden text-center py-4 text-sm text-gray-400"></div>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 mb-3 text-xs">
-          <label class="inline-flex items-center gap-2 rounded-md border border-slate-700/40 bg-slate-900/40 px-2 py-1 text-gray-300">
-            <input id="population-show-population-${matchId}" type="checkbox" checked class="accent-cyan-400" />
-            <span>Show Population</span>
-          </label>
-          <label class="inline-flex items-center gap-2 rounded-md border border-slate-700/40 bg-slate-900/40 px-2 py-1 text-gray-300">
-            <input id="population-show-cap-${matchId}" type="checkbox" checked class="accent-cyan-400" />
-            <span>Show Cap</span>
-          </label>
-          <label class="flex items-center gap-2 rounded-md border border-slate-700/40 bg-slate-900/40 px-2 py-1 text-gray-300">
-            <span class="text-[10px] uppercase tracking-wider text-gray-500">Smoothing</span>
-            <select id="population-smoothing-${matchId}" class="ml-auto rounded border border-slate-700/60 bg-slate-950/70 px-2 py-1 text-[11px] text-gray-200">
-              <option value="0">Off</option>
-              <option value="0.15">Low</option>
-              <option value="0.25" selected>Medium</option>
-              <option value="0.4">High</option>
-            </select>
-          </label>
-          <label class="flex items-center gap-2 rounded-md border border-slate-700/40 bg-slate-900/40 px-2 py-1 text-gray-300">
-            <span class="text-[10px] uppercase tracking-wider text-gray-500">Downsample</span>
-            <select id="population-downsample-${matchId}" class="ml-auto rounded border border-slate-700/60 bg-slate-950/70 px-2 py-1 text-[11px] text-gray-200">
-              <option value="auto" selected>Auto</option>
-              <option value="300">300</option>
-              <option value="240">240</option>
-              <option value="180">180</option>
-              <option value="120">120</option>
-              <option value="all">All</option>
-            </select>
-          </label>
+
+        <div id="graph-army-${matchId}" class="rounded-xl border border-slate-700/40 bg-slate-900/55 p-4">
+          <div class="mb-4">
+            <p class="text-[10px] uppercase tracking-[0.24em] text-gray-400">Army Pressure</p>
+            <h4 class="text-sm font-semibold text-white mt-1">Population pressure plus death differential</h4>
+          </div>
+          <div class="relative" style="height: 240px;">
+            <canvas id="${chartIds.army}"></canvas>
+          </div>
+          <div class="chart-empty hidden text-center py-4 text-sm text-gray-400"></div>
         </div>
-        <p id="population-downsample-hint-${matchId}" class="text-[10px] uppercase tracking-wider text-gray-500 mb-2"></p>
-        <div class="relative" style="height: 260px;">
-          <canvas id="chart-population-${matchId}"></canvas>
-        </div>
-        <div class="chart-empty hidden text-center py-4 text-xs text-gray-500">No population heartbeat data available.</div>
       </div>
-      <div id="graph-leaderpoints-${matchId}" class="rounded-lg border border-slate-700/40 bg-slate-800/40 p-3">
-        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-          <h4 class="text-[10px] uppercase tracking-wider text-gray-400">Leader Point Progression</h4>
-          <span class="text-[10px] uppercase tracking-wider text-gray-500">Unlock XP: 0, 600, 1300, 2000, 3000, 4000, 5000, 6000, 7000, 7900, 8900</span>
+
+      <div id="graph-rail-${matchId}" class="rounded-xl border border-slate-700/40 bg-slate-900/55 p-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div>
+            <p class="text-[10px] uppercase tracking-[0.24em] text-gray-400">Event Rail</p>
+            <h4 class="text-sm font-semibold text-white mt-1">Milestones that explain the swings</h4>
+          </div>
+          <p class="text-[11px] uppercase tracking-wider text-gray-500">First tech, power spikes, peak pop, death spikes</p>
         </div>
-        <div class="relative" style="height: 260px;">
-          <canvas id="chart-leaderpoints-${matchId}"></canvas>
-        </div>
-        <div class="chart-empty hidden text-center py-4 text-xs text-gray-500">No leader point heartbeat data available.</div>
+        <div id="graph-event-rail-${matchId}"></div>
       </div>
-      <div id="graph-buildorder-${matchId}" class="rounded-lg border border-slate-700/40 bg-slate-800/40 p-3">
-        <h4 class="text-[10px] uppercase tracking-wider text-gray-400 mb-2">Build Order Timeline</h4>
-        <div class="relative" style="height: 200px;">
-          <canvas id="chart-buildorder-${matchId}"></canvas>
+
+      <div id="graph-contribution-${matchId}" class="rounded-xl border border-slate-700/40 bg-slate-900/55 p-4">
+        <div class="mb-4">
+          <p class="text-[10px] uppercase tracking-[0.24em] text-gray-400">Contribution Summary</p>
+          <h4 class="text-sm font-semibold text-white mt-1">End-of-match player contribution snapshot</h4>
         </div>
-        <div class="chart-empty hidden text-center py-4 text-xs text-gray-500">No build data available.</div>
-      </div>
-      <div id="graph-activity-${matchId}" class="rounded-lg border border-slate-700/40 bg-slate-800/40 p-3">
-        <h4 class="text-[10px] uppercase tracking-wider text-gray-400 mb-2">Activity Over Time</h4>
-        <div class="relative" style="height: 240px;">
-          <canvas id="chart-activity-${matchId}"></canvas>
+        <div class="relative" style="height: 300px;">
+          <canvas id="${chartIds.contribution}"></canvas>
         </div>
-        <div class="chart-empty hidden text-center py-4 text-xs text-gray-500">No event data available.</div>
+        <div class="chart-empty hidden text-center py-4 text-sm text-gray-400"></div>
       </div>
     </div>
   `;
 
-  renderUnitsChart(Chart, matchId, matchResultData);
-
   if (eventResult.ok) {
-    const { entries, playersByIndex } = await buildEventEntries(eventResult.data);
+    const { entries, playersByIndex, isCompleteSet } = await buildEventEntries(eventResult.data);
     const filteredEntries = entries.filter((entry) => {
       if (entry.playerIndex == null) return true;
       const info = playersByIndex.get(entry.playerIndex);
       return info?.playerType !== 3;
     });
-    const maxTimelineMinutes = Math.max(1, filteredEntries.reduce((max, entry) => Math.max(max, entry.timeMs / 60000), 0));
-    const presetEl = document.getElementById(`graph-time-preset-${matchId}`) as HTMLSelectElement | null;
-    const startEl = document.getElementById(`graph-time-start-${matchId}`) as HTMLInputElement | null;
-    const endEl = document.getElementById(`graph-time-end-${matchId}`) as HTMLInputElement | null;
-
-    const applyPreset = (preset: string): TimeWindow => {
-      switch (preset) {
-        case 'opening30':
-          return clampTimeWindow(0, Math.min(30, maxTimelineMinutes), maxTimelineMinutes);
-        case 'opening60':
-          return clampTimeWindow(0, Math.min(60, maxTimelineMinutes), maxTimelineMinutes);
-        case 'last30':
-          return clampTimeWindow(Math.max(0, maxTimelineMinutes - 30), maxTimelineMinutes, maxTimelineMinutes);
-        case 'last60':
-          return clampTimeWindow(Math.max(0, maxTimelineMinutes - 60), maxTimelineMinutes, maxTimelineMinutes);
-        case 'full':
-        default:
-          return clampTimeWindow(0, maxTimelineMinutes, maxTimelineMinutes);
-      }
-    };
-
-    const readAndSyncWindow = () => {
-      const bounded = getSelectedTimeWindow(matchId, maxTimelineMinutes);
-      syncTimeWindowInputs(matchId, bounded, maxTimelineMinutes);
-      return bounded;
-    };
-
-    const renderTimeSeriesCharts = () => {
-      const selectedWindow = readAndSyncWindow();
-      renderActivityChart(Chart, matchId, filteredEntries, playersByIndex, selectedWindow);
-      renderLeaderPointsChart(Chart, matchId, filteredEntries, playersByIndex, selectedWindow);
-      renderBuildOrderChart(Chart, matchId, filteredEntries, playersByIndex, selectedWindow);
-    };
-
-    const initialWindow = applyPreset('full');
-    syncTimeWindowInputs(matchId, initialWindow, maxTimelineMinutes);
-    if (presetEl) presetEl.value = 'full';
-
-    if (presetEl) {
-      presetEl.addEventListener('change', () => {
-        if (presetEl.value === 'custom') {
-          renderTimeSeriesCharts();
-          return;
-        }
-        const presetWindow = applyPreset(presetEl.value);
-        syncTimeWindowInputs(matchId, presetWindow, maxTimelineMinutes);
-        renderTimeSeriesCharts();
-      });
+    const model = buildMatchGraphModel(filteredEntries, playersByIndex);
+    const overlayEl = document.getElementById(`graph-player-overlay-${matchId}`) as HTMLSelectElement | null;
+    if (overlayEl) {
+      overlayEl.innerHTML = `
+        <option value="">Team Only</option>
+        ${model.playerSeries.map((series) => `<option value="${series.playerIndex}">${series.teamId ? `Team ${series.teamId}` : 'Unknown'} · ${series.playerName}</option>`).join('')}
+      `;
     }
-
-    const handleCustomWindowInput = () => {
-      if (presetEl) presetEl.value = 'custom';
-      renderTimeSeriesCharts();
-    };
-
-    [startEl, endEl].forEach((el) => {
-      if (!el) return;
-      el.addEventListener('input', handleCustomWindowInput);
-      el.addEventListener('change', handleCustomWindowInput);
+    renderGraphDashboard(Chart, matchId, model, buildContributionRows(matchResultData), {
+      hasHeartbeatData: filteredEntries.some((entry) => entry.kind === 'resource'),
+      isCompleteSet,
     });
-
-    renderResourcesChart(Chart, matchId, filteredEntries, playersByIndex, readAndSyncWindow, [presetEl, startEl, endEl]);
-    renderPopulationChart(Chart, matchId, filteredEntries, playersByIndex, readAndSyncWindow, [presetEl, startEl, endEl]);
-    renderTimeSeriesCharts();
   } else {
-    const activityEmpty = graphsEl.querySelector(`#graph-activity-${matchId} .chart-empty`) as HTMLElement | null;
-    const resourceEmpty = graphsEl.querySelector(`#graph-resources-${matchId} .chart-empty`) as HTMLElement | null;
-    const populationEmpty = graphsEl.querySelector(`#graph-population-${matchId} .chart-empty`) as HTMLElement | null;
-    const leaderPointsEmpty = graphsEl.querySelector(`#graph-leaderpoints-${matchId} .chart-empty`) as HTMLElement | null;
-    const buildEmpty = graphsEl.querySelector(`#graph-buildorder-${matchId} .chart-empty`) as HTMLElement | null;
-    const timeWindowSection = document.getElementById(`graph-timewindow-${matchId}`) as HTMLElement | null;
-    const activityCanvas = document.getElementById(`chart-activity-${matchId}`)?.parentElement;
-    const resourceCanvas = document.getElementById(`chart-resources-${matchId}`)?.parentElement;
-    const populationCanvas = document.getElementById(`chart-population-${matchId}`)?.parentElement;
-    const leaderPointsCanvas = document.getElementById(`chart-leaderpoints-${matchId}`)?.parentElement;
-    const buildCanvas = document.getElementById(`chart-buildorder-${matchId}`)?.parentElement;
-    if (timeWindowSection) timeWindowSection.classList.add('hidden');
-    if (activityCanvas) activityCanvas.classList.add('hidden');
-    if (resourceCanvas) resourceCanvas.classList.add('hidden');
-    if (populationCanvas) populationCanvas.classList.add('hidden');
-    if (leaderPointsCanvas) leaderPointsCanvas.classList.add('hidden');
-    if (buildCanvas) buildCanvas.classList.add('hidden');
-    if (activityEmpty) activityEmpty.classList.remove('hidden');
-    if (resourceEmpty) resourceEmpty.classList.remove('hidden');
-    if (populationEmpty) populationEmpty.classList.remove('hidden');
-    if (leaderPointsEmpty) leaderPointsEmpty.classList.remove('hidden');
-    if (buildEmpty) buildEmpty.classList.remove('hidden');
+    const emptyModel = buildMatchGraphModel([], new Map());
+    renderGraphDashboard(Chart, matchId, emptyModel, buildContributionRows(matchResultData), {
+      hasHeartbeatData: false,
+      isCompleteSet: undefined,
+    });
+    renderEventRail(matchId, emptyModel, {
+      phase: 'full',
+      window: getPhaseWindow('full', emptyModel.maxTimeMin),
+      economyMetric: 'supply',
+      overlayPlayerIndex: null,
+      hoverMinute: null,
+      customEnabled: false,
+    }, undefined);
+    const railEl = document.getElementById(`graph-event-rail-${matchId}`);
+    if (railEl) {
+      railEl.innerHTML = `<div class="rounded-lg border border-slate-700/40 bg-slate-900/40 p-3 text-sm text-gray-400">Match events are unavailable for this game.</div>`;
+    }
   }
 
   graphsEl.removeAttribute('data-loading');
   graphsEl.setAttribute('data-loaded', 'true');
+}
+
+function modelOptionMarkup(series: Array<{ playerIndex: number; playerName: string; teamId: 1 | 2 | null }>): string {
+  return series.map((item) => `<option value="${item.playerIndex}">${item.teamId ? `Team ${item.teamId}` : 'Unknown'} · ${item.playerName}</option>`).join('');
 }
