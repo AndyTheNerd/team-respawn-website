@@ -25,6 +25,14 @@ npx wrangler d1 execute team-respawn-hw2 --file ../migrations/0004_campaign_cach
 npx wrangler d1 execute team-respawn-hw2 --file ../migrations/0005_player_matches_cache.sql --remote
 ```
 
+For the local preview database used by `npm run dev:cf`, run the local migrations from the repo root:
+
+```powershell
+npm run cf:d1:migrate:local
+```
+
+`wrangler pages dev` uses the repo root `.wrangler/state/...` preview database. It does not automatically read the populated remote D1 database, and it is separate from any `workers/.wrangler/...` state created by commands that target the worker config directory.
+
 ## 3) Create/Configure Cloudflare Pages project
 
 In Cloudflare Dashboard:

@@ -1,140 +1,1017 @@
 ---
-// Displays aggregated HW2 community stats from our D1 database cache.
-// Data reflects only matches analyzed through this site (biased sample).
 import { mapData } from '../data/haloWars2/maps.ts';
+import { leaderData } from '../data/haloWars2/leaders.ts';
+import { playlistData } from '../data/haloWars2/playlists.ts';
+import { hw2NameMappings } from '../data/haloWars2/nameMappings.ts';
 
 const mapNames: Record<string, string> = Object.fromEntries(
   Object.entries(mapData).map(([id, map]) => [id, map.name])
 );
+
+const leaderMeta: Record<string, { displayName: string; faction: string }> = Object.fromEntries(
+  Object.values(leaderData).map((leader) => [
+    String(leader.id),
+    { displayName: leader.displayName, faction: leader.faction },
+  ])
+);
+
+const playlistMeta = Object.values(playlistData).map((playlist) => ({
+  id: playlist.id,
+  displayName: playlist.displayName,
+}));
+
+const powerNames = hw2NameMappings?.idMaps?.leaderPowers || {};
 ---
-<section class="mb-8" aria-labelledby="hw2-community-stats-heading">
-  <div class="flex items-center mb-4">
-    <h2
-      id="hw2-community-stats-heading"
-      class="text-lg font-semibold text-gray-200 flex items-center gap-2"
-    >
-      <i class="fas fa-chart-bar text-cyan-400" aria-hidden="true"></i>
-      HW2 Community Insights
-    </h2>
+<section class="mb-10" aria-labelledby="hw2-community-stats-heading">
+  <div class="flex flex-col gap-3 mb-5">
+    <div class="flex flex-wrap items-center gap-3">
+      <h2
+        id="hw2-community-stats-heading"
+        class="text-2xl font-semibold text-slate-100 flex items-center gap-3"
+      >
+        <span class="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-cyan-400/30 bg-cyan-400/10 text-cyan-300">
+          <i class="fas fa-chart-bar" aria-hidden="true"></i>
+        </span>
+        HW2 Community Dashboard
+      </h2>
+      <span class="inline-flex items-center rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-200">
+        Cache Only
+      </span>
+    </div>
+    <p class="max-w-4xl text-sm leading-6 text-slate-400">
+      Built entirely from matches, events, leader powers, and search history already cached in this site&apos;s database.
+      This landing view does not make live Halo API requests.
+    </p>
   </div>
 
   <div id="hw2-community-stats" aria-live="polite">
-    <!-- Loading skeleton -->
     <div class="animate-pulse space-y-4">
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {Array.from({ length: 4 }).map(() => (
-          <div class="h-16 bg-gray-800 rounded-xl border border-gray-700/50"></div>
+          <div class="h-24 rounded-2xl border border-slate-700/60 bg-slate-800/60"></div>
         ))}
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {Array.from({ length: 4 }).map(() => (
-          <div class="h-36 bg-gray-800 rounded-xl border border-gray-700/50"></div>
+      <div class="grid grid-cols-1 xl:grid-cols-12 gap-4">
+        {Array.from({ length: 6 }).map(() => (
+          <div class="h-72 rounded-2xl border border-slate-700/60 bg-slate-800/60 xl:col-span-6"></div>
         ))}
       </div>
     </div>
   </div>
 </section>
 
-<script is:inline define:vars={{ mapNames }}>
+<style>
+  .hw2-dashboard-panel {
+    border: 1px solid rgba(100, 116, 139, 0.25);
+    background:
+      radial-gradient(circle at top right, rgba(6, 182, 212, 0.08), transparent 32%),
+      linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(2, 6, 23, 0.92));
+    border-radius: 22px;
+    padding: 1rem;
+    box-shadow: inset 0 1px 0 rgba(148, 163, 184, 0.08);
+  }
+
+  .hw2-dashboard-panel h3 {
+    letter-spacing: 0.04em;
+  }
+
+  .hw2-dashboard-scroll {
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .hw2-filter-chip {
+    border: 1px solid rgba(56, 189, 248, 0.22);
+    background: rgba(15, 23, 42, 0.72);
+    color: rgb(148, 163, 184);
+    transition: all 0.2s ease;
+  }
+
+  .hw2-filter-chip:hover {
+    color: rgb(224, 242, 254);
+    border-color: rgba(56, 189, 248, 0.42);
+    background: rgba(8, 47, 73, 0.6);
+  }
+
+  .hw2-filter-chip.is-active {
+    color: white;
+    border-color: rgba(34, 211, 238, 0.55);
+    background: linear-gradient(135deg, rgba(14, 116, 144, 0.55), rgba(8, 47, 73, 0.9));
+    box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.12) inset;
+  }
+
+  .hw2-heat-table {
+    min-width: 100%;
+    border-collapse: separate;
+    border-spacing: 0.4rem;
+  }
+
+  .hw2-heat-table th {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgb(100, 116, 139);
+    text-align: left;
+    white-space: nowrap;
+    padding-bottom: 0.25rem;
+  }
+
+  .hw2-heat-table td {
+    min-width: 4.4rem;
+    padding: 0.6rem 0.55rem;
+    border-radius: 14px;
+    text-align: center;
+    border: 1px solid rgba(148, 163, 184, 0.08);
+    vertical-align: middle;
+  }
+
+  .hw2-heat-label {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: linear-gradient(90deg, rgba(2, 6, 23, 0.96), rgba(2, 6, 23, 0.9));
+    min-width: 10rem;
+    text-align: left !important;
+    padding-left: 0.75rem !important;
+  }
+
+  .hw2-heat-main {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: rgb(241, 245, 249);
+    line-height: 1.1;
+  }
+
+  .hw2-heat-sub {
+    display: block;
+    margin-top: 0.2rem;
+    font-size: 0.64rem;
+    color: rgba(226, 232, 240, 0.7);
+    line-height: 1.1;
+  }
+
+  .hw2-mini-bar {
+    height: 0.42rem;
+    border-radius: 999px;
+    background: rgba(51, 65, 85, 0.85);
+    overflow: hidden;
+  }
+
+  .hw2-mini-bar > span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+  }
+
+  .hw2-interest-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.45rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid rgba(34, 211, 238, 0.22);
+    background: rgba(8, 47, 73, 0.25);
+    color: rgb(186, 230, 253);
+    font-size: 0.78rem;
+    transition: all 0.2s ease;
+  }
+
+  .hw2-interest-link:hover {
+    background: rgba(8, 47, 73, 0.45);
+    color: white;
+    border-color: rgba(34, 211, 238, 0.38);
+  }
+
+  .hw2-activity-grid {
+    display: grid;
+    grid-template-columns: 3rem repeat(24, minmax(0, 1fr));
+    gap: 0.22rem;
+    align-items: center;
+  }
+
+  .hw2-activity-grid > div {
+    min-height: 0.95rem;
+  }
+
+  .hw2-activity-label {
+    font-size: 0.68rem;
+    color: rgb(100, 116, 139);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  .hw2-activity-cell {
+    border-radius: 0.35rem;
+    border: 1px solid rgba(148, 163, 184, 0.06);
+  }
+
+  .hw2-power-row + .hw2-power-row {
+    border-top: 1px solid rgba(51, 65, 85, 0.55);
+  }
+</style>
+
+<script is:inline define:vars={{ mapNames, leaderMeta, playlistMeta, powerNames }}>
   (async () => {
     const container = document.getElementById('hw2-community-stats');
     if (!container) return;
 
-    function fmt(n) {
-      return Number(n).toLocaleString('en-US');
+    const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const OPENING_BUCKETS = Array.from({ length: 11 }, (_, i) => i);
+    const RESOURCE_BUCKETS = Array.from({ length: 11 }, (_, i) => i * 2);
+    const OPENING_LABELS = {
+      eco: 'First Supply Pad / Harvester',
+      generator: 'First Generator / Extractor',
+      barracks: 'First Barracks / Raid Camp',
+      vehicle: 'First Vehicle Building',
+      air: 'First Air Pad',
+      first_unit: 'First Unit',
+      tech2: 'Tech 2',
+      tech3: 'Tech 3',
+    };
+    const RANKED_IDS = new Set((playlistMeta || []).map((playlist) => playlist.id));
+    const PLAYLIST_FILTERS = [
+      { id: 'ranked', label: 'Ranked Meta', match: (playlistId) => RANKED_IDS.has(playlistId || '') },
+      { id: 'all', label: 'All Cached', match: () => true },
+      ...((playlistMeta || []).map((playlist) => ({
+        id: playlist.id,
+        label: playlist.displayName,
+        match: (playlistId) => playlistId === playlist.id,
+      }))),
+    ];
+
+    const state = { activeFilter: 'ranked' };
+
+    function fmt(n, digits = 0) {
+      const num = Number(n);
+      if (!Number.isFinite(num)) return '—';
+      return num.toLocaleString('en-US', {
+        minimumFractionDigits: digits,
+        maximumFractionDigits: digits,
+      });
+    }
+
+    function fmtPct(n, digits = 0) {
+      const num = Number(n);
+      if (!Number.isFinite(num)) return '—';
+      return `${(num * 100).toFixed(digits)}%`;
     }
 
     function fmtDuration(seconds) {
-      if (!seconds) return '—';
-      const m = Math.floor(seconds / 60);
-      const s = Math.round(seconds % 60);
+      const num = Number(seconds);
+      if (!Number.isFinite(num) || num <= 0) return '—';
+      const m = Math.floor(num / 60);
+      const s = Math.round(num % 60);
       return `${m}m ${String(s).padStart(2, '0')}s`;
     }
 
-    function sectionHeading(label) {
-      return `<h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">${label}</h3>`;
+    function escHtml(value) {
+      const div = document.createElement('div');
+      div.textContent = String(value ?? '');
+      return div.innerHTML;
+    }
+
+    function leaderName(leaderId) {
+      return leaderMeta?.[String(leaderId)]?.displayName || `Leader ${leaderId}`;
+    }
+
+    function leaderFaction(leaderId) {
+      return leaderMeta?.[String(leaderId)]?.faction || '';
+    }
+
+    function mapName(mapId) {
+      if (!mapId) return 'Unknown';
+      return mapNames?.[mapId] || String(mapId).split('\\').pop() || String(mapId);
+    }
+
+    function playlistName(playlistId) {
+      if (!playlistId) return 'Unlisted';
+      const hit = (playlistMeta || []).find((playlist) => playlist.id === playlistId);
+      return hit?.displayName || 'Other';
+    }
+
+    function humanizeId(value) {
+      return String(value || '')
+        .replace(/([a-z])([A-Z])/g, '$1 $2')
+        .replace(/[_-]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .replace(/\b\w/g, (char) => char.toUpperCase());
+    }
+
+    function powerName(powerId) {
+      if (!powerId) return 'Unknown Power';
+      return powerNames?.[powerId] || humanizeId(powerId);
+    }
+
+    function getFilter() {
+      return PLAYLIST_FILTERS.find((item) => item.id === state.activeFilter) || PLAYLIST_FILTERS[0];
+    }
+
+    function filterRows(rows) {
+      const filter = getFilter();
+      return (rows || []).filter((row) => filter.match(row?.playlist_id || null));
+    }
+
+    function alphaCell(value, maxValue, rgb, fallbackAlpha = 0.08) {
+      const safeMax = Math.max(Number(maxValue) || 0, 0.0001);
+      const normalized = Math.min(1, Math.max(0, Number(value) || 0) / safeMax);
+      const alpha = fallbackAlpha + normalized * 0.72;
+      return `background: rgba(${rgb}, ${alpha.toFixed(3)});`;
+    }
+
+    function pctCell(value, rgb) {
+      if (!Number.isFinite(value)) {
+        return 'background: rgba(51, 65, 85, 0.22);';
+      }
+      const normalized = Math.min(1, Math.max(0, value));
+      const alpha = 0.08 + normalized * 0.76;
+      return `background: rgba(${rgb}, ${alpha.toFixed(3)});`;
+    }
+
+    function renderPanel(title, subtitle, body, span = 'xl:col-span-6') {
+      return `
+        <section class="hw2-dashboard-panel ${span}">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div>
+              <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-slate-200">${escHtml(title)}</h3>
+              <p class="mt-1 text-xs text-slate-500">${escHtml(subtitle)}</p>
+            </div>
+          </div>
+          ${body}
+        </section>
+      `;
     }
 
     function renderSnapshot(data) {
-      const powers = data.medianPowersPerPlayer;
+      const cards = [
+        {
+          value: fmt(data.totalMatches),
+          label: 'Matches Analyzed',
+          tone: 'text-cyan-300',
+          meta: 'Cached matches in D1',
+        },
+        {
+          value: fmt(data.totalPlayers),
+          label: 'Players Tracked',
+          tone: 'text-emerald-300',
+          meta: 'Unique searched profiles',
+        },
+        {
+          value: fmtDuration(data.avgDurationSeconds),
+          label: 'Average Game Length',
+          tone: 'text-amber-200',
+          meta: 'All cached matches',
+        },
+        {
+          value: data.medianPowersPerPlayer != null ? fmt(data.medianPowersPerPlayer) : '—',
+          label: 'Median Powers Used',
+          tone: 'text-fuchsia-200',
+          meta: 'Per human player',
+        },
+      ];
+
       return `
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-          <div class="bg-gray-800/50 border border-gray-700/50 rounded-xl p-3 text-center">
-            <div class="text-xl font-bold text-cyan-400">${fmt(data.totalMatches)}</div>
-            <div class="text-xs text-gray-500 mt-0.5">Matches Analyzed</div>
-          </div>
-          <div class="bg-gray-800/50 border border-gray-700/50 rounded-xl p-3 text-center">
-            <div class="text-xl font-bold text-cyan-400">${fmt(data.totalPlayers)}</div>
-            <div class="text-xs text-gray-500 mt-0.5">Players Tracked</div>
-          </div>
-          <div class="bg-gray-800/50 border border-gray-700/50 rounded-xl p-3 text-center">
-            <div class="text-xl font-bold text-cyan-400">${fmtDuration(data.avgDurationSeconds)}</div>
-            <div class="text-xs text-gray-500 mt-0.5">Avg Game Length</div>
-          </div>
-          <div class="bg-gray-800/50 border border-gray-700/50 rounded-xl p-3 text-center">
-            <div class="text-xl font-bold text-cyan-400">${powers != null ? fmt(powers) : '—'}</div>
-            <div class="text-xs text-gray-500 mt-0.5">Median Powers Used</div>
-          </div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+          ${cards.map((card) => `
+            <div class="hw2-dashboard-panel !p-4">
+              <div class="text-[11px] uppercase tracking-[0.18em] text-slate-500">${card.label}</div>
+              <div class="mt-2 text-2xl font-bold ${card.tone}">${card.value}</div>
+              <div class="mt-2 text-xs text-slate-500">${card.meta}</div>
+            </div>
+          `).join('')}
         </div>
       `;
     }
 
     function renderMapDurations(stats) {
-      if (!stats?.length) return '';
-      const maxCnt = stats[0].cnt;
-      const rows = stats.map(m => {
-        const name = mapNames[m.map_id] || m.map_id.split('\\').pop() || 'Unknown';
-        const pct = maxCnt > 0 ? Math.round((m.cnt / maxCnt) * 100) : 0;
-        const dur = m.median_seconds ? fmtDuration(m.median_seconds) : '—';
-        return `
-          <div class="flex items-center gap-2">
-            <span class="text-xs text-gray-300 w-24 shrink-0 truncate" title="${name}">${name}</span>
-            <div class="flex-1 bg-gray-700 rounded-full h-1.5 overflow-hidden">
-              <div class="bg-cyan-500/60 h-full rounded-full" style="width:${pct}%"></div>
-            </div>
-            <span class="text-xs text-gray-400 w-12 text-right shrink-0">${dur}</span>
-            <span class="text-xs text-gray-600 w-6 text-right shrink-0">${m.cnt}</span>
-          </div>
-        `;
-      }).join('');
+      if (!stats?.length) {
+        return '<p class="text-sm text-slate-500 italic">Map duration data will appear once cached matches accumulate.</p>';
+      }
+      const top = stats.slice(0, 8);
+      const maxCount = Math.max(...top.map((row) => Number(row.cnt) || 0), 1);
       return `
-        <div>
-          ${sectionHeading('Median Duration by Map')}
-          <div class="bg-gray-800/40 border border-gray-700/30 rounded-xl p-4 space-y-2">${rows}</div>
+        <div class="space-y-3">
+          ${top.map((row) => {
+            const count = Number(row.cnt) || 0;
+            const width = Math.round((count / maxCount) * 100);
+            return `
+              <div>
+                <div class="flex items-center justify-between gap-3 text-xs mb-1.5">
+                  <span class="truncate text-slate-200">${escHtml(mapName(row.map_id))}</span>
+                  <span class="shrink-0 text-slate-500">${fmtDuration(row.median_seconds)} • ${fmt(count)}</span>
+                </div>
+                <div class="hw2-mini-bar">
+                  <span style="width:${width}%; background: linear-gradient(90deg, rgba(34,211,238,0.42), rgba(34,211,238,0.9));"></span>
+                </div>
+              </div>
+            `;
+          }).join('')}
         </div>
       `;
     }
 
-    function renderUnits(destroyed, lost) {
-      if (destroyed == null && lost == null) return '';
-      const maxVal = Math.max(destroyed ?? 0, lost ?? 0, 1);
-      const dPct = Math.round(((destroyed ?? 0) / maxVal) * 100);
-      const lPct = Math.round(((lost ?? 0) / maxVal) * 100);
+    function renderUnitMedians(data) {
+      const destroyed = Number(data.medianUnitsDestroyed);
+      const lost = Number(data.medianUnitsLost);
+      const max = Math.max(destroyed || 0, lost || 0, 1);
+      const destroyedPct = destroyed > 0 ? Math.round((destroyed / max) * 100) : 0;
+      const lostPct = lost > 0 ? Math.round((lost / max) * 100) : 0;
+
       return `
-        <div>
-          ${sectionHeading('Median Units per Player')}
-          <div class="bg-gray-800/40 border border-gray-700/30 rounded-xl p-4 space-y-3">
-            <div>
-              <div class="flex justify-between text-xs mb-1">
-                <span class="text-green-400 font-medium">Units Destroyed</span>
-                <span class="text-gray-300 font-bold">${destroyed != null ? fmt(destroyed) : '—'}</span>
-              </div>
-              <div class="h-2 bg-gray-700 rounded-full overflow-hidden">
-                <div class="h-full bg-green-500/70 rounded-full" style="width:${dPct}%"></div>
-              </div>
+        <div class="space-y-4">
+          <div>
+            <div class="flex items-center justify-between text-xs mb-1.5">
+              <span class="text-emerald-300">Units Destroyed</span>
+              <span class="text-slate-200 font-semibold">${Number.isFinite(destroyed) ? fmt(destroyed) : '—'}</span>
             </div>
-            <div>
-              <div class="flex justify-between text-xs mb-1">
-                <span class="text-red-400 font-medium">Units Lost</span>
-                <span class="text-gray-300 font-bold">${lost != null ? fmt(lost) : '—'}</span>
-              </div>
-              <div class="h-2 bg-gray-700 rounded-full overflow-hidden">
-                <div class="h-full bg-red-500/60 rounded-full" style="width:${lPct}%"></div>
-              </div>
+            <div class="hw2-mini-bar">
+              <span style="width:${destroyedPct}%; background: linear-gradient(90deg, rgba(16,185,129,0.35), rgba(16,185,129,0.95));"></span>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between text-xs mb-1.5">
+              <span class="text-rose-300">Units Lost</span>
+              <span class="text-slate-200 font-semibold">${Number.isFinite(lost) ? fmt(lost) : '—'}</span>
+            </div>
+            <div class="hw2-mini-bar">
+              <span style="width:${lostPct}%; background: linear-gradient(90deg, rgba(244,63,94,0.35), rgba(244,63,94,0.95));"></span>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <div class="rounded-2xl border border-slate-700/60 bg-slate-900/50 p-3">
+              <div class="text-[10px] uppercase tracking-[0.16em] text-slate-500">Combat Delta</div>
+              <div class="mt-2 text-lg font-semibold text-slate-100">${Number.isFinite(destroyed) && Number.isFinite(lost) ? fmt(destroyed - lost) : '—'}</div>
+            </div>
+            <div class="rounded-2xl border border-slate-700/60 bg-slate-900/50 p-3">
+              <div class="text-[10px] uppercase tracking-[0.16em] text-slate-500">Median Match Style</div>
+              <div class="mt-2 text-sm font-semibold text-slate-100">${destroyed > lost ? 'Trades Up' : 'Trades Even'}</div>
             </div>
           </div>
         </div>
       `;
+    }
+
+    function renderFilterBar() {
+      return `
+        <div class="hw2-dashboard-panel !p-4 mb-4">
+          <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <div class="text-xs uppercase tracking-[0.18em] text-slate-500">Meta Filters</div>
+              <p class="mt-1 text-sm text-slate-400">Heatmaps and meta panels below are derived from cached rows matching this playlist scope.</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              ${PLAYLIST_FILTERS.map((filter) => `
+                <button
+                  type="button"
+                  data-filter-id="${escHtml(filter.id)}"
+                  class="hw2-filter-chip ${state.activeFilter === filter.id ? 'is-active' : ''} rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em]"
+                >
+                  ${escHtml(filter.label)}
+                </button>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderInterestPanel(data) {
+      const recent = data.recentSearches || [];
+      const top = data.topSearches || [];
+      const rising = data.risingSearches || [];
+
+      const recentHtml = recent.length
+        ? `<div class="flex flex-wrap gap-2">
+            ${recent.map((row) => `
+              <a class="hw2-interest-link" href="/halo-wars-stats?gamertag=${encodeURIComponent(row.gamertag || '')}">
+                <i class="fas fa-gamepad text-[10px] text-cyan-400" aria-hidden="true"></i>
+                ${escHtml(row.gamertag || '')}
+              </a>
+            `).join('')}
+          </div>`
+        : '<p class="text-sm text-slate-500 italic">Search interest appears once visitors start using the lookup.</p>';
+
+      const trendList = (rows, kind) => rows.length
+        ? `<div class="space-y-2">
+            ${rows.map((row, index) => `
+              <div class="flex items-center justify-between gap-3 rounded-2xl border border-slate-700/60 bg-slate-900/45 px-3 py-2">
+                <div>
+                  <div class="text-[10px] uppercase tracking-[0.14em] text-slate-500">#${index + 1}</div>
+                  <a href="/halo-wars-stats?gamertag=${encodeURIComponent(row.gamertag || '')}" class="text-sm font-semibold text-slate-100 hover:text-cyan-200">
+                    ${escHtml(row.gamertag || '')}
+                  </a>
+                </div>
+                <div class="text-right">
+                  <div class="text-sm font-semibold ${kind === 'rising' ? 'text-emerald-300' : 'text-cyan-300'}">
+                    ${kind === 'rising' ? `+${fmt(row.delta || 0)}` : fmt(row.searches || row.recent_searches || 0)}
+                  </div>
+                  <div class="text-[11px] text-slate-500">
+                    ${kind === 'rising'
+                      ? `${fmt(row.recent_searches || 0)} now / ${fmt(row.previous_searches || 0)} prior`
+                      : 'Last 7 days'}
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>`
+        : '<p class="text-sm text-slate-500 italic">Not enough search history yet.</p>';
+
+      return `
+        <div class="space-y-5">
+          <div>
+            <div class="text-[11px] uppercase tracking-[0.16em] text-slate-500 mb-2">Recent Searches</div>
+            ${recentHtml}
+          </div>
+          <div class="grid gap-4 md:grid-cols-2">
+            <div>
+              <div class="text-[11px] uppercase tracking-[0.16em] text-slate-500 mb-2">Most Searched This Week</div>
+              ${trendList(top, 'top')}
+            </div>
+            <div>
+              <div class="text-[11px] uppercase tracking-[0.16em] text-slate-500 mb-2">Fastest Rising Interest</div>
+              ${trendList(rising, 'rising')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderLeaderMapHeatmap(rows, metric) {
+      const filtered = filterRows(rows).filter((row) => row?.leader_id != null && row?.map_id);
+      if (!filtered.length) {
+        return '<p class="text-sm text-slate-500 italic">No leader/map cache yet for this playlist scope.</p>';
+      }
+
+      const mapTotals = new Map();
+      const leaderTotals = new Map();
+      const cells = new Map();
+
+      filtered.forEach((row) => {
+        const picks = Number(row.picks) || 0;
+        const wins = Number(row.wins) || 0;
+        const mapKey = String(row.map_id);
+        const leaderKey = String(row.leader_id);
+        mapTotals.set(mapKey, (mapTotals.get(mapKey) || 0) + picks);
+        leaderTotals.set(leaderKey, (leaderTotals.get(leaderKey) || 0) + picks);
+        const cellKey = `${leaderKey}::${mapKey}`;
+        const current = cells.get(cellKey) || { picks: 0, wins: 0 };
+        current.picks += picks;
+        current.wins += wins;
+        cells.set(cellKey, current);
+      });
+
+      const maps = [...mapTotals.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 8)
+        .map(([mapId]) => mapId);
+
+      const leaders = [...leaderTotals.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .map(([leaderId]) => leaderId);
+
+      let maxValue = 0;
+      const computed = new Map();
+      leaders.forEach((leaderId) => {
+        maps.forEach((mapId) => {
+          const cell = cells.get(`${leaderId}::${mapId}`) || { picks: 0, wins: 0 };
+          const picks = Number(cell.picks) || 0;
+          const wins = Number(cell.wins) || 0;
+          const value = metric === 'pick'
+            ? (picks > 0 ? picks / Math.max(1, mapTotals.get(mapId) || 1) : 0)
+            : (picks > 0 ? wins / picks : Number.NaN);
+          if (Number.isFinite(value)) maxValue = Math.max(maxValue, value);
+          computed.set(`${leaderId}::${mapId}`, { picks, wins, value });
+        });
+      });
+
+      return `
+        <div class="hw2-dashboard-scroll">
+          <table class="hw2-heat-table">
+            <thead>
+              <tr>
+                <th class="hw2-heat-label">${metric === 'pick' ? 'Leader' : 'Leader'}</th>
+                ${maps.map((mapId) => `<th title="${escHtml(mapName(mapId))}">${escHtml(mapName(mapId))}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              ${leaders.map((leaderId) => `
+                <tr>
+                  <td class="hw2-heat-label">
+                    <div class="text-sm font-semibold text-slate-100">${escHtml(leaderName(leaderId))}</div>
+                    <div class="text-[11px] text-slate-500">${escHtml(leaderFaction(leaderId))}</div>
+                  </td>
+                  ${maps.map((mapId) => {
+                    const cell = computed.get(`${leaderId}::${mapId}`) || { picks: 0, wins: 0, value: Number.NaN };
+                    const muted = metric === 'win' && cell.picks < 8;
+                    const style = muted
+                      ? 'background: rgba(51, 65, 85, 0.22);'
+                      : metric === 'pick'
+                        ? pctCell(cell.value, '34, 211, 238')
+                        : pctCell(cell.value, '16, 185, 129');
+                    const main = metric === 'pick'
+                      ? fmtPct(cell.value, 0)
+                      : (cell.picks ? fmtPct(cell.value, 0) : '—');
+                    const sub = metric === 'pick'
+                      ? `${fmt(cell.picks)} picks`
+                      : `${fmt(cell.wins)}W / ${fmt(cell.picks)} picks`;
+                    return `
+                      <td style="${style}" title="${escHtml(leaderName(leaderId))} on ${escHtml(mapName(mapId))}">
+                        <span class="hw2-heat-main">${main}</span>
+                        <span class="hw2-heat-sub">${sub}</span>
+                      </td>
+                    `;
+                  }).join('')}
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderMatchupMatrix(rows) {
+      const filtered = filterRows(rows).filter((row) => row?.leader_id != null && row?.opponent_leader_id != null);
+      if (!filtered.length) {
+        return '<p class="text-sm text-slate-500 italic">This filter has no 1v1 matchup cache yet.</p>';
+      }
+
+      const totals = new Map();
+      const cells = new Map();
+      filtered.forEach((row) => {
+        const leaderId = String(row.leader_id);
+        const oppId = String(row.opponent_leader_id);
+        const matches = Number(row.matches) || 0;
+        const wins = Number(row.wins) || 0;
+        totals.set(leaderId, (totals.get(leaderId) || 0) + matches);
+        const key = `${leaderId}::${oppId}`;
+        const current = cells.get(key) || { matches: 0, wins: 0 };
+        current.matches += matches;
+        current.wins += wins;
+        cells.set(key, current);
+      });
+
+      const leaders = [...totals.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 12)
+        .map(([leaderId]) => leaderId);
+
+      return `
+        <div class="hw2-dashboard-scroll">
+          <table class="hw2-heat-table">
+            <thead>
+              <tr>
+                <th class="hw2-heat-label">Leader</th>
+                ${leaders.map((leaderId) => `<th>${escHtml(leaderName(leaderId))}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              ${leaders.map((leaderId) => `
+                <tr>
+                  <td class="hw2-heat-label">
+                    <div class="text-sm font-semibold text-slate-100">${escHtml(leaderName(leaderId))}</div>
+                    <div class="text-[11px] text-slate-500">Row win rate vs column</div>
+                  </td>
+                  ${leaders.map((oppId) => {
+                    if (leaderId === oppId) {
+                      return '<td style="background: rgba(30,41,59,0.45);"><span class="hw2-heat-main">—</span></td>';
+                    }
+                    const cell = cells.get(`${leaderId}::${oppId}`) || { matches: 0, wins: 0 };
+                    const matches = Number(cell.matches) || 0;
+                    const winRate = matches > 0 ? (Number(cell.wins) || 0) / matches : Number.NaN;
+                    const style = matches < 10
+                      ? 'background: rgba(51,65,85,0.22);'
+                      : pctCell(winRate, '251, 191, 36');
+                    return `
+                      <td style="${style}" title="${escHtml(leaderName(leaderId))} vs ${escHtml(leaderName(oppId))}">
+                        <span class="hw2-heat-main">${matches ? fmtPct(winRate, 0) : '—'}</span>
+                        <span class="hw2-heat-sub">${fmt(matches)} matches</span>
+                      </td>
+                    `;
+                  }).join('')}
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderMapPlaylistHeatmap(rows) {
+      const filtered = (rows || []).filter((row) => row?.map_id);
+      if (!filtered.length) {
+        return '<p class="text-sm text-slate-500 italic">No map/playlist distribution is available yet.</p>';
+      }
+
+      const playlistGroups = new Map();
+      const mapTotals = new Map();
+      const cells = new Map();
+
+      filtered.forEach((row) => {
+        const rawPlaylist = row.playlist_id || 'other';
+        const playlistKey = RANKED_IDS.has(rawPlaylist) ? rawPlaylist : 'other';
+        const mapId = String(row.map_id);
+        const matches = Number(row.matches) || 0;
+        playlistGroups.set(playlistKey, (playlistGroups.get(playlistKey) || 0) + matches);
+        mapTotals.set(mapId, (mapTotals.get(mapId) || 0) + matches);
+        const cellKey = `${playlistKey}::${mapId}`;
+        cells.set(cellKey, (cells.get(cellKey) || 0) + matches);
+      });
+
+      const playlists = [...playlistGroups.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .map(([playlistId]) => playlistId);
+
+      const maps = [...mapTotals.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10)
+        .map(([mapId]) => mapId);
+
+      const maxCell = Math.max(
+        ...maps.flatMap((mapId) => playlists.map((playlistId) => Number(cells.get(`${playlistId}::${mapId}`) || 0))),
+        1
+      );
+
+      return `
+        <div class="hw2-dashboard-scroll">
+          <table class="hw2-heat-table">
+            <thead>
+              <tr>
+                <th class="hw2-heat-label">Map</th>
+                ${playlists.map((playlistId) => `<th>${escHtml(playlistId === 'other' ? 'Other / Custom' : playlistName(playlistId))}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              ${maps.map((mapId) => `
+                <tr>
+                  <td class="hw2-heat-label">
+                    <div class="text-sm font-semibold text-slate-100">${escHtml(mapName(mapId))}</div>
+                    <div class="text-[11px] text-slate-500">${fmt(mapTotals.get(mapId) || 0)} cached matches</div>
+                  </td>
+                  ${playlists.map((playlistId) => {
+                    const value = Number(cells.get(`${playlistId}::${mapId}`) || 0);
+                    return `
+                      <td style="${alphaCell(value, maxCell, '56, 189, 248')}">
+                        <span class="hw2-heat-main">${fmt(value)}</span>
+                      </td>
+                    `;
+                  }).join('')}
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderLeaderPowerPanel(rows) {
+      const filtered = filterRows(rows).filter((row) => row?.leader_id != null && row?.power_id);
+      if (!filtered.length) {
+        return '<p class="text-sm text-slate-500 italic">Leader power popularity appears once cached detailed matches include powers.</p>';
+      }
+
+      const aggregate = new Map();
+      filtered.forEach((row) => {
+        const key = `${row.leader_id}::${row.power_id}`;
+        const current = aggregate.get(key) || { leader_id: row.leader_id, power_id: row.power_id, casts: 0, player_uses: 0, matches_using_power: 0 };
+        current.casts += Number(row.casts) || 0;
+        current.player_uses += Number(row.player_uses) || 0;
+        current.matches_using_power += Number(row.matches_using_power) || 0;
+        aggregate.set(key, current);
+      });
+
+      const top = [...aggregate.values()]
+        .sort((a, b) => b.casts - a.casts)
+        .slice(0, 10);
+
+      return `
+        <div class="space-y-2">
+          ${top.map((row) => `
+            <div class="hw2-power-row flex items-center justify-between gap-3 py-2">
+              <div class="min-w-0">
+                <div class="text-sm font-semibold text-slate-100 truncate">${escHtml(powerName(row.power_id))}</div>
+                <div class="text-[11px] text-slate-500">${escHtml(leaderName(row.leader_id))}</div>
+              </div>
+              <div class="text-right shrink-0">
+                <div class="text-sm font-semibold text-cyan-300">${fmt(row.casts)}</div>
+                <div class="text-[11px] text-slate-500">${fmt(row.player_uses)} users • ${fmt(row.matches_using_power)} matches</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderOpeningHeatmap(rows) {
+      const filtered = filterRows(rows);
+      if (!filtered.length) {
+        return '<p class="text-sm text-slate-500 italic">Opening timing heatmap needs cached event summaries with build orders.</p>';
+      }
+
+      const aggregate = new Map();
+      filtered.forEach((row) => {
+        const key = `${row.milestone}::${row.bucket_minute}`;
+        aggregate.set(key, (aggregate.get(key) || 0) + (Number(row.count) || 0));
+      });
+
+      const milestones = Object.keys(OPENING_LABELS).filter((milestone) => {
+        return OPENING_BUCKETS.some((bucket) => Number(aggregate.get(`${milestone}::${bucket}`) || 0) > 0);
+      });
+
+      if (!milestones.length) {
+        return '<p class="text-sm text-slate-500 italic">No opening milestones are available for this filter yet.</p>';
+      }
+
+      return `
+        <div class="hw2-dashboard-scroll">
+          <table class="hw2-heat-table">
+            <thead>
+              <tr>
+                <th class="hw2-heat-label">Opening Milestone</th>
+                ${OPENING_BUCKETS.map((bucket) => `<th>${bucket === 10 ? '10+' : `${bucket}-${bucket + 1}`}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              ${milestones.map((milestone) => {
+                const rowTotal = OPENING_BUCKETS.reduce((sum, bucket) => sum + Number(aggregate.get(`${milestone}::${bucket}`) || 0), 0);
+                return `
+                  <tr>
+                    <td class="hw2-heat-label">
+                      <div class="text-sm font-semibold text-slate-100">${escHtml(OPENING_LABELS[milestone])}</div>
+                      <div class="text-[11px] text-slate-500">${fmt(rowTotal)} tracked openings</div>
+                    </td>
+                    ${OPENING_BUCKETS.map((bucket) => {
+                      const value = Number(aggregate.get(`${milestone}::${bucket}`) || 0);
+                      const share = rowTotal > 0 ? value / rowTotal : 0;
+                      return `
+                        <td style="${pctCell(share, '251, 191, 36')}">
+                          <span class="hw2-heat-main">${fmt(value)}</span>
+                          <span class="hw2-heat-sub">${fmtPct(share, 0)}</span>
+                        </td>
+                      `;
+                    }).join('')}
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderResourcePanel(rows) {
+      const filtered = filterRows(rows);
+      if (!filtered.length) {
+        return '<p class="text-sm text-slate-500 italic">Resource float appears once cached event payloads include resource heartbeats.</p>';
+      }
+
+      const aggregate = new Map();
+      filtered.forEach((row) => {
+        const bucket = Number(row.minute_bucket) || 0;
+        const current = aggregate.get(bucket) || {
+          supplyWeighted: 0,
+          supplyCount: 0,
+          energyWeighted: 0,
+          energyCount: 0,
+          populationWeighted: 0,
+          populationCount: 0,
+          populationCapWeighted: 0,
+          populationCapCount: 0,
+          sampleCount: 0,
+        };
+        const samples = Number(row.sample_count) || 0;
+        if (Number.isFinite(Number(row.avg_supply))) {
+          current.supplyWeighted += Number(row.avg_supply) * samples;
+          current.supplyCount += samples;
+        }
+        if (Number.isFinite(Number(row.avg_energy))) {
+          current.energyWeighted += Number(row.avg_energy) * samples;
+          current.energyCount += samples;
+        }
+        if (Number.isFinite(Number(row.avg_population))) {
+          current.populationWeighted += Number(row.avg_population) * samples;
+          current.populationCount += samples;
+        }
+        if (Number.isFinite(Number(row.avg_population_cap))) {
+          current.populationCapWeighted += Number(row.avg_population_cap) * samples;
+          current.populationCapCount += samples;
+        }
+        current.sampleCount += samples;
+        aggregate.set(bucket, current);
+      });
+
+      const normalized = RESOURCE_BUCKETS.map((bucket) => {
+        const row = aggregate.get(bucket);
+        const avgSupply = row?.supplyCount ? row.supplyWeighted / row.supplyCount : null;
+        const avgEnergy = row?.energyCount ? row.energyWeighted / row.energyCount : null;
+        const avgPopulation = row?.populationCount ? row.populationWeighted / row.populationCount : null;
+        const avgPopulationCap = row?.populationCapCount ? row.populationCapWeighted / row.populationCapCount : null;
+        const popFill = avgPopulation != null && avgPopulationCap ? avgPopulation / avgPopulationCap : null;
+        return { bucket, avgSupply, avgEnergy, popFill, samples: row?.sampleCount || 0 };
+      });
+
+      const maxSupply = Math.max(...normalized.map((row) => Number(row.avgSupply) || 0), 1);
+      const maxEnergy = Math.max(...normalized.map((row) => Number(row.avgEnergy) || 0), 1);
+      const maxPopFill = Math.max(...normalized.map((row) => Number(row.popFill) || 0), 1);
+
+      function rowHtml(label, key, maxValue, rgb, formatter) {
+        return `
+          <div class="grid grid-cols-[8.5rem_repeat(11,minmax(0,1fr))] gap-2 items-center">
+            <div class="text-xs uppercase tracking-[0.16em] text-slate-500">${label}</div>
+            ${normalized.map((row) => {
+              const value = row[key];
+              const style = Number.isFinite(value) ? alphaCell(value, maxValue, rgb, 0.06) : 'background: rgba(51,65,85,0.2);';
+              return `
+                <div class="rounded-2xl border border-slate-700/50 px-2 py-2 text-center" style="${style}">
+                  <div class="text-[10px] uppercase tracking-[0.12em] text-slate-500">${row.bucket}-${row.bucket + 2}</div>
+                  <div class="mt-1 text-sm font-semibold text-slate-100">${formatter(value)}</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+
+      return `
+        <div class="space-y-3">
+          ${rowHtml('Supply Float', 'avgSupply', maxSupply, '34, 211, 238', (value) => Number.isFinite(value) ? fmt(value, 0) : '—')}
+          ${rowHtml('Energy Float', 'avgEnergy', maxEnergy, '167, 139, 250', (value) => Number.isFinite(value) ? fmt(value, 0) : '—')}
+          ${rowHtml('Population Fill', 'popFill', maxPopFill, '16, 185, 129', (value) => Number.isFinite(value) ? fmtPct(value, 0) : '—')}
+        </div>
+      `;
+    }
+
+    function buildActivityGrid(rows, rgb) {
+      const matrix = new Map();
+      (rows || []).forEach((row) => {
+        const key = `${Number(row.dow) || 0}::${Number(row.hour) || 0}`;
+        matrix.set(key, Number(row.count) || 0);
+      });
+      const max = Math.max(...matrix.values(), 1);
+      const header = `
+        <div></div>
+        ${Array.from({ length: 24 }, (_, hour) => `
+          <div class="text-[9px] text-slate-600 text-center">${hour % 6 === 0 ? hour : ''}</div>
+        `).join('')}
+      `;
+      const body = DAY_LABELS.map((day, dow) => `
+        <div class="hw2-activity-label">${day}</div>
+        ${Array.from({ length: 24 }, (_, hour) => {
+          const value = Number(matrix.get(`${dow}::${hour}`) || 0);
+          const alpha = 0.06 + (value / max) * 0.84;
+          return `<div class="hw2-activity-cell" style="background: rgba(${rgb}, ${alpha.toFixed(3)});" title="${day} ${hour}:00 • ${fmt(value)}"></div>`;
+        }).join('')}
+      `).join('');
+      return `<div class="hw2-activity-grid">${header}${body}</div>`;
+    }
+
+    function renderActivityPanel(data) {
+      return `
+        <div class="grid gap-4 lg:grid-cols-2">
+          <div>
+            <div class="text-[11px] uppercase tracking-[0.16em] text-slate-500 mb-2">Match Activity</div>
+            ${buildActivityGrid(data.matchActivity || [], '34, 211, 238')}
+          </div>
+          <div>
+            <div class="text-[11px] uppercase tracking-[0.16em] text-slate-500 mb-2">Search Activity</div>
+            ${buildActivityGrid(data.searchActivity || [], '251, 191, 36')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderDashboard(data) {
+      container.innerHTML = `
+        ${renderSnapshot(data)}
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-4 mb-4">
+          ${renderPanel('Community Interest', 'Searches and rising lookup interest from the local search log.', renderInterestPanel(data), 'xl:col-span-7')}
+          ${renderPanel('Median Duration by Map', 'The longest-running maps in the cached sample tend to rise quickly here.', renderMapDurations(data.mapDurationStats || []), 'xl:col-span-5')}
+          ${renderPanel('Median Units per Player', 'A quick read on how violent the average cached match is.', renderUnitMedians(data), 'xl:col-span-4')}
+          ${renderPanel('Activity Heatmap', 'When cached matches and on-site lookups are most active by day and hour.', renderActivityPanel(data), 'xl:col-span-8')}
+        </div>
+        ${renderFilterBar()}
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-4">
+          ${renderPanel('Leader x Map Pick Rate', 'Cell = leader share on that map within the current filter.', renderLeaderMapHeatmap(data.leaderMapStats || [], 'pick'), 'xl:col-span-7')}
+          ${renderPanel('Leader x Map Win Rate', 'Cells under 8 samples are muted to avoid noisy reads.', renderLeaderMapHeatmap(data.leaderMapStats || [], 'win'), 'xl:col-span-5')}
+          ${renderPanel('1v1 Leader Matchups', 'Row leader win rate against the column leader. Top 12 by cached volume.', renderMatchupMatrix(data.leaderMatchupStats || []), 'xl:col-span-12')}
+          ${renderPanel('Opening Timing Heatmap', 'Early-game milestone timing from cached build-order event summaries.', renderOpeningHeatmap(data.openingTimingStats || []), 'xl:col-span-7')}
+          ${renderPanel('Leader Power Popularity', 'Most-cast powers within the current filter.', renderLeaderPowerPanel(data.leaderPowerStats || []), 'xl:col-span-5')}
+          ${renderPanel('Resource Float & Population', 'Minute buckets from cached resource heartbeat events.', renderResourcePanel(data.resourceBucketStats || []), 'xl:col-span-7')}
+          ${renderPanel('Map x Playlist Mix', 'Which maps are showing up in ranked queues versus the rest of the cache.', renderMapPlaylistHeatmap(data.mapPlaylistStats || []), 'xl:col-span-5')}
+        </div>
+        <p class="mt-4 text-xs text-slate-600 italic">
+          Based on matches and searches cached through this site. This reflects the Team Respawn sample, not the full Halo Wars 2 population.
+        </p>
+      `;
+
+      container.querySelectorAll('[data-filter-id]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const nextFilter = button.getAttribute('data-filter-id');
+          if (!nextFilter || nextFilter === state.activeFilter) return;
+          state.activeFilter = nextFilter;
+          renderDashboard(data);
+        });
+      });
     }
 
     try {
@@ -143,22 +1020,13 @@ const mapNames: Record<string, string> = Object.fromEntries(
       const data = await res.json();
 
       if (!data.totalMatches) {
-        container.innerHTML = '<p class="text-sm text-gray-500 italic">No data yet — stats will appear once players are searched.</p>';
+        container.innerHTML = '<p class="text-sm text-slate-500 italic">No community cache yet. Search a few gamertags and this dashboard will start filling in.</p>';
         return;
       }
 
-      container.innerHTML = `
-        ${renderSnapshot(data)}
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-          ${renderMapDurations(data.mapDurationStats)}
-          ${renderUnits(data.medianUnitsDestroyed, data.medianUnitsLost)}
-        </div>
-        <p class="text-xs text-gray-600 italic mt-3">
-          * Based on matches cached through this site — not representative of the full HW2 player base.
-        </p>
-      `;
+      renderDashboard(data);
     } catch {
-      container.innerHTML = '<p class="text-sm text-gray-500 italic">Could not load community stats.</p>';
+      container.innerHTML = '<p class="text-sm text-slate-500 italic">Could not load the cached community dashboard.</p>';
     }
   })();
 </script>

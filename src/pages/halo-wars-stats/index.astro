@@ -4,7 +4,6 @@ import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import SidePanel from '../../components/SidePanel.astro';
 import StorehausPromo from '../../components/StorehausPromo.astro';
-import RecentHW2Searches from '../../components/RecentHW2Searches.astro';
 import HW2CommunityStats from '../../components/HW2CommunityStats.astro';
 import { videos } from '../../data/videos';
 import { hw2NameMappings } from '../../data/haloWars2/nameMappings';
@@ -525,7 +524,6 @@ const hw2ContentCreatorGamertagsJson = JSON.stringify(contentCreatorGamertags).r
       </section>
 
       <div id="recent-hw2-searches-section" class="hidden">
-        <RecentHW2Searches />
         <HW2CommunityStats />
       </div>
 

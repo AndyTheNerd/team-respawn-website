@@ -18,7 +18,17 @@
     "cf:d1:migrate:7": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0007_event_summary_columns.sql --remote",
     "cf:d1:migrate:8": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0008_match_summaries.sql --remote",
     "cf:d1:migrate:9": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0009_hwde_steam_tracking.sql --remote",
-    "cf:d1:migrate": "npm run cf:d1:migrate:1 && npm run cf:d1:migrate:2 && npm run cf:d1:migrate:3 && npm run cf:d1:migrate:4 && npm run cf:d1:migrate:5 && npm run cf:d1:migrate:6 && npm run cf:d1:migrate:7 && npm run cf:d1:migrate:8 && npm run cf:d1:migrate:9"
+    "cf:d1:migrate": "npm run cf:d1:migrate:1 && npm run cf:d1:migrate:2 && npm run cf:d1:migrate:3 && npm run cf:d1:migrate:4 && npm run cf:d1:migrate:5 && npm run cf:d1:migrate:6 && npm run cf:d1:migrate:7 && npm run cf:d1:migrate:8 && npm run cf:d1:migrate:9",
+    "cf:d1:migrate:local:1": "wrangler d1 execute team-respawn-hw2 --config wrangler.toml --file migrations/0001_init.sql",
+    "cf:d1:migrate:local:2": "wrangler d1 execute team-respawn-hw2 --config wrangler.toml --file migrations/0002_match_events.sql",
+    "cf:d1:migrate:local:3": "wrangler d1 execute team-respawn-hw2 --config wrangler.toml --file migrations/0003_player_stats_cache.sql",
+    "cf:d1:migrate:local:4": "wrangler d1 execute team-respawn-hw2 --config wrangler.toml --file migrations/0004_campaign_cache.sql",
+    "cf:d1:migrate:local:5": "wrangler d1 execute team-respawn-hw2 --config wrangler.toml --file migrations/0005_player_matches_cache.sql",
+    "cf:d1:migrate:local:6": "wrangler d1 execute team-respawn-hw2 --config wrangler.toml --file migrations/0006_metadata_cache.sql",
+    "cf:d1:migrate:local:7": "wrangler d1 execute team-respawn-hw2 --config wrangler.toml --file migrations/0007_event_summary_columns.sql",
+    "cf:d1:migrate:local:8": "wrangler d1 execute team-respawn-hw2 --config wrangler.toml --file migrations/0008_match_summaries.sql",
+    "cf:d1:migrate:local:9": "wrangler d1 execute team-respawn-hw2 --config wrangler.toml --file migrations/0009_hwde_steam_tracking.sql",
+    "cf:d1:migrate:local": "npm run cf:d1:migrate:local:1 && npm run cf:d1:migrate:local:2 && npm run cf:d1:migrate:local:3 && npm run cf:d1:migrate:local:4 && npm run cf:d1:migrate:local:5 && npm run cf:d1:migrate:local:6 && npm run cf:d1:migrate:local:7 && npm run cf:d1:migrate:local:8 && npm run cf:d1:migrate:local:9"
   },
   "dependencies": {
     "astro": "^5.16.15",
