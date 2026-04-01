@@ -48,6 +48,14 @@ type SummaryCacheRow = {
   model: string;
 };
 
+function getProviderLabel(model: string): string {
+  const parenMatch = model.match(/\(([^)]+)\)\s*$/);
+  if (parenMatch?.[1]) return parenMatch[1];
+  if (/groq/i.test(model)) return 'Groq';
+  if (/cerebras/i.test(model)) return 'Cerebras';
+  return 'Unknown';
+}
+
 function formatPlayer(p: PlayerSummary): string {
   const lines: string[] = [`  Leader: ${p.leader} (${p.gamertag})`];
   if (p.unitsDestroyed > 0 || p.unitsLost > 0) lines.push(`  Units: ${p.unitsDestroyed} destroyed / ${p.unitsLost} lost`);
@@ -179,7 +187,12 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
       if (cached?.summary) {
         return new Response(
-          JSON.stringify({ summary: cached.summary, model: cached.model, cached: true }),
+          JSON.stringify({
+            summary: cached.summary,
+            model: cached.model,
+            provider: getProviderLabel(cached.model),
+            cached: true,
+          }),
           { status: 200, headers: corsHeaders }
         );
       }
@@ -257,7 +270,12 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   }
 
   return new Response(
-    JSON.stringify({ summary, model: modelUsed, cached: false }),
+    JSON.stringify({
+      summary,
+      model: modelUsed,
+      provider: getProviderLabel(modelUsed),
+      cached: false,
+    }),
     { status: 200, headers: corsHeaders }
   );
 };

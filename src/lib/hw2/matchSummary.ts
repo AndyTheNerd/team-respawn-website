@@ -39,12 +39,9 @@ export async function loadMatchSummary(
         <span class="text-base">✨</span>
         <span class="text-xs font-semibold uppercase tracking-wider text-cyan-300">AI Summary</span>
       </div>
-      <div class="space-y-2">
-        <div class="h-3 bg-slate-700/50 rounded animate-pulse w-full"></div>
-        <div class="h-3 bg-slate-700/50 rounded animate-pulse w-5/6"></div>
-        <div class="h-3 bg-slate-700/50 rounded animate-pulse w-4/6"></div>
-        <div class="h-3 bg-slate-700/50 rounded animate-pulse w-full"></div>
-        <div class="h-3 bg-slate-700/50 rounded animate-pulse w-3/4"></div>
+      <div class="flex items-center gap-3 text-sm text-gray-300" role="status" aria-live="polite">
+        <i class="fas fa-spinner fa-spin text-cyan-300" aria-hidden="true"></i>
+        <span>Generating AI summary...</span>
       </div>
     </div>
   `;
@@ -62,7 +59,8 @@ export async function loadMatchSummary(
       throw new Error(err.error || `HTTP ${response.status}`);
     }
 
-    const data = await response.json() as { summary: string; model: string; cached: boolean };
+    const data = await response.json() as { summary: string; model: string; provider?: string; cached: boolean };
+    const provider = data.provider || getProviderLabel(data.model);
 
     el.innerHTML = `
       <div class="rounded-lg border border-cyan-500/20 bg-slate-800/30 p-4">
@@ -72,7 +70,10 @@ export async function loadMatchSummary(
           ${data.cached ? '<span class="text-[10px] text-gray-500 ml-auto">cached</span>' : ''}
         </div>
         <p class="text-sm text-gray-200 leading-relaxed">${escapeHtml(data.summary)}</p>
-        <p class="text-[10px] text-gray-500 mt-3">Double check stats, AI summary can make mistakes</p>
+        <div class="mt-3 flex flex-wrap items-center justify-between gap-2 text-[10px] text-gray-500">
+          <p>Double check stats, AI summary can make mistakes</p>
+          <p>Provider: ${escapeHtml(provider)}</p>
+        </div>
       </div>
     `;
     el.setAttribute('data-loaded', 'true');
@@ -97,4 +98,12 @@ function escapeHtml(str: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+function getProviderLabel(model: string): string {
+  const parenMatch = model.match(/\(([^)]+)\)\s*$/);
+  if (parenMatch?.[1]) return parenMatch[1];
+  if (/groq/i.test(model)) return 'Groq';
+  if (/cerebras/i.test(model)) return 'Cerebras';
+  return model || 'Unknown';
 }
