@@ -379,6 +379,7 @@ const publishedDateFormatter = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
 });
 
+/** Returns a fresh default state with no filters, newest sort, and page 1. */
 export function getDefaultState(): VideoDatabaseState {
   return {
     query: '',
@@ -441,6 +442,10 @@ export function getSeries(title: string): SeriesTag {
   return 'general';
 }
 
+/**
+ * Derives game, series, format, and year tags from a raw Video entry.
+ * Game and series are inferred from the title via regex when not explicitly set.
+ */
 export function tagVideo(video: Video): TaggedVideo {
   const format = getFormat(video.durationMs);
   const game = video.game ?? getGame(video.title);
@@ -450,6 +455,11 @@ export function tagVideo(video: Video): TaggedVideo {
   return { ...video, game, series, format, year };
 }
 
+/**
+ * Builds a fully-enriched VideoSearchRecord from a raw Video: tags it,
+ * computes display labels, formats the duration and publish date, and
+ * concatenates a normalised searchableText string for fast client-side matching.
+ */
 export function buildVideoSearchRecord(video: Video): VideoSearchRecord {
   const taggedVideo = tagVideo(video);
   const gameLabel = GAME_LABELS[taggedVideo.game];
@@ -555,6 +565,11 @@ export function getVideoLibraryStats(videos: TaggedVideo[]): VideoLibraryStats {
   };
 }
 
+/**
+ * Parses a VideoDatabaseState from URL search params.
+ * Handles legacy `dur` / `shorts=1` params for backwards compatibility.
+ * All values are validated against the available video set; unknown tags are silently dropped.
+ */
 export function parseStateFromSearchParams(
   searchParams: URLSearchParams,
   videos: TaggedVideo[],
@@ -608,6 +623,11 @@ export function parseStateFromSearchParams(
   };
 }
 
+/**
+ * Applies the full filter + sort pipeline from a VideoDatabaseState.
+ * Filtering is applied in order: game → series → format → year → query.
+ * An empty formats array yields zero results (all formats must be explicitly selected).
+ */
 export function filterAndSortVideos(videos: VideoSearchRecord[], state: VideoDatabaseState): VideoSearchRecord[] {
   const normalizedQuery = normalizeSearchText(state.query);
   let filteredVideos = videos.slice();
@@ -754,6 +774,11 @@ export function serializeStateToSearchParams(state: VideoDatabaseState): URLSear
   return searchParams;
 }
 
+/**
+ * Scores a video title against a search query.
+ * Weights: exact match +200, starts-with +90, substring +40, per-word match +20.
+ * Both inputs should be pre-normalised via normalizeSearchText.
+ */
 export function scoreTitle(title: string, query: string): number {
   const normalizedTitle = normalizeSearchText(title);
   const normalizedQuery = normalizeSearchText(query);
@@ -773,6 +798,12 @@ export function scoreTitle(title: string, query: string): number {
   return score;
 }
 
+/**
+ * Scores a full VideoSearchRecord against a query.
+ * Combines title scoring with searchableText and label bonuses:
+ * searchableText substring +60, exact game/series label match +35 each,
+ * per-word searchableText match +14.
+ */
 export function scoreVideo(video: VideoSearchRecord, query: string): number {
   const normalizedQuery = normalizeSearchText(query);
   if (!normalizedQuery) return 0;
@@ -820,6 +851,11 @@ export function getVideoThumbnailUrl(videoId: string): string {
   return `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`;
 }
 
+/**
+ * Lowercases the string, expands `&` to `and`, and collapses all
+ * non-alphanumeric runs to single spaces. Used consistently for both
+ * indexing and query normalisation so comparisons are always apples-to-apples.
+ */
 export function normalizeSearchText(value: string): string {
   return String(value || '')
     .toLowerCase()

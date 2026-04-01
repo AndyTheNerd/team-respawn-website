@@ -1,158 +1,107 @@
 # Team Respawn Website
 
-A modern, component-based website showcasing curated gaming content from the Team Respawn YouTube channel. Features walkthroughs and strategy guides for Halo Wars, Halo FPS, Age of Empires, and Age of Mythology.
+A gaming content website for the [Team Respawn YouTube channel](https://www.youtube.com/@TeamRespawn), focused on strategy RTS games — primarily Halo Wars 2, Age of Empires, and Age of Mythology.
+
+**Live site:** https://www.teamrespawn.net — hosted on Cloudflare Pages.
 
 ## Features
 
-- Component-based Astro architecture with WebcoreUI integration
-- Block-based content system for reusable components
-- Tabbed navigation across game series
-- Home page with hero, stats, carousel, and Twitch embed
+- Blog posts: guides, walkthroughs, and reviews with pagination
+- Video database with MCC-style filter/search composer (`/videos`)
+- Halo Wars 2 live stats lookup — player profiles, match history, match details, AI summaries (`/halo-wars-stats`)
+- Halo Wars: Definitive Edition Steam player count — live concurrency, observed daily high, and 30-day trend chart (`/halo-wars-de-player-count`)
+- Halo Wars 1 unit reference table — filterable/sortable DPS, cost, and upgrade data (`/halo-wars-de-player-count`)
+- Serverless API functions (Cloudflare Pages Functions) with Cloudflare D1 caching
 - Side panel navigation with keyboard support
 - Responsive Tailwind-based styling via WebcoreUI
-- Accessibility and SEO meta tags
-- SCSS support for advanced styling
+- SEO meta tags and OpenGraph support
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Astro v5 |
+| UI library | WebcoreUI v1.3 (Tailwind CSS) |
+| Styling | SCSS via `sass` |
+| Language | TypeScript + ES modules |
+| Hosting | Cloudflare Pages |
+| Serverless functions | Cloudflare Pages Functions (`functions/` dir) |
+| Database | Cloudflare D1 (SQLite — API response caching) |
+| Images | Cloudinary |
 
 ## Project Structure
 
 ```
 team-respawn-website/
-|-- public/              # Static assets (served as-is)
-|   |-- css/
-|   |-- js/
-|   |-- data/
-|   |-- img/
-|   `-- content/
-|-- src/
-|   |-- blocks/          # Reusable content blocks (Author, Socials)
-|   |-- components/      # Astro components
-|   |-- data/           # Site data and configuration
-|   |-- layouts/        # Shared layouts (head/SEO)
-|   |-- pages/          # File-based routes
-|   `-- styles/         # Global styles and SCSS files
-|-- astro.config.mjs    # Astro configuration
-|-- package.json        # Dependencies and scripts
-`-- webcore.config.scss # WebcoreUI configuration
+├── functions/api/         # Cloudflare Pages Functions (serverless API)
+│   ├── hw2/               # Halo Wars 2 endpoints
+│   ├── hwde/              # Halo Wars: Definitive Edition endpoints
+│   └── youtube/           # YouTube latest videos endpoint
+├── migrations/            # Cloudflare D1 SQL migrations (numbered)
+├── public/                # Static assets (served as-is)
+├── scripts/               # Node utility scripts (add-video.mjs)
+├── src/
+│   ├── blocks/            # Reusable content blocks (Author, Socials)
+│   ├── components/        # Astro components (Header, Footer, SidePanel)
+│   ├── data/              # Site data as TS modules
+│   │   ├── haloWars2/     # HW2 static data (leaders, maps, CSR, etc.)
+│   │   ├── haloWars1.ts   # HW1 unit reference data
+│   │   └── videos-YYYY.ts # Video entries by year
+│   ├── layouts/           # Page layouts
+│   ├── lib/hw2/           # HW2 match rendering logic
+│   ├── pages/             # File-based routes
+│   ├── styles/            # Global SCSS
+│   └── config.js          # SITE_URL, SITE_NAME constants
+├── workers/
+│   └── wrangler.toml      # Cloudflare Pages Functions config + D1 binding
+├── astro.config.mjs
+└── wrangler.toml          # Root Cloudflare config
 ```
 
 ## Setup & Running Locally
 
 ### Prerequisites
 
-- Node.js (v18 or higher)
-- npm or yarn package manager
+- Node.js v18+
+- npm
 
 ### Installation
 
-1. Clone the repository:
 ```bash
 git clone <repository-url>
 cd team-respawn-website
-```
-
-2. Install dependencies:
-```bash
 npm install
 ```
 
+Copy `.env.example` to `.env` and fill in the required keys (Cloudinary, HW2 API keys, Cloudflare Analytics).
+
 ### Development
 
-1. Start the Astro development server:
 ```bash
-npm run dev
+npm run dev       # Astro dev server → http://localhost:4321 (no CF functions)
+npm run dev:cf    # Wrangler proxy — use this when testing API functions or D1
 ```
 
-2. Open your browser to:
-```
-http://localhost:4321
-```
-
-The development server will hot-reload automatically when you save changes to any file in the `src/` directory.
+Use `npm run dev` for UI/content work. Use `npm run dev:cf` when testing anything under `functions/`.
 
 ### Build & Preview
 
-1. Build the production version:
 ```bash
-npm run build
+npm run build     # Production build → dist/
+npm run preview   # Preview production build locally
 ```
 
-2. Preview the production build locally:
+### Other Scripts
+
 ```bash
-npm run preview
+npm run add-video           # Interactive script to add a new video entry
+npm run cf:d1:migrate       # Run all D1 migrations on the remote database
+npm run cf:d1:migrate:9     # Run a specific migration (replace 9 with number)
 ```
-
-The preview server will run on `http://localhost:4321` by default.
-
-## Development
-
-The site uses Astro for layouts/pages with WebcoreUI components and vanilla JavaScript for interactivity. The block system in `src/blocks/` allows for reusable content components.
-
-Key Files:
-- `src/pages/index.astro` - Main page structure
-- `src/blocks/` - Reusable content blocks (Author profiles, Social media components)
-- `public/data/` - Static data files
-- `src/components/` - Astro components
-- `astro.config.mjs` - Astro and WebcoreUI configuration
-
-### Working with Blocks
-
-The project uses a block-based architecture in `src/blocks/`:
-- `Author/` - Author profile and bio blocks
-- `Socials/` - Social media link and embed blocks
-
-### Styling
-
-- WebcoreUI provides Tailwind CSS utilities out of the box
-- Custom SCSS files can be added to `src/styles/`
-- Component-specific styles should be included within Astro components
-
-## Technologies Used
-
-- **Astro v5.16.15** - Component and layout framework with file-based routing
-- **WebcoreUI v1.3.0** - Modern UI component library with Tailwind CSS
-- **SCSS** - CSS preprocessor for advanced styling
-- **TypeScript** - Type-safe JavaScript development
-- **HTML5** - Semantic markup
-- **JavaScript (ES6+)** - Vanilla JS for interactivity
-- **Vite** - Build tool and development server
-
-## Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run astro` - Run Astro CLI commands
-
-## Data Structure
-
-Video data is stored in public/data/videos.json. Each video object should follow this structure:
-
-```json
-{
-  "title": "Video Title",
-  "description": "Video description",
-  "youtubeUrl": "https://youtu.be/VIDEO_ID",
-  "imageSrc": "img/path/to/image.jpg",
-  "color": "orange-400",
-  "buttonColor": "orange-500",
-  "alt": "Alt text for image"
-}
-```
-
-## Technologies Used
-
-- Astro - Component and layout framework with file-based routing
-- HTML5 - Semantic markup
-- CSS3 - Custom styles with Tailwind CSS
-- JavaScript (ES6+) - Vanilla JS
-- Tailwind CSS - Utility-first CSS framework
-- Font Awesome - Icons
-- DOMPurify - HTML sanitization library
-- Google Fonts - Inter font family
 
 ## Links
 
-- YouTube Channel: https://www.youtube.com/@TeamRespawn
+- YouTube: https://www.youtube.com/@TeamRespawn
 - Twitch: https://www.twitch.tv/TeamRespawnTV
 - Discord: https://discord.gg/TeamRespawn
 - Shop: https://www.teamrespawn.shop

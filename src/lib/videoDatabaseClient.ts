@@ -10,6 +10,7 @@ import {
   isDefaultFormatSelection,
   paginateVideos,
   parseStateFromSearchParams,
+  serializeStateToSearchParams,
   type FormatTag,
   type GameTag,
   type SeriesTag,
@@ -17,7 +18,26 @@ import {
   type VideoSearchRecord,
 } from './videoUtils';
 
+const SEARCH_DEBOUNCE_MS = 140;
+
 type FilterType = 'game' | 'series' | 'format' | 'year';
+
+/**
+ * DOM refs threaded through the pure render functions so they don't need
+ * to close over module-level variables.
+ */
+interface VdbContext {
+  root: HTMLElement;
+  searchInput: HTMLInputElement;
+  searchClear: HTMLButtonElement;
+  sortBadge: HTMLElement | null;
+  activeChips: HTMLElement;
+  resultsGrid: HTMLElement;
+  pagination: HTMLElement;
+  paginationControls: HTMLElement;
+}
+
+// ─── Shared helpers ──────────────────────────────────────────────────────────
 
 function escapeHtml(value: string): string {
   return String(value || '')
@@ -65,6 +85,216 @@ function formatComparer(left: FormatTag, right: FormatTag): number {
   return order[left] - order[right];
 }
 
+/**
+ * Compares two states by serialising them to URL params. Used to decide
+ * whether the server-rendered HTML already reflects the initial client state,
+ * so we can skip the redundant first render.
+ */
+function statesAreEqual(a: VideoDatabaseState, b: VideoDatabaseState): boolean {
+  return serializeStateToSearchParams(a).toString() === serializeStateToSearchParams(b).toString();
+}
+
+// ─── Pure render functions ───────────────────────────────────────────────────
+// Each function receives explicit dependencies rather than closing over them,
+// making them independently testable and keeping initVideoDatabase() concise.
+
+function renderFilterButtons(ctx: VdbContext, state: VideoDatabaseState): void {
+  ctx.root.querySelectorAll<HTMLElement>('[data-filter-type][data-filter-value]').forEach((element) => {
+    const filterType = element.dataset.filterType as FilterType;
+    const filterValue = element.dataset.filterValue;
+
+    if (!filterValue) {
+      console.warn('vdb: filter button is missing data-filter-value', element);
+      return;
+    }
+
+    let isActive = false;
+    if (filterType === 'game') isActive = state.games.includes(filterValue as GameTag);
+    if (filterType === 'series') isActive = state.series.includes(filterValue as SeriesTag);
+    if (filterType === 'format') isActive = state.formats.includes(filterValue as FormatTag);
+    if (filterType === 'year') isActive = state.years.includes(Number.parseInt(filterValue, 10));
+
+    const isDisabled = filterType === 'format' && isActive && !canRemoveFormat(state.formats, filterValue as FormatTag);
+
+    element.classList.toggle('is-active', isActive);
+    element.classList.toggle('is-disabled', isDisabled);
+    element.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    element.setAttribute('aria-disabled', isDisabled ? 'true' : 'false');
+  });
+
+  ctx.root.querySelectorAll<HTMLElement>('[data-sort]').forEach((element) => {
+    const isActive = element.dataset.sort === state.sort;
+    element.classList.toggle('is-active', isActive);
+    element.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+  });
+
+  ctx.searchInput.value = state.query;
+  ctx.searchClear.classList.toggle('is-hidden', state.query.length === 0);
+
+  if (ctx.sortBadge) {
+    ctx.sortBadge.innerHTML = `<i class="fas fa-arrow-down-wide-short" aria-hidden="true"></i>${escapeHtml(getSortStatusLabel(state.sort))}`;
+  }
+}
+
+function renderChips(ctx: VdbContext, state: VideoDatabaseState): void {
+  const chips = getActiveFilterChips(state);
+  ctx.activeChips.classList.toggle('is-empty', chips.length === 0);
+
+  if (chips.length === 0) {
+    ctx.activeChips.innerHTML = isDefaultFormatSelection(state.formats)
+      ? '<p class="vdb-chip-empty">Showing the default archive view: Long Form is enabled. Shorts are any videos under two minutes.</p>'
+      : '<p class="vdb-chip-empty">No filters applied. Start with the search bar or pick a game.</p>';
+    return;
+  }
+
+  ctx.activeChips.innerHTML = chips
+    .map(
+      (chip) => `
+        <button
+          type="button"
+          class="vdb-chip"
+          data-chip-type="${escapeHtml(chip.type)}"
+          data-chip-value="${escapeHtml(chip.value)}"
+          aria-label="Remove filter: ${escapeHtml(chip.label)}"
+        >
+          <span>${escapeHtml(chip.label)}</span>
+          <i class="fas fa-xmark" aria-hidden="true"></i>
+        </button>
+      `,
+    )
+    .join('');
+}
+
+function renderCards(ctx: VdbContext, videos: VideoSearchRecord[]): void {
+  if (videos.length === 0) {
+    ctx.resultsGrid.innerHTML = `
+      <div class="vdb-empty-state">
+        <i class="fas fa-satellite-dish" aria-hidden="true"></i>
+        <h3>No videos match this combination</h3>
+        <p>Try widening the search, removing a filter, or switching the sort back to newest.</p>
+      </div>
+    `;
+    return;
+  }
+
+  ctx.resultsGrid.innerHTML = videos
+    .map((video) => {
+      // Pre-escape values used more than once per card
+      const url = escapeHtml(video.youtubeUrl);
+      const title = escapeHtml(video.title);
+      const thumbnail = escapeHtml(video.thumbnailUrl);
+      const gameLabel = escapeHtml(video.gameLabel);
+      const formatLabel = escapeHtml(video.formatLabel);
+
+      const seriesTag =
+        video.series !== 'general'
+          ? `<span class="vdb-card-tag is-series">${escapeHtml(video.seriesLabel)}</span>`
+          : '';
+      const durationTag = video.durationLabel
+        ? `<span class="vdb-duration-badge">${escapeHtml(video.durationLabel)}</span>`
+        : '';
+      const dateTag = video.publishedLabel
+        ? `<span class="vdb-card-detail is-date"><i class="fas fa-calendar-days" aria-hidden="true"></i>${escapeHtml(video.publishedLabel)}</span>`
+        : '';
+
+      return `
+        <article class="vdb-card" role="listitem">
+          <a
+            href="${url}"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="vdb-card-thumb"
+            aria-label="Watch ${title} on YouTube"
+          >
+            <img src="${thumbnail}" alt="" width="480" height="270" loading="lazy" />
+            ${durationTag}
+          </a>
+          <div class="vdb-card-body">
+            <div class="vdb-card-tags">
+              <span class="vdb-card-tag is-game">${gameLabel}</span>
+              <span class="vdb-card-tag is-format">${formatLabel}</span>
+              ${seriesTag}
+            </div>
+            <h3 class="vdb-card-title">
+              <a href="${url}" target="_blank" rel="noopener noreferrer">
+                ${title}
+              </a>
+            </h3>
+            <div class="vdb-card-meta">
+              ${dateTag}
+            </div>
+            <div class="vdb-card-actions">
+              <a href="${url}" target="_blank" rel="noopener noreferrer" class="vdb-watch-link">
+                <i class="fab fa-youtube" aria-hidden="true"></i>
+                <span>Watch on YouTube</span>
+              </a>
+              <button type="button" class="vdb-copy-link" data-video-url="${url}">
+                <i class="fas fa-link" aria-hidden="true"></i>
+                <span class="vdb-copy-link-label">Copy link</span>
+              </button>
+            </div>
+          </div>
+        </article>
+      `;
+    })
+    .join('');
+}
+
+function renderPagination(ctx: VdbContext, state: VideoDatabaseState, totalPages: number): void {
+  if (totalPages <= 1) {
+    ctx.pagination.classList.add('is-hidden');
+    ctx.paginationControls.innerHTML = '';
+    return;
+  }
+
+  ctx.pagination.classList.remove('is-hidden');
+  const pages = getPaginationWindow(totalPages, state.page);
+
+  const pageLinks = [
+    `
+      <a
+        href="${escapeHtml(getPageHref(state, Math.max(1, state.page - 1)))}"
+        class="vdb-page-btn${state.page === 1 ? ' is-disabled' : ''}"
+        data-page="${Math.max(1, state.page - 1)}"
+        aria-disabled="${state.page === 1 ? 'true' : 'false'}"
+      >
+        Previous
+      </a>
+    `,
+  ];
+
+  pages.forEach((page, index) => {
+    if (index > 0 && page - pages[index - 1] > 1) {
+      pageLinks.push('<span class="vdb-page-gap">...</span>');
+    }
+
+    pageLinks.push(`
+      <a
+        href="${escapeHtml(getPageHref(state, page))}"
+        class="vdb-page-btn${page === state.page ? ' is-current' : ''}"
+        data-page="${page}"
+        ${page === state.page ? 'aria-current="page"' : ''}
+      >
+        ${page}
+      </a>
+    `);
+  });
+
+  pageLinks.push(`
+    <a
+      href="${escapeHtml(getPageHref(state, Math.min(totalPages, state.page + 1)))}"
+      class="vdb-page-btn${state.page === totalPages ? ' is-disabled' : ''}"
+      data-page="${Math.min(totalPages, state.page + 1)}"
+      aria-disabled="${state.page === totalPages ? 'true' : 'false'}"
+    >
+      Next
+    </a>
+  `);
+
+  ctx.paginationControls.innerHTML = pageLinks.join('');
+}
+
+// ─── Main init ───────────────────────────────────────────────────────────────
 
 export function initVideoDatabase() {
   const root = document.querySelector<HTMLElement>('[data-video-database]');
@@ -88,11 +318,22 @@ export function initVideoDatabase() {
   const paginationControls = document.getElementById('vdb-pagination-controls');
   const shareStatus = document.getElementById('vdb-share-status');
   const scrollTopButton = document.getElementById('vdb-scroll-top') as HTMLButtonElement | null;
-  const sortBadge = root.querySelector('.vdb-results-badge');
+  const sortBadge = document.getElementById('vdb-results-badge');
 
   if (!searchInput || !searchClear || !matchCount || !rangeSummary || !activeChips || !resultsGrid || !pagination || !paginationControls) {
     return;
   }
+
+  const ctx: VdbContext = {
+    root,
+    searchInput,
+    searchClear,
+    sortBadge,
+    activeChips,
+    resultsGrid,
+    pagination,
+    paginationControls,
+  };
 
   let state: VideoDatabaseState = {
     ...initialState,
@@ -114,192 +355,9 @@ export function initVideoDatabase() {
     }
   }
 
-  function renderFilterButtons() {
-    root.querySelectorAll<HTMLElement>('[data-filter-type][data-filter-value]').forEach((element) => {
-      const filterType = element.dataset.filterType as FilterType;
-      const filterValue = element.dataset.filterValue || '';
-
-      let isActive = false;
-      if (filterType === 'game') isActive = state.games.includes(filterValue as GameTag);
-      if (filterType === 'series') isActive = state.series.includes(filterValue as SeriesTag);
-      if (filterType === 'format') isActive = state.formats.includes(filterValue as FormatTag);
-      if (filterType === 'year') isActive = state.years.includes(Number.parseInt(filterValue, 10));
-
-      const isDisabled = filterType === 'format' && isActive && !canRemoveFormat(state.formats, filterValue as FormatTag);
-
-      element.classList.toggle('is-active', isActive);
-      element.classList.toggle('is-disabled', isDisabled);
-      element.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-      element.setAttribute('aria-disabled', isDisabled ? 'true' : 'false');
-    });
-
-    root.querySelectorAll<HTMLElement>('[data-sort]').forEach((element) => {
-      const isActive = element.dataset.sort === state.sort;
-      element.classList.toggle('is-active', isActive);
-      element.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-    });
-
-    searchInput.value = state.query;
-    searchClear.classList.toggle('is-hidden', state.query.length === 0);
-
-    if (sortBadge) {
-      sortBadge.innerHTML = `<i class="fas fa-arrow-down-wide-short" aria-hidden="true"></i>${escapeHtml(getSortStatusLabel(state.sort))}`;
-    }
-  }
-
-  function renderChips() {
-    const chips = getActiveFilterChips(state);
-    activeChips.classList.toggle('is-empty', chips.length === 0);
-
-    if (chips.length === 0) {
-      activeChips.innerHTML = isDefaultFormatSelection(state.formats)
-        ? '<p class="vdb-chip-empty">Showing the default archive view: Long Form is enabled. Shorts are any videos under two minutes.</p>'
-        : '<p class="vdb-chip-empty">No filters applied. Start with the search bar or pick a game.</p>';
-      return;
-    }
-
-    activeChips.innerHTML = chips
-      .map(
-        (chip) => `
-          <button
-            type="button"
-            class="vdb-chip"
-            data-chip-type="${escapeHtml(chip.type)}"
-            data-chip-value="${escapeHtml(chip.value)}"
-            aria-label="Remove filter: ${escapeHtml(chip.label)}"
-          >
-            <span>${escapeHtml(chip.label)}</span>
-            <i class="fas fa-xmark" aria-hidden="true"></i>
-          </button>
-        `,
-      )
-      .join('');
-  }
-
-  function renderCards(videos: VideoSearchRecord[]) {
-    if (videos.length === 0) {
-      resultsGrid.innerHTML = `
-        <div class="vdb-empty-state">
-          <i class="fas fa-satellite-dish" aria-hidden="true"></i>
-          <h3>No videos match this combination</h3>
-          <p>Try widening the search, removing a filter, or switching the sort back to newest.</p>
-        </div>
-      `;
-      return;
-    }
-
-    resultsGrid.innerHTML = videos
-      .map((video) => {
-        const seriesTag =
-          video.series !== 'general'
-            ? `<span class="vdb-card-tag is-series">${escapeHtml(video.seriesLabel)}</span>`
-            : '';
-
-        const durationTag = video.durationLabel
-          ? `<span class="vdb-duration-badge">${escapeHtml(video.durationLabel)}</span>`
-          : '';
-        const dateTag = video.publishedLabel
-          ? `<span class="vdb-card-detail is-date"><i class="fas fa-calendar-days" aria-hidden="true"></i>${escapeHtml(video.publishedLabel)}</span>`
-          : '';
-
-        return `
-          <article class="vdb-card" role="listitem">
-            <a
-              href="${escapeHtml(video.youtubeUrl)}"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="vdb-card-thumb"
-              aria-label="Watch ${escapeHtml(video.title)} on YouTube"
-            >
-              <img src="${escapeHtml(video.thumbnailUrl)}" alt="" width="480" height="270" loading="lazy" />
-              ${durationTag}
-            </a>
-            <div class="vdb-card-body">
-              <div class="vdb-card-tags">
-                <span class="vdb-card-tag is-game">${escapeHtml(video.gameLabel)}</span>
-                <span class="vdb-card-tag is-format">${escapeHtml(video.formatLabel)}</span>
-                ${seriesTag}
-              </div>
-              <h3 class="vdb-card-title">
-                <a href="${escapeHtml(video.youtubeUrl)}" target="_blank" rel="noopener noreferrer">
-                  ${escapeHtml(video.title)}
-                </a>
-              </h3>
-              <div class="vdb-card-meta">
-                ${dateTag}
-              </div>
-              <div class="vdb-card-actions">
-                <a href="${escapeHtml(video.youtubeUrl)}" target="_blank" rel="noopener noreferrer" class="vdb-watch-link">
-                  <i class="fab fa-youtube" aria-hidden="true"></i>
-                  <span>Watch on YouTube</span>
-                </a>
-                <button type="button" class="vdb-copy-link" data-video-url="${escapeHtml(video.youtubeUrl)}">
-                  <i class="fas fa-link" aria-hidden="true"></i>
-                  <span class="vdb-copy-link-label">Copy link</span>
-                </button>
-              </div>
-            </div>
-          </article>
-        `;
-      })
-      .join('');
-  }
-
-  function renderPagination(totalPages: number) {
-    if (totalPages <= 1) {
-      pagination.classList.add('is-hidden');
-      paginationControls.innerHTML = '';
-      return;
-    }
-
-    pagination.classList.remove('is-hidden');
-    const pages = getPaginationWindow(totalPages, state.page);
-
-    const pageLinks = [
-      `
-        <a
-          href="${escapeHtml(getPageHref(state, Math.max(1, state.page - 1)))}"
-          class="vdb-page-btn${state.page === 1 ? ' is-disabled' : ''}"
-          data-page="${Math.max(1, state.page - 1)}"
-          aria-disabled="${state.page === 1 ? 'true' : 'false'}"
-        >
-          Previous
-        </a>
-      `,
-    ];
-
-    pages.forEach((page, index) => {
-      if (index > 0 && page - pages[index - 1] > 1) {
-        pageLinks.push('<span class="vdb-page-gap">...</span>');
-      }
-
-      pageLinks.push(`
-        <a
-          href="${escapeHtml(getPageHref(state, page))}"
-          class="vdb-page-btn${page === state.page ? ' is-current' : ''}"
-          data-page="${page}"
-          ${page === state.page ? 'aria-current="page"' : ''}
-        >
-          ${page}
-        </a>
-      `);
-    });
-
-    pageLinks.push(`
-      <a
-        href="${escapeHtml(getPageHref(state, Math.min(totalPages, state.page + 1)))}"
-        class="vdb-page-btn${state.page === totalPages ? ' is-disabled' : ''}"
-        data-page="${Math.min(totalPages, state.page + 1)}"
-        aria-disabled="${state.page === totalPages ? 'true' : 'false'}"
-      >
-        Next
-      </a>
-    `);
-
-    paginationControls.innerHTML = pageLinks.join('');
-  }
-
   function renderResults(shouldSyncUrl = true) {
+    resultsGrid.setAttribute('aria-busy', 'true');
+
     const filteredVideos = filterAndSortVideos(allVideos, state);
     const pageData = paginateVideos(filteredVideos, state.page, PAGE_SIZE);
     state = { ...state, page: pageData.page };
@@ -310,14 +368,22 @@ export function initVideoDatabase() {
         ? 'Showing 0 of 0'
         : `Showing ${pageData.startIndex + 1}-${pageData.endIndex} of ${filteredVideos.length.toLocaleString()}`;
 
-    renderFilterButtons();
-    renderChips();
-    renderCards(pageData.items);
-    renderPagination(pageData.totalPages);
+    renderFilterButtons(ctx, state);
+    renderChips(ctx, state);
+    renderCards(ctx, pageData.items);
+    renderPagination(ctx, state, pageData.totalPages);
+
+    resultsGrid.setAttribute('aria-busy', 'false');
 
     if (shouldSyncUrl) {
       syncStateToUrl();
     }
+  }
+
+  /** Single entry point for all state mutations — ensures consistent immutability. */
+  function setState(patch: Partial<VideoDatabaseState>, syncUrl = true) {
+    state = { ...state, ...patch };
+    renderResults(syncUrl);
   }
 
   function resetState() {
@@ -327,54 +393,42 @@ export function initVideoDatabase() {
 
   function removeChip(filterType: string, filterValue: string) {
     if (filterType === 'query') {
-      state = { ...state, query: '', sort: state.sort === 'relevance' ? DEFAULT_SORT : state.sort, page: 1 };
-      renderResults();
+      setState({ query: '', sort: state.sort === 'relevance' ? DEFAULT_SORT : state.sort, page: 1 });
       return;
     }
 
     if (filterType === 'game') {
-      state = { ...state, games: removeValue(state.games, filterValue as GameTag), page: 1 };
-      renderResults();
+      setState({ games: removeValue(state.games, filterValue as GameTag), page: 1 });
       return;
     }
 
     if (filterType === 'series') {
-      state = { ...state, series: removeValue(state.series, filterValue as SeriesTag), page: 1 };
-      renderResults();
+      setState({ series: removeValue(state.series, filterValue as SeriesTag), page: 1 });
       return;
     }
 
     if (filterType === 'format') {
       if (!canRemoveFormat(state.formats, filterValue as FormatTag)) return;
-      state = { ...state, formats: removeValue(state.formats, filterValue as FormatTag, formatComparer), page: 1 };
-      renderResults();
+      setState({ formats: removeValue(state.formats, filterValue as FormatTag, formatComparer), page: 1 });
       return;
     }
 
     if (filterType === 'year') {
-      state = {
-        ...state,
-        years: removeValue(
-          state.years,
-          Number.parseInt(filterValue, 10),
-          (left, right) => right - left,
-        ),
+      setState({
+        years: removeValue(state.years, Number.parseInt(filterValue, 10), (left, right) => right - left),
         page: 1,
-      };
-      renderResults();
+      });
     }
   }
 
   function toggleFilter(filterType: FilterType, filterValue: string) {
     if (filterType === 'game') {
-      state = { ...state, games: toggleValue(state.games, filterValue as GameTag), page: 1 };
-      renderResults();
+      setState({ games: toggleValue(state.games, filterValue as GameTag), page: 1 });
       return;
     }
 
     if (filterType === 'series') {
-      state = { ...state, series: toggleValue(state.series, filterValue as SeriesTag), page: 1 };
-      renderResults();
+      setState({ series: toggleValue(state.series, filterValue as SeriesTag), page: 1 });
       return;
     }
 
@@ -382,27 +436,15 @@ export function initVideoDatabase() {
       if (state.formats.includes(filterValue as FormatTag) && !canRemoveFormat(state.formats, filterValue as FormatTag)) {
         return;
       }
-
-      state = {
-        ...state,
-        formats: toggleValue(state.formats, filterValue as FormatTag, formatComparer),
-        page: 1,
-      };
-      renderResults();
+      setState({ formats: toggleValue(state.formats, filterValue as FormatTag, formatComparer), page: 1 });
       return;
     }
 
     if (filterType === 'year') {
-      state = {
-        ...state,
-        years: toggleValue(
-          state.years,
-          Number.parseInt(filterValue, 10),
-          (left, right) => right - left,
-        ),
+      setState({
+        years: toggleValue(state.years, Number.parseInt(filterValue, 10), (left, right) => right - left),
         page: 1,
-      };
-      renderResults();
+      });
     }
   }
 
@@ -413,7 +455,7 @@ export function initVideoDatabase() {
       try {
         await navigator.clipboard.writeText(url);
         copied = true;
-      } catch (error) {
+      } catch {
         copied = false;
       }
     }
@@ -425,7 +467,6 @@ export function initVideoDatabase() {
     }
 
     const label = button.querySelector('.vdb-copy-link-label');
-
     button.classList.add('is-copied');
     if (label) label.textContent = 'Copied';
     if (shareStatus) shareStatus.textContent = 'YouTube link copied to clipboard.';
@@ -441,6 +482,8 @@ export function initVideoDatabase() {
     scrollTopButton.classList.toggle('is-visible', window.scrollY > 320);
   }
 
+  // ─── Event delegation ──────────────────────────────────────────────────────
+
   root.addEventListener('click', (event) => {
     const target = event.target as HTMLElement;
     const filterButton = target.closest<HTMLElement>('[data-filter-type][data-filter-value]');
@@ -450,20 +493,30 @@ export function initVideoDatabase() {
     const pageButton = target.closest<HTMLElement>('[data-page]');
 
     if (filterButton) {
-      toggleFilter(filterButton.dataset.filterType as FilterType, filterButton.dataset.filterValue || '');
+      const filterValue = filterButton.dataset.filterValue;
+      if (!filterValue) {
+        console.warn('vdb: filter button is missing data-filter-value', filterButton);
+        return;
+      }
+      toggleFilter(filterButton.dataset.filterType as FilterType, filterValue);
       return;
     }
 
     if (sortButton) {
       const nextSort = sortButton.dataset.sort as VideoDatabaseState['sort'];
       if (!nextSort || nextSort === state.sort) return;
-      state = { ...state, sort: nextSort, page: 1 };
-      renderResults();
+      setState({ sort: nextSort, page: 1 });
       return;
     }
 
     if (chipButton) {
-      removeChip(chipButton.dataset.chipType || '', chipButton.dataset.chipValue || '');
+      const chipType = chipButton.dataset.chipType;
+      const chipValue = chipButton.dataset.chipValue;
+      if (!chipType || !chipValue) {
+        console.warn('vdb: chip button is missing data attributes', chipButton);
+        return;
+      }
+      removeChip(chipType, chipValue);
       return;
     }
 
@@ -481,8 +534,7 @@ export function initVideoDatabase() {
       }
 
       event.preventDefault();
-      state = { ...state, page };
-      renderResults();
+      setState({ page });
       resultsGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   });
@@ -499,30 +551,15 @@ export function initVideoDatabase() {
             ? DEFAULT_SORT
             : state.sort;
 
-      state = {
-        ...state,
-        query: nextQuery,
-        sort: nextSort,
-        page: 1,
-      };
-
-      renderResults();
-    }, 140);
+      setState({ query: nextQuery, sort: nextSort, page: 1 });
+    }, SEARCH_DEBOUNCE_MS);
   });
 
   searchClear.addEventListener('click', () => {
-    state = {
-      ...state,
-      query: '',
-      sort: state.sort === 'relevance' ? DEFAULT_SORT : state.sort,
-      page: 1,
-    };
-    renderResults();
+    setState({ query: '', sort: state.sort === 'relevance' ? DEFAULT_SORT : state.sort, page: 1 });
   });
 
-  clearAllButton?.addEventListener('click', () => {
-    resetState();
-  });
+  clearAllButton?.addEventListener('click', resetState);
 
   scrollTopButton?.addEventListener('click', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -535,5 +572,9 @@ export function initVideoDatabase() {
 
   window.addEventListener('scroll', updateScrollTopVisibility, { passive: true });
   updateScrollTopVisibility();
-  renderResults(false);
+
+  // Skip re-rendering what the server already painted correctly on first load
+  if (!statesAreEqual(initialState, serverState)) {
+    renderResults(false);
+  }
 }

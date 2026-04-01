@@ -20,6 +20,7 @@ type Env = {
 const PLAYER_CACHE_DAYS = 30;
 const RAW_PAYLOAD_DAYS = 60;
 const METADATA_CACHE_DAYS = 90;
+const HWDE_STEAM_SAMPLE_DAYS = 30;
 
 function daysAgo(days: number): string {
   return new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
@@ -45,6 +46,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const playerCutoff = daysAgo(PLAYER_CACHE_DAYS);
   const rawCutoff = daysAgo(RAW_PAYLOAD_DAYS);
   const metadataCutoff = daysAgo(METADATA_CACHE_DAYS);
+  const hwdeSteamCutoff = daysAgo(HWDE_STEAM_SAMPLE_DAYS);
 
   const playerStats = await env.DB.prepare(
     'DELETE FROM player_stats_cache WHERE fetched_at < ?'
@@ -78,6 +80,10 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     'DELETE FROM raw_event_payloads WHERE fetched_at < ?'
   ).bind(rawCutoff).run();
 
+  const hwdeSteamSamples = await env.DB.prepare(
+    'DELETE FROM hwde_steam_player_samples WHERE sampled_at < ?'
+  ).bind(hwdeSteamCutoff).run();
+
   return jsonResponse({
     deleted: {
       player_stats_cache: playerStats.meta?.changes ?? 0,
@@ -88,11 +94,13 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       campaign_levels_cache: campaignLevels.meta?.changes ?? 0,
       raw_match_payloads: rawMatches.meta?.changes ?? 0,
       raw_event_payloads: rawEvents.meta?.changes ?? 0,
+      hwde_steam_player_samples: hwdeSteamSamples.meta?.changes ?? 0,
     },
     retention: {
       player_caches: `${PLAYER_CACHE_DAYS} days`,
       raw_payloads: `${RAW_PAYLOAD_DAYS} days`,
       metadata: `${METADATA_CACHE_DAYS} days`,
+      hwde_steam_samples: `${HWDE_STEAM_SAMPLE_DAYS} days`,
     },
     cleanedAt: new Date().toISOString(),
   });

@@ -2,9 +2,15 @@
 
 This file provides context for AI agents working on this codebase. Read it before making changes.
 
+## Agent Rules
+
+- **Update `README.md` when adding a major feature.** Major features include new pages, new API endpoints, new database tables/migrations, and new integrations. Keep the Features section and Scripts section in sync with what actually exists.
+
+---
+
 ## Project Overview
 
-**Team Respawn** is a gaming content website for Andy's YouTube channel, focused on strategy RTS games — primarily Halo Wars 2, Age of Empires, and Age of Mythology. The site hosts blog posts (guides, walkthroughs, reviews), a video database, Halo Wars 2 live stats lookup, and info on related projects (Storehaus Bot, Halo Quotes, AOE2 API).
+**Team Respawn** is a gaming content website for Andy's YouTube channel, focused on strategy RTS games — primarily Halo Wars 2, Age of Empires, and Age of Mythology. The site hosts blog posts (guides, walkthroughs, reviews), a video database, Halo Wars 2 live stats lookup, a Halo Wars: Definitive Edition Steam player count tracker, and info on related projects (Storehaus Bot, Halo Quotes, AOE2 API).
 
 - **Live site:** https://www.teamrespawn.net
 - **YouTube:** https://www.youtube.com/@TeamRespawn

@@ -1,5 +1,18 @@
 ---
 import SecondaryPageLayout from '../../layouts/SecondaryPageLayout.astro';
+
+const referralLinks = [
+  {
+    name: 'Proton Mail',
+    href: 'https://pr.tn/ref/MN6ZA3KF',
+    icon: 'fas fa-envelope-open-text',
+    eyebrow: 'Referral Link',
+    description:
+      'If you already want a privacy-first email provider, using this referral link is a clean way to support Team Respawn while signing up for something genuinely useful.',
+    highlights: ['Secure email', 'Privacy-first', 'Easy way to support us'],
+    cta: 'Check Out Proton Mail',
+  },
+];
 ---
 <SecondaryPageLayout
   title="Support Us | Team Respawn"
@@ -17,7 +30,7 @@ import SecondaryPageLayout from '../../layouts/SecondaryPageLayout.astro';
           Support Us
         </h1>
         <p class="text-gray-400 text-lg">
-          Everything we create — guides, tools, videos, and bots — is free. Your support keeps it that way.
+          Everything we create - guides, tools, videos, and bots - is free. Your support keeps it that way.
         </p>
       </header>
 
@@ -28,33 +41,186 @@ import SecondaryPageLayout from '../../layouts/SecondaryPageLayout.astro';
             We don't have a paywall or premium tier. The best way to support Team Respawn is to engage with our content and share it with others who might find it useful.
           </p>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-700/60 hover:border-purple-500/40 transition-colors duration-300">
+            <div class="not-prose bg-gray-800/60 p-4 rounded-lg border border-gray-700/60 hover:border-red-500/40 transition-colors duration-300 flex flex-col">
               <i class="fab fa-youtube text-red-400 text-2xl mb-2" aria-hidden="true"></i>
               <h3 class="font-semibold text-purple-200 mb-1">Subscribe on YouTube</h3>
-              <p class="text-sm text-gray-400">Watch and subscribe to our channel for the latest RTS guides and content</p>
+              <p class="text-sm text-gray-400 mb-4 flex-1">Watch and subscribe to our channel for the latest RTS guides and content</p>
+              <a
+                href="https://www.youtube.com/@TeamRespawn"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white font-semibold text-sm transition-colors duration-200"
+              >
+                <i class="fab fa-youtube" aria-hidden="true"></i>
+                Subscribe
+              </a>
             </div>
-            <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-700/60 hover:border-purple-500/40 transition-colors duration-300">
+
+            <div class="not-prose bg-gray-800/60 p-4 rounded-lg border border-gray-700/60 hover:border-purple-500/40 transition-colors duration-300 flex flex-col">
               <i class="fab fa-twitch text-purple-400 text-2xl mb-2" aria-hidden="true"></i>
               <h3 class="font-semibold text-purple-200 mb-1">Follow on Twitch</h3>
-              <p class="text-sm text-gray-400">Catch live streams and join the conversation in real time</p>
+              <p class="text-sm text-gray-400 mb-4 flex-1">Catch live streams and join the conversation in real time</p>
+              <a
+                href="https://www.twitch.tv/TeamRespawnTV"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-semibold text-sm transition-colors duration-200"
+              >
+                <i class="fab fa-twitch" aria-hidden="true"></i>
+                Follow
+              </a>
             </div>
-            <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-700/60 hover:border-purple-500/40 transition-colors duration-300">
+            <div class="not-prose bg-gray-800/60 p-4 rounded-lg border border-gray-700/60 hover:border-purple-500/40 transition-colors duration-300 flex flex-col">
               <i class="fas fa-share-alt text-purple-400 text-2xl mb-2" aria-hidden="true"></i>
               <h3 class="font-semibold text-purple-200 mb-1">Share Our Content</h3>
-              <p class="text-sm text-gray-400">Share guides and videos with your community — it makes a huge difference</p>
+              <p class="text-sm text-gray-400 flex-1">Share guides and videos with your community - it makes a huge difference</p>
+            </div>
+          </div>
+
+          <div class="not-prose mt-4 rounded-2xl border border-amber-400/20 bg-[radial-gradient(circle_at_top_left,rgba(251,191,36,0.18),transparent_32%),radial-gradient(circle_at_bottom_right,rgba(249,115,22,0.12),transparent_30%),linear-gradient(145deg,rgba(31,24,13,0.96),rgba(17,24,39,0.98))] p-5 sm:p-6 shadow-[0_18px_40px_rgba(0,0,0,0.24)]">
+            <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+              <div class="max-w-2xl">
+                <div class="flex items-start gap-4">
+                  <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl border border-amber-300/20 bg-amber-300/10 text-amber-200">
+                    <i class="fas fa-star text-lg" aria-hidden="true"></i>
+                  </div>
+                  <div>
+                    <h3 class="text-xl sm:text-2xl font-extrabold text-amber-100">Join on YouTube</h3>
+                    <p class="mt-2 text-sm leading-7 text-gray-300">
+                      Become a YouTube member if you want a more direct way to support Team Respawn through the channel itself.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <a
+                href="https://www.youtube.com/channel/UC7p8p881VBUXXcNbomNsT8A/join"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-400 px-5 py-3 text-sm font-extrabold text-slate-950 transition-colors duration-200 hover:bg-amber-300"
+              >
+                <i class="fas fa-star" aria-hidden="true"></i>
+                Join on YouTube
+              </a>
             </div>
           </div>
         </section>
 
         <section class="mb-8">
-          <h2 class="text-2xl sm:text-3xl font-bold mb-4 text-purple-300">Coming Soon</h2>
-          <p class="text-gray-300 leading-relaxed mb-4">
-            We're exploring additional ways for supporters to contribute directly. More details to come.
+          <h2 class="text-2xl sm:text-3xl font-bold mb-4 text-purple-300">Leave a Tip</h2>
+          <p class="text-gray-300 leading-relaxed mb-6">
+            If you want a more direct one-time way to support Team Respawn, you can use our Ko-fi tip jar below.
           </p>
-          <ul class="list-disc list-inside mb-4 space-y-2 text-gray-300 ml-4">
-            <li>Patreon membership — <span class="text-gray-500">coming soon</span></li>
-            <li>YouTube channel membership — <span class="text-gray-500">coming soon</span></li>
-          </ul>
+
+          <div class="not-prose relative overflow-hidden rounded-2xl border border-teal-400/15 bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.12),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(168,85,247,0.10),transparent_28%),linear-gradient(145deg,rgba(17,24,39,0.96),rgba(7,12,24,0.98))] p-5 sm:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.28)]">
+            <div class="absolute inset-0 bg-[linear-gradient(rgba(45,212,191,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(45,212,191,0.04)_1px,transparent_1px)] bg-[size:28px_28px] opacity-35 [mask-image:linear-gradient(180deg,rgba(0,0,0,0.55),transparent_85%)] pointer-events-none"></div>
+
+            <div class="relative">
+              <div class="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                <div class="max-w-2xl">
+                  <span class="inline-flex items-center gap-2 rounded-full border border-teal-400/20 bg-teal-950/35 px-3 py-1 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-teal-100">
+                    Ko-fi
+                  </span>
+                  <div class="mt-4 flex items-start gap-4">
+                    <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl border border-teal-400/15 bg-teal-400/10 text-teal-200 shadow-[0_0_24px_rgba(45,212,191,0.10)]">
+                      <i class="fas fa-mug-hot text-lg" aria-hidden="true"></i>
+                    </div>
+                    <div>
+                      <h3 class="text-2xl font-extrabold text-white">Tip Team Respawn on Ko-fi</h3>
+                      <p class="mt-2 text-sm leading-7 text-gray-300">
+                        Best for one-time support if you want to help fund more guides, tools, and videos without signing up for a recurring membership.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="mt-5 flex flex-wrap gap-2">
+                    <span class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200">One-time support</span>
+                    <span class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200">Quick and direct</span>
+                    <span class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200">Helps fund future content</span>
+                  </div>
+                </div>
+
+                <a
+                  href="https://ko-fi.com/teamrespawn"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-200 via-cyan-300 to-sky-300 px-4 py-3 text-sm font-extrabold text-slate-950 transition-transform duration-200 hover:-translate-y-0.5"
+                >
+                  Open Ko-fi
+                  <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                </a>
+              </div>
+
+              <div class="mt-6 overflow-hidden rounded-2xl border border-white/10 bg-slate-950/55 p-3 sm:p-4 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)]">
+                <iframe
+                  id="kofiframe"
+                  src="https://ko-fi.com/teamrespawn/?hidefeed=true&widget=true&embed=true&preview=true"
+                  style="border:none;width:100%;padding:0;background:#eef2f7;border-radius:14px;"
+                  height="560"
+                  title="teamrespawn"
+                  loading="lazy"
+                ></iframe>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="mb-8">
+          <h2 class="text-2xl sm:text-3xl font-bold mb-4 text-purple-300">Referral Links</h2>
+          <p class="text-gray-300 leading-relaxed mb-6">
+            Below are the referral links for Team Respawn. If you sign up using these referral links, Team Respawn may receive a benefit.
+          </p>
+
+          <div class="not-prose grid grid-cols-1 gap-5">
+            {referralLinks.map((link) => (
+              <article class="relative overflow-hidden rounded-2xl border border-cyan-400/20 bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.18),transparent_32%),radial-gradient(circle_at_bottom_right,rgba(168,85,247,0.14),transparent_30%),linear-gradient(145deg,rgba(17,24,39,0.96),rgba(7,12,24,0.98))] p-5 sm:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.28)]">
+                <div class="absolute inset-0 bg-[linear-gradient(rgba(56,189,248,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(56,189,248,0.05)_1px,transparent_1px)] bg-[size:28px_28px] opacity-40 [mask-image:linear-gradient(180deg,rgba(0,0,0,0.55),transparent_85%)] pointer-events-none"></div>
+
+                <div class="relative flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                  <div class="max-w-2xl">
+                    <span class="inline-flex items-center gap-2 rounded-full border border-cyan-400/25 bg-cyan-950/40 px-3 py-1 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-cyan-200">
+                      {link.eyebrow}
+                    </span>
+                    <div class="mt-4 flex items-start gap-4">
+                      <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl border border-cyan-400/20 bg-cyan-400/10 text-cyan-300 shadow-[0_0_24px_rgba(56,189,248,0.12)]">
+                        <i class={`${link.icon} text-lg`} aria-hidden="true"></i>
+                      </div>
+                      <div>
+                        <h3 class="text-2xl font-extrabold text-white">{link.name}</h3>
+                        <p class="mt-2 text-sm leading-7 text-gray-300">
+                          {link.description}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div class="mt-5 flex flex-wrap gap-2">
+                      {link.highlights.map((highlight) => (
+                        <span class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200">
+                          {highlight}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div class="relative flex w-full max-w-sm flex-col rounded-2xl border border-white/10 bg-slate-950/40 p-4 sm:p-5">
+                    <p class="text-sm font-semibold text-cyan-200">Use this referral link</p>
+                    <p class="mt-2 text-sm leading-6 text-gray-400">
+                      Best for people who already want a more private email setup and want to help fund the site at the same time.
+                    </p>
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="mt-5 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-300 via-sky-400 to-indigo-400 px-4 py-3 text-sm font-extrabold text-slate-950 transition-transform duration-200 hover:-translate-y-0.5"
+                    >
+                      {link.cta}
+                      <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                    </a>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
         </section>
       </div>
     </article>
