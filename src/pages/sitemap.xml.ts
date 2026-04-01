@@ -36,7 +36,43 @@ export async function GET({ site }: { site?: { origin: string } }) {
       priority: '0.8'
     },
     {
-      url: '/storehaus-info',
+      url: '/storehaus',
+      lastmod: '2026-01-27',
+      changefreq: 'monthly',
+      priority: '0.7'
+    },
+    {
+      url: '/videos',
+      lastmod: new Date().toISOString().split('T')[0],
+      changefreq: 'weekly',
+      priority: '0.8'
+    },
+    {
+      url: '/halo-wars-stats',
+      lastmod: new Date().toISOString().split('T')[0],
+      changefreq: 'weekly',
+      priority: '0.8'
+    },
+    {
+      url: '/halo-wars-de-player-count',
+      lastmod: new Date().toISOString().split('T')[0],
+      changefreq: 'daily',
+      priority: '0.8'
+    },
+    {
+      url: '/about',
+      lastmod: '2026-01-27',
+      changefreq: 'monthly',
+      priority: '0.7'
+    },
+    {
+      url: '/support',
+      lastmod: '2026-01-27',
+      changefreq: 'monthly',
+      priority: '0.7'
+    },
+    {
+      url: '/partner',
       lastmod: '2026-01-27',
       changefreq: 'monthly',
       priority: '0.7'

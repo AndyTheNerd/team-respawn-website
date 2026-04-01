@@ -1,21 +1,127 @@
 ---
-const redirectUrl =
-  'https://discord.com/oauth2/authorize?client_id=1446587655541227552&permissions=117760&integration_type=0&scope=bot';
+import SecondaryPageLayout from '../../layouts/SecondaryPageLayout.astro';
 ---
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Redirectingâ€¦ | Team Respawn</title>
-    <meta http-equiv="refresh" content={`0; url=${redirectUrl}`} />
-  </head>
-  <body>
-    <noscript>
-      <p>
-        JavaScript is required to redirect. Continue here:
-        <a href={redirectUrl}>Discord authorization</a>.
+<SecondaryPageLayout
+  title="Storehaus RTS Summary | Team Respawn"
+  description="Storehaus RTS is a Discord bot for Halo Wars 2, Age of Empires II and IV: civ stats, player search, game history, and an AI strategy advisor for Halo Wars 2."
+  keywords="Storehaus RTS, Discord bot, Age of Empires, AoE2, AoE4, Halo Wars 2, Team Respawn"
+  canonical="https://www.teamrespawn.net/storehaus"
+  ogTitle="Storehaus RTS Summary | Team Respawn"
+  ogDescription="Storehaus RTS is a Discord bot for Halo Wars 2, Age of Empires II and IV: civ stats, player search, game history, and an AI strategy advisor for Halo Wars 2."
+  ogImage="https://www.teamrespawn.net/content/Banner.jpg"
+>
+  <main id="main-content" class="max-w-4xl mx-auto mt-8" aria-label="Storehaus RTS summary">
+    <div class="mb-8 rounded-xl overflow-hidden border border-gray-700/60">
+      <img src="/content/Banner.jpg" alt="Storehaus RTS" class="w-full h-auto object-cover" width="1200" height="300" />
+    </div>
+
+    <article class="bg-gray-800/60 border border-gray-700/60 rounded-xl p-6 sm:p-8 lg:p-10">
+      <header class="mb-8">
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+          Storehaus RTS
+        </h1>
+        <p class="text-gray-400 text-lg">
+          A Discord bot built with discord.js v14 that provides information and statistics for Halo Wars 2, Age of Empires II and Age of Empires IV.
+        </p>
+      </header>
+
+      <div class="prose prose-invert prose-lg max-w-none">
+        <section class="mb-8">
+          <h2 class="text-2xl sm:text-3xl font-bold mb-4 text-purple-300">Features</h2>
+
+          <h3 class="text-xl sm:text-2xl font-semibold mb-3 text-purple-200 mt-6">Age of Empires IV</h3>
+          <p class="text-gray-300 leading-relaxed mb-4">
+            Get civilization statistics, search for players, and view game history. Data is fetched from
+            <a href="https://aoe4world.com" target="_blank" rel="noopener noreferrer" class="text-purple-400 hover:text-purple-300 underline">
+              aoe4world.com
+            </a>.
+          </p>
+          <ul class="list-disc list-inside mb-4 space-y-2 text-gray-300 ml-4">
+            <li>Civilization stats for 1v1, 2v2, 3v3, and 4v4 (Quick Match and Ranked)</li>
+            <li>Player search by name (minimum 3 characters)</li>
+            <li>Recent games for a player by profile ID</li>
+          </ul>
+
+          <h3 class="text-xl sm:text-2xl font-semibold mb-3 text-purple-200 mt-6">Age of Empires II</h3>
+          <p class="text-gray-300 leading-relaxed mb-4">
+            Look up units, technologies, structures, and civilizations from the game database. All searches are case-insensitive and support partial matching.
+          </p>
+          <ul class="list-disc list-inside mb-4 space-y-2 text-gray-300 ml-4">
+            <li>Unit costs, stats, armor, and more</li>
+            <li>Technologies</li>
+            <li>Structures</li>
+            <li>Civilizations, bonuses, unique units, and more</li>
+          </ul>
+
+          <h3 class="text-xl sm:text-2xl font-semibold mb-3 text-purple-200 mt-6">Halo Wars 2</h3>
+          <p class="text-gray-300 leading-relaxed mb-4">
+            The bot also includes an AI-powered strategy advisor for Halo Wars 2, using retrieval-augmented generation (RAG) and multiple AI providers (Groq, Cloudflare, OpenRouter, Cerebras) to answer strategy questions.
+          </p>
+        </section>
+
+        <section class="mb-8">
+          <h2 class="text-2xl sm:text-3xl font-bold mb-4 text-purple-300">Commands</h2>
+          <p class="text-gray-300 leading-relaxed mb-4">Slash commands are available for each game:</p>
+          <ul class="list-disc list-inside mb-4 space-y-2 text-gray-300 ml-4">
+            <li><strong>/aoe4</strong>: Civilization stats by team size (1v1-4v4), player search, and recent games</li>
+            <li><strong>/aoe2</strong>: Unit, technology, structure, and civilization lookups</li>
+            <li><strong>/ping</strong>: Replies with "Pong!"</li>
+          </ul>
+          <p class="text-gray-300 leading-relaxed mb-4">
+            The Halo Wars 2 strategy advisor is available via its own command in servers where the bot and the optional RAG service are configured.
+          </p>
+        </section>
+
+        <section class="mb-8">
+          <h2 class="text-2xl sm:text-3xl font-bold mb-4 text-purple-300">Data Sources</h2>
+          <ul class="list-disc list-inside mb-4 space-y-2 text-gray-300 ml-4">
+            <li>
+              <strong>Age of Empires IV</strong>: Statistics and player data from the
+              <a href="https://aoe4world.com/api" target="_blank" rel="noopener noreferrer" class="text-purple-400 hover:text-purple-300 underline">
+                aoe4world.com API
+              </a>
+            </li>
+            <li><strong>Age of Empires II</strong>: Game data stored locally in JSON format</li>
+          </ul>
+        </section>
+      </div>
+    </article>
+
+    <section class="mt-8 mb-8 bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-xl p-6 border border-purple-500/30">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+        <div class="flex items-center gap-3">
+          <i class="fab fa-discord text-purple-400 text-3xl" aria-hidden="true"></i>
+          <h2 class="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+            Ready to Add Storehaus to Your Server?
+          </h2>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-2">
+          <a href="/storehaus-invite" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg text-white font-semibold transition-colors duration-300">
+            <i class="fab fa-discord mr-2" aria-hidden="true"></i>
+            Add to Discord
+          </a>
+        </div>
+      </div>
+      <p class="text-gray-300 mb-6 text-base sm:text-lg">
+        Join thousands of RTS gamers already using Storehaus! Get instant access to real-time AoE4 statistics, comprehensive AoE2 database lookups, and AI-powered Halo Wars 2 strategy advice.
       </p>
-    </noscript>
-  </body>
-</html>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-700/60 hover:border-purple-500/40 transition-colors duration-300">
+          <i class="fas fa-chart-line text-purple-400 text-2xl mb-2" aria-hidden="true"></i>
+          <h3 class="font-semibold text-purple-200 mb-1">AoE4 Statistics</h3>
+          <p class="text-sm text-gray-400">Player stats, civ data, game history from aoe4world.com</p>
+        </div>
+        <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-700/60 hover:border-purple-500/40 transition-colors duration-300">
+          <i class="fas fa-database text-purple-400 text-2xl mb-2" aria-hidden="true"></i>
+          <h3 class="font-semibold text-purple-200 mb-1">AoE2 Database</h3>
+          <p class="text-sm text-gray-400">Units, technologies, structures, and civilizations</p>
+        </div>
+        <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-700/60 hover:border-purple-500/40 transition-colors duration-300">
+          <i class="fas fa-robot text-purple-400 text-2xl mb-2" aria-hidden="true"></i>
+          <h3 class="font-semibold text-purple-200 mb-1">HW2 AI Advisor</h3>
+          <p class="text-sm text-gray-400">AI-powered strategy tips with RAG technology</p>
+        </div>
+      </div>
+    </section>
+  </main>
+</SecondaryPageLayout>

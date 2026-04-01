@@ -325,7 +325,7 @@ const hw1FactionPillClasses: Record<string, string> = {
           const column = document.createElement('div');
           column.className = 'flex h-full items-end';
           column.innerHTML = `
-            <div class="group flex w-full items-end" title="${label}">
+            <div class="group flex h-full w-full items-end" title="${label}">
               <div
                 class="w-full rounded-t-md transition ${barClass}"
                 style="height: ${barHeight};"
@@ -468,6 +468,14 @@ const hw1FactionPillClasses: Record<string, string> = {
         });
       }
 
+      function escHtml(value) {
+        return String(value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
       function renderUnitRows(rows) {
         if (!unitTableBodyEl || !unitResultsEl || !unitEmptyEl) return;
 
@@ -487,16 +495,16 @@ const hw1FactionPillClasses: Record<string, string> = {
 
           return `
             <tr class="transition hover:bg-slate-900/70">
-              <td class="px-4 py-3 font-semibold text-white">${unit.name}</td>
+              <td class="px-4 py-3 font-semibold text-white">${escHtml(unit.name)}</td>
               <td class="px-4 py-3">
                 <span class="inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${factionClasses}">
-                  ${unit.faction}
+                  ${escHtml(unit.faction)}
                 </span>
               </td>
-              <td class="px-4 py-3 text-slate-300">${unit.type}</td>
-              <td class="px-4 py-3 text-right font-semibold text-cyan-100">${unit.dpsDisplay}</td>
-              <td class="px-4 py-3 text-right">${unit.upgradeCount}</td>
-              <td class="px-4 py-3 text-slate-300">${unit.costDisplay}</td>
+              <td class="px-4 py-3 text-slate-300">${escHtml(unit.type)}</td>
+              <td class="px-4 py-3 text-right font-semibold text-cyan-100">${escHtml(unit.dpsDisplay)}</td>
+              <td class="px-4 py-3 text-right">${escHtml(unit.upgradeCount)}</td>
+              <td class="px-4 py-3 text-slate-300">${escHtml(unit.costDisplay)}</td>
             </tr>
           `;
         }).join('');
