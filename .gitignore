@@ -13,3 +13,5 @@ REFACTOR_CHANGELOG.md
 changelogs/
 scripts/
 .astro/settings.json
+.astro/data-store.json
+.codex-*.log

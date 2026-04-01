@@ -1,2 +1,4 @@
 /halo-wars-stats/player /halo-wars-stats 200
 /halo-wars-stats/player/* /halo-wars-stats 200
+/storehaus-info /storehaus 301
+/storehaus-invite https://discord.com/oauth2/authorize?client_id=1446587655541227552&permissions=117760&integration_type=0&scope=bot 302

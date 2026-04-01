@@ -3,20 +3,26 @@ import SocialIcons from './SocialIcons.astro';
 import SearchBar from './SearchBar.astro';
 import {
   aboutLinks,
+  headerPrimaryLinks,
   hw2GuideSections,
   isNavLinkActive,
   normalizePathname,
   otherProjectSections,
+  STOREHAUS_INVITE_URL,
 } from '../data/navigation';
 
 const { showPanelButton = true } = Astro.props;
 const pathname = Astro.url?.pathname ?? '';
 const normalizedPath = normalizePathname(pathname);
 const isHome = pathname === '/' || pathname === '/index.html';
-const isBlog = pathname.startsWith('/blog');
 const isHw2Stats = pathname.startsWith('/halo-wars-stats');
 const isVideos = pathname.startsWith('/videos');
 const navFlags = { isVideos, isHw2Stats };
+
+const headerPrimaryLinksWithActive = headerPrimaryLinks.map((link) => ({
+  ...link,
+  active: isNavLinkActive(link, pathname, navFlags),
+}));
 
 const headerHw2Sections = hw2GuideSections.map((section) => ({
   ...section,
@@ -39,7 +45,18 @@ const headerAboutLinks = aboutLinks.map((link) => ({
   active: isNavLinkActive(link, pathname, navFlags),
 }));
 
-const isStorehausRoute = normalizedPath === '/storehaus' || normalizedPath === '/storehaus-info' || normalizedPath.startsWith('/storehaus/');
+const headerAboutSections = [
+  {
+    title: 'Support and Partnerships',
+    description: 'Keep the guides and tools going, or talk with us about sponsorships and collabs.',
+    links: headerAboutLinks.filter((link) => normalizePathname(link.href) !== '/about'),
+  },
+];
+
+const isStorehausRoute =
+  normalizedPath === '/storehaus' ||
+  normalizedPath === '/storehaus-info' ||
+  normalizedPath.startsWith('/storehaus/');
 const isOtherProjects = isStorehausRoute || headerOtherProjectSections.some((section) => section.links.some((link) => link.active));
 const isAboutSection = headerAboutLinks.some((link) => link.active);
 const isHaloWars2Section = isHw2Stats || headerHw2Sections.some((section) => section.links.some((link) => link.active));
@@ -93,24 +110,14 @@ const isHaloWars2Section = isHw2Stats || headerHw2Sections.some((section) => sec
         >
           Home
         </button>
-        <a
-          href="/blog"
-          class={`nav-link ${isBlog ? 'nav-link-active' : ''}`}
-        >
-          Blog
-        </a>
-        <a
-          href="/videos"
-          class={`nav-link ${isVideos ? 'nav-link-active' : ''}`}
-        >
-          Videos
-        </a>
-        <a
-          href="/halo-wars-stats"
-          class={`nav-link ${isHw2Stats ? 'nav-link-active' : ''}`}
-        >
-          HW2 Stats
-        </a>
+        {headerPrimaryLinksWithActive.map((link) => (
+          <a
+            href={link.href}
+            class={`nav-link ${link.active ? 'nav-link-active' : ''}`}
+          >
+            {link.label}
+          </a>
+        ))}
         <div class="nav-dropdown" data-dropdown>
           <button
             class={`nav-link nav-dropdown-toggle ${isHaloWars2Section ? 'nav-link-active' : ''}`}
@@ -191,26 +198,66 @@ const isHaloWars2Section = isHw2Stats || headerHw2Sections.some((section) => sec
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
             </svg>
           </button>
-          <div id="other-projects-dropdown-menu" class="nav-dropdown-menu nav-dropdown-menu--rich" role="menu" aria-label="Other projects" data-dropdown-menu>
-            <div class="nav-dropdown-rich-grid">
-              {headerOtherProjectSections.map((section) => (
-                <div class="nav-dropdown-section">
-                  <span class="nav-dropdown-section-heading">{section.title}</span>
-                  <p class="nav-dropdown-section-desc">{section.description}</p>
-                  {section.links.map((link) => (
-                    <a
-                      href={link.href}
-                      class={`nav-dropdown-item nav-dropdown-item--icon ${link.active ? 'nav-dropdown-item-active' : ''}`}
-                      role="menuitem"
-                      target={link.external ? '_blank' : undefined}
-                      rel={link.external ? 'noopener noreferrer' : undefined}
-                    >
-                      <span class="nav-dropdown-item-icon"><i class={link.icon} aria-hidden="true"></i></span>
-                      {link.label}
-                    </a>
-                  ))}
+          <div
+            id="other-projects-dropdown-menu"
+            class="nav-dropdown-menu nav-dropdown-menu--hub nav-dropdown-menu--hub-projects"
+            role="menu"
+            aria-label="Other projects"
+            data-dropdown-menu
+          >
+            <div class="nav-dropdown-hub-shell">
+              <div class="nav-dropdown-hub-header">
+                <span class="nav-dropdown-hub-kicker">Other Projects</span>
+                <div>
+                  <p class="nav-dropdown-hub-title">Bots, APIs, and Side Builds</p>
+                  <p class="nav-dropdown-hub-copy">Explore the tools and experiments around Team Respawn, from the Storehaus Discord bot to utility APIs and Halo quote projects.</p>
                 </div>
-              ))}
+              </div>
+
+              <div class="nav-dropdown-hub-grid nav-dropdown-hub-grid--projects">
+                {headerOtherProjectSections.map((section) => (
+                  <div class="nav-dropdown-hub-zone">
+                    <span class="nav-dropdown-hub-zone-label">{section.title}</span>
+                    <p class="nav-dropdown-hub-zone-copy">{section.description}</p>
+                    {section.links.map((link) => (
+                      <a
+                        href={link.href}
+                        class={`nav-dropdown-item nav-dropdown-item--icon ${link.active ? 'nav-dropdown-item-active' : ''}`}
+                        role="menuitem"
+                        target={link.external ? '_blank' : undefined}
+                        rel={link.external ? 'noopener noreferrer' : undefined}
+                      >
+                        <span class="nav-dropdown-item-icon"><i class={link.icon} aria-hidden="true"></i></span>
+                        {link.label}
+                      </a>
+                    ))}
+                  </div>
+                ))}
+
+                <div class="nav-dropdown-hub-rail">
+                  <span class="nav-dropdown-hub-rail-kicker">Spotlight</span>
+                  <h3 class="nav-dropdown-hub-rail-title">Storehaus</h3>
+                  <p class="nav-dropdown-hub-rail-copy">The flagship side project: a Discord bot built for RTS players who want instant stats, lookups, and strategy help without leaving chat.</p>
+                  <div class="nav-dropdown-hub-rail-list" aria-hidden="true">
+                    <span><i class="fab fa-discord" aria-hidden="true"></i> Bot commands and AI answers</span>
+                    <span><i class="fas fa-quote-left" aria-hidden="true"></i> Halo quotes and companion APIs</span>
+                    <span><i class="fas fa-code" aria-hidden="true"></i> Developer-friendly RTS data</span>
+                  </div>
+                  <a href="/storehaus" class="nav-dropdown-hub-rail-cta" role="menuitem">
+                    Open Storehaus Summary
+                    <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                  </a>
+                  <a
+                    href={STOREHAUS_INVITE_URL}
+                    class="nav-dropdown-hub-rail-secondary"
+                    role="menuitem"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Add Storehaus to Discord
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -227,17 +274,57 @@ const isHaloWars2Section = isHw2Stats || headerHw2Sections.some((section) => sec
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
             </svg>
           </button>
-          <div id="about-dropdown-menu" class="nav-dropdown-menu nav-dropdown-menu--rich-sm" role="menu" aria-label="About Team Respawn" data-dropdown-menu>
-            <div class="nav-dropdown-rich-grid nav-dropdown-rich-grid--single">
-              <div class="nav-dropdown-section">
-                <span class="nav-dropdown-section-heading">Team Respawn</span>
-                <p class="nav-dropdown-section-desc">RTS strategy content, tools, and community since 2017.</p>
-                {headerAboutLinks.map((link) => (
-                  <a href={link.href} class={`nav-dropdown-item nav-dropdown-item--icon ${link.active ? 'nav-dropdown-item-active' : ''}`} role="menuitem">
-                    <span class="nav-dropdown-item-icon"><i class={link.icon} aria-hidden="true"></i></span>
-                    {link.label}
-                  </a>
+          <div
+            id="about-dropdown-menu"
+            class="nav-dropdown-menu nav-dropdown-menu--hub nav-dropdown-menu--hub-about"
+            role="menu"
+            aria-label="About Team Respawn"
+            data-dropdown-menu
+          >
+            <div class="nav-dropdown-hub-shell">
+              <div class="nav-dropdown-hub-header">
+                <span class="nav-dropdown-hub-kicker">About</span>
+                <div>
+                  <p class="nav-dropdown-hub-title">Who Team Respawn Is</p>
+                  <p class="nav-dropdown-hub-copy">Get the quick version on the team, how we support the site, and how to work with us if there is a genuine fit.</p>
+                </div>
+              </div>
+
+              <div class="nav-dropdown-hub-grid nav-dropdown-hub-grid--about">
+                {headerAboutSections.map((section) => (
+                  <div class="nav-dropdown-hub-zone">
+                    <span class="nav-dropdown-hub-zone-label">{section.title}</span>
+                    <p class="nav-dropdown-hub-zone-copy">{section.description}</p>
+                    {section.links.map((link) => (
+                      <a href={link.href} class={`nav-dropdown-item nav-dropdown-item--icon ${link.active ? 'nav-dropdown-item-active' : ''}`} role="menuitem">
+                        <span class="nav-dropdown-item-icon"><i class={link.icon} aria-hidden="true"></i></span>
+                        {link.label}
+                      </a>
+                    ))}
+                  </div>
                 ))}
+
+                <div class="nav-dropdown-hub-rail">
+                  <span class="nav-dropdown-hub-rail-kicker">Overview</span>
+                  <h3 class="nav-dropdown-hub-rail-title">RTS Strategy Since 2017</h3>
+                  <p class="nav-dropdown-hub-rail-copy">Team Respawn is built around practical RTS coverage: beginner help, in-depth guides, and tools that save people time.</p>
+                  <div class="nav-dropdown-hub-rail-list" aria-hidden="true">
+                    <span><i class="fas fa-book-open" aria-hidden="true"></i> Guides, reviews, and walkthroughs</span>
+                    <span><i class="fas fa-chart-line" aria-hidden="true"></i> Stats tools and searchable databases</span>
+                    <span><i class="fas fa-users" aria-hidden="true"></i> Sponsorships and community projects</span>
+                  </div>
+                  <a href="/about" class="nav-dropdown-hub-rail-cta" role="menuitem">
+                    Meet Team Respawn
+                    <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                  </a>
+                  <a
+                    href="/partner"
+                    class={`nav-dropdown-hub-rail-secondary ${normalizePathname('/partner') === normalizedPath ? 'nav-dropdown-hub-rail-secondary-active' : ''}`}
+                    role="menuitem"
+                  >
+                    Partner With Us
+                  </a>
+                </div>
               </div>
             </div>
           </div>

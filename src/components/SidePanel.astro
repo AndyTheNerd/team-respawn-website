@@ -1,11 +1,8 @@
 ---
 import SocialIcons from './SocialIcons.astro';
 import {
-  aboutLinks,
-  hw2GuideSections,
   isNavLinkActive,
   normalizePathname,
-  otherProjectSections,
   sidePanelPrimaryLinks,
 } from '../data/navigation';
 
@@ -13,6 +10,7 @@ const pathname = Astro.url?.pathname ?? '';
 const normalizedPath = normalizePathname(pathname);
 const isHome = pathname === '/' || pathname === '/index.html';
 const isHw2Stats = normalizedPath === '/halo-wars-stats';
+const isHw2GuideHub = normalizedPath === '/halo-wars-guides';
 const isVideos = pathname.startsWith('/videos');
 const navFlags = { isVideos, isHw2Stats };
 
@@ -21,32 +19,42 @@ const primaryLinks = sidePanelPrimaryLinks.map((link) => ({
   active: isNavLinkActive(link, pathname, navFlags),
 }));
 
-const panelOtherProjectSections = otherProjectSections.map((section) => ({
-  ...section,
-  links: section.links.map((link) => ({
-    ...link,
-    active: isNavLinkActive(link, pathname, navFlags),
-  })),
-}));
-
-const panelHw2Sections = hw2GuideSections.map((section) => ({
-  ...section,
-  links: section.links.map((link) => ({
-    ...link,
-    active: isNavLinkActive(link, pathname, navFlags),
-  })),
-}));
-
-const panelAboutLinks = aboutLinks.map((link) => ({
-  ...link,
-  active: isNavLinkActive(link, pathname, navFlags),
-}));
-
 const primaryLinkClass = (active: boolean) =>
-  `side-panel-tab-link ${active ? 'side-panel-tab-active' : 'side-panel-tab-inactive'} text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50`;
+  `side-panel-tab-link ${active ? 'side-panel-tab-active' : 'side-panel-tab-inactive'} flex items-center gap-3 text-left text-base font-semibold transition-all duration-200 py-3 px-3 rounded-xl hover:bg-gray-800/50`;
 
-const sectionLinkClass = (active: boolean) =>
-  `text-lg font-semibold transition-all duration-200 py-2 px-3 rounded-lg ${active ? 'side-panel-tab-active' : 'text-gray-400 hover:text-white hover:bg-gray-800/50'}`;
+const featureCardClass = (active: boolean) =>
+  `block rounded-2xl border p-4 transition-all duration-200 ${
+    active
+      ? 'border-cyan-400/30 bg-cyan-950/30 shadow-[inset_0_0_0_1px_rgba(34,211,238,0.08)]'
+      : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/[0.07]'
+  }`;
+
+const featuredLinks = [
+  {
+    href: '/halo-wars-guides',
+    title: 'Halo Wars 2 Guide Hub',
+    description: 'Beginner routes, matchup help, and leader picks.',
+    eyebrow: 'Featured',
+    icon: 'fas fa-book-open',
+    active: isHw2GuideHub,
+  },
+  {
+    href: '/halo-wars-stats',
+    title: 'HW2 Stats',
+    description: 'Search players, CSR, leaders, and recent match history.',
+    eyebrow: 'Tool',
+    icon: 'fas fa-chart-bar',
+    active: isHw2Stats,
+  },
+  {
+    href: '/partner',
+    title: 'Partner With Us',
+    description: 'Sponsorships, collaborations, and brand partnerships.',
+    eyebrow: 'About',
+    icon: 'fas fa-handshake',
+    active: normalizedPath === '/partner',
+  },
+];
 ---
 <aside
   id="side-panel"
@@ -69,16 +77,19 @@ const sectionLinkClass = (active: boolean) =>
   </div>
 
   <div class="mb-8">
-    <h2 class="text-2xl font-extrabold mb-4 text-white">Content</h2>
-    <nav class="flex flex-col space-y-2" aria-label="Main content navigation">
+    <div class="mb-3">
+      <p class="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300/80">Menu</p>
+      <h2 class="mt-2 text-2xl font-extrabold text-white">Browse</h2>
+    </div>
+    <nav class="flex flex-col gap-2" aria-label="Main navigation">
       <button
         data-tab-id="home-tab"
-        class={`side-panel-tab-link ${isHome ? 'side-panel-tab-active' : 'side-panel-tab-inactive'} text-left text-lg font-semibold text-gray-400 hover:text-white transition-all duration-200 py-2 px-3 rounded-lg hover:bg-gray-800/50`}
+        class={primaryLinkClass(isHome)}
         type="button"
         role="menuitem"
       >
-        <i class="fas fa-home mr-2" aria-hidden="true"></i>
-        Home
+        <i class="fas fa-home w-5 text-center" aria-hidden="true"></i>
+        <span>Home</span>
       </button>
       {primaryLinks.map((link) => (
         <a
@@ -86,77 +97,34 @@ const sectionLinkClass = (active: boolean) =>
           class={primaryLinkClass(link.active)}
           role="menuitem"
         >
-          <i class={`${link.icon} mr-2`} aria-hidden="true"></i>
-          {link.panelLabel ?? link.label}
+          <i class={`${link.icon} w-5 text-center`} aria-hidden="true"></i>
+          <span>{link.panelLabel ?? link.label}</span>
         </a>
       ))}
     </nav>
   </div>
 
   <div class="mb-8">
-    <h2 class="text-2xl font-extrabold mb-4 text-white">Other Projects</h2>
-    <nav class="flex flex-col space-y-1" aria-label="Other projects navigation">
-      {panelOtherProjectSections.map((section, sectionIndex) => (
-        <Fragment>
-          <p class={`text-xs uppercase tracking-wider text-gray-500 px-3 ${sectionIndex === 0 ? 'pb-1' : 'pt-4 pb-1'}`}>{section.title}</p>
-          {section.links.map((link) => (
-            <a
-              href={link.href}
-              target={link.external ? '_blank' : undefined}
-              rel={link.external ? 'noopener noreferrer' : undefined}
-              class={sectionLinkClass(link.active)}
-            >
-              <i class={`${link.icon} mr-2`} aria-hidden="true"></i>
-              {link.label}
-            </a>
-          ))}
-        </Fragment>
-      ))}
-    </nav>
-  </div>
-
-  <div class="mb-8">
-    <h2 class="text-2xl font-extrabold mb-4 text-white">Halo Wars 2</h2>
-    <nav class="flex flex-col space-y-1" aria-label="Halo Wars 2 navigation">
-      {panelHw2Sections.map((section, sectionIndex) => (
-        <Fragment>
-          <p class={`text-xs uppercase tracking-wider text-cyan-400/80 px-3 ${sectionIndex === 0 ? 'pb-1' : 'pt-4 pb-1'}`}>{section.panelTitle ?? section.title}</p>
-          {section.links.map((link) => (
-            <a
-              href={link.href}
-              class={sectionLinkClass(link.active)}
-            >
-              <i class={`${link.icon} mr-2`} aria-hidden="true"></i>
-              {link.panelLabel ?? link.label}
-            </a>
-          ))}
-        </Fragment>
-      ))}
-      <p class="text-xs uppercase tracking-wider text-cyan-400/80 px-3 pt-4 pb-1">Tools</p>
-      <a
-        href="/halo-wars-stats"
-        class={sectionLinkClass(isHw2Stats)}
-      >
-        <i class="fas fa-chart-bar mr-2" aria-hidden="true"></i>
-        HW2 Stats
-      </a>
-    </nav>
-  </div>
-
-  <div class="mb-8">
-    <h2 class="text-2xl font-extrabold mb-4 text-white">About</h2>
-    <nav class="flex flex-col space-y-2" aria-label="About navigation">
-      {panelAboutLinks.map((link) => (
-        <a
-          href={link.href}
-          class={primaryLinkClass(link.active)}
-          role="menuitem"
-        >
-          <i class={`${link.icon} mr-2`} aria-hidden="true"></i>
-          {link.label}
+    <div class="mb-3 flex items-center justify-between">
+      <h2 class="text-lg font-extrabold text-white">Featured</h2>
+      <span class="text-xs uppercase tracking-[0.16em] text-slate-500">Shortcuts</span>
+    </div>
+    <div class="grid gap-3">
+      {featuredLinks.map((link) => (
+        <a href={link.href} class={featureCardClass(link.active)}>
+          <div class="flex items-start gap-3">
+            <span class="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-300">
+              <i class={link.icon} aria-hidden="true"></i>
+            </span>
+            <div class="min-w-0">
+              <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-300/75">{link.eyebrow}</p>
+              <h3 class="mt-1 text-base font-bold text-white">{link.title}</h3>
+              <p class="mt-1 text-sm leading-6 text-slate-300">{link.description}</p>
+            </div>
+          </div>
         </a>
       ))}
-    </nav>
+    </div>
   </div>
 
   <div class="mt-auto flex justify-center space-x-4 text-gray-400" aria-label="Social media links">
