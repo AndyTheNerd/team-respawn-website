@@ -21,7 +21,7 @@
     "cf:d1:migrate": "npm run cf:d1:migrate:1 && npm run cf:d1:migrate:2 && npm run cf:d1:migrate:3 && npm run cf:d1:migrate:4 && npm run cf:d1:migrate:5 && npm run cf:d1:migrate:6 && npm run cf:d1:migrate:7 && npm run cf:d1:migrate:8 && npm run cf:d1:migrate:9"
   },
   "dependencies": {
-    "astro": "^5.16.15",
+    "astro": "^5.18.1",
     "cloudinary": "^2.9.0",
     "webcoreui": "^1.3.0"
   },
