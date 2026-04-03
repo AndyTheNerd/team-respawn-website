@@ -48,6 +48,8 @@ type SummaryCacheRow = {
   model: string;
 };
 
+const SUMMARY_CACHE_VERSION = 'leaders-v2';
+
 function formatPlayer(p: PlayerSummary): string {
   const lines: string[] = [`  Leader: ${p.leader} (${p.gamertag})`];
   if (p.unitsDestroyed > 0 || p.unitsLost > 0) lines.push(`  Units: ${p.unitsDestroyed} destroyed / ${p.unitsLost} lost`);
@@ -177,7 +179,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         .bind(matchId, gamertagKey)
         .first<SummaryCacheRow>();
 
-      if (cached?.summary) {
+      if (cached?.summary && cached.model?.includes(SUMMARY_CACHE_VERSION)) {
         return new Response(
           JSON.stringify({ summary: cached.summary, model: cached.model, cached: true }),
           { status: 200, headers: corsHeaders }
@@ -236,6 +238,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       { status: 502, headers: corsHeaders }
     );
   }
+
+  modelUsed = `${modelUsed} | ${SUMMARY_CACHE_VERSION}`;
 
   // Cache in D1
   if (env.DB) {

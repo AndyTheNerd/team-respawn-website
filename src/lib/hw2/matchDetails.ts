@@ -4,45 +4,8 @@ import { ensureLeaderPowerMap, getLeaderPowerDisplayName } from './apiCache';
 import { getLeaderName } from '../../data/haloWars2/leaders';
 import { getMatchResult } from '../../utils/haloApi';
 import { fetchMatchEventsPayload, buildEventEntries } from './matchEventProcessing';
-
-const LEADER_POWER_SIGNATURES: Array<{ leaderId: number; patterns: RegExp[] }> = [
-  { leaderId: 16, patterns: [/^johnson/, /^unscbunkerdrop/, /^unscvehiclerecycle/, /^unscdiggingin/] },
-  { leaderId: 9, patterns: [/^jerome/, /^powgplaserbarrage01/] },
-  { leaderId: 3, patterns: [/^unscark/, /^unsclurebeacon/, /^unscretrieversentinel/] },
-  { leaderId: 10, patterns: [/^arbiter/, /^stasisprojectileeffect/] },
-  { leaderId: 15, patterns: [/^serina/, /^unscice/, /^unsccryo/] },
-  { leaderId: 7, patterns: [/^unscforge/, /^unscheavymetal/] },
-];
-
-function normalizePowerId(powerId: string): string {
-  return powerId.toLowerCase().replace(/[^a-z0-9]/g, '');
-}
-
-function inferLeaderIdFromPowerStats(stats: any): number | null {
-  if (!stats || typeof stats !== 'object') return null;
-  const scoreByLeader = new Map<number, number>();
-
-  Object.entries(stats).forEach(([powerId, rawValue]) => {
-    const times = typeof rawValue === 'number'
-      ? rawValue
-      : (rawValue as any)?.TimesCast ?? (rawValue as any)?.TotalPlays ?? 0;
-    if (!Number.isFinite(times) || times <= 0) return;
-    const normalized = normalizePowerId(String(powerId));
-    if (!normalized) return;
-
-    for (const signature of LEADER_POWER_SIGNATURES) {
-      if (!signature.patterns.some((pattern) => pattern.test(normalized))) continue;
-      const prev = scoreByLeader.get(signature.leaderId) || 0;
-      scoreByLeader.set(signature.leaderId, prev + times);
-      return;
-    }
-  });
-
-  if (scoreByLeader.size === 0) return null;
-  const ranked = [...scoreByLeader.entries()].sort((a, b) => b[1] - a[1]);
-  if (ranked.length > 1 && ranked[0][1] === ranked[1][1]) return null;
-  return ranked[0][0];
-}
+import { resolvePlayerLeaderId } from './leaderResolution';
+import { logLeaderResolutionMismatch } from './leaderResolutionDiagnostics';
 
 function buildEventSummarySections(entries: TimelineEntry[], playersByIndex: Map<number, PlayerInfo>) {
   const playerCounts = new Map<number, { playerIndex: number; name: string; teamId: number | null; units: number; techs: number; powers: number }>();
@@ -397,8 +360,13 @@ export async function loadMatchDetails(matchId: string, detailsEl: HTMLElement) 
     const eventLeader = playerIndex != null
       ? eventLeaderByIndex.get(playerIndex)
       : eventLeaderByName.get(normalizeRosterKey(gamertag));
-    const inferredLeader = inferLeaderIdFromPowerStats(p?.LeaderPowerStats);
-    const leaderId = inferredLeader ?? eventLeader ?? p.LeaderId;
+    const resolution = resolvePlayerLeaderId({
+      rawLeaderId: p?.LeaderId,
+      eventLeaderId: eventLeader,
+      leaderPowerStats: p?.LeaderPowerStats,
+    });
+    logLeaderResolutionMismatch(matchId, gamertag, resolution);
+    const leaderId = resolution.resolvedLeaderId;
     if (teamId == null || leaderId == null) return;
     const leaderName = getLeaderName(leaderId);
     let destroyed = 0;

@@ -5,6 +5,10 @@
 // Cached walkthrough data for sorting
 let walkthroughsData = [];
 
+function hasContainer(containerId) {
+    return Boolean(document.getElementById(containerId));
+}
+
 /**
  * Loads video data from JSON and renders it
  */
@@ -22,7 +26,12 @@ async function loadAndRenderVideos() {
         }
 
         // Render walkthroughs
-        if (data.walkthroughs && Array.isArray(data.walkthroughs) && data.walkthroughs.length > 0) {
+        if (
+            data.walkthroughs &&
+            Array.isArray(data.walkthroughs) &&
+            data.walkthroughs.length > 0 &&
+            hasContainer('walkthroughs-grid')
+        ) {
             initWalkthroughSorting(data.walkthroughs);
         }
 
@@ -89,7 +98,11 @@ async function loadAndRenderProjects() {
         }
         
         // Render projects if function exists
-        if (typeof renderProjectGrid === 'function' && data.projects.length > 0) {
+        if (
+            typeof renderProjectGrid === 'function' &&
+            data.projects.length > 0 &&
+            hasContainer('other-projects-grid')
+        ) {
             renderProjectGrid(data.projects, 'other-projects-grid');
         }
     } catch (error) {
@@ -118,6 +131,10 @@ function initWalkthroughSorting(walkthroughs) {
     walkthroughsData = Array.isArray(walkthroughs) ? [...walkthroughs] : [];
     const sortSelect = document.getElementById('walkthroughs-sort-select');
     const gridId = 'walkthroughs-grid';
+
+    if (!hasContainer(gridId)) {
+        return;
+    }
 
     if (!sortSelect) {
         // Fallback: render without sorting controls

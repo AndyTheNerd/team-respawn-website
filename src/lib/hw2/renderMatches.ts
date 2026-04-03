@@ -14,6 +14,50 @@ import { getMatchResult } from '../../utils/haloApi';
 import { getLeaderName } from '../../data/haloWars2/leaders';
 import { getMapName, getMapImage, getMapImageFallback } from '../../data/haloWars2/maps';
 import { getPlaylistName } from '../../data/haloWars2/playlists';
+import { resolvePlayerLeaderId } from './leaderResolution';
+import { logLeaderResolutionMismatch } from './leaderResolutionDiagnostics';
+
+function getPlayerGamertag(player: any): string {
+  return String((typeof player?.HumanPlayerId === 'object' ? player.HumanPlayerId?.Gamertag : player?.HumanPlayerId) || player?.Gamertag || player?.PlayerId || 'Unknown');
+}
+
+function findPlayerByGamertag(match: any, gamertag: string): any | null {
+  const gtLower = gamertag.toLowerCase();
+  const players = Array.isArray(match?.Players) ? match.Players : Object.values(match?.Players || {});
+  return players.find((p: any) => getPlayerGamertag(p).toLowerCase() === gtLower) || players[0] || null;
+}
+
+function getResolvedLeaderName(match: any, gamertag: string): string {
+  const player = findPlayerByGamertag(match, gamertag);
+  if (!player) return 'Unknown';
+
+  const resolution = resolvePlayerLeaderId({
+    rawLeaderId: player?.LeaderId ?? match?.LeaderId,
+    leaderPowerStats: player?.LeaderPowerStats,
+  });
+  logLeaderResolutionMismatch(match?.MatchId || 'unknown', getPlayerGamertag(player), resolution);
+  return resolution.resolvedLeaderId != null ? getLeaderName(resolution.resolvedLeaderId) : 'Unknown';
+}
+
+async function hydrateVisibleMatchLeaderLabels(matches: any[], gamertag: string, container: HTMLElement) {
+  await Promise.all(matches.map(async (match: any) => {
+    const matchId = match?.MatchId || '';
+    if (!matchId) return;
+
+    let fullMatch = state.matchResultCache.get(matchId);
+    if (!fullMatch) {
+      const result = await getMatchResult(matchId);
+      if (!result.ok || !result.data) return;
+      fullMatch = result.data;
+      state.matchResultCache.set(matchId, fullMatch);
+    }
+
+    const leaderEl = container.querySelector(`[data-match-leader-id="${matchId}"]`) as HTMLElement | null;
+    if (leaderEl) {
+      leaderEl.textContent = getResolvedLeaderName(fullMatch, gamertag);
+    }
+  }));
+}
 
 function getOrderedMatches(matches: any[], pinnedSet: Set<string> = new Set(getPinnedMatches())) {
   const safeMatches = Array.isArray(matches) ? matches : [];
@@ -126,8 +170,11 @@ export function renderMatches(matches: any[], gamertag: string) {
     const resultColor = isWin ? 'text-green-400' : isLoss ? 'text-red-400' : 'text-gray-400';
     const borderColor = isWin ? '#22c55e' : isLoss ? '#ef4444' : '#6b7280';
 
-    const leaderId = player?.LeaderId ?? match.LeaderId;
-    const leaderName = leaderId != null ? getLeaderName(leaderId) : 'Unknown';
+    const matchId = match.MatchId || '';
+    const cachedFullMatch = matchId ? state.matchResultCache.get(matchId) : null;
+    const leaderName = cachedFullMatch
+      ? getResolvedLeaderName(cachedFullMatch, gamertag)
+      : ((player?.LeaderId ?? match.LeaderId) != null ? getLeaderName(player?.LeaderId ?? match.LeaderId) : 'Unknown');
     const mapName = getMapName(match.MapId || '');
     const mapImg = getMapImage(match.MapId || '');
     const mapFallback = getMapImageFallback(match.MapId || '');
@@ -176,7 +223,6 @@ export function renderMatches(matches: any[], gamertag: string) {
       }
     }
 
-    const matchId = match.MatchId || '';
     const detailsId = matchId ? `match-details-${matchId}` : '';
     const timelineId = matchId ? `match-timeline-${matchId}` : '';
     const isPinned = matchId ? pinnedSet.has(matchId) : false;
@@ -200,7 +246,7 @@ export function renderMatches(matches: any[], gamertag: string) {
               <span class="text-white text-sm truncate">${mapName}</span>
             </div>
             <div class="flex items-center gap-3 text-xs text-gray-400 mt-1 flex-wrap">
-              <span>${leaderName}</span>
+              <span data-match-leader-id="${matchId}">${leaderName}</span>
               ${dateStr ? `<span>${dateStr}</span>` : ''}
               ${durationStr ? `<span>• ${durationStr}</span>` : ''}
               ${teamSizeLabel ? `<span>• ${teamSizeLabel}</span>` : ''}
@@ -313,6 +359,9 @@ export function renderMatches(matches: any[], gamertag: string) {
     `;
   }).join('') + '</div>' + paginationHtml;
   matchesContent.classList.remove('hidden');
+  hydrateVisibleMatchLeaderLabels(pageMatches, gamertag, matchesContent).catch(() => {
+    // Non-fatal UI enhancement; leave the row unchanged if hydration fails.
+  });
 
   // Wire up pagination
   matchesContent.querySelectorAll('[data-page-target]').forEach((node) => {
@@ -473,6 +522,23 @@ export function renderMatches(matches: any[], gamertag: string) {
       }
       if (!match) return;
 
+      const summaryMatch = await (async () => {
+        const basePlayers = Array.isArray(match?.Players) ? match.Players : Object.values(match?.Players || {});
+        const hasLeaderPowerStats = basePlayers.some((p: any) => p?.LeaderPowerStats && typeof p.LeaderPowerStats === 'object');
+        if (hasLeaderPowerStats) return match;
+
+        const cached = state.matchResultCache.get(matchId);
+        if (cached) return cached;
+
+        const result = await getMatchResult(matchId);
+        if (result.ok && result.data) {
+          state.matchResultCache.set(matchId, result.data);
+          return result.data;
+        }
+
+        return match;
+      })();
+
       // Fetch events for leader resolution, tech timing, build order, and powers
       const eventsResult = await fetchMatchEventsPayload(matchId);
       const { entries, playersByIndex } = eventsResult.ok && eventsResult.data
@@ -507,7 +573,13 @@ export function renderMatches(matches: any[], gamertag: string) {
         const gamertag = getGt(p);
         const pidx = typeof p.PlayerIndex === 'number' ? p.PlayerIndex : null;
         const info = pidx != null ? playersByIndex.get(pidx) : null;
-        const leaderId = info?.leaderId ?? p.LeaderId ?? null;
+        const resolution = resolvePlayerLeaderId({
+          rawLeaderId: p?.LeaderId,
+          eventLeaderId: info?.leaderId,
+          leaderPowerStats: p?.LeaderPowerStats,
+        });
+        logLeaderResolutionMismatch(matchId, gamertag, resolution);
+        const leaderId = resolution.resolvedLeaderId;
 
         let unitsDestroyed = 0, unitsLost = 0;
         const us = p.UnitStats;
@@ -532,31 +604,31 @@ export function renderMatches(matches: any[], gamertag: string) {
         };
       };
 
-      const humanPlayers: any[] = (Array.isArray(match.Players) ? match.Players : Object.values(match.Players || {}))
+      const humanPlayers: any[] = (Array.isArray(summaryMatch.Players) ? summaryMatch.Players : Object.values(summaryMatch.Players || {}))
         .filter((p: any) => p.IsHuman !== false && p.PlayerType !== 2 && p.PlayerType !== 3);
       const youPlayer = humanPlayers.find((p: any) => getGt(p).toLowerCase() === gtLower) || humanPlayers[0];
       if (!youPlayer) return;
 
       const youTeamId = youPlayer.TeamId ?? null;
-      const rawOutcome = youPlayer.MatchOutcome ?? youPlayer.PlayerMatchOutcome ?? match.PlayerMatchOutcome ?? match.MatchOutcome;
+      const rawOutcome = youPlayer.MatchOutcome ?? youPlayer.PlayerMatchOutcome ?? summaryMatch.PlayerMatchOutcome ?? summaryMatch.MatchOutcome;
       const outcome = typeof rawOutcome === 'string' ? rawOutcome.toLowerCase() : rawOutcome;
       const resultText = outcome === 1 || outcome === 'win' || outcome === 'victory' ? 'Victory'
         : outcome === 2 || outcome === 'loss' || outcome === 'defeat' ? 'Defeat' : 'Draw';
 
-      const mapName = getMapName(match.MapId || '');
-      const dateStr = match.MatchStartDate?.ISO8601Date
-        ? new Date(match.MatchStartDate.ISO8601Date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      const mapName = getMapName(summaryMatch.MapId || '');
+      const dateStr = summaryMatch.MatchStartDate?.ISO8601Date
+        ? new Date(summaryMatch.MatchStartDate.ISO8601Date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
         : '';
-      const durationStr = parseDuration(match.PlayerMatchDuration || match.MatchDuration || '') || '';
-      const playlistLabel = (match.PlaylistId ? getPlaylistName(match.PlaylistId) : '') || getGameModeName(match.GameMode) || '';
+      const durationStr = parseDuration(summaryMatch.PlayerMatchDuration || summaryMatch.MatchDuration || '') || '';
+      const playlistLabel = (summaryMatch.PlaylistId ? getPlaylistName(summaryMatch.PlaylistId) : '') || getGameModeName(summaryMatch.GameMode) || '';
       let teamSizeLabel = '';
-      if (match.Teams && typeof match.Teams === 'object') {
-        const sizes = Object.values(match.Teams).map((t: any) => t?.TeamSize).filter((s: any) => typeof s === 'number');
+      if (summaryMatch.Teams && typeof summaryMatch.Teams === 'object') {
+        const sizes = Object.values(summaryMatch.Teams).map((t: any) => t?.TeamSize).filter((s: any) => typeof s === 'number');
         if (sizes.length >= 2) teamSizeLabel = `${sizes[0]}v${sizes[1]}`;
         else if (sizes.length === 1) teamSizeLabel = `${sizes[0]}v${sizes[0]}`;
       }
-      const prevCsr = match.RatingProgress?.PreviousCsr?.Raw;
-      const nextCsr = match.RatingProgress?.UpdatedCsr?.Raw;
+      const prevCsr = summaryMatch.RatingProgress?.PreviousCsr?.Raw;
+      const nextCsr = summaryMatch.RatingProgress?.UpdatedCsr?.Raw;
       const csrDelta = (typeof prevCsr === 'number' && typeof nextCsr === 'number') ? Math.round(nextCsr - prevCsr) : null;
       const csrDeltaText = csrDelta != null ? `${csrDelta > 0 ? '+' : ''}${csrDelta}` : '';
 

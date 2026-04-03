@@ -6,6 +6,8 @@ import { getPlaylistName } from '../../data/haloWars2/playlists';
 import { getMatchResult } from '../../utils/haloApi';
 import { fetchMatchEventsPayload, buildEventEntries } from './matchEventProcessing';
 import { ensureLeaderPowerMap, getLeaderPowerDisplayName } from './apiCache';
+import { resolvePlayerLeaderId } from './leaderResolution';
+import { logLeaderResolutionMismatch } from './leaderResolutionDiagnostics';
 
 // --- SheetJS lazy loader ---
 
@@ -103,8 +105,48 @@ export async function exportMatchToCsv(matchId: string, gamertag: string) {
   XLSX.utils.book_append_sheet(wb, overviewSheet, 'Match Overview');
 
   // --- Sheet 2: Team Compositions (from full match result) ---
-  const matchResult = await getMatchResult(matchId);
-  const leaderPowerMap = await ensureLeaderPowerMap();
+  const [matchResult, leaderPowerMap, eventsResult] = await Promise.all([
+    getMatchResult(matchId),
+    ensureLeaderPowerMap(),
+    fetchMatchEventsPayload(matchId),
+  ]);
+
+  const normalizeRosterKey = (value: string) => value.trim().toLowerCase();
+  const parseLeaderId = (value: unknown): number | null => {
+    if (typeof value === 'number' && Number.isFinite(value)) return value;
+    if (typeof value === 'string' && value.trim() !== '') {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : null;
+    }
+    return null;
+  };
+  const getEventPlayerName = (event: any): string => {
+    const humanId = event?.HumanPlayerId;
+    if (typeof humanId === 'string') return humanId;
+    if (typeof humanId === 'object' && humanId?.Gamertag) return String(humanId.Gamertag);
+    return event?.Gamertag || event?.PlayerId || '';
+  };
+  const eventLeaderByIndex = new Map<number, number>();
+  const eventLeaderByName = new Map<string, number>();
+  if (eventsResult.ok) {
+    const eventsRaw = eventsResult.data?.GameEvents;
+    const events = Array.isArray(eventsRaw) ? eventsRaw : [];
+    events.forEach((event: any) => {
+      if (event?.EventName !== 'PlayerJoinedMatch') return;
+      const playerType = typeof event?.PlayerType === 'number' ? event.PlayerType : null;
+      if (playerType === 2 || playerType === 3) return;
+      const leaderId = parseLeaderId(event?.LeaderId ?? event?.Leader ?? event?.LeaderType);
+      if (leaderId == null) return;
+      const playerIndex = typeof event?.PlayerIndex === 'number' ? event.PlayerIndex : null;
+      if (playerIndex != null && !eventLeaderByIndex.has(playerIndex)) {
+        eventLeaderByIndex.set(playerIndex, leaderId);
+      }
+      const nameKey = normalizeRosterKey(getEventPlayerName(event));
+      if (nameKey && !eventLeaderByName.has(nameKey)) {
+        eventLeaderByName.set(nameKey, leaderId);
+      }
+    });
+  }
 
   if (matchResult.ok) {
     const playersRaw = matchResult.data?.Players;
@@ -123,7 +165,19 @@ export async function exportMatchToCsv(matchId: string, gamertag: string) {
         || p?.Gamertag
         || (typeof p?.HumanPlayerId === 'string' ? p.HumanPlayerId : '')
         || (p?.ComputerPlayerId != null ? `AI ${p.ComputerPlayerId}` : 'Unknown');
-      const leaderName = getLeaderName(p.LeaderId);
+      const playerIndex = typeof p?.PlayerIndex === 'number' ? p.PlayerIndex : null;
+      const eventLeaderId = playerIndex != null
+        ? eventLeaderByIndex.get(playerIndex)
+        : eventLeaderByName.get(normalizeRosterKey(playerName));
+      const resolution = resolvePlayerLeaderId({
+        rawLeaderId: p?.LeaderId,
+        eventLeaderId,
+        leaderPowerStats: p?.LeaderPowerStats,
+      });
+      logLeaderResolutionMismatch(matchId, playerName, resolution);
+      const leaderName = resolution.resolvedLeaderId != null
+        ? getLeaderName(resolution.resolvedLeaderId)
+        : 'Unknown';
       const teamLabel = p.TeamId != null ? `Team ${p.TeamId}` : 'Unknown';
       const outcome = p.MatchOutcome === 1 ? 'Win' : p.MatchOutcome === 2 ? 'Loss' : 'Draw';
 
@@ -175,7 +229,6 @@ export async function exportMatchToCsv(matchId: string, gamertag: string) {
   }
 
   // --- Sheet 4: Build Order Events ---
-  const eventsResult = await fetchMatchEventsPayload(matchId);
   if (eventsResult.ok) {
     const { entries } = await buildEventEntries(eventsResult.data);
     if (entries.length > 0) {

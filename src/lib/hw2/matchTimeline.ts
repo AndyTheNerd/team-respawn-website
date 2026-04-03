@@ -5,6 +5,8 @@ import { getLeaderName } from '../../data/haloWars2/leaders';
 import { getMatchEvents, getMatchResult } from '../../utils/haloApi';
 import { buildEventEntries } from './matchEventProcessing';
 import { extractBuildOrders, renderBuildOrderSummary } from './renderBuildOrder';
+import { resolvePlayerLeaderId } from './leaderResolution';
+import { logLeaderResolutionMismatch } from './leaderResolutionDiagnostics';
 
 function buildTimelineHighlights(entries: TimelineEntry[]) {
   if (entries.length === 0) return '';
@@ -184,24 +186,25 @@ export async function loadMatchTimeline(matchId: string, timelineEl: HTMLElement
     }
     return basePlayers;
   })();
-  const matchLeaderByIndex = new Map<number, number>();
-  const matchLeaderByName = new Map<string, number>();
+  const matchPlayerByIndex = new Map<number, any>();
+  const matchPlayerByName = new Map<string, any>();
   matchPlayers.forEach((player: any) => {
-    const leaderId = player?.LeaderId;
-    if (leaderId == null) return;
     if (typeof player?.PlayerIndex === 'number') {
-      matchLeaderByIndex.set(player.PlayerIndex, leaderId);
+      matchPlayerByIndex.set(player.PlayerIndex, player);
     }
     const nameKey = normalizeRosterKey(getMatchPlayerName(player));
-    if (nameKey) matchLeaderByName.set(nameKey, leaderId);
+    if (nameKey) matchPlayerByName.set(nameKey, player);
   });
-  const resolveLeaderIdForPlayer = (index: number, info: PlayerInfo) => {
-    if (typeof info.leaderId === 'number') return info.leaderId;
-    const byIndex = matchLeaderByIndex.get(index);
-    if (byIndex != null) return byIndex;
+  const resolveLeaderForPlayer = (index: number, info: PlayerInfo) => {
     const nameKey = normalizeRosterKey(info.name || '');
-    if (!nameKey) return null;
-    return matchLeaderByName.get(nameKey) ?? null;
+    const matchPlayer = matchPlayerByIndex.get(index) || (nameKey ? matchPlayerByName.get(nameKey) : null);
+    const resolution = resolvePlayerLeaderId({
+      rawLeaderId: matchPlayer?.LeaderId,
+      eventLeaderId: info.leaderId,
+      leaderPowerStats: matchPlayer?.LeaderPowerStats,
+    });
+    logLeaderResolutionMismatch(matchId, info.name || `player-${index}`, resolution);
+    return resolution;
   };
   const getTeamSwatchClass = (teamId: number | null) => {
     if (typeof teamId !== 'number') return 'bg-slate-500';
@@ -213,7 +216,8 @@ export async function loadMatchTimeline(matchId: string, timelineEl: HTMLElement
     .filter(([, info]) => info.playerType !== 3)
     .sort((a, b) => a[0] - b[0])
     .map(([index, info]) => {
-      const leaderId = resolveLeaderIdForPlayer(index, info);
+      const resolution = resolveLeaderForPlayer(index, info);
+      const leaderId = resolution.resolvedLeaderId;
       const leaderName = leaderId != null ? getLeaderName(leaderId) : 'Unknown';
       const teamLabel = typeof info.teamId === 'number' ? `Team ${info.teamId}` : '';
       return {
