@@ -15,6 +15,8 @@ import { getLeaderName } from '../../data/haloWars2/leaders';
 import { getMapName, getMapImage, getMapImageFallback } from '../../data/haloWars2/maps';
 import { getPlaylistName } from '../../data/haloWars2/playlists';
 import { getMatchResult } from '../../utils/haloApi';
+import { resolvePlayerLeaderId } from './leaderResolution';
+import { logLeaderResolutionMismatch } from './leaderResolutionDiagnostics';
 
 function setShareStatus(message: string, tone: 'ok' | 'error' | 'info' = 'info') {
   if (!shareStatusEl) return;
@@ -303,8 +305,12 @@ export function buildMatchShareData(match: any, gamertag: string): ShareData {
   const resultText = isWin ? 'Victory' : isLoss ? 'Defeat' : 'Draw';
   const resultClass: ShareData['resultClass'] = isWin ? 'win' : isLoss ? 'loss' : 'draw';
 
-  const leaderId = player?.LeaderId ?? match.LeaderId;
-  const leaderName = leaderId != null ? getLeaderName(leaderId) : 'Unknown';
+  const resolution = resolvePlayerLeaderId({
+    rawLeaderId: player?.LeaderId ?? match.LeaderId,
+    leaderPowerStats: player?.LeaderPowerStats,
+  });
+  const leaderName = resolution.resolvedLeaderId != null ? getLeaderName(resolution.resolvedLeaderId) : 'Unknown';
+  logLeaderResolutionMismatch(match?.MatchId || 'unknown', gamertag, resolution);
   const mapName = getMapName(match.MapId || '');
   const mapImage =
     getMapImage(match.MapId || '')
@@ -412,6 +418,7 @@ export async function showShareModal(matchId: string, gamertag: string) {
     ...result.data,
     Players: result.data?.Players ?? match.Players,
   };
+  state.matchResultCache.set(matchId, mergedMatch);
   const updated = buildMatchShareData(mergedMatch, gamertag);
   state.activeShareData = updated;
   updateShareCard(updated);
