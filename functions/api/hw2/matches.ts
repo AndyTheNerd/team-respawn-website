@@ -40,20 +40,8 @@ function normalizePlayerId(gamertag: string): string {
   return gamertag.trim().toLowerCase();
 }
 
-function formatDurationIso(totalSeconds: number | null): string | null {
-  if (totalSeconds == null || totalSeconds <= 0) return null;
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = Math.floor(totalSeconds % 60);
-  const parts = [];
-  if (hours > 0) parts.push(`${hours}H`);
-  if (minutes > 0) parts.push(`${minutes}M`);
-  if (seconds > 0 || parts.length === 0) parts.push(`${seconds}S`);
-  return `PT${parts.join('')}`;
-}
-
 function shouldUseCache(errorType: string): boolean {
-  return errorType === 'rate_limit' || errorType === 'network' || errorType === 'auth';
+  return errorType !== 'not_found';
 }
 
 const MATCHES_API_PAGE_SIZE = 25;
@@ -61,28 +49,6 @@ const MATCHES_API_PAGE_SIZE = 25;
 type CompactMatchesCacheRow = {
   payload_json: string;
   fetched_at: string;
-};
-
-type CachedMatchRow = {
-  match_id: string;
-  match_type: number | null;
-  game_mode: number | null;
-  season_id: string | null;
-  playlist_id: string | null;
-  map_id: string | null;
-  started_at: string | null;
-  duration_seconds: number | null;
-  ingested_at: string | null;
-};
-
-type CachedPlayerRow = {
-  match_id: string;
-  player_name: string | null;
-  is_human: number | null;
-  team_id: number | null;
-  leader_id: number | null;
-  outcome: number | null;
-  player_index: number | null;
 };
 
 async function loadCompactCachedMatches(db: D1Database, gamertag: string, count: number) {
@@ -115,84 +81,8 @@ async function loadCompactCachedMatches(db: D1Database, gamertag: string, count:
   }
 }
 
-async function loadLegacyCachedMatches(db: D1Database, gamertag: string, count: number) {
-  const playerId = normalizePlayerId(gamertag);
-  const matchRowsResult = await db.prepare(
-    `SELECT
-       m.match_id,
-       m.match_type,
-       m.game_mode,
-       m.season_id,
-       m.playlist_id,
-       m.map_id,
-       m.started_at,
-       m.duration_seconds,
-       m.ingested_at
-     FROM match_players mp
-     JOIN matches m ON m.match_id = mp.match_id
-     WHERE mp.player_id = ?
-     ORDER BY m.started_at DESC
-     LIMIT ?`
-  ).bind(playerId, count).all<CachedMatchRow>();
-
-  const matchRows = matchRowsResult?.results || [];
-  if (matchRows.length === 0) return null;
-
-  const matchIds = matchRows.map((row) => row.match_id);
-  const placeholders = matchIds.map(() => '?').join(', ');
-  const playerRowsResult = await db.prepare(
-    `SELECT match_id, player_name, is_human, team_id, leader_id, outcome, player_index
-     FROM match_players
-     WHERE match_id IN (${placeholders})`
-  ).bind(...matchIds).all<CachedPlayerRow>();
-  const playerRows = playerRowsResult?.results || [];
-
-  const playersByMatch = new Map<string, MatchSummary['Players']>();
-  playerRows.forEach((row) => {
-    const list = playersByMatch.get(row.match_id) || [];
-    const isHuman = row.is_human === 1;
-    const name = row.player_name || '';
-    list.push({
-      HumanPlayerId: isHuman ? { Gamertag: name } : undefined,
-      Gamertag: isHuman ? name : undefined,
-      PlayerId: isHuman ? name : undefined,
-      PlayerType: isHuman ? 0 : 3,
-      TeamId: row.team_id ?? undefined,
-      LeaderId: row.leader_id ?? undefined,
-      MatchOutcome: row.outcome ?? undefined,
-      PlayerIndex: row.player_index ?? undefined,
-    });
-    playersByMatch.set(row.match_id, list);
-  });
-
-  let latestIngested = '';
-  const results: MatchSummary[] = matchRows.map((row) => {
-    if (row.ingested_at && row.ingested_at > latestIngested) {
-      latestIngested = row.ingested_at;
-    }
-    return {
-      MatchId: row.match_id,
-      MatchType: row.match_type ?? undefined,
-      GameMode: row.game_mode ?? undefined,
-      SeasonId: row.season_id ?? undefined,
-      PlaylistId: row.playlist_id ?? undefined,
-      MapId: row.map_id ?? undefined,
-      MatchStartDate: row.started_at ? { ISO8601Date: row.started_at } : undefined,
-      PlayerMatchDuration: formatDurationIso(row.duration_seconds),
-      Players: playersByMatch.get(row.match_id) || [],
-    };
-  });
-
-  return {
-    payload: { Results: results, _meta: { cached: true, fetchedAt: latestIngested || null } },
-    fetchedAt: latestIngested || null,
-  };
-}
-
 async function loadCachedMatches(db: D1Database, gamertag: string, count: number) {
-  const compact = await loadCompactCachedMatches(db, gamertag, count);
-  if (compact) return compact;
-  return loadLegacyCachedMatches(db, gamertag, count);
+  return loadCompactCachedMatches(db, gamertag, count);
 }
 
 async function fetchMatchesBatched(gamertag: string, count: number, apiKeys: string[]) {
@@ -277,7 +167,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     );
   }
 
-  let payload: { gamertag?: string; count?: number } | null = null;
+  let payload: { gamertag?: string; count?: number; cacheOnly?: boolean } | null = null;
   try {
     payload = await request.json();
   } catch {
@@ -290,6 +180,22 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     return errorResponse({ type: 'unknown', message: 'Gamertag is required.' }, 400);
   }
 
+  const cacheOnly = payload?.cacheOnly === true;
+  if (cacheOnly) {
+    const cached = await loadCachedMatches(env.DB, gamertag, count);
+    if (cached?.payload) {
+      const fetchedAt = (cached.payload as any)?._meta?.fetchedAt || cached.fetchedAt;
+      const cacheAgeSeconds = fetchedAt
+        ? Math.floor((Date.now() - new Date(fetchedAt).getTime()) / 1000)
+        : undefined;
+      return jsonResponse({
+        ...(cached.payload as Record<string, unknown>),
+        _meta: { ...(cached.payload as any)?._meta, cacheAgeSeconds, reason: 'cache_only' },
+      });
+    }
+    return errorResponse({ type: 'not_found', message: 'No cached data available.' }, 404);
+  }
+
   const apiKeys = [env.HW2_API_KEY_1, env.HW2_API_KEY_2, env.HW2_API_KEY_3].filter(
     (key): key is string => Boolean(key)
   );
@@ -298,9 +204,13 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     if (shouldUseCache(result.error.type)) {
       const cached = await loadCachedMatches(env.DB, gamertag, count);
       if (cached?.payload) {
+        const fetchedAt = (cached.payload as any)?._meta?.fetchedAt || cached.fetchedAt;
+        const cacheAgeSeconds = fetchedAt
+          ? Math.floor((Date.now() - new Date(fetchedAt).getTime()) / 1000)
+          : undefined;
         return jsonResponse({
           ...(cached.payload as Record<string, unknown>),
-          _meta: { ...(cached.payload as any)?._meta, reason: result.error.type },
+          _meta: { ...(cached.payload as any)?._meta, cacheAgeSeconds, reason: result.error.type },
         });
       }
     }

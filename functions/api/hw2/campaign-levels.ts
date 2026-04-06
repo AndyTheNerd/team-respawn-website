@@ -26,7 +26,7 @@ type CachedRow = {
 const CACHE_KEY = 'campaign_levels';
 
 function shouldUseCache(errorType: string): boolean {
-  return errorType === 'rate_limit' || errorType === 'network' || errorType === 'auth';
+  return errorType !== 'not_found';
 }
 
 async function loadCached(db: D1Database) {
@@ -57,13 +57,27 @@ async function storeLevels(db: D1Database, payload: unknown) {
 }
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
-  const { env } = context;
+  const { request, env } = context;
 
   if (!env.DB) {
     return errorResponse(
       { type: 'unknown', message: 'Database not configured. Bind D1 as DB.' },
       500
     );
+  }
+
+  const url = new URL(request.url);
+  const cacheOnly = url.searchParams.get('cacheOnly') === 'true';
+  if (cacheOnly) {
+    const cached = await loadCached(env.DB);
+    if (cached) {
+      const cacheAgeSeconds = Math.floor((Date.now() - new Date(cached.fetchedAt).getTime()) / 1000);
+      return jsonResponse({
+        ...cached.payload,
+        _meta: { cached: true, fetchedAt: cached.fetchedAt, cacheAgeSeconds, reason: 'cache_only' },
+      });
+    }
+    return errorResponse({ type: 'not_found', message: 'No cached data available.' }, 404);
   }
 
   const apiKeys = [env.HW2_API_KEY_1, env.HW2_API_KEY_2, env.HW2_API_KEY_3].filter(
@@ -80,9 +94,10 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   if (shouldUseCache(result.error.type)) {
     const cached = await loadCached(env.DB);
     if (cached) {
+      const cacheAgeSeconds = Math.floor((Date.now() - new Date(cached.fetchedAt).getTime()) / 1000);
       return jsonResponse({
         ...cached.payload,
-        _meta: { cached: true, fetchedAt: cached.fetchedAt, reason: result.error.type },
+        _meta: { cached: true, fetchedAt: cached.fetchedAt, cacheAgeSeconds, reason: result.error.type },
       });
     }
   }

@@ -8,6 +8,7 @@ const PAGES_API_BASE = '/api/hw2';
 type CacheMeta = {
   cached?: boolean;
   fetchedAt?: string;
+  cacheAgeSeconds?: number;
   reason?: string;
 };
 
@@ -113,62 +114,69 @@ async function fetchWithKeyFallback<T>(url: string, extraHeaders: Record<string,
   };
 }
 
-export async function getCampaignProgress(gamertag: string): Promise<ApiResult<any>> {
+export async function getCampaignProgress(gamertag: string, opts: { cacheOnly?: boolean } = {}): Promise<ApiResult<any>> {
   const encoded = encodeURIComponent(gamertag);
+  const cacheParam = opts.cacheOnly ? '&cacheOnly=true' : '';
   return fetchFromPagesFunction<any>(
-    `${PAGES_API_BASE}/campaign-progress?gamertag=${encoded}`,
+    `${PAGES_API_BASE}/campaign-progress?gamertag=${encoded}${cacheParam}`,
     { method: 'GET' },
-    () => fetchWithKeyFallback<any>(`${SUMMARY_API_URL}/players/${encoded}/campaign-progress`)
+    opts.cacheOnly ? undefined : () => fetchWithKeyFallback<any>(`${SUMMARY_API_URL}/players/${encoded}/campaign-progress`)
   );
 }
 
-export async function getCampaignLevels(): Promise<ApiResult<any>> {
+export async function getCampaignLevels(opts: { cacheOnly?: boolean } = {}): Promise<ApiResult<any>> {
+  const cacheParam = opts.cacheOnly ? '?cacheOnly=true' : '';
   return fetchFromPagesFunction<any>(
-    `${PAGES_API_BASE}/campaign-levels`,
+    `${PAGES_API_BASE}/campaign-levels${cacheParam}`,
     { method: 'GET' },
-    () => fetchWithKeyFallback<any>(`${METADATA_API_URL}/campaign-levels`, { 'Accept-Language': 'en-US' })
+    opts.cacheOnly ? undefined : () => fetchWithKeyFallback<any>(`${METADATA_API_URL}/campaign-levels`, { 'Accept-Language': 'en-US' })
   );
 }
 
-export async function getPlayerStats(gamertag: string): Promise<ApiResult<WithMeta<PlayerStatsSummaryResponse>>> {
+export async function getPlayerStats(gamertag: string, opts: { cacheOnly?: boolean } = {}): Promise<ApiResult<WithMeta<PlayerStatsSummaryResponse>>> {
   const encoded = encodeURIComponent(gamertag);
+  const cacheParam = opts.cacheOnly ? '&cacheOnly=true' : '';
   return fetchFromPagesFunction<WithMeta<PlayerStatsSummaryResponse>>(
-    `${PAGES_API_BASE}/stats?gamertag=${encoded}`,
+    `${PAGES_API_BASE}/stats?gamertag=${encoded}${cacheParam}`,
     { method: 'GET' },
-    () => fetchWithKeyFallback<WithMeta<PlayerStatsSummaryResponse>>(`${SUMMARY_API_URL}/players/${encoded}/stats`)
+    opts.cacheOnly ? undefined : () => fetchWithKeyFallback<WithMeta<PlayerStatsSummaryResponse>>(`${SUMMARY_API_URL}/players/${encoded}/stats`)
   );
 }
 
 export async function getPlayerSeasonStats(
   gamertag: string,
-  seasonId: string
+  seasonId: string,
+  opts: { cacheOnly?: boolean } = {}
 ): Promise<ApiResult<WithMeta<SeasonStatsResponse>>> {
   const encoded = encodeURIComponent(gamertag);
+  const cacheParam = opts.cacheOnly ? '&cacheOnly=true' : '';
   return fetchFromPagesFunction<WithMeta<SeasonStatsResponse>>(
-    `${PAGES_API_BASE}/season-stats?gamertag=${encoded}&seasonId=${encodeURIComponent(seasonId)}`,
+    `${PAGES_API_BASE}/season-stats?gamertag=${encoded}&seasonId=${encodeURIComponent(seasonId)}${cacheParam}`,
     { method: 'GET' },
-    () =>
+    opts.cacheOnly ? undefined : () =>
       fetchWithKeyFallback<WithMeta<SeasonStatsResponse>>(
         `${SUMMARY_API_URL}/players/${encoded}/stats/seasons/${seasonId}`
       )
   );
 }
 
-export async function getMatchResult(matchId: string): Promise<ApiResult<WithMeta<any>>> {
+export async function getMatchResult(matchId: string, opts: { cacheOnly?: boolean } = {}): Promise<ApiResult<WithMeta<any>>> {
   const encoded = encodeURIComponent(matchId);
+  const cacheParam = opts.cacheOnly ? '&cacheOnly=true' : '';
   return fetchFromPagesFunction<WithMeta<any>>(
-    `${PAGES_API_BASE}/match?matchId=${encoded}`,
+    `${PAGES_API_BASE}/match?matchId=${encoded}${cacheParam}`,
     { method: 'GET' },
-    () => fetchWithKeyFallback<any>(`${HALO_API_URL}/matches/${encoded}`)
+    opts.cacheOnly ? undefined : () => fetchWithKeyFallback<any>(`${HALO_API_URL}/matches/${encoded}`)
   );
 }
 
-export async function getMatchEvents(matchId: string): Promise<ApiResult<WithMeta<any>>> {
+export async function getMatchEvents(matchId: string, opts: { cacheOnly?: boolean } = {}): Promise<ApiResult<WithMeta<any>>> {
   const encoded = encodeURIComponent(matchId);
+  const cacheParam = opts.cacheOnly ? '&cacheOnly=true' : '';
   return fetchFromPagesFunction<WithMeta<any>>(
-    `${PAGES_API_BASE}/events?matchId=${encoded}`,
+    `${PAGES_API_BASE}/events?matchId=${encoded}${cacheParam}`,
     { method: 'GET' },
-    () => fetchWithKeyFallback<any>(`${SUMMARY_API_URL}/matches/${encoded}/events`)
+    opts.cacheOnly ? undefined : () => fetchWithKeyFallback<any>(`${SUMMARY_API_URL}/matches/${encoded}/events`)
   );
 }
 
@@ -206,16 +214,17 @@ async function fetchMatchesBatched(
 
 export async function getPlayerMatches(
   gamertag: string,
-  count = 10
+  count = 10,
+  opts: { cacheOnly?: boolean } = {}
 ): Promise<ApiResult<WithMeta<{ Results: MatchResult[] }>>> {
   return fetchFromPagesFunction<WithMeta<{ Results: MatchResult[] }>>(
     `${PAGES_API_BASE}/matches`,
     {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ gamertag, count }),
+      body: JSON.stringify({ gamertag, count, cacheOnly: opts.cacheOnly }),
     },
-    async () => {
+    opts.cacheOnly ? undefined : async () => {
       const result = await fetchMatchesBatched(gamertag, count);
       if (result.ok) {
         // CF Function was unavailable so D1 was never updated. Fire a background

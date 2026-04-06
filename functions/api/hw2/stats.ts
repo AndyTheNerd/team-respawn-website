@@ -28,7 +28,7 @@ function normalizePlayerId(gamertag: string): string {
 }
 
 function shouldUseCache(errorType: string): boolean {
-  return errorType === 'rate_limit' || errorType === 'network' || errorType === 'auth';
+  return errorType !== 'not_found';
 }
 
 async function loadCachedStats(db: D1Database, playerId: string) {
@@ -89,6 +89,19 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     return errorResponse({ type: 'unknown', message: 'Gamertag is required.' }, 400);
   }
 
+  const cacheOnly = url.searchParams.get('cacheOnly') === 'true';
+  if (cacheOnly) {
+    const cached = await loadCachedStats(env.DB, normalizePlayerId(gamertag));
+    if (cached) {
+      const cacheAgeSeconds = Math.floor((Date.now() - new Date(cached.fetchedAt).getTime()) / 1000);
+      return jsonResponse({
+        ...cached.payload,
+        _meta: { cached: true, fetchedAt: cached.fetchedAt, cacheAgeSeconds, reason: 'cache_only' },
+      });
+    }
+    return errorResponse({ type: 'not_found', message: 'No cached data available.' }, 404);
+  }
+
   const apiKeys = [env.HW2_API_KEY_1, env.HW2_API_KEY_2, env.HW2_API_KEY_3].filter(
     (key): key is string => Boolean(key)
   );
@@ -104,9 +117,10 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   if (shouldUseCache(result.error.type)) {
     const cached = await loadCachedStats(env.DB, normalizePlayerId(gamertag));
     if (cached) {
+      const cacheAgeSeconds = Math.floor((Date.now() - new Date(cached.fetchedAt).getTime()) / 1000);
       return jsonResponse({
         ...cached.payload,
-        _meta: { cached: true, fetchedAt: cached.fetchedAt, reason: result.error.type },
+        _meta: { cached: true, fetchedAt: cached.fetchedAt, cacheAgeSeconds, reason: result.error.type },
       });
     }
   }

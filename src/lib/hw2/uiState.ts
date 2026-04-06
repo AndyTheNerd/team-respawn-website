@@ -1,4 +1,43 @@
-import { staleBanner, staleBannerMeta } from './dom';
+import { staleBanner, staleBannerMeta, staleBannerRetry } from './dom';
+
+export function showSectionRetryButton(
+  sectionId: string,
+  errorType: string,
+  onRetry: () => void
+) {
+  const errorEl = document.getElementById(`${sectionId}-error`);
+  if (!errorEl) return;
+  const existing = errorEl.querySelector('.section-retry-btn');
+  if (existing) existing.remove();
+
+  const btn = document.createElement('button');
+  btn.className = 'section-retry-btn mt-3 text-sm px-3 py-1.5 rounded border border-zinc-600 text-zinc-300 hover:border-zinc-400 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed';
+
+  if (errorType === 'rate_limit') {
+    let remaining = 5;
+    btn.textContent = `Retry in ${remaining}s…`;
+    btn.disabled = true;
+    const interval = setInterval(() => {
+      remaining -= 1;
+      if (remaining <= 0) {
+        clearInterval(interval);
+        btn.textContent = 'Retry';
+        btn.disabled = false;
+      } else {
+        btn.textContent = `Retry in ${remaining}s…`;
+      }
+    }, 1000);
+  } else {
+    btn.textContent = 'Retry';
+  }
+
+  btn.addEventListener('click', () => {
+    btn.remove();
+    onRetry();
+  });
+
+  errorEl.appendChild(btn);
+}
 
 export function showError(container: HTMLElement, error: { type: string; message: string }) {
   const colorMap: Record<string, string> = {
@@ -48,6 +87,46 @@ export function showStaleBanner(sources: Array<{ label: string; fetchedAt?: stri
   ].filter(Boolean).join(' ');
   if (staleBannerMeta) staleBannerMeta.textContent = metaBits;
   staleBanner.classList.remove('hidden');
+}
+
+function formatAge(seconds: number): string {
+  if (seconds < 60) return 'just now';
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`;
+  return `${Math.floor(seconds / 86400)}d`;
+}
+
+function getAgeUrgencyClass(seconds?: number): string {
+  if (seconds == null) return 'bg-zinc-800 text-zinc-400';
+  if (seconds < 3600) return 'bg-zinc-800 text-zinc-400';
+  if (seconds < 86400) return 'bg-amber-900/30 text-amber-400';
+  return 'bg-amber-900/50 text-amber-300';
+}
+
+export function showSectionStaleBadge(sectionId: string, meta?: { fetchedAt?: string; cacheAgeSeconds?: number; reason?: string } | null) {
+  const container = document.getElementById(`${sectionId}-content`);
+  if (!container) return;
+  const existing = container.querySelector('.cache-stale-badge');
+  if (existing) existing.remove();
+
+  const ageSeconds = meta?.cacheAgeSeconds ?? (
+    meta?.fetchedAt
+      ? Math.floor((Date.now() - new Date(meta.fetchedAt).getTime()) / 1000)
+      : undefined
+  );
+  const ageText = ageSeconds != null ? formatAge(ageSeconds) : null;
+  const urgencyClass = getAgeUrgencyClass(ageSeconds);
+
+  const badge = document.createElement('div');
+  badge.className = `cache-stale-badge text-xs px-2 py-1 rounded inline-flex items-center gap-1 mb-3 ${urgencyClass}`;
+  badge.setAttribute('aria-label', `Showing cached data${ageText && ageText !== 'just now' ? ` from ${ageText} ago` : ''}`);
+  badge.innerHTML = `<i class="fas fa-clock" aria-hidden="true"></i> ${ageText && ageText !== 'just now' ? `Cached · ${ageText} ago` : 'Cached snapshot'}`;
+  container.prepend(badge);
+}
+
+export function removeSectionStaleBadge(sectionId: string) {
+  document.getElementById(`${sectionId}-content`)
+    ?.querySelector('.cache-stale-badge')?.remove();
 }
 
 export function showSkeleton(sectionId: string) {
