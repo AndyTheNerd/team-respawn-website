@@ -5,14 +5,14 @@ const SUMMARY_API_URL = 'https://s3publicapis.azure-api.net/stats/hw2';
 const METADATA_API_URL = 'https://s3publicapis.azure-api.net/metadata/hw2';
 const PAGES_API_BASE = '/api/hw2';
 
-type CacheMeta = {
+export type CacheMeta = {
   cached?: boolean;
   fetchedAt?: string;
   cacheAgeSeconds?: number;
   reason?: string;
 };
 
-type WithMeta<T> = T & { _meta?: CacheMeta };
+export type WithMeta<T> = T & { _meta?: CacheMeta };
 
 const API_KEYS = [
   import.meta.env.PUBLIC_HW2_API_KEY_1,

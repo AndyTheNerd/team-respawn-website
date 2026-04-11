@@ -11,6 +11,7 @@ import { loadMatchGraphs } from './matchGraphs';
 import { loadMatchSummary, type MatchSummaryContext, type PlayerSummary } from './matchSummary';
 import { fetchMatchEventsPayload, buildEventEntries } from './matchEventProcessing';
 import { getMatchResult } from '../../utils/haloApi';
+import type { CacheMeta } from '../../utils/haloApi';
 import { getLeaderName } from '../../data/haloWars2/leaders';
 import { getMapName, getMapImage, getMapImageFallback } from '../../data/haloWars2/maps';
 import { getPlaylistName } from '../../data/haloWars2/playlists';
@@ -66,11 +67,19 @@ function getOrderedMatches(matches: any[], pinnedSet: Set<string> = new Set(getP
   return [...pinnedMatches, ...unpinnedMatches];
 }
 
-export function renderMatches(matches: any[], gamertag: string) {
+export function renderMatches(matches: any[], gamertag: string, cacheMeta?: CacheMeta) {
   hideSkeleton('matches');
   const matchesContent = document.getElementById('matches-content')!;
   state.currentMatches = Array.isArray(matches) ? matches : [];
   state.currentGamertag = gamertag;
+  if (cacheMeta !== undefined) {
+    state.matchesCacheMeta = cacheMeta;
+  }
+  const activeCacheMeta = cacheMeta ?? state.matchesCacheMeta;
+  const showCachedRowBadge = activeCacheMeta?.cached === true;
+  const cachedRowBadge = showCachedRowBadge
+    ? '<span class="inline-flex items-center gap-1 text-amber-300/80 text-[10px] uppercase tracking-wider"><i class="fas fa-clock" aria-hidden="true"></i> Cached</span>'
+    : '';
   state.matchLookup = new Map<string, any>();
   state.currentMatches.forEach((m: any) => {
     const id = m?.MatchId;
@@ -254,6 +263,7 @@ export function renderMatches(matches: any[], gamertag: string) {
               ${playlistLabel ? `<span class="text-cyan-300">• ${playlistLabel}</span>` : ''}
               ${csrDeltaText ? `<span class="${csrDeltaClass}">• CSR ${csrDeltaText}</span>` : ''}
               ${unitsText ? `<span>• Units ${unitsText}</span>` : ''}
+              ${cachedRowBadge}
             </div>
             ${matchId ? `
               <div class="flex flex-wrap gap-2 mt-3">

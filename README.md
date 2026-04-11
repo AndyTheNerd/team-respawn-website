@@ -8,10 +8,10 @@ A gaming content website for the [Team Respawn YouTube channel](https://www.yout
 
 - Blog posts: guides, walkthroughs, and reviews with pagination
 - Video database with MCC-style filter/search composer (`/videos`)
-- Halo Wars 2 live stats lookup — player profiles, match history, match details, AI summaries (`/halo-wars-stats`)
+- Halo Wars 2 live stats lookup — player profiles, match history, match details, AI summaries, with cache-first loading that serves D1-cached snapshots instantly when the Halo API is rate-limited or unavailable (`/halo-wars-stats`)
 - Halo Wars: Definitive Edition Steam player count — live concurrency, observed daily high, and 30-day trend chart (`/halo-wars-de-player-count`)
 - Halo Wars 1 unit reference table — filterable/sortable DPS, cost, and upgrade data (`/halo-wars-de-player-count`)
-- Serverless API functions (Cloudflare Pages Functions) with Cloudflare D1 caching
+- Serverless API functions (Cloudflare Pages Functions) with Cloudflare D1 cache-first fallback for HW2 stats
 - Side panel navigation with keyboard support
 - Responsive Tailwind-based styling via WebcoreUI
 - SEO meta tags and OpenGraph support

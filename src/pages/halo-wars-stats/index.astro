@@ -565,6 +565,7 @@ const hw2ContentCreatorGamertagsJson = JSON.stringify(contentCreatorGamertags).r
                   Suspected cheating
                 </span>
                 <span id="player-last-seen" class="ml-2 text-xs text-gray-400 font-normal hidden"></span>
+                <span id="player-last-refreshed" class="ml-2 text-xs text-gray-400 font-normal hidden"></span>
               </h2>
               <button
                 id="profile-share-btn"
@@ -995,7 +996,7 @@ const hw2ContentCreatorGamertagsJson = JSON.stringify(contentCreatorGamertags).r
     import { initShareModalListeners, closeShareModal } from '../../lib/hw2/shareCard';
     import { initProfileShareListeners, closeProfileShareModal } from '../../lib/hw2/profileShare';
     import { parseGamertagFromProfilePath } from '../../lib/hw2/urlProfile';
-    import { performSearch } from '../../lib/hw2/search';
+    import { performSearch, refreshSearch } from '../../lib/hw2/search';
     import { runComparison } from '../../lib/hw2/comparePlayers';
     import { getMatchResult } from '../../utils/haloApi';
 
@@ -1082,7 +1083,7 @@ const hw2ContentCreatorGamertagsJson = JSON.stringify(contentCreatorGamertags).r
     staleBannerRetry?.addEventListener('click', () => {
       const target = state.currentGamertag || searchInput.value;
       if (target.trim()) {
-        performSearch(target);
+        refreshSearch(target.trim());
       }
     });
 

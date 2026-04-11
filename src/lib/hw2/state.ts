@@ -1,4 +1,5 @@
 import type { ShareData, ProfileShareData } from './types';
+import type { CacheMeta } from '../../utils/haloApi';
 import { seasonData } from '../../data/haloWars2/seasons';
 
 export const STORAGE_KEY = 'hw2-recent-searches';
@@ -32,4 +33,5 @@ export const state = {
   shareRequestId: 0,
   shareMapImageUrl: null as string | null,
   shareMapImagePromise: null as Promise<string | null> | null,
+  matchesCacheMeta: undefined as CacheMeta | undefined,
 };

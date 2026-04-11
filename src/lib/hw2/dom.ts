@@ -64,6 +64,7 @@ export const playerGamertagEl = document.getElementById('player-gamertag') as HT
 export const playerContentCreatorIndicatorEl = document.getElementById('player-content-creator-indicator') as HTMLElement | null;
 export const playerCheaterIndicatorEl = document.getElementById('player-cheater-indicator') as HTMLElement | null;
 export const playerLastSeenEl = document.getElementById('player-last-seen') as HTMLElement | null;
+export const playerLastRefreshedEl = document.getElementById('player-last-refreshed') as HTMLElement | null;
 
 // Collapsible panel elements
 export const leadersToggle = document.getElementById('leaders-toggle') as HTMLButtonElement | null;

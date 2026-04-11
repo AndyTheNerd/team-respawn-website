@@ -89,7 +89,7 @@ export function showStaleBanner(sources: Array<{ label: string; fetchedAt?: stri
   staleBanner.classList.remove('hidden');
 }
 
-function formatAge(seconds: number): string {
+export function formatAge(seconds: number): string {
   if (seconds < 60) return 'just now';
   if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
   if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`;
