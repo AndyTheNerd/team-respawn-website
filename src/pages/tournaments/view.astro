@@ -1,0 +1,12 @@
+---
+// Redirect /tournaments/view?id=trn_... → /tournaments/trn_...
+// This preserves old shared links.
+---
+<script>
+  const id = new URLSearchParams(window.location.search).get('id');
+  if (id) {
+    window.location.replace(`/tournaments/${id}`);
+  } else {
+    window.location.replace('/tournaments');
+  }
+</script>

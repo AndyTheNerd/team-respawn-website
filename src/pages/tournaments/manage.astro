@@ -1,0 +1,12 @@
+---
+// Redirect /tournaments/manage?id=trn_... → /tournaments/trn_...
+// Admin mode is now unlocked inline on the unified tournament page.
+---
+<script>
+  const id = new URLSearchParams(window.location.search).get('id');
+  if (id) {
+    window.location.replace(`/tournaments/${id}`);
+  } else {
+    window.location.replace('/tournaments');
+  }
+</script>

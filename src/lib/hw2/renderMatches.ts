@@ -256,6 +256,19 @@ export function renderMatches(matches: any[], gamertag: string) {
               ${unitsText ? `<span>• Units ${unitsText}</span>` : ''}
             </div>
             ${matchId ? `
+              <div class="mt-2">
+                <button
+                  type="button"
+                  class="match-copy-id-btn inline-flex items-center gap-1.5 text-[10px] text-gray-500 hover:text-gray-300 transition-colors font-mono"
+                  data-match-id="${matchId}"
+                  title="Copy match ID"
+                >
+                  <i class="fas fa-copy text-[9px]" aria-hidden="true"></i>
+                  <span class="match-id-label">${matchId}</span>
+                </button>
+              </div>
+            ` : ''}
+            ${matchId ? `
               <div class="flex flex-wrap gap-2 mt-3">
                 <button
                   type="button"
@@ -696,6 +709,20 @@ export function renderMatches(matches: any[], gamertag: string) {
       } finally {
         button.disabled = false;
         if (spanEl) spanEl.textContent = originalText;
+      }
+    });
+  });
+
+  matchesContent.querySelectorAll('.match-copy-id-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const matchId = (btn as HTMLElement).getAttribute('data-match-id') || '';
+      if (!matchId) return;
+      await navigator.clipboard.writeText(matchId);
+      const label = btn.querySelector('.match-id-label');
+      if (label) {
+        const original = label.textContent;
+        label.textContent = 'Copied!';
+        setTimeout(() => { label.textContent = original; }, 1500);
       }
     });
   });

@@ -11,6 +11,7 @@ A gaming content website for the [Team Respawn YouTube channel](https://www.yout
 - Halo Wars 2 live stats lookup — player profiles, match history, match details, AI summaries (`/halo-wars-stats`)
 - Halo Wars: Definitive Edition Steam player count — live concurrency, observed daily high, and 30-day trend chart (`/halo-wars-de-player-count`)
 - Halo Wars 1 unit reference table — filterable/sortable DPS, cost, and upgrade data (`/halo-wars-de-player-count`)
+- HW2 Tournaments — community-run single/double elimination bracket organizer (`/tournaments`): password-only admin auth (no manage URLs to save), unified public+admin page at `/tournaments/[id]`, open/private sign-ups, remove participants, admin overrides, HW2 match auto-suggest from stats cache, and in-place bracket updates without page reloads
 - Serverless API functions (Cloudflare Pages Functions) with Cloudflare D1 caching
 - Side panel navigation with keyboard support
 - Responsive Tailwind-based styling via WebcoreUI
@@ -34,8 +35,9 @@ A gaming content website for the [Team Respawn YouTube channel](https://www.yout
 ```
 team-respawn-website/
 ├── functions/api/         # Cloudflare Pages Functions (serverless API)
-│   ├── hw2/               # Halo Wars 2 endpoints
+│   ├── hw2/               # Halo Wars 2 stats endpoints
 │   ├── hwde/              # Halo Wars: Definitive Edition endpoints
+│   ├── tournaments/       # Tournament organizer endpoints
 │   └── youtube/           # YouTube latest videos endpoint
 ├── migrations/            # Cloudflare D1 SQL migrations (numbered)
 ├── public/                # Static assets (served as-is)
@@ -95,8 +97,10 @@ npm run preview   # Preview production build locally
 
 ```bash
 npm run add-video           # Interactive script to add a new video entry
-npm run cf:d1:migrate       # Run all D1 migrations on the remote database
-npm run cf:d1:migrate:9     # Run a specific migration (replace 9 with number)
+npm run cf:d1:migrate        # Run all D1 migrations on the remote database
+npm run cf:d1:migrate:11    # Run tournament tables migration (0011)
+npm run cf:d1:migrate:12    # Run tournament admin password migration (0012)
+npm run cf:d1:migrate:13    # Run tournament seeding column migration (0013)
 ```
 
 ## Links

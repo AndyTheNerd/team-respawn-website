@@ -18,10 +18,16 @@
     "cf:d1:migrate:7": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0007_event_summary_columns.sql --remote",
     "cf:d1:migrate:8": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0008_match_summaries.sql --remote",
     "cf:d1:migrate:9": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0009_hwde_steam_tracking.sql --remote",
-    "cf:d1:migrate": "npm run cf:d1:migrate:1 && npm run cf:d1:migrate:2 && npm run cf:d1:migrate:3 && npm run cf:d1:migrate:4 && npm run cf:d1:migrate:5 && npm run cf:d1:migrate:6 && npm run cf:d1:migrate:7 && npm run cf:d1:migrate:8 && npm run cf:d1:migrate:9"
+    "cf:d1:migrate:10": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0010_match_player_leader_resolution.sql --remote",
+    "cf:d1:migrate:11": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0011_tournaments.sql --remote",
+    "cf:d1:migrate:12": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0012_tournament_admin_password.sql --remote",
+    "cf:d1:migrate:13": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0013_tournament_seeding.sql --remote",
+    "cf:d1:migrate": "npm run cf:d1:migrate:1 && npm run cf:d1:migrate:2 && npm run cf:d1:migrate:3 && npm run cf:d1:migrate:4 && npm run cf:d1:migrate:5 && npm run cf:d1:migrate:6 && npm run cf:d1:migrate:7 && npm run cf:d1:migrate:8 && npm run cf:d1:migrate:9 && npm run cf:d1:migrate:10 && npm run cf:d1:migrate:11 && npm run cf:d1:migrate:12 && npm run cf:d1:migrate:13"
   },
   "dependencies": {
     "astro": "^5.18.1",
+    "brackets-manager": "^1.9.1",
+    "brackets-viewer": "^1.9.0",
     "cloudinary": "^2.9.0",
     "webcoreui": "^1.3.0"
   },
