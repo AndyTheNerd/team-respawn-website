@@ -70,10 +70,31 @@ const {
       return date.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
     };
 
+    async function readSnapshotResponse(response) {
+      if (!response.ok) {
+        throw new Error(`http_${response.status}`);
+      }
+
+      const contentType = response.headers.get('content-type') || '';
+      const bodyText = await response.text();
+
+      if (!contentType.includes('application/json')) {
+        if (/<!doctype html/i.test(bodyText) || /<html/i.test(bodyText)) {
+          throw new Error('route_returned_html');
+        }
+        throw new Error('unexpected_content_type');
+      }
+
+      try {
+        return JSON.parse(bodyText);
+      } catch {
+        throw new Error('invalid_json');
+      }
+    }
+
     try {
       const response = await fetch('/api/hw2/global-snapshot');
-      if (!response.ok) throw new Error('fetch failed');
-      const payload = await response.json();
+      const payload = await readSnapshotResponse(response);
 
       if (!payload?.hasData || !payload?.summary) {
         root.innerHTML = `
@@ -116,10 +137,16 @@ const {
           </div>
         </div>
       `;
-    } catch {
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : '';
+      const detail = reason === 'route_returned_html'
+        ? 'The snapshot API is not active in this environment yet.'
+        : 'Try again later.';
+
       root.innerHTML = `
         <div class="rounded-xl border border-rose-500/20 bg-rose-950/20 p-4">
           <p class="text-sm text-rose-100">Could not load the HW2 meta snapshot teaser.</p>
+          <p class="mt-2 text-xs text-rose-200/70">${detail}</p>
         </div>
       `;
     }

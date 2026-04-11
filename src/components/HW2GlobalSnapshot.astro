@@ -345,22 +345,52 @@ const playlistNames: Record<string, string> = Object.fromEntries(
       });
     }
 
+    async function readSnapshotResponse(response) {
+      if (!response.ok) {
+        throw new Error(`http_${response.status}`);
+      }
+
+      const contentType = response.headers.get('content-type') || '';
+      const bodyText = await response.text();
+
+      if (!contentType.includes('application/json')) {
+        if (/<!doctype html/i.test(bodyText) || /<html/i.test(bodyText)) {
+          throw new Error('route_returned_html');
+        }
+        throw new Error('unexpected_content_type');
+      }
+
+      try {
+        return JSON.parse(bodyText);
+      } catch {
+        throw new Error('invalid_json');
+      }
+    }
+
+    function renderError(error) {
+      const reason = error instanceof Error ? error.message : '';
+      const detail = reason === 'route_returned_html'
+        ? 'The snapshot API is not active in this environment yet. Deploy the Pages Function for `/api/hw2/global-snapshot` and try again.'
+        : 'This does not affect player lookup. Try again later.';
+
+      root.innerHTML = `
+        <div class="rounded-xl border border-rose-500/20 bg-rose-950/20 p-5">
+          <p class="text-sm text-rose-200">Could not load the scheduled global snapshot.</p>
+          <p class="mt-2 text-sm text-rose-200/70">${esc(detail)}</p>
+        </div>
+      `;
+    }
+
     async function loadSnapshot(playlistId = '') {
       const endpoint = new URL('/api/hw2/global-snapshot', window.location.origin);
       if (playlistId) endpoint.searchParams.set('playlist', playlistId);
 
       try {
         const response = await fetch(endpoint.toString());
-        if (!response.ok) throw new Error('fetch failed');
-        const payload = await response.json();
+        const payload = await readSnapshotResponse(response);
         render(payload);
-      } catch {
-        root.innerHTML = `
-          <div class="rounded-xl border border-rose-500/20 bg-rose-950/20 p-5">
-            <p class="text-sm text-rose-200">Could not load the scheduled global snapshot.</p>
-            <p class="mt-2 text-sm text-rose-200/70">This does not affect player lookup. Try again later.</p>
-          </div>
-        `;
+      } catch (error) {
+        renderError(error);
       }
     }
 
