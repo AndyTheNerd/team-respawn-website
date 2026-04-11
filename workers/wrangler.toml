@@ -12,6 +12,7 @@ migrations_dir = "../migrations"
 STORE_RAW_MATCHES = "1"
 STORE_RAW_EVENTS = "1"
 CLEANUP_SECRET = ""
+SNAPSHOT_SECRET = ""
 GROQ_API_KEY = ""
 CEREBRAS_API_KEY = ""
 # YouTube channel ID (UCxxxxxxxxxxxxxxxxxx format) for the Latest Videos widget.

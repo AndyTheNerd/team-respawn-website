@@ -1,0 +1,208 @@
+---
+type DirectoryItem = {
+  title: string;
+  subtitle?: string;
+  eyebrow?: string;
+  description?: string;
+  imageUrl?: string;
+  href?: string;
+  tags?: string[];
+};
+
+interface DataSource {
+  url: string;
+  label: string;
+}
+
+interface Props {
+  rootId: string;
+  title: string;
+  subtitle: string;
+  items?: DirectoryItem[];
+  dataSources?: DataSource[];
+  filterPlaceholder?: string;
+}
+
+const {
+  rootId,
+  title,
+  subtitle,
+  items = [],
+  dataSources = [],
+  filterPlaceholder = 'Search',
+} = Astro.props;
+---
+
+<section class="mb-8 rounded-xl border border-cyan-500/20 bg-slate-900/35 p-5 sm:p-6" aria-labelledby={`${rootId}-heading`}>
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <h2 id={`${rootId}-heading`} class="text-2xl font-semibold text-slate-100">{title}</h2>
+      <p class="mt-2 max-w-3xl text-sm text-slate-300">{subtitle}</p>
+    </div>
+    <div class="rounded-full border border-cyan-500/20 bg-cyan-500/10 px-3 py-1.5 text-[11px] uppercase tracking-wider text-cyan-200">
+      Utility Reference
+    </div>
+  </div>
+
+  <div class="mt-5">
+    <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <label class="block w-full lg:max-w-md">
+        <span class="sr-only">{filterPlaceholder}</span>
+        <input
+          id={`${rootId}-search`}
+          type="search"
+          placeholder={filterPlaceholder}
+          class="w-full rounded-lg border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:border-cyan-400 focus:outline-none"
+        />
+      </label>
+      <div id={`${rootId}-chips`} class="flex flex-wrap gap-2"></div>
+    </div>
+  </div>
+
+  <div id={rootId} class="mt-5" aria-live="polite">
+    <div class="animate-pulse space-y-4">
+      <div class="h-10 rounded-lg border border-slate-700/50 bg-slate-800/60"></div>
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {Array.from({ length: 6 }).map(() => (
+          <div class="h-44 rounded-xl border border-slate-700/50 bg-slate-800/60"></div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<script is:inline define:vars={{ rootId, items, dataSources, filterPlaceholder }}>
+  (() => {
+    const root = document.getElementById(rootId);
+    const search = document.getElementById(`${rootId}-search`);
+    const chips = document.getElementById(`${rootId}-chips`);
+    if (!root || !search || !chips) return;
+
+    const esc = (value) => String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+
+    let allItems = Array.isArray(items) ? [...items] : [];
+    let activeCategory = 'All';
+
+    function transformMapEntries(payload, label) {
+      const raw = payload && typeof payload === 'object' && payload.data && typeof payload.data === 'object'
+        ? payload.data
+        : payload;
+      return Object.entries(raw || {})
+        .map(([id, name]) => ({
+          title: String(name),
+          subtitle: String(id),
+          eyebrow: label,
+          description: label === 'Techs'
+            ? 'Technology and upgrade metadata cached from the Halo Wars 2 API.'
+            : label === 'Units'
+              ? 'Game object metadata cached from the Halo Wars 2 API.'
+              : 'Leader power metadata cached from the Halo Wars 2 API.',
+          tags: [label, String(name), String(id)],
+        }))
+        .sort((a, b) => a.title.localeCompare(b.title));
+    }
+
+    function categoriesFor(itemsList) {
+      return ['All', ...Array.from(new Set(itemsList.map((item) => item.eyebrow).filter(Boolean)))];
+    }
+
+    function filteredItems() {
+      const query = String(search.value || '').trim().toLowerCase();
+      return allItems.filter((item) => {
+        const matchesCategory = activeCategory === 'All' || item.eyebrow === activeCategory;
+        if (!matchesCategory) return false;
+        if (!query) return true;
+        const haystack = [
+          item.title,
+          item.subtitle,
+          item.eyebrow,
+          item.description,
+          ...(Array.isArray(item.tags) ? item.tags : []),
+        ].join(' ').toLowerCase();
+        return haystack.includes(query);
+      });
+    }
+
+    function renderChips() {
+      const categories = categoriesFor(allItems);
+      chips.innerHTML = categories.map((category) => `
+        <button
+          type="button"
+          data-category="${esc(category)}"
+          class="rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors ${category === activeCategory ? 'border-cyan-400/50 bg-cyan-500/10 text-cyan-100' : 'border-slate-700 bg-slate-900/60 text-slate-300 hover:border-cyan-500/30 hover:text-cyan-200'}"
+        >
+          ${esc(category)}
+        </button>
+      `).join('');
+      chips.querySelectorAll('[data-category]').forEach((button) => {
+        button.addEventListener('click', () => {
+          activeCategory = button.getAttribute('data-category') || 'All';
+          render();
+        });
+      });
+    }
+
+    function render() {
+      renderChips();
+      const visibleItems = filteredItems();
+      if (!visibleItems.length) {
+        root.innerHTML = `
+          <div class="rounded-xl border border-slate-700/60 bg-slate-950/60 p-5">
+            <p class="text-sm text-slate-300">No results matched your current filter.</p>
+          </div>
+        `;
+        return;
+      }
+
+      root.innerHTML = `
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          ${visibleItems.map((item) => `
+            <article class="overflow-hidden rounded-xl border border-slate-700/60 bg-slate-950/60 shadow-[0_18px_45px_rgba(2,6,23,0.28)]">
+              ${item.imageUrl ? `<div class="aspect-[16/9] overflow-hidden border-b border-slate-800 bg-slate-900"><img src="${esc(item.imageUrl)}" alt="${esc(item.title)}" class="h-full w-full object-cover" loading="lazy"></div>` : ''}
+              <div class="p-4">
+                ${item.eyebrow ? `<p class="text-[11px] uppercase tracking-wider text-cyan-300">${esc(item.eyebrow)}</p>` : ''}
+                <h3 class="mt-2 text-lg font-semibold text-slate-100">
+                  ${item.href ? `<a href="${esc(item.href)}" class="hover:text-cyan-200">${esc(item.title)}</a>` : esc(item.title)}
+                </h3>
+                ${item.subtitle ? `<p class="mt-1 break-all font-mono text-xs text-slate-500">${esc(item.subtitle)}</p>` : ''}
+                ${item.description ? `<p class="mt-3 text-sm text-slate-300">${esc(item.description)}</p>` : ''}
+              </div>
+            </article>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    async function loadRemoteItems() {
+      if (!Array.isArray(dataSources) || dataSources.length === 0) return;
+      const responses = await Promise.all(dataSources.map(async (source) => {
+        try {
+          const response = await fetch(source.url);
+          if (!response.ok) throw new Error('fetch failed');
+          return transformMapEntries(await response.json(), source.label);
+        } catch {
+          return [];
+        }
+      }));
+      allItems = [...allItems, ...responses.flat()];
+    }
+
+    search.addEventListener('input', render);
+
+    loadRemoteItems()
+      .then(render)
+      .catch(() => {
+        render();
+        root.insertAdjacentHTML('afterbegin', `
+          <div class="mb-4 rounded-xl border border-amber-500/20 bg-amber-950/20 p-4 text-sm text-amber-100">
+            Some live metadata could not be loaded. Cached static reference items are still available.
+          </div>
+        `);
+      });
+  })();
+</script>

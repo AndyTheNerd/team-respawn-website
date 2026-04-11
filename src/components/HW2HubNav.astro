@@ -1,0 +1,61 @@
+---
+type MainSection = 'lookup' | 'meta' | 'leaderboards' | 'data';
+type DataSection = 'leaders' | 'leader-powers' | 'maps' | 'units-techs';
+
+interface Props {
+  current: MainSection;
+  currentDataSection?: DataSection;
+}
+
+const { current, currentDataSection } = Astro.props;
+
+const mainLinks = [
+  { key: 'lookup', label: 'Lookup', href: '/halo-wars-stats' },
+  { key: 'meta', label: 'Meta', href: '/halo-wars-meta' },
+  { key: 'leaderboards', label: 'Leaderboards', href: '/halo-wars-leaderboards' },
+  { key: 'data', label: 'Data', href: '/halo-wars-data/leaders' },
+];
+
+const dataLinks = [
+  { key: 'leaders', label: 'Leaders', href: '/halo-wars-data/leaders' },
+  { key: 'leader-powers', label: 'Leader Powers', href: '/halo-wars-data/leader-powers' },
+  { key: 'maps', label: 'Maps', href: '/halo-wars-data/maps' },
+  { key: 'units-techs', label: 'Units + Techs', href: '/halo-wars-data/units-techs' },
+];
+---
+
+<section class="mb-6 rounded-xl border border-cyan-500/20 bg-slate-900/35 p-4">
+  <div class="flex flex-wrap gap-2">
+    {mainLinks.map((link) => (
+      <a
+        href={link.href}
+        class:list={[
+          'rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors',
+          current === link.key
+            ? 'border-cyan-400/50 bg-cyan-500/10 text-cyan-100'
+            : 'border-slate-700 bg-slate-800/60 text-slate-300 hover:border-cyan-500/40 hover:text-cyan-200'
+        ]}
+      >
+        {link.label}
+      </a>
+    ))}
+  </div>
+
+  {current === 'data' && (
+    <div class="mt-4 flex flex-wrap gap-2 border-t border-slate-800 pt-4">
+      {dataLinks.map((link) => (
+        <a
+          href={link.href}
+          class:list={[
+            'rounded-lg border px-3 py-2 text-xs font-medium transition-colors',
+            currentDataSection === link.key
+              ? 'border-emerald-400/40 bg-emerald-500/10 text-emerald-200'
+              : 'border-slate-700 bg-slate-900/60 text-slate-300 hover:border-emerald-500/30 hover:text-emerald-200'
+          ]}
+        >
+          {link.label}
+        </a>
+      ))}
+    </div>
+  )}
+</section>

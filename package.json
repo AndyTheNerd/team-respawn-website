@@ -9,6 +9,9 @@
     "preview": "astro preview",
     "astro": "astro",
     "add-video": "node scripts/add-video.mjs",
+    "build-hw2-snapshot-payload": "node scripts/build-hw2-snapshot-payload.mjs",
+    "check-hw2-xandy92": "node scripts/check-hw2-xandy92-regression.mjs",
+    "publish-hw2-snapshot": "node scripts/publish-hw2-snapshot.mjs",
     "cf:d1:migrate:1": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0001_init.sql --remote",
     "cf:d1:migrate:2": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0002_match_events.sql --remote",
     "cf:d1:migrate:3": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0003_player_stats_cache.sql --remote",
@@ -18,7 +21,8 @@
     "cf:d1:migrate:7": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0007_event_summary_columns.sql --remote",
     "cf:d1:migrate:8": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0008_match_summaries.sql --remote",
     "cf:d1:migrate:9": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0009_hwde_steam_tracking.sql --remote",
-    "cf:d1:migrate": "npm run cf:d1:migrate:1 && npm run cf:d1:migrate:2 && npm run cf:d1:migrate:3 && npm run cf:d1:migrate:4 && npm run cf:d1:migrate:5 && npm run cf:d1:migrate:6 && npm run cf:d1:migrate:7 && npm run cf:d1:migrate:8 && npm run cf:d1:migrate:9"
+    "cf:d1:migrate:10": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0010_hw2_global_snapshots.sql --remote",
+    "cf:d1:migrate": "npm run cf:d1:migrate:1 && npm run cf:d1:migrate:2 && npm run cf:d1:migrate:3 && npm run cf:d1:migrate:4 && npm run cf:d1:migrate:5 && npm run cf:d1:migrate:6 && npm run cf:d1:migrate:7 && npm run cf:d1:migrate:8 && npm run cf:d1:migrate:9 && npm run cf:d1:migrate:10"
   },
   "dependencies": {
     "astro": "^5.18.1",

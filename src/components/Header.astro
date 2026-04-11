@@ -15,7 +15,11 @@ const { showPanelButton = true } = Astro.props;
 const pathname = Astro.url?.pathname ?? '';
 const normalizedPath = normalizePathname(pathname);
 const isHome = pathname === '/' || pathname === '/index.html';
-const isHw2Stats = pathname.startsWith('/halo-wars-stats');
+const isHw2Stats =
+  pathname.startsWith('/halo-wars-stats') ||
+  pathname.startsWith('/halo-wars-meta') ||
+  pathname.startsWith('/halo-wars-leaderboards') ||
+  pathname.startsWith('/halo-wars-data/');
 const isVideos = pathname.startsWith('/videos');
 const navFlags = { isVideos, isHw2Stats };
 
@@ -167,15 +171,24 @@ const isHaloWars2Section = isHw2Stats || headerHw2Sections.some((section) => sec
                 <div class="nav-dropdown-hw2-tools">
                   <span class="nav-dropdown-hw2-tools-kicker">Tools</span>
                   <h3 class="nav-dropdown-hw2-tools-title">HW2 Stats</h3>
-                  <p class="nav-dropdown-hw2-tools-copy">Search any gamertag, review CSR, check leader usage, and inspect recent match history in seconds.</p>
+                  <p class="nav-dropdown-hw2-tools-copy">Search any gamertag, review CSR, inspect leaderboard snapshots, and move between player lookup, global meta, and reference data.</p>
                   <div class="nav-dropdown-hw2-tools-list" aria-hidden="true">
                     <span><i class="fas fa-chart-line" aria-hidden="true"></i> CSR lookup</span>
-                    <span><i class="fas fa-users" aria-hidden="true"></i> Leader usage</span>
-                    <span><i class="fas fa-clock-rotate-left" aria-hidden="true"></i> Recent matches</span>
+                    <span><i class="fas fa-ranking-star" aria-hidden="true"></i> Ladder snapshots</span>
+                    <span><i class="fas fa-database" aria-hidden="true"></i> Public data pages</span>
                   </div>
                   <a href="/halo-wars-stats" class="nav-dropdown-hw2-tools-cta" role="menuitem">
                     Open HW2 Stats
                     <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                  </a>
+                  <a href="/halo-wars-meta" class="nav-dropdown-hw2-tools-secondary" role="menuitem">
+                    Open HW2 Meta
+                  </a>
+                  <a href="/halo-wars-leaderboards" class="nav-dropdown-hw2-tools-secondary" role="menuitem">
+                    Open HW2 Leaderboards
+                  </a>
+                  <a href="/halo-wars-data/leaders" class="nav-dropdown-hw2-tools-secondary" role="menuitem">
+                    Browse HW2 Data
                   </a>
                   <a href="/videos?games=halo-wars-2" class={`nav-dropdown-hw2-tools-secondary ${isVideos ? 'nav-dropdown-hw2-tools-secondary-active' : ''}`} role="menuitem">
                     Browse all HW2 videos

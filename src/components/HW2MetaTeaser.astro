@@ -1,0 +1,127 @@
+---
+interface Props {
+  title?: string;
+  compact?: boolean;
+}
+
+const {
+  title = 'HW2 Meta Snapshot',
+  compact = false,
+} = Astro.props;
+---
+
+<section class="mb-8" aria-labelledby="hw2-meta-teaser-heading">
+  <div class="overflow-hidden rounded-xl border border-cyan-500/20 bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950/30">
+    <div class="border-b border-cyan-500/10 px-5 py-4 sm:px-6">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 id="hw2-meta-teaser-heading" class="text-lg font-semibold text-slate-100">{title}</h2>
+          <p class="mt-1 text-sm text-slate-300">
+            Scheduled aggregate playlist data published separately from player-search cache data.
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <a href="/halo-wars-meta" class="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-cyan-200 hover:bg-cyan-500/20">
+            Open Meta
+          </a>
+          <a href="/halo-wars-leaderboards" class="rounded-full border border-slate-700 bg-slate-900/70 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-slate-200 hover:border-cyan-500/30 hover:text-cyan-200">
+            Open Leaderboards
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div id="hw2-meta-teaser" class="px-5 py-5 sm:px-6" aria-live="polite">
+      <div class="animate-pulse space-y-4">
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {Array.from({ length: 4 }).map(() => (
+            <div class="h-16 rounded-xl border border-slate-700/50 bg-slate-800/60"></div>
+          ))}
+        </div>
+        <div class="h-20 rounded-xl border border-slate-700/50 bg-slate-800/60"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script is:inline define:vars={{ compact }}>
+  (async () => {
+    const root = document.getElementById('hw2-meta-teaser');
+    if (!root) return;
+
+    const fmt = (value, digits = 0) => {
+      const n = Number(value);
+      if (!Number.isFinite(n)) return '—';
+      return n.toLocaleString('en-US', { maximumFractionDigits: digits, minimumFractionDigits: digits });
+    };
+
+    const fmtDuration = (seconds) => {
+      const n = Number(seconds);
+      if (!Number.isFinite(n) || n <= 0) return '—';
+      const mins = Math.floor(n / 60);
+      const secs = Math.round(n % 60);
+      return `${mins}m ${String(secs).padStart(2, '0')}s`;
+    };
+
+    const fmtDate = (value) => {
+      if (!value) return 'Unknown';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return 'Unknown';
+      return date.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    };
+
+    try {
+      const response = await fetch('/api/hw2/global-snapshot');
+      if (!response.ok) throw new Error('fetch failed');
+      const payload = await response.json();
+
+      if (!payload?.hasData || !payload?.summary) {
+        root.innerHTML = `
+          <div class="rounded-xl border border-slate-700/60 bg-slate-900/50 p-4">
+            <p class="text-sm text-slate-300">No scheduled snapshot has been published yet.</p>
+            <p class="mt-2 text-sm text-slate-500">Once the collector publishes aggregate data, this card will promote the current playlist snapshot here.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const summary = payload.summary;
+      root.innerHTML = `
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div class="rounded-xl border border-slate-700/60 bg-slate-900/60 p-4">
+            <p class="text-[11px] uppercase tracking-wider text-slate-400">Playlist</p>
+            <p class="mt-2 text-lg font-semibold text-cyan-200">${summary.playlistName}</p>
+          </div>
+          <div class="rounded-xl border border-slate-700/60 bg-slate-900/60 p-4">
+            <p class="text-[11px] uppercase tracking-wider text-slate-400">Tracked Matches</p>
+            <p class="mt-2 text-lg font-semibold text-cyan-200">${fmt(summary.totalMatches)}</p>
+          </div>
+          <div class="rounded-xl border border-slate-700/60 bg-slate-900/60 p-4">
+            <p class="text-[11px] uppercase tracking-wider text-slate-400">Avg Match Length</p>
+            <p class="mt-2 text-lg font-semibold text-cyan-200">${fmtDuration(summary.avgDurationSeconds)}</p>
+          </div>
+          <div class="rounded-xl border border-slate-700/60 bg-slate-900/60 p-4">
+            <p class="text-[11px] uppercase tracking-wider text-slate-400">Quit / DC Rate</p>
+            <p class="mt-2 text-lg font-semibold text-cyan-200">${fmt((summary.quitRate || 0) * 100, 1)}%</p>
+          </div>
+        </div>
+        <div class="mt-4 flex flex-col gap-3 rounded-xl border border-slate-700/60 bg-slate-900/45 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p class="text-sm text-slate-200">Snapshot updated ${fmtDate(payload.snapshot?.generatedAt)}</p>
+            <p class="mt-1 text-xs text-slate-500">Source: ${payload.snapshot?.source?.label || 'scheduled aggregate dataset'}</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <a href="/halo-wars-meta" class="rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-cyan-200 hover:bg-cyan-500/20">See playlist meta</a>
+            <a href="/halo-wars-leaderboards" class="rounded-lg border border-slate-700 bg-slate-950/70 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-slate-200 hover:border-cyan-500/30 hover:text-cyan-200">See ladder movement</a>
+          </div>
+        </div>
+      `;
+    } catch {
+      root.innerHTML = `
+        <div class="rounded-xl border border-rose-500/20 bg-rose-950/20 p-4">
+          <p class="text-sm text-rose-100">Could not load the HW2 meta snapshot teaser.</p>
+        </div>
+      `;
+    }
+  })();
+</script>

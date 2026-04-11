@@ -1,0 +1,46 @@
+---
+import HW2HubNav from '../../../components/HW2HubNav.astro';
+import HW2ReferenceDirectory from '../../../components/HW2ReferenceDirectory.astro';
+import SecondaryPageLayout from '../../../layouts/SecondaryPageLayout.astro';
+import { getMapImage, mapData } from '../../../data/haloWars2/maps.ts';
+
+const items = Object.values(mapData)
+  .sort((a, b) => a.name.localeCompare(b.name))
+  .map((map) => ({
+    title: map.name,
+    subtitle: map.id,
+    eyebrow: map.id.includes('FF_') ? 'Firefight' : 'Map',
+    description: 'Map art and canonical map label used across the Team Respawn HW2 surfaces.',
+    imageUrl: getMapImage(map.id) || map.imageUrl,
+    tags: [map.name, map.id, map.id.includes('FF_') ? 'Firefight' : 'Multiplayer'],
+  }));
+---
+
+<SecondaryPageLayout
+  title="Halo Wars 2 Maps - Team Respawn"
+  description="Browse Halo Wars 2 maps with canonical names and reference imagery."
+  keywords="Halo Wars 2 maps, HW2 maps, Team Respawn data"
+  canonical="https://www.teamrespawn.net/halo-wars-data/maps/"
+  ogTitle="Halo Wars 2 Maps - Team Respawn"
+  ogDescription="Searchable Halo Wars 2 map reference data with canonical names and images."
+>
+  <main id="main-content">
+    <section class="mb-8 rounded-xl border border-cyan-500/20 bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950/30 px-6 py-10">
+      <p class="text-sm uppercase tracking-[0.2em] text-cyan-300">Halo Wars 2 Data</p>
+      <h1 class="mt-3 text-3xl font-bold text-slate-100 sm:text-4xl">Maps</h1>
+      <p class="mt-4 max-w-3xl text-base text-slate-300">
+        Searchable map reference data with the same map labels and imagery used in Team Respawn match and snapshot views.
+      </p>
+    </section>
+
+    <HW2HubNav current="data" currentDataSection="maps" />
+
+    <HW2ReferenceDirectory
+      rootId="hw2-maps-directory"
+      title="Map Directory"
+      subtitle="Static map reference data sourced from the site’s Halo Wars 2 map module."
+      items={items}
+      filterPlaceholder="Search maps by name, ID, or mode"
+    />
+  </main>
+</SecondaryPageLayout>

@@ -1,0 +1,28 @@
+---
+import HW2GlobalSnapshot from '../../components/HW2GlobalSnapshot.astro';
+import HW2HubNav from '../../components/HW2HubNav.astro';
+import SecondaryPageLayout from '../../layouts/SecondaryPageLayout.astro';
+---
+
+<SecondaryPageLayout
+  title="Halo Wars 2 Leaderboards - Team Respawn"
+  description="Browse scheduled Halo Wars 2 leaderboard snapshots for supported ranked playlists."
+  keywords="Halo Wars 2 leaderboard, HW2 leaderboard snapshot, Halo Wars 2 ranked ladder"
+  canonical="https://www.teamrespawn.net/halo-wars-leaderboards/"
+  ogTitle="Halo Wars 2 Leaderboards - Team Respawn"
+  ogDescription="Scheduled Halo Wars 2 ranked leaderboard snapshots with direct links back to player lookup."
+>
+  <main id="main-content">
+    <section class="mb-8 rounded-xl border border-cyan-500/20 bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950/40 px-6 py-10">
+      <p class="text-sm uppercase tracking-[0.2em] text-cyan-300">Halo Wars 2</p>
+      <h1 class="mt-3 text-3xl font-bold text-slate-100 sm:text-4xl">Leaderboard Snapshot</h1>
+      <p class="mt-4 max-w-3xl text-base text-slate-300">
+        Ranked ladders are published from the scheduled aggregate dataset and link directly back into the existing player profile flow.
+      </p>
+    </section>
+
+    <HW2HubNav current="leaderboards" />
+
+    <HW2GlobalSnapshot rootId="hw2-leaderboards-page" mode="leaderboards" />
+  </main>
+</SecondaryPageLayout>

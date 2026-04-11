@@ -1,0 +1,46 @@
+---
+import HW2HubNav from '../../../components/HW2HubNav.astro';
+import HW2ReferenceDirectory from '../../../components/HW2ReferenceDirectory.astro';
+import SecondaryPageLayout from '../../../layouts/SecondaryPageLayout.astro';
+import { leaderData } from '../../../data/haloWars2/leaders.ts';
+
+const items = Object.values(leaderData)
+  .sort((a, b) => a.displayName.localeCompare(b.displayName))
+  .map((leader) => ({
+    title: leader.displayName,
+    subtitle: `Leader ID ${leader.id}`,
+    eyebrow: leader.faction,
+    description: `Static reference entry for ${leader.displayName}. Use this alongside player lookup and meta pages for consistent naming.`,
+    imageUrl: leader.imageUrl,
+    tags: [leader.displayName, leader.name, leader.faction, String(leader.id)],
+  }));
+---
+
+<SecondaryPageLayout
+  title="Halo Wars 2 Leaders - Team Respawn"
+  description="Browse Halo Wars 2 leaders by faction with canonical names and imagery."
+  keywords="Halo Wars 2 leaders, HW2 leaders, Team Respawn data"
+  canonical="https://www.teamrespawn.net/halo-wars-data/leaders/"
+  ogTitle="Halo Wars 2 Leaders - Team Respawn"
+  ogDescription="Searchable Halo Wars 2 leader reference data with consistent naming."
+>
+  <main id="main-content">
+    <section class="mb-8 rounded-xl border border-cyan-500/20 bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950/30 px-6 py-10">
+      <p class="text-sm uppercase tracking-[0.2em] text-cyan-300">Halo Wars 2 Data</p>
+      <h1 class="mt-3 text-3xl font-bold text-slate-100 sm:text-4xl">Leaders</h1>
+      <p class="mt-4 max-w-3xl text-base text-slate-300">
+        Canonical leader names and faction labels used across Team Respawn’s lookup, snapshot, and match-detail views.
+      </p>
+    </section>
+
+    <HW2HubNav current="data" currentDataSection="leaders" />
+
+    <HW2ReferenceDirectory
+      rootId="hw2-leaders-directory"
+      title="Leader Directory"
+      subtitle="Static leader reference data sourced from the site’s Halo Wars 2 data module."
+      items={items}
+      filterPlaceholder="Search leaders by name, faction, or ID"
+    />
+  </main>
+</SecondaryPageLayout>

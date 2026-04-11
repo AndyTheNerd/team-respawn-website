@@ -1,0 +1,37 @@
+---
+import HW2HubNav from '../../../components/HW2HubNav.astro';
+import HW2ReferenceDirectory from '../../../components/HW2ReferenceDirectory.astro';
+import SecondaryPageLayout from '../../../layouts/SecondaryPageLayout.astro';
+---
+
+<SecondaryPageLayout
+  title="Halo Wars 2 Units and Techs - Team Respawn"
+  description="Browse Halo Wars 2 game objects and tech metadata from Team Respawn’s cached API endpoints."
+  keywords="Halo Wars 2 units, Halo Wars 2 techs, HW2 game objects, Team Respawn data"
+  canonical="https://www.teamrespawn.net/halo-wars-data/units-techs/"
+  ogTitle="Halo Wars 2 Units and Techs - Team Respawn"
+  ogDescription="Searchable Halo Wars 2 unit and tech metadata cached through Team Respawn."
+>
+  <main id="main-content">
+    <section class="mb-8 rounded-xl border border-cyan-500/20 bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950/30 px-6 py-10">
+      <p class="text-sm uppercase tracking-[0.2em] text-cyan-300">Halo Wars 2 Data</p>
+      <h1 class="mt-3 text-3xl font-bold text-slate-100 sm:text-4xl">Units and Techs</h1>
+      <p class="mt-4 max-w-3xl text-base text-slate-300">
+        Combined metadata view for game objects and techs, loaded from the same cached endpoints already used to resolve names in Team Respawn’s HW2 tools.
+      </p>
+    </section>
+
+    <HW2HubNav current="data" currentDataSection="units-techs" />
+
+    <HW2ReferenceDirectory
+      rootId="hw2-units-techs-directory"
+      title="Unit and Tech Directory"
+      subtitle="Combined metadata-backed reference page for game objects and techs."
+      dataSources={[
+        { url: '/api/hw2/game-objects', label: 'Units' },
+        { url: '/api/hw2/techs', label: 'Techs' }
+      ]}
+      filterPlaceholder="Search units, techs, or internal IDs"
+    />
+  </main>
+</SecondaryPageLayout>

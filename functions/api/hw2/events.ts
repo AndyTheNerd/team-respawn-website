@@ -523,7 +523,21 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   }
 
   const storeRaw = env.STORE_RAW_EVENTS === '1';
-  await storeMatchEvents(env.DB, matchId, result.data, storeRaw);
+  const fetchedAt = new Date().toISOString();
+  let storeWarning: string | null = null;
 
-  return jsonResponse({ ...result.data, _meta: { cached: false, fetchedAt: new Date().toISOString() } });
+  try {
+    await storeMatchEvents(env.DB, matchId, result.data, storeRaw);
+  } catch (error) {
+    storeWarning = error instanceof Error ? error.message : String(error);
+  }
+
+  return jsonResponse({
+    ...result.data,
+    _meta: {
+      cached: false,
+      fetchedAt,
+      storeWarning,
+    },
+  });
 };

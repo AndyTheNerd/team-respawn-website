@@ -9,7 +9,11 @@ import {
 const pathname = Astro.url?.pathname ?? '';
 const normalizedPath = normalizePathname(pathname);
 const isHome = pathname === '/' || pathname === '/index.html';
-const isHw2Stats = normalizedPath === '/halo-wars-stats';
+const isHw2Stats =
+  normalizedPath === '/halo-wars-stats' ||
+  normalizedPath === '/halo-wars-meta' ||
+  normalizedPath === '/halo-wars-leaderboards' ||
+  normalizedPath.startsWith('/halo-wars-data/');
 const isHw2GuideHub = normalizedPath === '/halo-wars-guides';
 const isVideos = pathname.startsWith('/videos');
 const navFlags = { isVideos, isHw2Stats };
@@ -45,6 +49,22 @@ const featuredLinks = [
     eyebrow: 'Tool',
     icon: 'fas fa-chart-bar',
     active: isHw2Stats,
+  },
+  {
+    href: '/halo-wars-meta',
+    title: 'HW2 Meta',
+    description: 'Open aggregate playlist snapshots, leader trends, and map activity.',
+    eyebrow: 'Snapshot',
+    icon: 'fas fa-globe',
+    active: normalizedPath === '/halo-wars-meta',
+  },
+  {
+    href: '/halo-wars-data/leaders',
+    title: 'HW2 Data',
+    description: 'Browse leader, map, power, unit, and tech reference pages.',
+    eyebrow: 'Reference',
+    icon: 'fas fa-database',
+    active: normalizedPath.startsWith('/halo-wars-data/'),
   },
   {
     href: '/partner',

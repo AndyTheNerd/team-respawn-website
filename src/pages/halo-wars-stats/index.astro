@@ -5,7 +5,9 @@ import Footer from '../../components/Footer.astro';
 import SidePanel from '../../components/SidePanel.astro';
 import StorehausPromo from '../../components/StorehausPromo.astro';
 import RecentHW2Searches from '../../components/RecentHW2Searches.astro';
-import HW2CommunityStats from '../../components/HW2CommunityStats.astro';
+import HW2GlobalSnapshot from '../../components/HW2GlobalSnapshot.astro';
+import HW2HubNav from '../../components/HW2HubNav.astro';
+import HW2ContextBridge from '../../components/HW2ContextBridge.astro';
 import { videos } from '../../data/videos';
 import { hw2NameMappings } from '../../data/haloWars2/nameMappings';
 import { confirmedCheaterGamertags } from '../../data/haloWars2/confirmedCheaters';
@@ -444,6 +446,8 @@ const hw2ContentCreatorGamertagsJson = JSON.stringify(contentCreatorGamertags).r
         </div>
       </section>
 
+      <HW2HubNav current="lookup" />
+
       <!-- Search Bar -->
       <section class="mb-8">
         <div class="flex flex-col sm:flex-row gap-3 max-w-2xl mx-auto">
@@ -526,7 +530,14 @@ const hw2ContentCreatorGamertagsJson = JSON.stringify(contentCreatorGamertags).r
 
       <div id="recent-hw2-searches-section" class="hidden">
         <RecentHW2Searches />
-        <HW2CommunityStats />
+        <HW2GlobalSnapshot
+          rootId="hw2-stats-global-snapshot"
+          mode="summary"
+          compact={true}
+          title="HW2 Global Snapshot"
+          subtitle="Scheduled aggregate playlist data shown separately from the player lookup cache."
+        />
+        <HW2ContextBridge />
       </div>
 
       <!-- Results Container -->

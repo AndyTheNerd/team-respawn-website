@@ -1,0 +1,369 @@
+---
+import { leaderData } from '../data/haloWars2/leaders.ts';
+import { mapData } from '../data/haloWars2/maps.ts';
+import { playlistData } from '../data/haloWars2/playlists.ts';
+
+interface Props {
+  rootId?: string;
+  mode?: 'summary' | 'leaderboards';
+  compact?: boolean;
+  title?: string;
+  subtitle?: string;
+}
+
+const {
+  rootId = 'hw2-global-snapshot',
+  mode = 'summary',
+  compact = false,
+  title = mode === 'leaderboards' ? 'HW2 Leaderboard Snapshot' : 'HW2 Global Meta Snapshot',
+  subtitle = mode === 'leaderboards'
+    ? 'Scheduled aggregate rankings for supported ranked playlists.'
+    : 'Scheduled aggregate data for ranked playlists, kept separate from player lookup cache data.',
+} = Astro.props;
+
+const leaderNames: Record<string, string> = Object.fromEntries(
+  Object.values(leaderData).map((leader) => [String(leader.id), leader.displayName])
+);
+const mapNames: Record<string, string> = Object.fromEntries(
+  Object.entries(mapData).map(([id, map]) => [id, map.name])
+);
+const playlistNames: Record<string, string> = Object.fromEntries(
+  Object.values(playlistData).map((playlist) => [playlist.id, playlist.displayName])
+);
+---
+
+<section class="mb-8" aria-labelledby={`${rootId}-heading`}>
+  <div class="rounded-xl border border-cyan-500/20 bg-slate-900/35 p-5 sm:p-6">
+    <div>
+      <div>
+        <h2 id={`${rootId}-heading`} class="text-xl font-semibold text-gray-100 flex items-center gap-2">
+          <i class={`fas ${mode === 'leaderboards' ? 'fa-ranking-star' : 'fa-globe'} text-cyan-400`} aria-hidden="true"></i>
+          {title}
+        </h2>
+        <p class="mt-2 max-w-3xl text-sm text-slate-300">{subtitle}</p>
+      </div>
+    </div>
+
+    <div id={rootId} class="mt-5" aria-live="polite">
+      <div class="animate-pulse space-y-4">
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {Array.from({ length: 4 }).map(() => (
+            <div class="h-20 rounded-xl border border-slate-700/50 bg-slate-800/70"></div>
+          ))}
+        </div>
+        <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          {Array.from({ length: compact ? 2 : 3 }).map(() => (
+            <div class="h-48 rounded-xl border border-slate-700/50 bg-slate-800/60"></div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script is:inline define:vars={{ rootId, mode, compact, leaderNames, mapNames, playlistNames }}>
+  (() => {
+    const root = document.getElementById(rootId);
+    if (!root) return;
+
+    const esc = (value) => String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+
+    const fmt = (value, digits = 0) => {
+      const n = Number(value);
+      if (!Number.isFinite(n)) return '—';
+      return n.toLocaleString('en-US', { maximumFractionDigits: digits, minimumFractionDigits: digits });
+    };
+
+    const fmtDuration = (seconds) => {
+      const n = Number(seconds);
+      if (!Number.isFinite(n) || n <= 0) return '—';
+      const mins = Math.floor(n / 60);
+      const secs = Math.round(n % 60);
+      return `${mins}m ${String(secs).padStart(2, '0')}s`;
+    };
+
+    const fmtRelative = (iso) => {
+      if (!iso) return 'Unknown';
+      const date = new Date(iso);
+      if (Number.isNaN(date.getTime())) return 'Unknown';
+      return date.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+      });
+    };
+
+    const fmtPercent = (value) => {
+      const n = Number(value);
+      if (!Number.isFinite(n)) return '—';
+      return `${n.toFixed(1)}%`;
+    };
+
+    const resolvePlaylistName = (playlistId, playlistName) => playlistName || playlistNames[playlistId] || playlistId || 'Unknown playlist';
+    const resolveMapName = (mapId) => mapNames[mapId] || mapId?.split('\\').pop() || mapId || 'Unknown map';
+    const resolveLeaderName = (leaderId) => leaderNames[String(leaderId)] || `Leader ${leaderId}`;
+    const movementLabel = (movement) => {
+      const n = Number(movement);
+      if (!Number.isFinite(n) || n === 0) return '—';
+      return n > 0 ? `+${n}` : `${n}`;
+    };
+
+    function renderPlaylistTabs(payload) {
+      const playlists = Array.isArray(payload.availablePlaylists) ? payload.availablePlaylists : [];
+      if (!playlists.length) return '';
+      return `
+        <div class="mb-5 flex flex-wrap gap-2" data-role="playlist-tabs">
+          ${playlists.map((playlist) => `
+            <button
+              type="button"
+              class="snapshot-playlist rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors ${playlist.id === payload.selectedPlaylistId ? 'border-cyan-400/50 bg-cyan-500/10 text-cyan-100' : 'border-slate-700 bg-slate-800/60 text-slate-300 hover:border-cyan-500/40 hover:text-cyan-200'}"
+              data-playlist-id="${esc(playlist.id)}"
+            >
+              ${esc(resolvePlaylistName(playlist.id, playlist.label))}
+            </button>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderMetaStrip(payload) {
+      const sourceLabel = payload?.snapshot?.source?.label || 'scheduled aggregate dataset';
+      const generatedAt = payload?.snapshot?.generatedAt;
+      const selected = payload?.summary;
+      const sampleText = selected?.sampleMatchCount
+        ? `Sampled matches: ${fmt(selected.sampleMatchCount)}`
+        : 'Sampled matches not published';
+      return `
+        <div class="mb-5 flex flex-col gap-2 rounded-xl border border-cyan-500/15 bg-slate-950/50 px-4 py-3 text-xs text-slate-300 sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2.5 py-1 font-semibold uppercase tracking-wider text-cyan-200">Source: ${esc(sourceLabel)}</span>
+            <span>Snapshot: ${esc(fmtRelative(generatedAt))}</span>
+          </div>
+          <div class="text-slate-400">${esc(sampleText)}</div>
+        </div>
+      `;
+    }
+
+    function renderSummaryCards(summary) {
+      return `
+        <div class="mb-5 grid grid-cols-2 gap-3 xl:grid-cols-4">
+          <div class="rounded-xl border border-slate-700/60 bg-slate-800/55 p-4">
+            <p class="text-[11px] uppercase tracking-wider text-slate-400">Tracked Matches</p>
+            <p class="mt-2 text-2xl font-bold text-cyan-300">${fmt(summary.totalMatches)}</p>
+          </div>
+          <div class="rounded-xl border border-slate-700/60 bg-slate-800/55 p-4">
+            <p class="text-[11px] uppercase tracking-wider text-slate-400">Tracked Players</p>
+            <p class="mt-2 text-2xl font-bold text-cyan-300">${fmt(summary.totalPlayers)}</p>
+          </div>
+          <div class="rounded-xl border border-slate-700/60 bg-slate-800/55 p-4">
+            <p class="text-[11px] uppercase tracking-wider text-slate-400">Avg Match Length</p>
+            <p class="mt-2 text-2xl font-bold text-cyan-300">${fmtDuration(summary.avgDurationSeconds)}</p>
+          </div>
+          <div class="rounded-xl border border-slate-700/60 bg-slate-800/55 p-4">
+            <p class="text-[11px] uppercase tracking-wider text-slate-400">Quit / DC Rate</p>
+            <p class="mt-2 text-2xl font-bold text-cyan-300">${fmtPercent((summary.quitRate || 0) * 100)}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderDetailCards(summary) {
+      const items = [
+        ['Median Powers / Player', summary.medianPowersPerPlayer == null ? '—' : fmt(summary.medianPowersPerPlayer, 1)],
+        ['Median Units Destroyed', summary.medianUnitsDestroyed == null ? '—' : fmt(summary.medianUnitsDestroyed, 1)],
+        ['Median Units Lost', summary.medianUnitsLost == null ? '—' : fmt(summary.medianUnitsLost, 1)],
+        ['Trend Window', summary.trendDays ? `${fmt(summary.trendDays)} days` : 'Current snapshot'],
+      ];
+      return `
+        <div class="mb-5 grid grid-cols-2 gap-3 xl:grid-cols-4">
+          ${items.map(([label, value]) => `
+            <div class="rounded-xl border border-slate-700/60 bg-slate-900/50 p-4">
+              <p class="text-[11px] uppercase tracking-wider text-slate-400">${esc(label)}</p>
+              <p class="mt-2 text-lg font-semibold text-slate-100">${esc(value)}</p>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderLeaderStats(leaderStats) {
+      if (!Array.isArray(leaderStats) || !leaderStats.length) {
+        return `
+          <div class="rounded-xl border border-slate-700/60 bg-slate-900/45 p-4">
+            <h3 class="text-sm font-semibold text-slate-100">Leader Meta</h3>
+            <p class="mt-3 text-sm text-slate-400">No leader snapshot data published for this playlist yet.</p>
+          </div>
+        `;
+      }
+      const rows = leaderStats.slice(0, compact ? 6 : 12).map((row) => {
+        const width = leaderStats[0]?.matchCount ? Math.max(8, Math.round((row.matchCount / leaderStats[0].matchCount) * 100)) : 0;
+        return `
+          <div class="space-y-1">
+            <div class="flex items-center justify-between gap-3 text-sm">
+              <span class="text-slate-200">${esc(resolveLeaderName(row.leaderId))}</span>
+              <span class="text-slate-400">${fmt(row.matchCount)} matches • ${fmtPercent(row.winRate)}</span>
+            </div>
+            <div class="h-2 overflow-hidden rounded-full bg-slate-700/80">
+              <div class="h-full rounded-full bg-cyan-500/70" style="width:${width}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      return `
+        <div class="rounded-xl border border-slate-700/60 bg-slate-900/45 p-4">
+          <h3 class="text-sm font-semibold text-slate-100">Leader Meta</h3>
+          <div class="mt-4 space-y-3">${rows}</div>
+        </div>
+      `;
+    }
+
+    function renderMapStats(mapStats) {
+      if (!Array.isArray(mapStats) || !mapStats.length) {
+        return `
+          <div class="rounded-xl border border-slate-700/60 bg-slate-900/45 p-4">
+            <h3 class="text-sm font-semibold text-slate-100">Map Snapshot</h3>
+            <p class="mt-3 text-sm text-slate-400">No map snapshot data published for this playlist yet.</p>
+          </div>
+        `;
+      }
+      const peak = mapStats[0]?.matchCount || 1;
+      const rows = mapStats.slice(0, compact ? 6 : 12).map((row) => `
+        <div class="grid grid-cols-[minmax(0,1fr)_72px_56px] items-center gap-3 text-sm">
+          <div>
+            <p class="truncate text-slate-200" title="${esc(resolveMapName(row.mapId))}">${esc(resolveMapName(row.mapId))}</p>
+            <div class="mt-1 h-2 overflow-hidden rounded-full bg-slate-700/80">
+              <div class="h-full rounded-full bg-emerald-500/70" style="width:${Math.max(8, Math.round((row.matchCount / peak) * 100))}%"></div>
+            </div>
+          </div>
+          <span class="text-right text-slate-400">${fmtDuration(row.medianSeconds)}</span>
+          <span class="text-right font-mono text-slate-300">${fmt(row.matchCount)}</span>
+        </div>
+      `).join('');
+
+      return `
+        <div class="rounded-xl border border-slate-700/60 bg-slate-900/45 p-4">
+          <div class="flex items-center justify-between gap-3">
+            <h3 class="text-sm font-semibold text-slate-100">Map Snapshot</h3>
+            <span class="text-[11px] uppercase tracking-wider text-slate-500">Median duration</span>
+          </div>
+          <div class="mt-4 space-y-3">${rows}</div>
+        </div>
+      `;
+    }
+
+    function renderLeaderboard(leaderboard) {
+      if (!Array.isArray(leaderboard) || !leaderboard.length) {
+        return `
+          <div class="rounded-xl border border-slate-700/60 bg-slate-900/45 p-4">
+            <h3 class="text-sm font-semibold text-slate-100">Leaderboard Snapshot</h3>
+            <p class="mt-3 text-sm text-slate-400">No leaderboard entries published for this playlist yet.</p>
+          </div>
+        `;
+      }
+
+      const rows = leaderboard.slice(0, compact && mode !== 'leaderboards' ? 5 : 50).map((entry) => `
+        <tr class="border-t border-slate-800/80">
+          <td class="px-3 py-3 font-mono text-cyan-300">${fmt(entry.rank)}</td>
+          <td class="px-3 py-3">
+            <a href="/halo-wars-stats/${encodeURIComponent(entry.gamertag)}" class="font-semibold text-slate-100 hover:text-cyan-200">${esc(entry.gamertag)}</a>
+          </td>
+          <td class="px-3 py-3 text-right text-slate-300">${entry.rating == null ? '—' : fmt(entry.rating, 0)}</td>
+          <td class="px-3 py-3 text-right text-slate-400">${entry.tier ? esc(entry.tier) : '—'}</td>
+          <td class="px-3 py-3 text-right ${Number(entry.movement) > 0 ? 'text-emerald-300' : Number(entry.movement) < 0 ? 'text-rose-300' : 'text-slate-500'}">${esc(movementLabel(entry.movement))}</td>
+        </tr>
+      `).join('');
+
+      return `
+        <div class="rounded-xl border border-slate-700/60 bg-slate-900/45 p-4 ${mode === 'leaderboards' ? 'lg:col-span-2' : ''}">
+          <div class="mb-3 flex items-center justify-between gap-3">
+            <h3 class="text-sm font-semibold text-slate-100">Leaderboard Snapshot</h3>
+            ${mode === 'summary' ? '<a href="/halo-wars-leaderboards" class="text-xs font-semibold uppercase tracking-wider text-cyan-300 hover:text-cyan-200">Open full leaderboard</a>' : ''}
+          </div>
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+              <thead class="text-left text-[11px] uppercase tracking-wider text-slate-500">
+                <tr>
+                  <th class="px-3 py-2">Rank</th>
+                  <th class="px-3 py-2">Gamertag</th>
+                  <th class="px-3 py-2 text-right">Rating</th>
+                  <th class="px-3 py-2 text-right">Tier</th>
+                  <th class="px-3 py-2 text-right">Move</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function render(payload) {
+      if (!payload?.hasData || !payload.summary) {
+        root.innerHTML = `
+          <div class="rounded-xl border border-slate-700/60 bg-slate-900/45 p-5">
+            <p class="text-sm text-slate-300">No scheduled aggregate snapshot is available yet.</p>
+            <p class="mt-2 text-sm text-slate-500">Player lookup still works normally. Once the scheduled collector publishes data, this section will show source-labelled meta snapshots independent of site searches.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const summary = payload.summary;
+      const layout = mode === 'leaderboards'
+        ? `
+          ${renderLeaderboard(payload.leaderboard)}
+        `
+        : `
+          ${renderLeaderStats(payload.leaderStats)}
+          ${renderMapStats(payload.mapStats)}
+          ${compact ? '' : renderLeaderboard(payload.leaderboard)}
+        `;
+
+      root.innerHTML = `
+        ${renderPlaylistTabs(payload)}
+        ${renderMetaStrip(payload)}
+        <div class="mb-4">
+          <p class="text-sm uppercase tracking-wider text-cyan-300">${esc(resolvePlaylistName(summary.playlistId, summary.playlistName))}</p>
+        </div>
+        ${renderSummaryCards(summary)}
+        ${compact ? '' : renderDetailCards(summary)}
+        <div class="grid grid-cols-1 gap-4 ${mode === 'leaderboards' ? '' : 'lg:grid-cols-2'}">
+          ${layout}
+        </div>
+      `;
+
+      root.querySelectorAll('[data-playlist-id]').forEach((button) => {
+        button.addEventListener('click', () => loadSnapshot(button.getAttribute('data-playlist-id') || ''));
+      });
+    }
+
+    async function loadSnapshot(playlistId = '') {
+      const endpoint = new URL('/api/hw2/global-snapshot', window.location.origin);
+      if (playlistId) endpoint.searchParams.set('playlist', playlistId);
+
+      try {
+        const response = await fetch(endpoint.toString());
+        if (!response.ok) throw new Error('fetch failed');
+        const payload = await response.json();
+        render(payload);
+      } catch {
+        root.innerHTML = `
+          <div class="rounded-xl border border-rose-500/20 bg-rose-950/20 p-5">
+            <p class="text-sm text-rose-200">Could not load the scheduled global snapshot.</p>
+            <p class="mt-2 text-sm text-rose-200/70">This does not affect player lookup. Try again later.</p>
+          </div>
+        `;
+      }
+    }
+
+    loadSnapshot();
+  })();
+</script>

@@ -9,6 +9,9 @@ A gaming content website for the [Team Respawn YouTube channel](https://www.yout
 - Blog posts: guides, walkthroughs, and reviews with pagination
 - Video database with MCC-style filter/search composer (`/videos`)
 - Halo Wars 2 live stats lookup — player profiles, match history, match details, AI summaries (`/halo-wars-stats`)
+- Halo Wars 2 global meta snapshots — scheduled aggregate playlist summaries, leader meta, and map trends (`/halo-wars-meta`)
+- Halo Wars 2 leaderboard snapshots — scheduled ranked ladder views with links back to player profiles (`/halo-wars-leaderboards`)
+- Halo Wars 2 public data reference pages — leaders, maps, leader powers, and units/techs (`/halo-wars-data/*`)
 - Halo Wars: Definitive Edition Steam player count — live concurrency, observed daily high, and 30-day trend chart (`/halo-wars-de-player-count`)
 - Halo Wars 1 unit reference table — filterable/sortable DPS, cost, and upgrade data (`/halo-wars-de-player-count`)
 - Serverless API functions (Cloudflare Pages Functions) with Cloudflare D1 caching
@@ -26,7 +29,7 @@ A gaming content website for the [Team Respawn YouTube channel](https://www.yout
 | Language | TypeScript + ES modules |
 | Hosting | Cloudflare Pages |
 | Serverless functions | Cloudflare Pages Functions (`functions/` dir) |
-| Database | Cloudflare D1 (SQLite — API response caching) |
+| Database | Cloudflare D1 (SQLite — API response caching + scheduled HW2 aggregate snapshots) |
 | Images | Cloudinary |
 
 ## Project Structure
@@ -95,9 +98,80 @@ npm run preview   # Preview production build locally
 
 ```bash
 npm run add-video           # Interactive script to add a new video entry
+npm run build-hw2-snapshot-payload -- --aggregate <aggregate.json> [--leaderboards <leaderboards.json>]
+npm run check-hw2-xandy92 -- [--base-url http://127.0.0.1:8788]
+npm run publish-hw2-snapshot -- <payload.json> [--dry-run]
 npm run cf:d1:migrate       # Run all D1 migrations on the remote database
-npm run cf:d1:migrate:9     # Run a specific migration (replace 9 with number)
+npm run cf:d1:migrate:10    # Run a specific migration (replace 10 with number)
 ```
+
+### Publishing HW2 snapshots
+
+The scheduled HW2 global snapshot pipeline posts to `POST /api/hw2/global-snapshot` using the `SNAPSHOT_SECRET`.
+
+Build a payload from separate aggregate and leaderboard inputs:
+
+```bash
+npm run build-hw2-snapshot-payload -- ^
+  --aggregate scripts/examples/hw2-aggregate-input.sample.json ^
+  --leaderboards scripts/examples/hw2-leaderboards-input.sample.json ^
+  --output scripts/examples/hw2-global-snapshot.generated.json
+```
+
+Local dry run:
+
+```bash
+npm run publish-hw2-snapshot -- scripts/examples/hw2-global-snapshot.sample.json --dry-run
+```
+
+Publish example:
+
+```bash
+set HW2_SNAPSHOT_URL=https://www.teamrespawn.net/api/hw2/global-snapshot
+set HW2_SNAPSHOT_SECRET=your-secret-here
+npm run publish-hw2-snapshot -- scripts/examples/hw2-global-snapshot.sample.json
+```
+
+### HW2 regression workflow
+
+For the pinned lookup regression account, start the app with Pages Functions enabled:
+
+```bash
+npm run dev:cf
+```
+
+Then, in a second terminal, run:
+
+```bash
+npm run check-hw2-xandy92
+```
+
+The regression script checks:
+
+- `/halo-wars-stats?gamertag=xandy92`
+- `/halo-wars-meta`
+- `/halo-wars-leaderboards`
+- `/halo-wars-data/leaders`
+- `/api/hw2/stats`
+- `/api/hw2/season-stats`
+- `/api/hw2/campaign-progress`
+- `/api/hw2/matches`
+- first returned match through `/api/hw2/match` and `/api/hw2/events`
+- `/api/hw2/global-snapshot`
+- `/api/hw2/recent-searches`
+
+Interpretation notes:
+
+- `Global snapshot API responds - No snapshot published yet` means the route is live and healthy, but no aggregate snapshot has been posted yet.
+- `route returned HTML` on an API path usually means the route is not deployed on that environment yet or is being rewritten to the site shell instead of returning JSON.
+- `Events API returned 500` or `route returned HTML error page (500)` means the worker threw before it could return cached or upstream event data.
+
+Manual follow-up checks still worth doing in the browser:
+
+- open the profile share modal on `/halo-wars-stats`
+- expand at least one recent match detail panel
+- confirm stale banner behavior when cached data is served
+- confirm the new Meta, Leaderboards, and Data links navigate cleanly from the stats page
 
 ## Links
 
