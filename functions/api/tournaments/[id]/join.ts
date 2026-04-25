@@ -1,6 +1,6 @@
 import {
   Env, TournamentRow,
-  jsonResponse, errorResponse, isExpired, hashSecret, validateTournamentId,
+  jsonResponse, errorResponse, isExpired, validateTournamentId, verifySha256SecretConstantTime,
 } from '../_shared';
 
 // ── POST /api/tournaments/:id/join ────────────────────────────────────────────
@@ -39,8 +39,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, params, env }
   // Verify join password for private tournaments
   if (tournament.join_password_hash) {
     if (!joinPassword) return errorResponse('A join password is required for this tournament', 403);
-    const hash = await hashSecret(joinPassword.trim());
-    if (hash !== tournament.join_password_hash) {
+    if (!(await verifySha256SecretConstantTime(joinPassword, tournament.join_password_hash))) {
       return errorResponse('Incorrect join password', 403);
     }
   }

@@ -88,6 +88,52 @@ export async function hashSecret(plain: string): Promise<string> {
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+const SHA256_HEX_LEN = 64;
+const SHA256_BYTE_LEN = 32;
+
+function hexNibble(code: number): number {
+  if (code >= 0x30 && code <= 0x39) return code - 0x30;
+  if (code >= 0x41 && code <= 0x46) return code - 0x41 + 10;
+  if (code >= 0x61 && code <= 0x66) return code - 0x61 + 10;
+  return -1;
+}
+
+/** Decode exactly 64 hex chars to 32 bytes. Returns null if malformed. */
+function sha256HexToBytes(hex: string): Uint8Array | null {
+  if (typeof hex !== 'string' || hex.length !== SHA256_HEX_LEN) return null;
+  const out = new Uint8Array(SHA256_BYTE_LEN);
+  for (let i = 0; i < SHA256_BYTE_LEN; i++) {
+    const hi = hexNibble(hex.charCodeAt(i * 2));
+    const lo = hexNibble(hex.charCodeAt(i * 2 + 1));
+    if (hi < 0 || lo < 0) return null;
+    out[i] = (hi << 4) | lo;
+  }
+  return out;
+}
+
+/**
+ * Compare a plain secret to a stored SHA-256 hex digest using constant-time equality
+ * on the raw digest bytes (via SubtleCrypto.timingSafeEqual).
+ */
+export async function verifySha256SecretConstantTime(
+  plain: string,
+  storedHashHex: string | null | undefined,
+): Promise<boolean> {
+  if (storedHashHex == null || storedHashHex === '') return false;
+  const stored = sha256HexToBytes(storedHashHex);
+  if (!stored) return false;
+
+  const encoded = new TextEncoder().encode(plain.trim());
+  const digest = await crypto.subtle.digest('SHA-256', encoded);
+  const computed = new Uint8Array(digest);
+
+  // Workers expose timingSafeEqual; DOM lib types may lag behind.
+  const subtle = crypto.subtle as SubtleCrypto & {
+    timingSafeEqual(a: BufferSource, b: BufferSource): boolean;
+  };
+  return subtle.timingSafeEqual(computed as BufferSource, stored as BufferSource);
+}
+
 export function expiresAt(createdAt: number): number {
   return createdAt + THIRTY_DAYS_MS;
 }
@@ -100,9 +146,11 @@ export function isExpired(tournament: TournamentRow): boolean {
  * Verify the raw admin password against the stored SHA-256 hash.
  * Passwords are always trimmed before hashing for consistency.
  */
-export async function verifyAdminPassword(raw: string, storedHash: string): Promise<boolean> {
-  const hash = await hashSecret(raw.trim());
-  return hash === storedHash;
+export async function verifyAdminPassword(
+  raw: string,
+  storedHash: string | null | undefined,
+): Promise<boolean> {
+  return verifySha256SecretConstantTime(raw, storedHash);
 }
 
 /** Max wrong admin password attempts per tournament + client before lockout. */
@@ -237,4 +285,35 @@ export function parseBracketData(raw: string | null): Record<string, unknown> | 
   } catch {
     return null;
   }
+}
+
+/** HW2 `MatchOutcome` / D1 `outcome`: 1 = win, 2 = loss. */
+export function normalizeHw2MatchOutcome(outcome: unknown): 'win' | 'loss' | null {
+  if (outcome === 1 || outcome === '1') return 'win';
+  if (outcome === 2 || outcome === '2') return 'loss';
+  if (typeof outcome === 'string') {
+    const normalized = outcome.trim().toLowerCase();
+    if (normalized === 'win' || normalized === 'won') return 'win';
+    if (normalized === 'loss' || normalized === 'lose' || normalized === 'lost') return 'loss';
+  }
+  return null;
+}
+
+/**
+ * Infer which bracket-side gamertag won a 1v1 from both human players' outcomes.
+ * Returns null when ambiguous (missing data, draw-like symmetry, contradictory values).
+ */
+export function inferBracket1v1WinnerGamertag(
+  p1Outcome: unknown,
+  p2Outcome: unknown,
+  p1Gamertag: string,
+  p2Gamertag: string,
+): string | null {
+  const n1 = normalizeHw2MatchOutcome(p1Outcome);
+  const n2 = normalizeHw2MatchOutcome(p2Outcome);
+  if (n1 === 'win' && n2 !== 'win') return p1Gamertag;
+  if (n2 === 'win' && n1 !== 'win') return p2Gamertag;
+  if (n1 === 'loss' && n2 !== 'loss') return p2Gamertag;
+  if (n2 === 'loss' && n1 !== 'loss') return p1Gamertag;
+  return null;
 }

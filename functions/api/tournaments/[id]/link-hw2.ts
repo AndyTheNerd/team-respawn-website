@@ -1,6 +1,7 @@
 import {
   Env, TournamentRow,
-  jsonResponse, errorResponse, isExpired, parseBracketData, validateTournamentId,
+  jsonResponse, errorResponse, inferBracket1v1WinnerGamertag, isExpired, parseBracketData,
+  validateTournamentId,
 } from '../_shared';
 
 // ── POST /api/tournaments/:id/link-hw2 ───────────────────────────────────────
@@ -101,30 +102,8 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, params, env }
   const p1Outcome = p1.MatchOutcome ?? p1.PlayerMatchOutcome;
   const p2Outcome = p2.MatchOutcome ?? p2.PlayerMatchOutcome;
 
-  function normalizeOutcome(outcome: unknown): 'win' | 'loss' | null {
-    if (outcome === 1 || outcome === '1') return 'win';
-    if (outcome === 2 || outcome === '2') return 'loss';
-    if (typeof outcome === 'string') {
-      const normalized = outcome.trim().toLowerCase();
-      if (normalized === 'win' || normalized === 'won') return 'win';
-      if (normalized === 'loss' || normalized === 'lose' || normalized === 'lost') return 'loss';
-    }
-    return null;
-  }
-
-  const normalizedP1Outcome = normalizeOutcome(p1Outcome);
-  const normalizedP2Outcome = normalizeOutcome(p2Outcome);
-
-  let winnerGamertag: string;
-  if (normalizedP1Outcome === 'win' && normalizedP2Outcome !== 'win') {
-    winnerGamertag = p1Gamertag;
-  } else if (normalizedP2Outcome === 'win' && normalizedP1Outcome !== 'win') {
-    winnerGamertag = p2Gamertag;
-  } else if (normalizedP1Outcome === 'loss' && normalizedP2Outcome !== 'loss') {
-    winnerGamertag = p2Gamertag;
-  } else if (normalizedP2Outcome === 'loss' && normalizedP1Outcome !== 'loss') {
-    winnerGamertag = p1Gamertag;
-  } else {
+  const winnerGamertag = inferBracket1v1WinnerGamertag(p1Outcome, p2Outcome, p1Gamertag, p2Gamertag);
+  if (!winnerGamertag) {
     return errorResponse(
       'Could not determine a winner from this HW2 match. Please verify the result manually.',
       422

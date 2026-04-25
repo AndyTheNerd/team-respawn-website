@@ -81,8 +81,8 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, params, env }
     await manager.update.match({
       id: bracketsMatchId,
       ...(bracketMatch.opponent1?.id === bWinner.id
-        ? { opponent1: { result: 'win', forfeit: true }, opponent2: { result: 'loss', forfeit: true } }
-        : { opponent1: { result: 'loss', forfeit: true }, opponent2: { result: 'win', forfeit: true } }),
+        ? { opponent1: { result: 'win' }, opponent2: { result: 'loss', forfeit: true } }
+        : { opponent1: { result: 'loss', forfeit: true }, opponent2: { result: 'win' } }),
     });
   } catch (e: any) {
     return errorResponse(`Bracket update failed: ${e?.message ?? 'unknown error'}`, 500);

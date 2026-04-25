@@ -1224,10 +1224,15 @@ const tournamentPickerMapsJson = JSON.stringify(
 
           suggestionsEl.classList.remove('hidden');
           suggestionsEl.innerHTML = '<p class="text-gray-500 text-xs mb-1">Recent matches found — click to use:</p>' +
-            data.suggestions.map(s => `
+            data.suggestions.map(s => {
+              const outcomeLabel = s.inferred_winner
+                ? `<span class="text-green-300 font-medium">${esc(s.inferred_winner)} wins</span>`
+                : '<span class="text-gray-400 font-medium">Winner not in cache</span>';
+              const dataWinner = s.inferred_winner ? esc(s.inferred_winner) : '';
+              return `
               <div class="flex items-center gap-2 rounded border border-slate-700/40 bg-slate-900/40 px-3 py-2 text-xs">
                 <div class="flex-1 min-w-0">
-                  <span class="text-green-300 font-medium">${esc(s.inferred_winner)} wins</span>
+                  ${outcomeLabel}
                   <span class="text-gray-500 mx-1">·</span>
                   <span class="text-gray-400">${s.map_id ? esc(mapName(s.map_id)) : 'Unknown map'}</span>
                   <span class="text-gray-500 mx-1">·</span>
@@ -1240,12 +1245,13 @@ const tournamentPickerMapsJson = JSON.stringify(
                   data-map-id="${esc(s.map_id ?? '')}"
                   data-p1-leader="${s.p1_leader_id ?? ''}"
                   data-p2-leader="${s.p2_leader_id ?? ''}"
-                  data-winner="${esc(s.inferred_winner)}"
+                  data-winner="${dataWinner}"
                 >
                   Use this
                 </button>
               </div>
-            `).join('');
+            `;
+            }).join('');
 
           // Wire "Use this" buttons
           suggestionsEl.querySelectorAll('.use-suggestion-btn').forEach(useBtn => {
@@ -1269,10 +1275,11 @@ const tournamentPickerMapsJson = JSON.stringify(
                   if (opt.value === useBtn.dataset.p2Leader) { opt.selected = true; break; }
                 }
               }
-              // Highlight the correct winner button
               const winnerName = useBtn.dataset.winner;
-              msgEl.textContent = `Selected: ${winnerName} wins. Click their Wins button below to confirm.`;
-              msgEl.className = 'text-xs text-green-400';
+              msgEl.textContent = winnerName
+                ? `Selected: ${winnerName} wins. Click their Wins button below to confirm.`
+                : 'Match details filled — winner not determined from cache; pick the correct Wins button below.';
+              msgEl.className = winnerName ? 'text-xs text-green-400' : 'text-xs text-cyan-400';
               msgEl.classList.remove('hidden');
               suggestionsEl.classList.add('hidden');
             });

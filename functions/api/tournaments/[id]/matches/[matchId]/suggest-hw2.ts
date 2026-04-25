@@ -1,5 +1,6 @@
 import {
   Env, TournamentRow,
+  inferBracket1v1WinnerGamertag,
   jsonResponse, errorResponse, isExpired, parseBracketData, validateTournamentId,
 } from '../../../_shared';
 
@@ -52,7 +53,8 @@ export const onRequestGet: PagesFunction<Env> = async ({ params, env }) => {
        m.started_at,
        mp1.leader_id  AS p1_leader_id,
        mp2.leader_id  AS p2_leader_id,
-       mp1.outcome    AS p1_outcome
+       mp1.outcome    AS p1_outcome,
+       mp2.outcome    AS p2_outcome
      FROM matches m
      JOIN match_players mp1
        ON mp1.match_id = m.match_id
@@ -72,20 +74,22 @@ export const onRequestGet: PagesFunction<Env> = async ({ params, env }) => {
     p1_leader_id: number | null;
     p2_leader_id: number | null;
     p1_outcome: number | null;
+    p2_outcome: number | null;
   }>();
 
-  const suggestions = rows.results.map(r => {
-    // Outcome: 1 = win, 2 = loss (HW2 convention)
-    const p1Won = r.p1_outcome === 1;
-    return {
-      hw2_match_id: r.match_id,
-      map_id: r.map_id,
-      started_at: r.started_at,
-      p1_leader_id: r.p1_leader_id,
-      p2_leader_id: r.p2_leader_id,
-      inferred_winner: p1Won ? p1Gamertag : p2Gamertag,
-    };
-  });
+  const suggestions = rows.results.map(r => ({
+    hw2_match_id: r.match_id,
+    map_id: r.map_id,
+    started_at: r.started_at,
+    p1_leader_id: r.p1_leader_id,
+    p2_leader_id: r.p2_leader_id,
+    inferred_winner: inferBracket1v1WinnerGamertag(
+      r.p1_outcome,
+      r.p2_outcome,
+      p1Gamertag,
+      p2Gamertag,
+    ),
+  }));
 
   return jsonResponse({
     p1_gamertag: p1Gamertag,
