@@ -94,6 +94,7 @@ export async function buildEventEntries(payload: any): Promise<{
         label: `Completed ${buildingName}`,
         kind: 'building',
         detail: detail || undefined,
+        iconId: buildingId ? String(buildingId) : undefined,
       });
     }
 
@@ -113,6 +114,7 @@ export async function buildEventEntries(payload: any): Promise<{
         label,
         kind: 'upgrade',
         detail: detail || undefined,
+        iconId: nextId || currentId || undefined,
         techTier: techTier || undefined,
       });
       if (typeof instanceId === 'number' && nextId) {
@@ -138,6 +140,7 @@ export async function buildEventEntries(payload: any): Promise<{
         label: `Trained ${unitName}`,
         kind: 'unit',
         detail: detailBits.length ? detailBits.join(' | ') : undefined,
+        iconId: squadId ? String(squadId) : undefined,
       });
     }
 
@@ -153,6 +156,7 @@ export async function buildEventEntries(payload: any): Promise<{
         label: `Veterancy: ${unitName}`,
         kind: 'veterancy',
         detail: detail || undefined,
+        iconId: squadId ? String(squadId) : undefined,
       });
     }
 
@@ -206,6 +210,7 @@ export async function buildEventEntries(payload: any): Promise<{
         label: `Lost ${victimName}`,
         kind: 'death',
         detail,
+        iconId: victimId ? String(victimId) : undefined,
       });
     }
 
@@ -223,6 +228,7 @@ export async function buildEventEntries(payload: any): Promise<{
         label: `Recycled ${buildingName}`,
         kind: 'recycle',
         detail: detailBits.length ? detailBits.join(' | ') : undefined,
+        iconId: buildingId ? String(buildingId) : undefined,
       });
     }
 

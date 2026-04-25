@@ -19,7 +19,13 @@ import SidePanel from '../../components/SidePanel.astro';
     <main id="main-content" class="mx-auto max-w-5xl px-4 py-10">
       <div class="mb-6 flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 class="text-2xl font-bold text-white">HW2 Tournaments</h1>
+          <div class="flex items-center gap-3 flex-wrap">
+            <h1 class="text-2xl font-bold text-white">HW2 Tournaments</h1>
+            <span
+              class="inline-flex shrink-0 items-center rounded-md border border-violet-400/40 bg-violet-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-violet-200"
+              title="This tournament tool is in beta; behavior may change as we improve it."
+            >Beta</span>
+          </div>
           <p class="mt-1 text-sm text-gray-400">Community-run single and double elimination brackets.</p>
         </div>
         <a
@@ -102,7 +108,7 @@ import SidePanel from '../../components/SidePanel.astro';
     const statusClass = t.status === 'completed' ? 'opacity-60' : '';
 
     return `
-      <a href="/tournaments/${t.id}" class="flex items-center gap-4 rounded-lg border border-slate-700/40 bg-slate-800/30 p-4 hover:bg-slate-700/30 hover:border-slate-600/50 transition-colors ${statusClass}">
+      <a href="/tournaments/tournament?id=${encodeURIComponent(t.id)}" class="flex items-center gap-4 rounded-lg border border-slate-700/40 bg-slate-800/30 p-4 hover:bg-slate-700/30 hover:border-slate-600/50 transition-colors ${statusClass}">
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2 flex-wrap">
             <span class="font-semibold text-white truncate">${escHtml(t.name)}</span>

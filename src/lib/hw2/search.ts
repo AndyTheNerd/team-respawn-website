@@ -1,8 +1,8 @@
 import { MATCH_FETCH_COUNT, CURRENT_SEASON, state } from './state';
-import { globalError, resultsContainer, playerGamertagEl, playerContentCreatorIndicatorEl, playerCheaterIndicatorEl, playerLastSeenEl, profileShareBtn, recentHw2SearchesSectionEl, videoCtaEl } from './dom';
+import { globalError, resultsContainer, playerGamertagEl, playerContentCreatorIndicatorEl, playerCheaterIndicatorEl, playerSmurfIndicatorEl, playerLastSeenEl, profileShareBtn, recentHw2SearchesSectionEl, videoCtaEl } from './dom';
 import { showSkeleton, hideSkeleton, showError, showStaleBanner, hideStaleBanner } from './uiState';
 import { destroyAllCharts } from './chartManager';
-import { updateLastSeen, isContentCreatorGamertag, isConfirmedCheaterGamertag } from './dataProcessing';
+import { updateLastSeen, isContentCreatorGamertag, isConfirmedCheaterGamertag, isSuspectedSmurfGamertag } from './dataProcessing';
 import { syncProfileUrl } from './urlProfile';
 import { addRecentSearch } from './localStorage';
 import { renderOverview } from './renderOverview';
@@ -32,6 +32,10 @@ export async function performSearch(gamertag: string, options: { matchId?: strin
   if (playerCheaterIndicatorEl) {
     const suspected = isConfirmedCheaterGamertag(cleanGamertag);
     playerCheaterIndicatorEl.classList.toggle('hidden', !suspected);
+  }
+  if (playerSmurfIndicatorEl) {
+    const suspected = isSuspectedSmurfGamertag(cleanGamertag);
+    playerSmurfIndicatorEl.classList.toggle('hidden', !suspected);
   }
   if (playerLastSeenEl) {
     playerLastSeenEl.textContent = '';

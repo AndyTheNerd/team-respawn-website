@@ -4,6 +4,9 @@ import {
   Env, TournamentRow, ParticipantRow,
   jsonResponse, errorResponse, isExpired,
   verifyAdminPassword, validateTournamentId,
+  adminPasswordCheckRateLimit,
+  adminPasswordRecordFailure,
+  adminPasswordRecordSuccess,
 } from '../_shared';
 
 // ── POST /api/tournaments/:id/start ──────────────────────────────────────────
@@ -23,7 +26,6 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, params, env }
   }
 
   const adminPassword = typeof body.adminPassword === 'string' ? body.adminPassword.trim() : '';
-  if (!adminPassword) return errorResponse('adminPassword is required', 401);
 
   const tournament = await env.DB.prepare(
     'SELECT * FROM tournaments WHERE id = ?'
@@ -32,9 +34,19 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, params, env }
   if (!tournament) return errorResponse('Tournament not found', 404);
   if (isExpired(tournament)) return errorResponse('This tournament has expired', 410);
   if (!tournament.admin_password_hash) return errorResponse('Admin password not configured', 400);
+
+  const locked = await adminPasswordCheckRateLimit(env, id, request);
+  if (locked) return locked;
+
+  if (!adminPassword) return errorResponse('adminPassword is required', 401);
+
   if (!(await verifyAdminPassword(adminPassword, tournament.admin_password_hash))) {
+    await adminPasswordRecordFailure(env, id, request);
     return errorResponse('Incorrect admin password', 403);
   }
+
+  await adminPasswordRecordSuccess(env, id, request);
+
   if (tournament.status !== 'registration') {
     return errorResponse('Tournament has already started');
   }

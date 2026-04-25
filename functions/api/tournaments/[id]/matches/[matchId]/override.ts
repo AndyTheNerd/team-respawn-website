@@ -4,6 +4,9 @@ import {
   Env, TournamentRow,
   jsonResponse, errorResponse, isExpired,
   verifyAdminPassword, parseBracketData, validateTournamentId,
+  adminPasswordCheckRateLimit,
+  adminPasswordRecordFailure,
+  adminPasswordRecordSuccess,
 } from '../../../_shared';
 
 // ── POST /api/tournaments/:id/matches/:matchId/override ───────────────────────
@@ -31,7 +34,6 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, params, env }
   const p1LeaderId = typeof body.p1LeaderId === 'number' ? body.p1LeaderId : null;
   const p2LeaderId = typeof body.p2LeaderId === 'number' ? body.p2LeaderId : null;
 
-  if (!adminPassword) return errorResponse('adminPassword is required', 401);
   if (!winnerGamertag) return errorResponse('winnerGamertag is required');
 
   const tournament = await env.DB.prepare(
@@ -41,9 +43,19 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, params, env }
   if (!tournament) return errorResponse('Tournament not found', 404);
   if (isExpired(tournament)) return errorResponse('This tournament has expired', 410);
   if (!tournament.admin_password_hash) return errorResponse('Admin password not configured', 400);
+
+  const locked = await adminPasswordCheckRateLimit(env, tournamentId, request);
+  if (locked) return locked;
+
+  if (!adminPassword) return errorResponse('adminPassword is required', 401);
+
   if (!(await verifyAdminPassword(adminPassword, tournament.admin_password_hash))) {
+    await adminPasswordRecordFailure(env, tournamentId, request);
     return errorResponse('Incorrect admin password', 403);
   }
+
+  await adminPasswordRecordSuccess(env, tournamentId, request);
+
   if (tournament.status !== 'active') return errorResponse('Tournament is not active');
 
   const bracketContent = parseBracketData(tournament.bracket_data);
@@ -58,6 +70,9 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, params, env }
     (p: any) => p.name?.toLowerCase() === winnerGamertag.toLowerCase()
   );
   if (!bWinner) return errorResponse('Winner gamertag not found in bracket');
+  if (bWinner.id !== bracketMatch.opponent1?.id && bWinner.id !== bracketMatch.opponent2?.id) {
+    return errorResponse('Winner must be one of the players in this match');
+  }
 
   const db = new InMemoryDatabase(bracketContent as any);
   const manager = new BracketsManager(db);

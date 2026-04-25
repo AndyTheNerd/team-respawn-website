@@ -61,6 +61,20 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     ? Math.min(64, Math.max(2, Math.floor(body.maxParticipants)))
     : 16;
 
+  const rulesRaw = typeof body.rules === 'string' ? body.rules.trim() : '';
+  const rules = rulesRaw.length > 0 ? rulesRaw : null;
+  if (rules && rules.length > 4000) {
+    return errorResponse('Rules must be 4000 characters or fewer');
+  }
+
+  let startsAt: number | null = null;
+  if (body.starts_at !== undefined && body.starts_at !== null) {
+    if (typeof body.starts_at !== 'number' || !Number.isFinite(body.starts_at)) {
+      return errorResponse('starts_at must be a valid timestamp or omitted');
+    }
+    startsAt = Math.floor(body.starts_at);
+  }
+
   if (!name) return errorResponse('Tournament name is required');
   if (name.length > 80) return errorResponse('Tournament name must be 80 characters or fewer');
   if (!organizerName) return errorResponse('Organizer name is required');
@@ -76,16 +90,37 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   const adminPasswordHash = await hashSecret(adminPassword);
   const joinPasswordHash = joinPassword ? await hashSecret(joinPassword) : null;
   const now = Date.now();
+  const expires = expiresAt(now);
+  if (startsAt !== null && startsAt > expires) {
+    return errorResponse('Scheduled start must be on or before the tournament expiry date');
+  }
 
-  await env.DB.prepare(
-    `INSERT INTO tournaments
-       (id, name, organizer_name, admin_token_hash, admin_password_hash, join_password_hash,
-        format, status, bracket_data, max_participants, created_at, expires_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, 'registration', NULL, ?, ?, ?)`
-  ).bind(
-    id, name, organizerName, legacyTokenHash, adminPasswordHash, joinPasswordHash,
-    format, maxParticipants, now, expiresAt(now)
-  ).run();
+  try {
+    await env.DB.prepare(
+      `INSERT INTO tournaments
+         (id, name, organizer_name, admin_token_hash, admin_password_hash, join_password_hash,
+          format, status, bracket_data, max_participants, created_at, expires_at, rules, starts_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 'registration', NULL, ?, ?, ?, ?, ?)`
+    ).bind(
+      id, name, organizerName, legacyTokenHash, adminPasswordHash, joinPasswordHash,
+      format, maxParticipants, now, expires, rules, startsAt,
+    ).run();
+  } catch (e: unknown) {
+    const message = String((e as { message?: unknown })?.message ?? e ?? '');
+    if (/no such column:\s*(rules|starts_at)/i.test(message)) {
+      await env.DB.prepare(
+        `INSERT INTO tournaments
+           (id, name, organizer_name, admin_token_hash, admin_password_hash, join_password_hash,
+            format, status, bracket_data, max_participants, created_at, expires_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, 'registration', NULL, ?, ?, ?)`
+      ).bind(
+        id, name, organizerName, legacyTokenHash, adminPasswordHash, joinPasswordHash,
+        format, maxParticipants, now, expires,
+      ).run();
+      return jsonResponse({ id }, 201);
+    }
+    throw e;
+  }
 
   return jsonResponse({ id }, 201);
 };

@@ -5,7 +5,7 @@
 <script>
   const id = new URLSearchParams(window.location.search).get('id');
   if (id) {
-    window.location.replace(`/tournaments/${id}`);
+    window.location.replace(`/tournaments/tournament?id=${encodeURIComponent(id)}`);
   } else {
     window.location.replace('/tournaments');
   }

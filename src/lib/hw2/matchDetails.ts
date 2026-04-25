@@ -1,11 +1,25 @@
 import type { TimelineEntry, PlayerInfo } from './types';
 import { formatMatchClock, renderTechTierBadge } from './dataProcessing';
 import { ensureLeaderPowerMap, getLeaderPowerDisplayName } from './apiCache';
-import { getLeaderName } from '../../data/haloWars2/leaders';
+import { getLeaderImage, getLeaderImageFallback, getLeaderName } from '../../data/haloWars2/leaders';
+import { getGameObjectIcon } from '../../data/haloWars2/unitIcons';
 import { getMatchResult } from '../../utils/haloApi';
 import { fetchMatchEventsPayload, buildEventEntries } from './matchEventProcessing';
 import { resolvePlayerLeaderId } from './leaderResolution';
 import { logLeaderResolutionMismatch } from './leaderResolutionDiagnostics';
+
+function renderEntryLabelWithIcon(entry: TimelineEntry) {
+  const iconUrl = getGameObjectIcon(entry.iconId);
+  const iconHtml = iconUrl
+    ? `<img src="${iconUrl}" alt="" class="h-8 w-8 rounded-sm border border-slate-700/50 bg-slate-900/60 object-contain p-0.5" loading="lazy" />`
+    : '';
+  return `
+    <span class="inline-flex items-center gap-2 min-w-0">
+      ${iconHtml}
+      <span class="text-gray-300">${entry.label}</span>
+    </span>
+  `;
+}
 
 function buildEventSummarySections(entries: TimelineEntry[], playersByIndex: Map<number, PlayerInfo>) {
   const playerCounts = new Map<number, { playerIndex: number; name: string; teamId: number | null; units: number; techs: number; powers: number }>();
@@ -128,7 +142,7 @@ function buildEventSummarySections(entries: TimelineEntry[], playersByIndex: Map
             <div class="grid grid-cols-[52px_minmax(0,1fr)] gap-2 text-xs">
               <span class="font-mono text-cyan-300">${formatMatchClock(entry.timeMs)}</span>
               <span class="flex flex-wrap items-center gap-2">
-                <span class="text-gray-300">${entry.label}</span>
+                ${renderEntryLabelWithIcon(entry)}
                 ${renderTechTierBadge(entry)}
               </span>
             </div>
@@ -351,7 +365,26 @@ export async function loadMatchDetails(matchId: string, detailsEl: HTMLElement) 
       }
     });
   }
-  const teamMap = new Map<number, { members: Array<{ name: string; leader: string; destroyed: number; lost: number; powerEntries: Array<{ name: string; times: number }> }>; totals: { destroyed: number; lost: number; powers: number } }>();
+  const getTeamBorderClass = (teamId: number | null) => {
+    if (typeof teamId !== 'number') return 'border-white/80';
+    if (teamId === 1) return 'border-sky-400';
+    if (teamId === 2) return 'border-red-400';
+    return 'border-white/80';
+  };
+
+  const teamMap = new Map<number, {
+    members: Array<{
+      name: string;
+      leader: string;
+      leaderImage: string;
+      leaderImageFallback: string;
+      leaderBorderClass: string;
+      destroyed: number;
+      lost: number;
+      powerEntries: Array<{ name: string; times: number }>;
+    }>;
+    totals: { destroyed: number; lost: number; powers: number };
+  }>();
   players.forEach((p: any) => {
     if (p.PlayerType === 2 || p.PlayerType === 3 || p.IsHuman === false) return;
     const teamId = p.TeamId;
@@ -369,6 +402,8 @@ export async function loadMatchDetails(matchId: string, detailsEl: HTMLElement) 
     const leaderId = resolution.resolvedLeaderId;
     if (teamId == null || leaderId == null) return;
     const leaderName = getLeaderName(leaderId);
+    const leaderImage = getLeaderImage(leaderId);
+    const leaderImageFallback = getLeaderImageFallback(leaderId);
     let destroyed = 0;
     let lost = 0;
     const unitStats = p?.UnitStats;
@@ -397,7 +432,16 @@ export async function loadMatchDetails(matchId: string, detailsEl: HTMLElement) 
       });
     }
     const team = teamMap.get(teamId) || { members: [], totals: { destroyed: 0, lost: 0, powers: 0 } };
-    team.members.push({ name: gamertag, leader: leaderName, destroyed, lost, powerEntries });
+    team.members.push({
+      name: gamertag,
+      leader: leaderName,
+      leaderImage,
+      leaderImageFallback,
+      leaderBorderClass: getTeamBorderClass(teamId),
+      destroyed,
+      lost,
+      powerEntries,
+    });
     team.totals.destroyed += destroyed;
     team.totals.lost += lost;
     team.totals.powers += powerCount;
@@ -414,7 +458,10 @@ export async function loadMatchDetails(matchId: string, detailsEl: HTMLElement) 
     .map(([teamId, team]) => {
       const rows = team.members.map((m) => `
         <span class="text-gray-200 truncate">${m.name}</span>
-        <span class="text-cyan-300 truncate">${m.leader}</span>
+        <span class="inline-flex items-center gap-2 text-cyan-300 truncate">
+          ${m.leaderImage ? `<img src="${m.leaderImage}" alt="" data-fallback="${m.leaderImageFallback || ''}" class="h-10 w-10 rounded-md border ${m.leaderBorderClass} bg-slate-900/70 object-contain p-0.5 shadow-sm" loading="lazy" />` : ''}
+          <span class="truncate">${m.leader}</span>
+        </span>
         <span class="text-xs text-gray-400 text-right">${m.destroyed} / ${m.lost}</span>
       `).join('');
       const powerRows = team.members.map((m) => {
@@ -654,5 +701,14 @@ export async function loadMatchDetails(matchId: string, detailsEl: HTMLElement) 
   if (summaryContent && summaryContent.getAttribute('data-loaded') !== 'true') {
     loadMatchSummary(matchId, summaryContent, { reveal: true });
   }
+  detailsEl.querySelectorAll('img[data-fallback]').forEach((node) => {
+    const img = node as HTMLImageElement;
+    img.addEventListener('error', () => {
+      const fallback = img.getAttribute('data-fallback') || '';
+      if (fallback && img.getAttribute('src') !== fallback) {
+        img.setAttribute('src', fallback);
+      }
+    }, { once: true });
+  });
   detailsEl.setAttribute('data-loaded', 'true');
 }

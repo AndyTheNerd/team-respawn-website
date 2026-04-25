@@ -2,7 +2,7 @@ import type { ShareData } from './types';
 import { SHARE_HERO_GRADIENT, state } from './state';
 import {
   shareModal, shareCard, shareResultEl, shareGamertagEl, shareSubtitleEl,
-  shareMapEl, shareLeaderEl, shareDurationEl, sharePowersEl, shareUnitsEl,
+  shareMapEl, shareLeaderEl, shareLeaderImageEl, shareDurationEl, sharePowersEl, shareUnitsEl,
   shareTeamEl, sharePlaylistEl, shareDateEl, shareHeroEl, shareStatusEl,
   shareCopyLinkBtn, shareDownloadBtn, shareCopyImageBtn, shareLinks,
   profileShareModal,
@@ -11,7 +11,7 @@ import { globalError } from './dom';
 import { showError } from './uiState';
 import { findMatchPlayer, parseDuration, getGameModeName } from './dataProcessing';
 import { buildProfileUrl } from './urlProfile';
-import { getLeaderName } from '../../data/haloWars2/leaders';
+import { getLeaderImage, getLeaderImageFallback, getLeaderName } from '../../data/haloWars2/leaders';
 import { getMapName, getMapImage, getMapImageFallback } from '../../data/haloWars2/maps';
 import { getPlaylistName } from '../../data/haloWars2/playlists';
 import { getMatchResult } from '../../utils/haloApi';
@@ -56,6 +56,21 @@ function updateShareCard(data: ShareData) {
   if (shareSubtitleEl) shareSubtitleEl.textContent = `${data.leaderName} | ${data.mapName}`;
   if (shareMapEl) shareMapEl.textContent = data.mapName;
   if (shareLeaderEl) shareLeaderEl.textContent = data.leaderName;
+  if (shareLeaderImageEl) {
+    if (data.leaderImage) {
+      shareLeaderImageEl.src = data.leaderImage;
+      shareLeaderImageEl.alt = data.leaderName;
+      if (data.leaderImageFallback) {
+        shareLeaderImageEl.setAttribute('data-fallback', data.leaderImageFallback);
+      } else {
+        shareLeaderImageEl.removeAttribute('data-fallback');
+      }
+      shareLeaderImageEl.classList.remove('hidden');
+    } else {
+      shareLeaderImageEl.removeAttribute('src');
+      shareLeaderImageEl.classList.add('hidden');
+    }
+  }
   if (shareDurationEl) shareDurationEl.textContent = data.durationStr || '-';
   if (sharePowersEl) sharePowersEl.textContent = data.powersText || '-';
   if (shareUnitsEl) shareUnitsEl.textContent = data.unitsText || '-';
@@ -310,6 +325,8 @@ export function buildMatchShareData(match: any, gamertag: string): ShareData {
     leaderPowerStats: player?.LeaderPowerStats,
   });
   const leaderName = resolution.resolvedLeaderId != null ? getLeaderName(resolution.resolvedLeaderId) : 'Unknown';
+  const leaderImage = resolution.resolvedLeaderId != null ? getLeaderImage(resolution.resolvedLeaderId) : '';
+  const leaderImageFallback = resolution.resolvedLeaderId != null ? getLeaderImageFallback(resolution.resolvedLeaderId) : '';
   logLeaderResolutionMismatch(match?.MatchId || 'unknown', gamertag, resolution);
   const mapName = getMapName(match.MapId || '');
   const mapImage =
@@ -376,6 +393,8 @@ export function buildMatchShareData(match: any, gamertag: string): ShareData {
     mapImage,
     mapImageFallback,
     leaderName,
+    leaderImage,
+    leaderImageFallback,
     dateStr,
     durationStr,
     playlistLabel,
@@ -439,4 +458,12 @@ export function initShareModalListeners() {
   shareCopyLinkBtn?.addEventListener('click', copyShareLink);
   shareDownloadBtn?.addEventListener('click', downloadShareImage);
   shareCopyImageBtn?.addEventListener('click', copyShareImage);
+  shareLeaderImageEl?.addEventListener('error', () => {
+    const fallback = shareLeaderImageEl.getAttribute('data-fallback') || '';
+    if (fallback && shareLeaderImageEl.getAttribute('src') !== fallback) {
+      shareLeaderImageEl.setAttribute('src', fallback);
+      return;
+    }
+    shareLeaderImageEl.classList.add('hidden');
+  });
 }

@@ -10,6 +10,8 @@ migrations_dir = "migrations"
 [vars]
 STORE_RAW_MATCHES = "1"
 STORE_RAW_EVENTS = "1"
+# Optional: long random string. Tournament admin rate limits store SHA-256(pepper|tournamentId|ip) in D1 only — never raw IPs. Set in Pages secrets / .dev.vars for production or local testing.
+TOURNAMENT_RATE_LIMIT_PEPPER = ""
 CLEANUP_SECRET = ""
 GROQ_API_KEY = ""
 CEREBRAS_API_KEY = ""

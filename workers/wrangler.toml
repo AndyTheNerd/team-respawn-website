@@ -11,6 +11,7 @@ migrations_dir = "../migrations"
 [vars]
 STORE_RAW_MATCHES = "1"
 STORE_RAW_EVENTS = "1"
+TOURNAMENT_RATE_LIMIT_PEPPER = ""
 CLEANUP_SECRET = ""
 GROQ_API_KEY = ""
 CEREBRAS_API_KEY = ""

@@ -16,5 +16,8 @@ export const confirmedCheaterGamertags = [
   'SixTrAveL',
   'Syllogisme5483',
   'RockPlaysLadder',
-  'EVIL ROCKGEN'
+  'EVIL ROCKGEN',
+  'Evil Morty 1st',
+  'Reaper Salami',
+  'Scorpion Laws'
 ];

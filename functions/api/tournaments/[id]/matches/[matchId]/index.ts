@@ -3,12 +3,15 @@ import { InMemoryDatabase } from '../../../_storage';
 import {
   Env, TournamentRow,
   jsonResponse, errorResponse, isExpired, parseBracketData, validateTournamentId,
+  verifyAdminPassword,
+  adminPasswordCheckRateLimit,
+  adminPasswordRecordFailure,
+  adminPasswordRecordSuccess,
 } from '../../../_shared';
 
 // ── PATCH /api/tournaments/:id/matches/:matchId ───────────────────────────────
-// Body: { reporterGamertag, winnerId, mapId?, p1LeaderId?, p2LeaderId?, hw2MatchId? }
-// Reports a match result. reporterGamertag must be one of the two match participants
-// (lightweight sanity check — not a security gate; admin override remains available).
+// Body: { adminPassword, winnerId, mapId?, p1LeaderId?, p2LeaderId?, hw2MatchId? }
+// Records a match result (organizer only — same secret as override / start).
 export const onRequestPatch: PagesFunction<Env> = async ({ request, params, env }) => {
   if (!env.DB) return errorResponse('Database unavailable', 503);
 
@@ -25,14 +28,13 @@ export const onRequestPatch: PagesFunction<Env> = async ({ request, params, env 
     return errorResponse('Invalid JSON body');
   }
 
-  const reporterGamertag = typeof body.reporterGamertag === 'string' ? body.reporterGamertag.trim() : '';
+  const adminPassword = typeof body.adminPassword === 'string' ? body.adminPassword.trim() : '';
   const winnerId = typeof body.winnerId === 'number' ? body.winnerId : null;
   const mapId = typeof body.mapId === 'string' ? body.mapId : null;
   const p1LeaderId = typeof body.p1LeaderId === 'number' ? body.p1LeaderId : null;
   const p2LeaderId = typeof body.p2LeaderId === 'number' ? body.p2LeaderId : null;
   const hw2MatchId = typeof body.hw2MatchId === 'string' ? body.hw2MatchId.trim() : null;
 
-  if (!reporterGamertag) return errorResponse('reporterGamertag is required');
   if (winnerId === null) return errorResponse('winnerId is required');
 
   const tournament = await env.DB.prepare(
@@ -41,6 +43,20 @@ export const onRequestPatch: PagesFunction<Env> = async ({ request, params, env 
 
   if (!tournament) return errorResponse('Tournament not found', 404);
   if (isExpired(tournament)) return errorResponse('This tournament has expired', 410);
+  if (!tournament.admin_password_hash) return errorResponse('Admin password not configured', 400);
+
+  const locked = await adminPasswordCheckRateLimit(env, tournamentId, request);
+  if (locked) return locked;
+
+  if (!adminPassword) return errorResponse('adminPassword is required', 401);
+
+  if (!(await verifyAdminPassword(adminPassword, tournament.admin_password_hash))) {
+    await adminPasswordRecordFailure(env, tournamentId, request);
+    return errorResponse('Incorrect admin password', 403);
+  }
+
+  await adminPasswordRecordSuccess(env, tournamentId, request);
+
   if (tournament.status !== 'active') return errorResponse('Tournament is not active');
 
   const bracketContent = parseBracketData(tournament.bracket_data);
@@ -65,17 +81,14 @@ export const onRequestPatch: PagesFunction<Env> = async ({ request, params, env 
     return errorResponse('This bracket match does not have two participants yet');
   }
 
-  // Verify reporter is one of the two match participants
-  const matchGamertags = [p1BracketPart.name?.toLowerCase(), p2BracketPart.name?.toLowerCase()];
-  if (!matchGamertags.includes(reporterGamertag.toLowerCase())) {
-    return errorResponse('You must be one of the players in this match to report the result');
-  }
-
   const winnerGamertag = winner.gamertag;
   const bWinner = bracketParticipants.find(
     (p: any) => p.name?.toLowerCase() === winnerGamertag.toLowerCase()
   );
   if (!bWinner) return errorResponse('Winner not found in bracket seeding');
+  if (bWinner.id !== bracketMatch.opponent1?.id && bWinner.id !== bracketMatch.opponent2?.id) {
+    return errorResponse('Winner must be one of the players in this match');
+  }
 
   const db = new InMemoryDatabase(bracketContent as any);
   const manager = new BracketsManager(db);

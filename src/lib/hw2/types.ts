@@ -38,6 +38,8 @@ export type ShareData = {
   mapImage: string;
   mapImageFallback: string;
   leaderName: string;
+  leaderImage: string;
+  leaderImageFallback: string;
   dateStr: string;
   durationStr: string;
   playlistLabel: string;
@@ -74,6 +76,7 @@ export type TimelineEntry = {
   label: string;
   kind: 'building' | 'upgrade' | 'unit' | 'unit_upgrade' | 'power' | 'veterancy' | 'death' | 'recycle' | 'resource';
   detail?: string;
+  iconId?: string;
   techTier?: 2 | 3;
   supply?: number;
   energy?: number;

@@ -45,6 +45,13 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, params, env }
     }
   }
 
+  const existingParticipant = await env.DB.prepare(
+    'SELECT 1 FROM tournament_participants WHERE tournament_id = ? AND LOWER(gamertag) = LOWER(?)'
+  ).bind(id, gamertag).first();
+  if (existingParticipant) {
+    return errorResponse('This gamertag has already joined');
+  }
+
   // Atomic conditional INSERT: only inserts if the current count is below max_participants.
   // This eliminates the race condition between the count check and the insert.
   try {

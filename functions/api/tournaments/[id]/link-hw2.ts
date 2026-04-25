@@ -99,13 +99,41 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, params, env }
   }
 
   const p1Outcome = p1.MatchOutcome ?? p1.PlayerMatchOutcome;
-  const p1Won = p1Outcome === 1 || p1Outcome === 'win' || p1Outcome === 'Win';
+  const p2Outcome = p2.MatchOutcome ?? p2.PlayerMatchOutcome;
+
+  function normalizeOutcome(outcome: unknown): 'win' | 'loss' | null {
+    if (outcome === 1 || outcome === '1') return 'win';
+    if (outcome === 2 || outcome === '2') return 'loss';
+    if (typeof outcome === 'string') {
+      const normalized = outcome.trim().toLowerCase();
+      if (normalized === 'win' || normalized === 'won') return 'win';
+      if (normalized === 'loss' || normalized === 'lose' || normalized === 'lost') return 'loss';
+    }
+    return null;
+  }
+
+  const normalizedP1Outcome = normalizeOutcome(p1Outcome);
+  const normalizedP2Outcome = normalizeOutcome(p2Outcome);
+
+  let winnerGamertag: string;
+  if (normalizedP1Outcome === 'win' && normalizedP2Outcome !== 'win') {
+    winnerGamertag = p1Gamertag;
+  } else if (normalizedP2Outcome === 'win' && normalizedP1Outcome !== 'win') {
+    winnerGamertag = p2Gamertag;
+  } else if (normalizedP1Outcome === 'loss' && normalizedP2Outcome !== 'loss') {
+    winnerGamertag = p2Gamertag;
+  } else if (normalizedP2Outcome === 'loss' && normalizedP1Outcome !== 'loss') {
+    winnerGamertag = p1Gamertag;
+  } else {
+    return errorResponse(
+      'Could not determine a winner from this HW2 match. Please verify the result manually.',
+      422
+    );
+  }
 
   const mapId: string = matchPayload.MapId ?? '';
   const p1LeaderId: number | null = p1.LeaderId ?? null;
   const p2LeaderId: number | null = p2.LeaderId ?? null;
-
-  const winnerGamertag = p1Won ? p1Gamertag : p2Gamertag;
   const winnerParticipant = await env.DB.prepare(
     'SELECT id FROM tournament_participants WHERE tournament_id = ? AND LOWER(gamertag) = LOWER(?)'
   ).bind(tournamentId, winnerGamertag).first<{ id: number }>();

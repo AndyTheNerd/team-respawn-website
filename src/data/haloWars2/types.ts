@@ -14,6 +14,7 @@ export interface Leader {
   displayName: string;
   faction: 'UNSC' | 'Banished';
   imageUrl: string;
+  fallbackImageUrl?: string;
 }
 
 export interface HaloMap {

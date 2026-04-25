@@ -78,6 +78,28 @@ import SidePanel from '../../components/SidePanel.astro';
           </p>
         </div>
 
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-300 mb-1.5" for="t-starts-at">
+            Scheduled start <span class="text-gray-500 font-normal">(optional)</span>
+          </label>
+          <input
+            id="t-starts-at" name="startsAt" type="datetime-local"
+            class="w-full max-w-xs rounded-md border border-slate-600/50 bg-slate-800/60 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
+          />
+          <p class="text-xs text-gray-500">When you plan to go live — shown on the tournament page. Must be before the 30-day expiry window.</p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-1.5" for="t-rules">
+            Tournament rules <span class="text-gray-500 font-normal">(optional)</span>
+          </label>
+          <textarea
+            id="t-rules" name="rules" rows="5" maxlength="4000" autocomplete="off"
+            placeholder="Format, map pool, civ bans, stream link…"
+            class="w-full rounded-md border border-slate-600/50 bg-slate-800/60 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-cyan-500/60 focus:outline-none"
+          ></textarea>
+        </div>
+
         <div class="rounded-md border border-slate-700/40 bg-slate-800/20 p-4 space-y-3">
           <div class="flex items-center gap-2">
             <input
@@ -142,6 +164,15 @@ import SidePanel from '../../components/SidePanel.astro';
     };
     const joinPw = (data.get('joinPassword') as string)?.trim();
     if (isPrivateCheckbox.checked && joinPw) body.joinPassword = joinPw;
+
+    const rules = ((data.get('rules') as string) ?? '').trim();
+    if (rules) body.rules = rules;
+
+    const startsInput = document.getElementById('t-starts-at') as HTMLInputElement;
+    if (startsInput?.value?.trim()) {
+      const ms = new Date(startsInput.value).getTime();
+      if (Number.isFinite(ms)) body.starts_at = ms;
+    }
 
     try {
       const res = await fetch('/api/tournaments', {

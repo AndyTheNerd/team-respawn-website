@@ -16,6 +16,7 @@ export const videoDataEl = document.getElementById('hw2-video-data') as HTMLScri
 export const nameMapsEl = document.getElementById('hw2-name-maps') as HTMLScriptElement | null;
 export const contentCreatorGamertagsEl = document.getElementById('hw2-content-creator-gamertags') as HTMLScriptElement | null;
 export const cheaterGamertagsEl = document.getElementById('hw2-cheater-gamertags') as HTMLScriptElement | null;
+export const smurfGamertagsEl = document.getElementById('hw2-smurf-gamertags') as HTMLScriptElement | null;
 
 // Match share modal elements
 export const shareModal = document.getElementById('match-share-modal') as HTMLElement | null;
@@ -25,6 +26,7 @@ export const shareGamertagEl = document.getElementById('match-share-gamertag') a
 export const shareSubtitleEl = document.getElementById('match-share-subtitle') as HTMLElement | null;
 export const shareMapEl = document.getElementById('match-share-map') as HTMLElement | null;
 export const shareLeaderEl = document.getElementById('match-share-leader') as HTMLElement | null;
+export const shareLeaderImageEl = document.getElementById('match-share-leader-image') as HTMLImageElement | null;
 export const shareDurationEl = document.getElementById('match-share-duration') as HTMLElement | null;
 export const sharePowersEl = document.getElementById('match-share-powers') as HTMLElement | null;
 export const shareUnitsEl = document.getElementById('match-share-units') as HTMLElement | null;
@@ -63,6 +65,7 @@ export const profileShareBtn = document.getElementById('profile-share-btn') as H
 export const playerGamertagEl = document.getElementById('player-gamertag') as HTMLElement | null;
 export const playerContentCreatorIndicatorEl = document.getElementById('player-content-creator-indicator') as HTMLElement | null;
 export const playerCheaterIndicatorEl = document.getElementById('player-cheater-indicator') as HTMLElement | null;
+export const playerSmurfIndicatorEl = document.getElementById('player-smurf-indicator') as HTMLElement | null;
 export const playerLastSeenEl = document.getElementById('player-last-seen') as HTMLElement | null;
 
 // Collapsible panel elements

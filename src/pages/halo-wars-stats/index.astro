@@ -10,6 +10,7 @@ import { videos } from '../../data/videos';
 import { hw2NameMappings } from '../../data/haloWars2/nameMappings';
 import { confirmedCheaterGamertags } from '../../data/haloWars2/confirmedCheaters';
 import { contentCreatorGamertags } from '../../data/haloWars2/contentCreators';
+import { suspectedSmurfGamertags } from '../../data/haloWars2/smurfs';
 
 const hw2VideoPool = videos
   .filter((video) => video.privacy === 'Public')
@@ -19,12 +20,13 @@ const hw2VideoJson = JSON.stringify(hw2VideoPool).replace(/</g, '\\u003c');
 const hw2NameMappingsJson = JSON.stringify(hw2NameMappings).replace(/</g, '\\u003c');
 const hw2CheaterGamertagsJson = JSON.stringify(confirmedCheaterGamertags).replace(/</g, '\\u003c');
 const hw2ContentCreatorGamertagsJson = JSON.stringify(contentCreatorGamertags).replace(/</g, '\\u003c');
+const hw2SmurfGamertagsJson = JSON.stringify(suspectedSmurfGamertags).replace(/</g, '\\u003c');
 ---
 <BaseLayout
   title="Halo Wars 2 Stats - Team Respawn"
   description="Search for any gamertag and view Halo Wars 2 player stats, ranked CSR, leader usage, and recent match history."
   keywords="Halo Wars 2 stats, HW2 stats, Halo Wars 2 ranked, CSR lookup, gamertag search, Halo Wars 2 leaderboard"
-  canonical="https://www.teamrespawn.net/halo-wars-stats/"
+  canonical=""
   ogTitle="Halo Wars 2 Stats Lookup - Team Respawn"
   ogDescription="Search any gamertag to view Halo Wars 2 player stats, ranked CSR, leader usage, and match history."
   ogImage="https://www.teamrespawn.net/content/Team-Respawn-Full.png"
@@ -229,10 +231,28 @@ const hw2ContentCreatorGamertagsJson = JSON.stringify(contentCreatorGamertags).r
         inset: 0;
         padding: 12px;
         display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        background: linear-gradient(180deg, rgba(2, 6, 23, 0.1) 0%, rgba(2, 6, 23, 0.85) 100%);
+      }
+
+      .match-share-hero-leader {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+        border: 2px solid rgba(255, 255, 255, 0.92);
+        background: rgba(15, 23, 42, 0.9);
+        object-fit: contain;
+        padding: 2px;
+        box-shadow: 0 10px 30px rgba(2, 6, 23, 0.35);
+      }
+
+      .match-share-hero-copy {
+        width: 100%;
+        display: flex;
         flex-direction: column;
         justify-content: flex-end;
         gap: 4px;
-        background: linear-gradient(180deg, rgba(2, 6, 23, 0.1) 0%, rgba(2, 6, 23, 0.85) 100%);
       }
 
       .match-share-map {
@@ -564,6 +584,13 @@ const hw2ContentCreatorGamertagsJson = JSON.stringify(contentCreatorGamertags).r
                 >
                   Suspected cheating
                 </span>
+                <span
+                  id="player-smurf-indicator"
+                  class="ml-2 hidden align-middle rounded-full border border-fuchsia-400/40 bg-fuchsia-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-fuchsia-200"
+                  title="This gamertag appears in the suspected smurf dataset."
+                >
+                  Suspected smurf
+                </span>
                 <span id="player-last-seen" class="ml-2 text-xs text-gray-400 font-normal hidden"></span>
               </h2>
               <button
@@ -775,8 +802,11 @@ const hw2ContentCreatorGamertagsJson = JSON.stringify(contentCreatorGamertags).r
               </div>
               <div id="match-share-hero" class="match-share-hero">
                 <div class="match-share-hero-overlay">
-                  <div id="match-share-map" class="match-share-map share-skeleton" style="--skeleton-width: 120px;">Unknown Map</div>
-                  <div id="match-share-leader" class="match-share-leader share-skeleton" style="--skeleton-width: 110px;">Unknown Leader</div>
+                  <img id="match-share-leader-image" class="match-share-hero-leader hidden" alt="" loading="eager" />
+                  <div class="match-share-hero-copy">
+                    <div id="match-share-map" class="match-share-map share-skeleton" style="--skeleton-width: 120px;">Unknown Map</div>
+                    <div id="match-share-leader" class="match-share-leader share-skeleton" style="--skeleton-width: 110px;">Unknown Leader</div>
+                  </div>
                 </div>
               </div>
               <div class="match-share-stats">
@@ -972,6 +1002,7 @@ const hw2ContentCreatorGamertagsJson = JSON.stringify(contentCreatorGamertags).r
         <script type="application/json" id="hw2-name-maps" set:html={hw2NameMappingsJson}></script>
         <script type="application/json" id="hw2-content-creator-gamertags" set:html={hw2ContentCreatorGamertagsJson}></script>
         <script type="application/json" id="hw2-cheater-gamertags" set:html={hw2CheaterGamertagsJson}></script>
+        <script type="application/json" id="hw2-smurf-gamertags" set:html={hw2SmurfGamertagsJson}></script>
       </section>
 
       <!-- Storehaus Promo -->
