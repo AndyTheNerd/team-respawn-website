@@ -106,7 +106,7 @@ CLOUDFLARE_API_TOKEN
 CLOUDFLARE_ZONE_ID
 ```
 
-In production these are set as Cloudflare Pages secrets. `wrangler.toml` also defines `STORE_RAW_MATCHES`, `STORE_RAW_EVENTS`, `CLEANUP_SECRET`, `GROQ_API_KEY`, and `CEREBRAS_API_KEY` as vars (currently only the first two are active).
+In production these are set as Cloudflare Pages secrets. `wrangler.toml` also defines `STORE_RAW_MATCHES`, `STORE_RAW_EVENTS`, `TOURNAMENT_RATE_LIMIT_PEPPER` (set a random value in Pages for tournament admin rate limits — raw IPs are not stored in D1), `CLEANUP_SECRET`, `GROQ_API_KEY`, and `CEREBRAS_API_KEY` as vars (currently only the first two are active).
 
 ---
 

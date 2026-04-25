@@ -1,6 +1,6 @@
 import type { VideoCta, Hw2NameMappings, AliasLookup, TimelineEntry } from './types';
 import { MIN_HW2_VIDEO_DURATION_MS } from './state';
-import { videoCtaEl, videoThumbEl, videoTitleEl, videoDateEl, videoLinkEl, videoDataEl, nameMapsEl, playerLastSeenEl, contentCreatorGamertagsEl, cheaterGamertagsEl } from './dom';
+import { videoCtaEl, videoThumbEl, videoTitleEl, videoDateEl, videoLinkEl, videoDataEl, nameMapsEl, playerLastSeenEl, contentCreatorGamertagsEl, cheaterGamertagsEl, smurfGamertagsEl } from './dom';
 import { getLeaderName } from '../../data/haloWars2/leaders';
 
 // --- Video CTA ---
@@ -182,12 +182,33 @@ const confirmedCheaterGamertagLookup: Set<string> = (() => {
   return lookup;
 })();
 
+const suspectedSmurfGamertagLookup: Set<string> = (() => {
+  const lookup = new Set<string>();
+  if (!smurfGamertagsEl?.textContent) return lookup;
+  try {
+    const parsed = JSON.parse(smurfGamertagsEl.textContent);
+    if (!Array.isArray(parsed)) return lookup;
+    parsed.forEach((entry) => {
+      if (typeof entry !== 'string') return;
+      const normalized = normalizeGamertagKey(entry);
+      if (normalized) lookup.add(normalized);
+    });
+  } catch {
+    return lookup;
+  }
+  return lookup;
+})();
+
 export function isContentCreatorGamertag(gamertag: string): boolean {
   return contentCreatorGamertagLookup.has(normalizeGamertagKey(gamertag));
 }
 
 export function isConfirmedCheaterGamertag(gamertag: string): boolean {
   return confirmedCheaterGamertagLookup.has(normalizeGamertagKey(gamertag));
+}
+
+export function isSuspectedSmurfGamertag(gamertag: string): boolean {
+  return suspectedSmurfGamertagLookup.has(normalizeGamertagKey(gamertag));
 }
 
 // --- Last Seen ---

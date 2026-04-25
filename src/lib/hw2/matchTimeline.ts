@@ -1,12 +1,26 @@
 import type { TimelineEntry, PlayerInfo } from './types';
 import { state } from './state';
 import { formatMatchClock, renderTechTierBadge } from './dataProcessing';
-import { getLeaderName } from '../../data/haloWars2/leaders';
+import { getLeaderImage, getLeaderImageFallback, getLeaderName } from '../../data/haloWars2/leaders';
+import { getGameObjectIcon } from '../../data/haloWars2/unitIcons';
 import { getMatchEvents, getMatchResult } from '../../utils/haloApi';
 import { buildEventEntries } from './matchEventProcessing';
 import { extractBuildOrders, renderBuildOrderSummary } from './renderBuildOrder';
 import { resolvePlayerLeaderId } from './leaderResolution';
 import { logLeaderResolutionMismatch } from './leaderResolutionDiagnostics';
+
+function renderEntryLabelWithIcon(entry: TimelineEntry, imageClass = 'h-8 w-8') {
+  const iconUrl = getGameObjectIcon(entry.iconId);
+  const iconHtml = iconUrl
+    ? `<img src="${iconUrl}" alt="" class="${imageClass} rounded-sm border border-slate-700/50 bg-slate-900/60 object-contain p-0.5" loading="lazy" />`
+    : '';
+  return `
+    <span class="inline-flex items-center gap-2 min-w-0">
+      ${iconHtml}
+      <span class="text-gray-400">${entry.label}</span>
+    </span>
+  `;
+}
 
 function buildTimelineHighlights(entries: TimelineEntry[]) {
   if (entries.length === 0) return '';
@@ -51,7 +65,7 @@ function buildTimelineHighlights(entries: TimelineEntry[]) {
         <div class="flex flex-wrap items-center gap-2 text-xs">
           <span class="text-gray-200 truncate">${entry.playerName}</span>
           <span class="inline-flex items-center px-2 py-0.5 rounded-full border text-[10px] uppercase tracking-wider ${tag.className}">${tag.label}</span>
-          <span class="text-gray-400">${entry.label}</span>
+          ${renderEntryLabelWithIcon(entry)}
           ${renderTechTierBadge(entry)}
         </div>
       </div>
@@ -71,7 +85,7 @@ function buildTimelineHighlights(entries: TimelineEntry[]) {
         <div class="flex flex-wrap items-center gap-2 text-xs">
           <span class="text-gray-200 truncate">${entry.playerName}</span>
           <span class="inline-flex items-center px-2 py-0.5 rounded-full border text-[10px] uppercase tracking-wider border-orange-400/40 text-orange-200 bg-orange-400/10">Upgrade</span>
-          <span class="text-gray-400">${entry.label}</span>
+          ${renderEntryLabelWithIcon(entry)}
           ${renderTechTierBadge(entry)}
         </div>
       </div>
@@ -212,6 +226,12 @@ export async function loadMatchTimeline(matchId: string, timelineEl: HTMLElement
     if (teamId === 2) return 'bg-red-400';
     return 'bg-sky-400';
   };
+  const getTeamBorderClass = (teamId: number | null) => {
+    if (typeof teamId !== 'number') return 'border-white/80';
+    if (teamId === 1) return 'border-sky-400';
+    if (teamId === 2) return 'border-red-400';
+    return 'border-white/80';
+  };
   const rosterEntries = [...playersByIndex.entries()]
     .filter(([, info]) => info.playerType !== 3)
     .sort((a, b) => a[0] - b[0])
@@ -219,13 +239,18 @@ export async function loadMatchTimeline(matchId: string, timelineEl: HTMLElement
       const resolution = resolveLeaderForPlayer(index, info);
       const leaderId = resolution.resolvedLeaderId;
       const leaderName = leaderId != null ? getLeaderName(leaderId) : 'Unknown';
+      const leaderImage = leaderId != null ? getLeaderImage(leaderId) : '';
+      const leaderImageFallback = leaderId != null ? getLeaderImageFallback(leaderId) : '';
       const teamLabel = typeof info.teamId === 'number' ? `Team ${info.teamId}` : '';
       return {
         index,
         name: info.name || `Player ${index}`,
         leaderName,
+        leaderImage,
+        leaderImageFallback,
         teamLabel,
         swatchClass: getTeamSwatchClass(info.teamId ?? null),
+        borderClass: getTeamBorderClass(info.teamId ?? null),
         teamId: info.teamId ?? null,
       };
     });
@@ -244,6 +269,7 @@ export async function loadMatchTimeline(matchId: string, timelineEl: HTMLElement
             ${team1Entries.map((entry) => `
               <div class="inline-flex items-center gap-2 rounded-full border border-slate-700/60 bg-slate-800/70 px-3 py-1 text-[11px] text-gray-200">
                 <span class="inline-flex h-2 w-2 rounded-full ${entry.swatchClass}"></span>
+                ${entry.leaderImage ? `<img src="${entry.leaderImage}" alt="" data-fallback="${entry.leaderImageFallback || ''}" class="h-10 w-10 rounded-md border ${entry.borderClass} bg-slate-900/70 object-contain p-0.5 shadow-sm" loading="lazy" />` : ''}
                 <span class="font-semibold text-gray-100">${entry.name}</span>
                 <span class="text-gray-500">&bull;</span>
                 <span class="text-cyan-200">${entry.leaderName}</span>
@@ -254,6 +280,7 @@ export async function loadMatchTimeline(matchId: string, timelineEl: HTMLElement
             ${team2Entries.map((entry) => `
               <div class="inline-flex items-center gap-2 rounded-full border border-slate-700/60 bg-slate-800/70 px-3 py-1 text-[11px] text-gray-200">
                 <span class="inline-flex h-2 w-2 rounded-full ${entry.swatchClass}"></span>
+                ${entry.leaderImage ? `<img src="${entry.leaderImage}" alt="" data-fallback="${entry.leaderImageFallback || ''}" class="h-10 w-10 rounded-md border ${entry.borderClass} bg-slate-900/70 object-contain p-0.5 shadow-sm" loading="lazy" />` : ''}
                 <span class="font-semibold text-gray-100">${entry.name}</span>
                 <span class="text-gray-500">&bull;</span>
                 <span class="text-cyan-200">${entry.leaderName}</span>
@@ -266,6 +293,7 @@ export async function loadMatchTimeline(matchId: string, timelineEl: HTMLElement
             ${otherEntries.map((entry) => `
               <div class="inline-flex items-center gap-2 rounded-full border border-slate-700/60 bg-slate-800/70 px-3 py-1 text-[11px] text-gray-200">
                 <span class="inline-flex h-2 w-2 rounded-full ${entry.swatchClass}"></span>
+                ${entry.leaderImage ? `<img src="${entry.leaderImage}" alt="" data-fallback="${entry.leaderImageFallback || ''}" class="h-10 w-10 rounded-md border ${entry.borderClass} bg-slate-900/70 object-contain p-0.5 shadow-sm" loading="lazy" />` : ''}
                 <span class="font-semibold text-gray-100">${entry.name}</span>
                 <span class="text-gray-500">&bull;</span>
                 <span class="text-cyan-200">${entry.leaderName}</span>
@@ -446,7 +474,7 @@ export async function loadMatchTimeline(matchId: string, timelineEl: HTMLElement
                 <div class="flex flex-wrap items-center gap-2">
                   <span class="text-gray-200 truncate">${entry.playerName}</span>
                   <span class="inline-flex items-center px-2 py-0.5 rounded-full border text-[10px] uppercase tracking-wider ${tag.className}">${tag.label}</span>
-                  <span class="text-gray-300">${entry.label}</span>
+                  ${renderEntryLabelWithIcon(entry)}
                   ${renderTechTierBadge(entry)}
                 </div>
                 ${entry.detail ? `<div class="text-[10px] text-gray-500 mt-1">${entry.detail}</div>` : ''}
@@ -490,7 +518,7 @@ export async function loadMatchTimeline(matchId: string, timelineEl: HTMLElement
               <div class="flex flex-wrap items-center gap-2">
                 <span class="text-gray-200 truncate">${entry.playerName}</span>
                 <span class="inline-flex items-center px-2 py-0.5 rounded-full border text-[10px] uppercase tracking-wider ${tag.className}">${tag.label}</span>
-                <span class="text-gray-300">${entry.label}</span>
+                ${renderEntryLabelWithIcon(entry)}
                 ${renderTechTierBadge(entry)}
               </div>
               ${entry.detail ? `<div class="text-[10px] text-gray-500 mt-1">${entry.detail}</div>` : ''}
@@ -548,6 +576,15 @@ export async function loadMatchTimeline(matchId: string, timelineEl: HTMLElement
   typeInputs.forEach((input) => input.addEventListener('change', updateFilter));
   if (startInput) startInput.addEventListener('change', updateFilter);
   if (endInput) endInput.addEventListener('change', updateFilter);
+  timelineEl.querySelectorAll('img[data-fallback]').forEach((node) => {
+    const img = node as HTMLImageElement;
+    img.addEventListener('error', () => {
+      const fallback = img.getAttribute('data-fallback') || '';
+      if (fallback && img.getAttribute('src') !== fallback) {
+        img.setAttribute('src', fallback);
+      }
+    }, { once: true });
+  });
   renderTimelineList();
 
   timelineEl.removeAttribute('data-loading');

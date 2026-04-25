@@ -1,4 +1,6 @@
 import { errorResponse, fetchWithKeyFallback, HALO_ENDPOINTS, jsonResponse, statusFromError } from './_shared';
+import { patchMatchPayloadWithResolvedLeaders, syncResolvedLeadersForMatches } from './_shared/leaderCache';
+import { resolvePlayerLeaderId } from '../../../src/lib/hw2/leaderResolution';
 
 type D1PreparedStatement = {
   bind: (...args: unknown[]) => D1PreparedStatement;
@@ -45,6 +47,11 @@ type MatchPlayerRow = {
   is_human: number;
   team_id: number | null;
   leader_id: number | null;
+  raw_leader_id: number | null;
+  resolved_leader_id: number | null;
+  leader_resolution_source: string | null;
+  leader_resolution_confidence: string | null;
+  leader_resolution_reason: string | null;
   outcome: number | null;
   units_destroyed: number;
   units_lost: number;
@@ -89,6 +96,8 @@ function trimMatchPayload(payload: any): any {
 async function reconstructMatchFromDB(db: D1Database, matchId: string) {
   const playerRows = await db.prepare(
     `SELECT player_key, player_id, player_name, is_human, team_id, leader_id,
+            raw_leader_id, resolved_leader_id,
+            leader_resolution_source, leader_resolution_confidence, leader_resolution_reason,
             outcome, units_destroyed, units_lost, player_index
      FROM match_players WHERE match_id = ?`
   ).bind(matchId).all<MatchPlayerRow>();
@@ -113,10 +122,11 @@ async function reconstructMatchFromDB(db: D1Database, matchId: string) {
     .sort((a, b) => a.player_index - b.player_index)
     .map((row) => {
       const isHuman = row.is_human === 1;
+      const resolvedLeaderId = row.resolved_leader_id ?? row.leader_id ?? row.raw_leader_id;
       const player: any = {
         PlayerIndex: row.player_index,
         TeamId: row.team_id,
-        LeaderId: row.leader_id,
+        LeaderId: resolvedLeaderId,
         MatchOutcome: row.outcome,
         IsHuman: isHuman,
         PlayerType: isHuman ? 1 : 3,
@@ -150,12 +160,14 @@ async function reconstructMatchFromDB(db: D1Database, matchId: string) {
 }
 
 async function loadCachedMatch(db: D1Database, matchId: string) {
+  const resolvedByPlayer = await syncResolvedLeadersForMatches(db, [matchId]);
   const row = await db.prepare(
     'SELECT payload_json, fetched_at FROM raw_match_payloads WHERE match_id = ?'
   ).bind(matchId).first<CachedMatchRow>();
   if (row?.payload_json) {
     try {
       const payload = JSON.parse(row.payload_json);
+      patchMatchPayloadWithResolvedLeaders(matchId, payload, resolvedByPlayer);
       return { payload, fetchedAt: row.fetched_at };
     } catch { /* fall through to reconstruction */ }
   }
@@ -276,7 +288,12 @@ async function storeMatchDetail(
 
   players.forEach((player, index) => {
     const teamId = player?.TeamId;
-    const leaderId = player?.LeaderId ?? null;
+    const resolution = resolvePlayerLeaderId({
+      rawLeaderId: player?.LeaderId ?? null,
+      leaderPowerStats: player?.LeaderPowerStats,
+    });
+    const rawLeaderId = resolution.rawLeaderId;
+    const leaderId = resolution.resolvedLeaderId ?? rawLeaderId;
     const outcome = player?.MatchOutcome ?? null;
     const isHuman = resolveIsHuman(player);
     const playerId = isHuman ? getPlayerId(player) : null;
@@ -309,18 +326,28 @@ async function storeMatchDetail(
            is_human,
            team_id,
            leader_id,
+           raw_leader_id,
+           resolved_leader_id,
+           leader_resolution_source,
+           leader_resolution_confidence,
+           leader_resolution_reason,
            outcome,
            units_destroyed,
            units_lost,
            leader_powers_used,
            player_index
-         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
          ON CONFLICT(match_id, player_key) DO UPDATE SET
            player_id = COALESCE(excluded.player_id, match_players.player_id),
            player_name = COALESCE(excluded.player_name, match_players.player_name),
            is_human = COALESCE(excluded.is_human, match_players.is_human),
            team_id = COALESCE(excluded.team_id, match_players.team_id),
            leader_id = COALESCE(excluded.leader_id, match_players.leader_id),
+           raw_leader_id = COALESCE(excluded.raw_leader_id, match_players.raw_leader_id),
+           resolved_leader_id = COALESCE(excluded.resolved_leader_id, match_players.resolved_leader_id),
+           leader_resolution_source = COALESCE(excluded.leader_resolution_source, match_players.leader_resolution_source),
+           leader_resolution_confidence = COALESCE(excluded.leader_resolution_confidence, match_players.leader_resolution_confidence),
+           leader_resolution_reason = COALESCE(excluded.leader_resolution_reason, match_players.leader_resolution_reason),
            outcome = COALESCE(excluded.outcome, match_players.outcome),
            units_destroyed = COALESCE(excluded.units_destroyed, match_players.units_destroyed),
            units_lost = COALESCE(excluded.units_lost, match_players.units_lost),
@@ -334,6 +361,11 @@ async function storeMatchDetail(
         isHumanInt,
         teamId ?? null,
         leaderId,
+        rawLeaderId,
+        leaderId,
+        resolution.source,
+        resolution.confidence,
+        resolution.reason,
         outcome,
         destroyed,
         lost,

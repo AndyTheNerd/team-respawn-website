@@ -9,6 +9,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "add-video": "node scripts/add-video.mjs",
+    "hw2:extract-assets": "node scripts/extract-hw2-assets.mjs",
     "cf:d1:migrate:1": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0001_init.sql --remote",
     "cf:d1:migrate:2": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0002_match_events.sql --remote",
     "cf:d1:migrate:3": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0003_player_stats_cache.sql --remote",
@@ -18,10 +19,21 @@
     "cf:d1:migrate:7": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0007_event_summary_columns.sql --remote",
     "cf:d1:migrate:8": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0008_match_summaries.sql --remote",
     "cf:d1:migrate:9": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0009_hwde_steam_tracking.sql --remote",
-    "cf:d1:migrate": "npm run cf:d1:migrate:1 && npm run cf:d1:migrate:2 && npm run cf:d1:migrate:3 && npm run cf:d1:migrate:4 && npm run cf:d1:migrate:5 && npm run cf:d1:migrate:6 && npm run cf:d1:migrate:7 && npm run cf:d1:migrate:8 && npm run cf:d1:migrate:9"
+    "cf:d1:migrate:10": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0010_match_player_leader_resolution.sql --remote",
+    "cf:d1:migrate:11": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0011_tournaments.sql --remote",
+    "cf:d1:migrate:12": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0012_tournament_admin_password.sql --remote",
+    "cf:d1:migrate:13": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0013_tournament_seeding.sql --remote",
+    "cf:d1:migrate:14": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0014_tournament_notes.sql --remote",
+    "cf:d1:migrate:15": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0015_tournament_gamertag_nocase.sql --remote",
+    "cf:d1:migrate:16": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0016_tournament_rules_starts.sql --remote",
+    "cf:d1:migrate:17": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0017_tournament_admin_rate_limits.sql --remote",
+    "cf:d1:migrate:18": "wrangler d1 execute team-respawn-hw2 --config workers/wrangler.toml --file migrations/0018_tournament_admin_rate_limit_clear_legacy.sql --remote",
+    "cf:d1:migrate": "npm run cf:d1:migrate:1 && npm run cf:d1:migrate:2 && npm run cf:d1:migrate:3 && npm run cf:d1:migrate:4 && npm run cf:d1:migrate:5 && npm run cf:d1:migrate:6 && npm run cf:d1:migrate:7 && npm run cf:d1:migrate:8 && npm run cf:d1:migrate:9 && npm run cf:d1:migrate:10 && npm run cf:d1:migrate:11 && npm run cf:d1:migrate:12 && npm run cf:d1:migrate:13 && npm run cf:d1:migrate:14 && npm run cf:d1:migrate:15 && npm run cf:d1:migrate:16 && npm run cf:d1:migrate:17 && npm run cf:d1:migrate:18"
   },
   "dependencies": {
     "astro": "^5.18.1",
+    "brackets-manager": "^1.9.1",
+    "brackets-viewer": "^1.9.0",
     "cloudinary": "^2.9.0",
     "webcoreui": "^1.3.0"
   },

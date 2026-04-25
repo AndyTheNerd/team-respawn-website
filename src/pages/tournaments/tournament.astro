@@ -1,0 +1,1617 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import SidePanel from '../../components/SidePanel.astro';
+import { leaderData } from '../../data/haloWars2/leaders';
+import { mapData, MAP_IDS_EXCLUDED_FROM_TOURNAMENT_PICKER } from '../../data/haloWars2/maps';
+
+const leadersJson = JSON.stringify(
+  Object.values(leaderData)
+    .map(l => ({ id: l.id, name: l.displayName }))
+    .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }))
+).replace(/</g, '\\u003c');
+
+const mapIdNamePairs = Object.values(mapData).map(m => ({ id: m.id, name: m.name }));
+const mapsJson = JSON.stringify(mapIdNamePairs).replace(/</g, '\\u003c');
+const tournamentPickerMapsJson = JSON.stringify(
+  mapIdNamePairs.filter(m => !MAP_IDS_EXCLUDED_FROM_TOURNAMENT_PICKER.has(m.id))
+).replace(/</g, '\\u003c');
+---
+<BaseLayout
+  title="Tournament - Team Respawn"
+  description="View and manage a Halo Wars 2 community tournament bracket."
+  canonical="https://www.teamrespawn.net/tournaments/"
+>
+  <Fragment slot="head">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/brackets-viewer@1.9.0/dist/brackets-viewer.min.css" crossorigin="anonymous" />
+    <link rel="stylesheet" href="/css/tournament-brackets.css" />
+    <script is:inline src="https://cdn.jsdelivr.net/npm/brackets-viewer@1.9.0/dist/brackets-viewer.min.js" crossorigin="anonymous"></script>
+  </Fragment>
+
+  <div class="container mx-auto p-4 sm:p-8">
+    <Header />
+
+    <main id="main-content" class="mx-auto max-w-6xl px-4 py-10">
+      <div class="mb-4">
+        <a href="/tournaments" class="text-xs text-cyan-400 hover:text-cyan-300 transition-colors">
+          <i class="fas fa-arrow-left mr-1" aria-hidden="true"></i>All Tournaments
+        </a>
+      </div>
+
+      <!-- Loading skeleton -->
+      <div id="page-skeleton" class="animate-pulse space-y-4">
+        <div class="h-8 w-72 rounded bg-slate-700/50"></div>
+        <div class="h-4 w-48 rounded bg-slate-700/30"></div>
+        <div class="h-32 rounded-lg bg-slate-700/30 mt-6"></div>
+      </div>
+
+      <!-- Page error -->
+      <p id="page-error" class="hidden text-center text-sm text-red-400 py-12"></p>
+
+      <!-- Main content (hidden until loaded) -->
+      <div id="page-content" class="hidden space-y-8">
+
+        <!-- Tournament header -->
+        <div class="flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <div class="flex items-center gap-3 flex-wrap">
+              <h1 id="t-name" class="text-2xl font-bold text-white"></h1>
+            </div>
+            <div class="mt-2 flex items-center gap-2 text-sm text-gray-400 flex-wrap" id="t-meta"></div>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button
+              id="share-btn" type="button"
+              class="inline-flex items-center gap-2 rounded-md border border-slate-600/40 bg-slate-800/40 px-3 py-2 text-xs text-gray-300 hover:text-white transition-colors"
+            >
+              <i class="fas fa-link" aria-hidden="true"></i>
+              <span>Copy Link</span>
+            </button>
+            <!-- Admin button — always shown, prompts for password if not authed -->
+            <button
+              id="admin-btn" type="button"
+              class="inline-flex items-center gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-300 hover:bg-amber-500/20 transition-colors"
+            >
+              <i class="fas fa-shield-alt" aria-hidden="true"></i>
+              <span id="admin-btn-label">Admin</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Admin password prompt (inline, shown on first Admin click) -->
+        <div id="admin-auth-panel" class="hidden rounded-lg border border-amber-500/20 bg-amber-500/5 p-5 space-y-3">
+          <h2 class="text-sm font-semibold text-amber-300">
+            <i class="fas fa-shield-alt mr-1" aria-hidden="true"></i>
+            Organizer Access
+          </h2>
+          <p class="text-xs text-gray-400">Enter the admin password you set when creating this tournament.</p>
+          <div class="flex gap-3 max-w-sm">
+            <input
+              id="admin-pw-input" type="password" placeholder="Admin password" autocomplete="current-password"
+              class="flex-1 rounded-md border border-slate-600/50 bg-slate-800/60 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-amber-500/50 focus:outline-none"
+            />
+            <button
+              id="admin-pw-submit" type="button"
+              class="rounded-md border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-sm text-amber-300 hover:bg-amber-500/20 transition-colors"
+            >
+              Unlock
+            </button>
+          </div>
+          <p id="admin-auth-error" class="hidden text-xs text-red-400"></p>
+        </div>
+
+        <div class="grid gap-8 xl:grid-cols-[minmax(0,1fr)_22rem] xl:items-start">
+          <div class="space-y-8">
+
+        <!-- Admin panel (shown after auth) -->
+        <div id="admin-panel" class="hidden space-y-6">
+
+          <!-- Tournament control -->
+          <section class="rounded-lg border border-amber-500/20 bg-amber-500/5 p-5 space-y-4">
+            <h2 class="text-sm font-semibold text-amber-300">
+              <i class="fas fa-cog mr-1" aria-hidden="true"></i>
+              Organizer Controls
+            </h2>
+
+            <!-- Registration controls -->
+            <div id="ctrl-registration" class="hidden space-y-4">
+              <div>
+                <h3 class="text-xs font-semibold text-gray-400 mb-2">
+                  Registered Players (<span id="reg-count">0</span> / <span id="reg-max">0</span>)
+                </h3>
+                <div id="admin-participants-list" class="flex flex-wrap gap-2 mb-3"></div>
+              </div>
+              <div class="flex flex-wrap items-start gap-3 max-w-xl">
+                <div class="flex-1 min-w-48">
+                  <input
+                    id="admin-add-gamertag" type="text" placeholder="Gamertag" maxlength="50" autocomplete="off"
+                    class="w-full rounded-md border border-slate-600/50 bg-slate-800/60 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-cyan-500/60 focus:outline-none"
+                  />
+                  <p id="admin-add-msg" class="hidden mt-2 text-xs"></p>
+                </div>
+                <button
+                  id="admin-add-btn" type="button"
+                  class="inline-flex items-center gap-2 rounded-md border border-cyan-500/40 bg-cyan-500/10 px-4 py-2 text-sm font-semibold text-cyan-300 hover:bg-cyan-500/20 transition-colors disabled:opacity-50"
+                >
+                  <i class="fas fa-user-plus" aria-hidden="true"></i>
+                  Add Player
+                </button>
+              </div>
+              <div class="flex items-center gap-3">
+                <button
+                  id="start-btn" type="button"
+                  class="inline-flex items-center gap-2 rounded-md border border-green-500/40 bg-green-500/10 px-4 py-2 text-sm font-semibold text-green-300 hover:bg-green-500/20 transition-colors disabled:opacity-50"
+                >
+                  <i class="fas fa-play" aria-hidden="true"></i>
+                  Start Tournament
+                </button>
+                <p id="start-error" class="hidden text-xs text-red-400"></p>
+              </div>
+            </div>
+
+            <!-- Active / Completed status -->
+            <div id="ctrl-active" class="hidden">
+              <p class="text-sm text-gray-400">Tournament is in progress. Use the match cards below to record results.</p>
+            </div>
+            <div id="ctrl-completed" class="hidden">
+              <p class="text-sm text-green-400 font-medium">
+                <i class="fas fa-trophy mr-1" aria-hidden="true"></i>Tournament completed!
+              </p>
+            </div>
+          </section>
+
+          <!-- Pending matches (active only) -->
+          <div id="admin-pending-section" class="hidden space-y-3">
+            <h2 class="text-sm font-semibold text-gray-300">
+              Pending Matches <span id="pending-count" class="text-gray-500 font-normal"></span>
+            </h2>
+            <div id="admin-pending-list" class="space-y-3"></div>
+          </div>
+
+          <div id="admin-completed-section" class="hidden space-y-3">
+            <div class="flex items-center justify-between gap-3 flex-wrap">
+              <h2 class="text-sm font-semibold text-gray-300">
+                Completed Matches <span id="completed-count" class="text-gray-500 font-normal"></span>
+              </h2>
+              <p class="text-xs text-gray-500">Reopen a match to undo its advancement and any later rounds that depended on it.</p>
+            </div>
+            <div id="admin-completed-list" class="space-y-3"></div>
+          </div>
+        </div>
+
+        <!-- Join panel (shown during registration, hidden for admin) -->
+        <div id="join-panel" class="hidden rounded-lg border border-blue-500/20 bg-blue-500/5 p-5 space-y-3">
+          <h2 class="text-sm font-semibold text-blue-300">
+            <i class="fas fa-user-plus mr-1" aria-hidden="true"></i>
+            Sign Up
+          </h2>
+          <div class="flex gap-3 flex-wrap">
+            <input
+              id="join-gamertag" type="text" placeholder="Your Gamertag" maxlength="50" autocomplete="off"
+              class="flex-1 min-w-40 rounded-md border border-slate-600/50 bg-slate-800/60 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-cyan-500/60 focus:outline-none"
+            />
+            <div id="join-pw-field" class="hidden flex-1 min-w-40">
+              <input
+                id="join-password" type="text" placeholder="Join Password" autocomplete="off"
+                class="w-full rounded-md border border-slate-600/50 bg-slate-800/60 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-cyan-500/60 focus:outline-none"
+              />
+            </div>
+            <button
+              id="join-btn" type="button"
+              class="rounded-md border border-blue-500/40 bg-blue-500/10 px-4 py-2 text-sm font-semibold text-blue-300 hover:bg-blue-500/20 transition-colors disabled:opacity-50"
+            >
+              Join
+            </button>
+          </div>
+          <p id="join-msg" class="hidden text-xs"></p>
+        </div>
+
+        <!-- Participants panel -->
+        <div id="participants-panel" class="hidden">
+          <h2 class="text-sm font-semibold text-gray-400 mb-3">
+            <i class="fas fa-users mr-1" aria-hidden="true"></i>
+            <span id="participants-count">0</span> participants
+          </h2>
+          <div id="participants-list" class="flex flex-wrap gap-2"></div>
+        </div>
+
+        <!-- Bracket viewer -->
+        <section class="tournament-bracket-shell">
+          <div class="tournament-bracket-shell__header">
+            <div>
+              <p class="tournament-bracket-shell__eyebrow">Match Tree</p>
+              <h2 class="tournament-bracket-shell__title">Tournament Bracket</h2>
+              <p class="tournament-bracket-shell__copy">
+                Follow each round left to right. Swipe sideways on smaller screens.
+              </p>
+            </div>
+          </div>
+          <div class="tournament-bracket-shell__body">
+            <div id="bracket-skeleton" class="tournament-bracket-skeleton animate-pulse"></div>
+            <div id="tournament-winner-banner" class="tournament-winner-banner hidden"></div>
+            <div id="bracket-empty" class="tournament-bracket-empty hidden text-sm text-gray-400">
+              The bracket hasn't been generated yet — waiting for the organizer to start.
+            </div>
+            <div id="bracket-wrapper" class="tournament-bracket-scroll hidden">
+              <div id="bracket-container" class="tournament-bracket-surface brackets-viewer"></div>
+            </div>
+            <p id="bracket-error" class="tournament-bracket-error hidden text-sm text-red-300"></p>
+          </div>
+        </section>
+
+          </div>
+
+          <aside class="xl:sticky xl:top-24 self-start space-y-6">
+            <section id="participant-info-panel" class="rounded-lg border border-slate-700/40 bg-slate-900/50 p-5 space-y-5">
+              <div class="space-y-1">
+                <h2 class="text-sm font-semibold text-cyan-200">
+                  <i class="fas fa-info-circle mr-1" aria-hidden="true"></i>
+                  Rules & schedule
+                </h2>
+                <p class="text-xs text-gray-500">Optional details everyone can see. Edit below when signed in as organizer.</p>
+              </div>
+
+              <div class="space-y-2">
+                <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-400">Scheduled start</h3>
+                <p id="schedule-line" class="text-sm text-gray-300"></p>
+              </div>
+
+              <div class="space-y-2 border-t border-slate-700/40 pt-4">
+                <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-400">Tournament rules</h3>
+                <p id="rules-empty" class="rounded-md border border-dashed border-slate-700/60 px-3 py-4 text-sm text-gray-500">
+                  No rules have been posted yet.
+                </p>
+                <div
+                  id="rules-view"
+                  class="hidden rounded-md border border-slate-700/40 bg-slate-950/40 px-3 py-4 text-sm text-gray-200 whitespace-pre-wrap break-words"
+                ></div>
+              </div>
+
+              <div id="participant-info-admin" class="hidden space-y-4 border-t border-slate-700/40 pt-4">
+                <p class="text-xs font-semibold text-amber-300">
+                  <i class="fas fa-shield-alt mr-1" aria-hidden="true"></i>
+                  Organizer — edit
+                </p>
+                <div>
+                  <label for="admin-starts-input" class="block text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1.5">
+                    Scheduled start (optional)
+                  </label>
+                  <input
+                    id="admin-starts-input"
+                    type="datetime-local"
+                    class="w-full max-w-xs rounded-md border border-slate-600/50 bg-slate-800/60 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
+                  />
+                  <p class="mt-1 text-xs text-gray-500">Shown in each visitor's local timezone. Clear the field to remove.</p>
+                </div>
+                <div>
+                  <label for="admin-rules-input" class="block text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1.5">
+                    Rules
+                  </label>
+                  <textarea
+                    id="admin-rules-input"
+                    rows="8"
+                    maxlength="4000"
+                    placeholder="Format (e.g. bo3 finals), map pool, civ bans, stream links…"
+                    class="w-full rounded-md border border-slate-600/50 bg-slate-800/60 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-cyan-500/60 focus:outline-none"
+                  ></textarea>
+                </div>
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                  <p id="admin-participant-info-msg" class="hidden text-xs"></p>
+                  <button
+                    id="admin-participant-info-save"
+                    type="button"
+                    class="inline-flex items-center gap-2 rounded-md border border-cyan-500/40 bg-cyan-500/10 px-4 py-2 text-sm font-semibold text-cyan-300 hover:bg-cyan-500/20 transition-colors disabled:opacity-50"
+                  >
+                    <i class="fas fa-save" aria-hidden="true"></i>
+                    Save rules & schedule
+                  </button>
+                </div>
+              </div>
+            </section>
+
+            <section id="notes-panel" class="rounded-lg border border-slate-700/40 bg-slate-900/50 p-5 space-y-4">
+              <div class="space-y-1">
+                <h2 class="text-sm font-semibold text-cyan-200">
+                  <i class="fas fa-clipboard mr-1" aria-hidden="true"></i>
+                  Tournament Notes
+                </h2>
+                <p class="text-xs text-gray-500">Short organizer updates and day-of reminders.</p>
+              </div>
+              <div id="notes-empty" class="hidden rounded-md border border-dashed border-slate-700/60 px-3 py-4 text-sm text-gray-500">
+                No notes have been posted yet.
+              </div>
+              <div
+                id="notes-view"
+                class="hidden rounded-md border border-slate-700/40 bg-slate-950/40 px-3 py-4 text-sm text-gray-200 whitespace-pre-wrap break-words"
+              ></div>
+              <div id="notes-admin" class="hidden space-y-3 border-t border-slate-700/40 pt-4">
+                <label for="admin-notes-input" class="block text-xs font-semibold uppercase tracking-wide text-gray-400">
+                  Edit Notes
+                </label>
+                <textarea
+                  id="admin-notes-input"
+                  rows="10"
+                  maxlength="500"
+                  placeholder="Add organizer notes for participants..."
+                  class="w-full rounded-md border border-slate-600/50 bg-slate-800/60 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-cyan-500/60 focus:outline-none"
+                ></textarea>
+                <div class="flex items-center justify-between gap-3">
+                  <p id="admin-notes-msg" class="hidden text-xs"></p>
+                  <button
+                    id="admin-notes-save"
+                    type="button"
+                    class="inline-flex items-center gap-2 rounded-md border border-cyan-500/40 bg-cyan-500/10 px-4 py-2 text-sm font-semibold text-cyan-300 hover:bg-cyan-500/20 transition-colors disabled:opacity-50"
+                  >
+                    <i class="fas fa-save" aria-hidden="true"></i>
+                    Save Notes
+                  </button>
+                </div>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </div><!-- /page-content -->
+    </main>
+
+    <Footer />
+  </div>
+
+  <SidePanel />
+</BaseLayout>
+
+<script define:vars={{ leadersJson, mapsJson, tournamentPickerMapsJson }}>
+  // ─── Data ──────────────────────────────────────────────────────────────────
+  // Prefer ?id= query param (works in wrangler dev where _redirects aren't applied
+  // and in production at /tournaments/tournament?id=trn_abc). Fall back to the
+  // last path segment so any legacy /tournaments/trn_abc links still resolve via
+  // the _redirects 200-rewrite in production.
+  const _idFromQuery = new URLSearchParams(window.location.search).get('id');
+  const _idFromPath = window.location.pathname.split('/').filter(Boolean).pop() ?? '';
+  const tournamentId = (_idFromQuery && /^trn_[0-9a-f]{12}$/.test(_idFromQuery))
+    ? _idFromQuery
+    : (/^trn_[0-9a-f]{12}$/.test(_idFromPath) ? _idFromPath : '');
+
+  const leaders = JSON.parse(leadersJson);
+  const maps = JSON.parse(mapsJson);
+  const tournamentPickerMaps = JSON.parse(tournamentPickerMapsJson);
+  const SESSION_KEY = `trn_admin_${tournamentId}`;
+
+  // ─── State ─────────────────────────────────────────────────────────────────
+  let adminPassword = sessionStorage.getItem(SESSION_KEY) ?? '';
+  let isAdmin = false;
+  let tournamentData = null;
+
+  // ─── Elements ──────────────────────────────────────────────────────────────
+  const pageSkeleton    = document.getElementById('page-skeleton');
+  const pageError       = document.getElementById('page-error');
+  const pageContent     = document.getElementById('page-content');
+  const bracketSkeleton = document.getElementById('bracket-skeleton');
+  const bracketWrapper  = document.getElementById('bracket-wrapper');
+  const bracketEmpty    = document.getElementById('bracket-empty');
+  const bracketError    = document.getElementById('bracket-error');
+  const winnerBanner    = document.getElementById('tournament-winner-banner');
+  const notesEmpty      = document.getElementById('notes-empty');
+  const notesView       = document.getElementById('notes-view');
+  const notesAdmin      = document.getElementById('notes-admin');
+
+  // ─── Helpers ───────────────────────────────────────────────────────────────
+  function esc(s) {
+    return String(s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function showError(msg) {
+    pageSkeleton.classList.add('hidden');
+    pageError.textContent = msg;
+    pageError.classList.remove('hidden');
+  }
+
+  function fmtDate(iso) {
+    return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function fmtDateTime(ms) {
+    return new Date(ms).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+  }
+
+  function msToDatetimeLocal(ms) {
+    const d = new Date(ms);
+    const p = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+  }
+
+  function parseDatetimeLocalToMs(s) {
+    if (!s || !String(s).trim()) return null;
+    const t = new Date(s).getTime();
+    return Number.isFinite(t) ? t : null;
+  }
+
+  function mapName(id) {
+    return maps.find(m => m.id === id)?.name ?? id;
+  }
+
+  function leaderName(id) {
+    const l = leaders.find(l => l.id === id);
+    return l ? l.name : id;
+  }
+
+  function participantNameById(bracketParticipants, id) {
+    return bracketParticipants.find(p => p.id === id)?.name ?? '';
+  }
+
+  function matchWinnerId(match) {
+    if (match?.opponent1?.result === 'win') return match.opponent1.id;
+    if (match?.opponent2?.result === 'win') return match.opponent2.id;
+    return null;
+  }
+
+  function tournamentWinnerName(tournament) {
+    if (tournament.status !== 'completed') return '';
+    const bd = tournament.bracket_data;
+    const bracketParticipants = bd?.participant ?? [];
+    const completedMatches = (bd?.match ?? []).filter(m => matchWinnerId(m) !== null);
+    if (completedMatches.length === 0) return '';
+
+    const finalMatch = completedMatches
+      .slice()
+      .sort((a, b) => (b.round_id - a.round_id) || (b.id - a.id))[0];
+
+    return participantNameById(bracketParticipants, matchWinnerId(finalMatch));
+  }
+
+  function renderTournamentWinner(tournament) {
+    const winnerName = tournamentWinnerName(tournament);
+    if (!winnerName) {
+      winnerBanner.classList.add('hidden');
+      winnerBanner.innerHTML = '';
+      return;
+    }
+
+    winnerBanner.innerHTML = `
+      <div class="tournament-winner-banner__icon">
+        <i class="fas fa-trophy" aria-hidden="true"></i>
+      </div>
+      <div>
+        <p class="tournament-winner-banner__label">Tournament Winner</p>
+        <p class="tournament-winner-banner__name">${esc(winnerName)}</p>
+      </div>
+    `;
+    winnerBanner.classList.remove('hidden');
+  }
+
+  function renderNotes(tournament) {
+    const notes = typeof tournament.notes === 'string' ? tournament.notes.trim() : '';
+
+    if (notes) {
+      notesView.textContent = notes;
+      notesView.classList.remove('hidden');
+      notesEmpty.classList.add('hidden');
+    } else {
+      notesView.textContent = '';
+      notesView.classList.add('hidden');
+      notesEmpty.classList.remove('hidden');
+    }
+
+    notesAdmin.classList.toggle('hidden', !isAdmin);
+    if (!isAdmin) return;
+
+    const input = document.getElementById('admin-notes-input');
+    const msg = document.getElementById('admin-notes-msg');
+    input.value = tournament.notes ?? '';
+    msg.classList.add('hidden');
+    wireAdminNotesSave();
+  }
+
+  function renderParticipantInfo(tournament) {
+    const scheduleLine = document.getElementById('schedule-line');
+    const startsMs =
+      typeof tournament.starts_at === 'number' && Number.isFinite(tournament.starts_at)
+        ? tournament.starts_at
+        : null;
+
+    if (startsMs !== null) {
+      const upcoming = startsMs > Date.now() ? ' Upcoming.' : '';
+      scheduleLine.textContent = `Starts ${fmtDateTime(startsMs)} (your local time).${upcoming}`;
+      scheduleLine.className = 'text-sm text-gray-200';
+    } else {
+      scheduleLine.textContent = 'No official start time has been set yet.';
+      scheduleLine.className = 'text-sm text-gray-500';
+    }
+
+    const rulesText = typeof tournament.rules === 'string' ? tournament.rules.trim() : '';
+    const rulesView = document.getElementById('rules-view');
+    const rulesEmpty = document.getElementById('rules-empty');
+    if (rulesText) {
+      rulesView.textContent = rulesText;
+      rulesView.classList.remove('hidden');
+      rulesEmpty.classList.add('hidden');
+    } else {
+      rulesView.textContent = '';
+      rulesView.classList.add('hidden');
+      rulesEmpty.classList.remove('hidden');
+    }
+
+    const adminBlock = document.getElementById('participant-info-admin');
+    adminBlock.classList.toggle('hidden', !isAdmin);
+    if (!isAdmin) return;
+
+    const startsInput = document.getElementById('admin-starts-input');
+    const rulesInput = document.getElementById('admin-rules-input');
+    startsInput.value = startsMs !== null ? msToDatetimeLocal(startsMs) : '';
+    rulesInput.value = tournament.rules ?? '';
+    document.getElementById('admin-participant-info-msg').classList.add('hidden');
+    wireParticipantInfoSave();
+  }
+
+  function wireParticipantInfoSave() {
+    const saveBtn = document.getElementById('admin-participant-info-save');
+    const startsInput = document.getElementById('admin-starts-input');
+    const rulesInput = document.getElementById('admin-rules-input');
+    const msg = document.getElementById('admin-participant-info-msg');
+
+    saveBtn.disabled = false;
+    saveBtn.innerHTML = '<i class="fas fa-save" aria-hidden="true"></i> Save rules & schedule';
+
+    saveBtn.onclick = async () => {
+      msg.classList.add('hidden');
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Saving...';
+
+      const starts_at = parseDatetimeLocalToMs(startsInput.value);
+
+      try {
+        const res = await fetch(`/api/tournaments/${tournamentId}/sidebar`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            adminPassword,
+            rules: rulesInput.value,
+            starts_at,
+          }),
+        });
+        let data = null;
+        try {
+          data = await res.json();
+        } catch {
+          data = null;
+        }
+
+        if (!res.ok) {
+          msg.textContent = data?.error ?? 'Failed to save.';
+          msg.className = 'text-xs text-red-400';
+          msg.classList.remove('hidden');
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = '<i class="fas fa-save" aria-hidden="true"></i> Save rules & schedule';
+          return;
+        }
+
+        msg.textContent = 'Saved.';
+        msg.className = 'text-xs text-green-400';
+        msg.classList.remove('hidden');
+        await refreshTournament();
+      } catch {
+        msg.textContent = 'Network error.';
+        msg.className = 'text-xs text-red-400';
+        msg.classList.remove('hidden');
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<i class="fas fa-save" aria-hidden="true"></i> Save rules & schedule';
+      }
+    };
+  }
+
+  function decorateBracketMatches(tournament, matchMetaByBracketsId) {
+    const bracketMatches = tournament.bracket_data?.match ?? [];
+    document.querySelectorAll('#bracket-container .match[data-match-id]').forEach(matchEl => {
+      const matchId = Number(matchEl.dataset.matchId);
+      const bracketMatch = bracketMatches.find(m => m.id === matchId);
+      const meta = matchMetaByBracketsId.get(matchId);
+
+      matchEl.querySelector('.tournament-match-map')?.remove();
+      matchEl.querySelector('.tournament-match-details')?.remove();
+      matchEl.querySelectorAll('.tournament-player-leader').forEach(el => el.remove());
+
+      if (!bracketMatch || !meta || meta.status !== 'completed') return;
+
+      if (meta.map_id) {
+        const opponentsEl = matchEl.querySelector('.opponents');
+        opponentsEl?.insertAdjacentHTML(
+          'afterbegin',
+          `<div class="tournament-match-map"><i class="fas fa-map" aria-hidden="true"></i>${esc(mapName(meta.map_id))}</div>`
+        );
+      }
+
+      const opponentLeaderPairs = [
+        [bracketMatch.opponent1?.id, meta.p1_leader_id],
+        [bracketMatch.opponent2?.id, meta.p2_leader_id],
+      ];
+
+      opponentLeaderPairs.forEach(([participantId, leaderId]) => {
+        if (!leaderId || participantId == null) return;
+        const participantEl = matchEl.querySelector(`.participant[data-participant-id="${participantId}"] .name`);
+        participantEl?.insertAdjacentHTML(
+          'beforeend',
+          `<div class="tournament-player-leader">${esc(leaderName(leaderId))}</div>`
+        );
+      });
+    });
+  }
+  // ─── Share button ──────────────────────────────────────────────────────────
+  document.getElementById('share-btn').addEventListener('click', async () => {
+    await navigator.clipboard.writeText(window.location.href);
+    const btn = document.getElementById('share-btn');
+    btn.querySelector('span').textContent = 'Copied!';
+    setTimeout(() => { btn.querySelector('span').textContent = 'Copy Link'; }, 1500);
+  });
+
+  // ─── Admin auth flow ───────────────────────────────────────────────────────
+  const adminBtn       = document.getElementById('admin-btn');
+  const adminBtnLabel  = document.getElementById('admin-btn-label');
+  const adminAuthPanel = document.getElementById('admin-auth-panel');
+  const adminPanel     = document.getElementById('admin-panel');
+  const adminPwInput   = document.getElementById('admin-pw-input');
+  const adminPwSubmit  = document.getElementById('admin-pw-submit');
+  const adminAuthError = document.getElementById('admin-auth-error');
+
+  adminBtn.addEventListener('click', async () => {
+    if (isAdmin) {
+      // Toggle admin panel visibility
+      adminPanel.classList.toggle('hidden');
+      return;
+    }
+    // If password is cached from this session, try verifying it first
+    if (adminPassword) {
+      const vr = await verifyPassword(adminPassword);
+      if (vr === 'ok') {
+        await activateAdmin();
+        return;
+      }
+      adminPassword = '';
+      sessionStorage.removeItem(SESSION_KEY);
+      if (vr === 'locked') {
+        adminAuthPanel.classList.remove('hidden');
+        adminAuthError.textContent =
+          'Too many incorrect attempts. Organizer login is locked for this tournament for 24 hours from your network.';
+        adminAuthError.classList.remove('hidden');
+        return;
+      }
+    }
+    // Show auth prompt
+    adminAuthPanel.classList.toggle('hidden');
+    if (!adminAuthPanel.classList.contains('hidden')) adminPwInput.focus();
+  });
+
+  adminPwSubmit.addEventListener('click', attemptAdminAuth);
+  adminPwInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') attemptAdminAuth(); });
+
+  async function attemptAdminAuth() {
+    const pw = adminPwInput.value.trim();
+    if (!pw) return;
+    adminAuthError.classList.add('hidden');
+    adminPwSubmit.disabled = true;
+    adminPwSubmit.textContent = 'Verifying…';
+
+    const vr = await verifyPassword(pw);
+    adminPwSubmit.disabled = false;
+    adminPwSubmit.textContent = 'Unlock';
+
+    if (vr === 'locked') {
+      adminAuthError.textContent =
+        'Too many incorrect attempts. Try again in 24 hours, or use another network if you share an IP with someone who tried repeatedly.';
+      adminAuthError.classList.remove('hidden');
+      return;
+    }
+    if (vr !== 'ok') {
+      adminAuthError.textContent = vr === 'network' ? 'Network error.' : 'Incorrect password.';
+      adminAuthError.classList.remove('hidden');
+      return;
+    }
+
+    adminPassword = pw;
+    sessionStorage.setItem(SESSION_KEY, pw);
+    adminAuthPanel.classList.add('hidden');
+    await activateAdmin();
+  }
+
+  /** @returns {'ok' | 'wrong' | 'locked' | 'network'} */
+  async function verifyPassword(pw) {
+    try {
+      const res = await fetch(`/api/tournaments/${tournamentId}/verify-admin`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ adminPassword: pw }),
+      });
+      if (res.status === 429) return 'locked';
+      if (res.ok) return 'ok';
+      return 'wrong';
+    } catch {
+      return 'network';
+    }
+  }
+
+  async function activateAdmin() {
+    isAdmin = true;
+    adminBtnLabel.textContent = 'Admin ✓';
+    adminBtn.classList.remove('border-amber-500/30', 'bg-amber-500/10', 'text-amber-300', 'hover:bg-amber-500/20');
+    adminBtn.classList.add('border-green-500/30', 'bg-green-500/10', 'text-green-300', 'hover:bg-green-500/20');
+    adminPanel.classList.remove('hidden');
+    if (tournamentData) renderAdminPanel(tournamentData);
+  }
+
+  // ─── Load tournament ───────────────────────────────────────────────────────
+  async function loadTournament() {
+    if (!tournamentId) { showError('Invalid tournament URL.'); return; }
+
+    try {
+      const res = await fetch(`/api/tournaments/${tournamentId}`);
+      const data = await res.json();
+
+      pageSkeleton.classList.add('hidden');
+      bracketSkeleton.classList.add('hidden');
+
+      if (!res.ok) { showError(data.error ?? 'Failed to load tournament.'); return; }
+
+      tournamentData = data;
+      pageContent.classList.remove('hidden');
+      renderPage(data);
+
+      // If admin password is cached, silently verify and activate admin mode
+      if (adminPassword && !isAdmin) {
+        verifyPassword(adminPassword).then(vr => {
+          if (vr === 'ok') activateAdmin();
+          else {
+            adminPassword = '';
+            sessionStorage.removeItem(SESSION_KEY);
+          }
+        });
+      }
+    } catch (e) {
+      showError('Failed to load tournament. Please try again.');
+    }
+  }
+
+  // ─── Render page ──────────────────────────────────────────────────────────
+  function renderPage({ tournament, participants, matches }) {
+    document.title = `${tournament.name} - Team Respawn`;
+
+    // Header
+    document.getElementById('t-name').textContent = tournament.name;
+    const formatLabel = tournament.format === 'double_elimination' ? 'Double Elimination' : 'Single Elimination';
+    const statusMap = {
+      registration: ['Open', 'bg-blue-500/20 text-blue-300'],
+      active: ['In Progress', 'bg-yellow-500/20 text-yellow-300'],
+      completed: ['Completed', 'bg-gray-500/20 text-gray-400'],
+    };
+    const [sl, sc] = statusMap[tournament.status] ?? [tournament.status, 'bg-gray-500/20 text-gray-400'];
+    const expiresStr = fmtDate(tournament.expires_at);
+
+    document.getElementById('t-meta').innerHTML = `
+      <span class="text-gray-300">by ${esc(tournament.organizer_name)}</span>
+      <span class="rounded-full bg-slate-700/60 px-2 py-0.5 text-[10px]">${formatLabel}</span>
+      <span class="rounded-full ${sc} px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide">${sl}</span>
+      ${tournament.is_private ? '<span class="text-amber-400 text-xs"><i class="fas fa-lock mr-1"></i>Private</span>' : ''}
+      <span class="text-gray-500 text-xs">expires ${expiresStr}</span>
+    `;
+    renderNotes(tournament);
+    renderParticipantInfo(tournament);
+
+    // Participants
+    const pCount = participants.length;
+    document.getElementById('participants-count').textContent = `${pCount} / ${tournament.max_participants}`;
+    if (pCount > 0) {
+      document.getElementById('participants-list').innerHTML = participants.map(p =>
+        `<span class="rounded-full border border-slate-600/40 bg-slate-800/40 px-3 py-1 text-xs text-gray-200">${esc(p.gamertag)}</span>`
+      ).join('');
+    }
+    document.getElementById('participants-panel').classList.remove('hidden');
+
+    // Join panel (registration status only, hidden once admin is active)
+    if (tournament.status === 'registration') {
+      document.getElementById('join-panel').classList.remove('hidden');
+      if (tournament.is_private) {
+        document.getElementById('join-pw-field').classList.remove('hidden');
+      }
+      wireJoinButton(tournament);
+    }
+
+    // Bracket
+    if (!tournament.bracket_data) {
+      winnerBanner.classList.add('hidden');
+      bracketEmpty.classList.remove('hidden');
+    } else {
+      renderBracket(tournament, matches);
+    }
+
+    // Admin panel (rendered later if auth activates)
+  }
+
+  // ─── Admin panel ──────────────────────────────────────────────────────────
+  function renderAdminPanel({ tournament, participants, matches }) {
+    // Hide the public join panel once admin mode is active
+    document.getElementById('join-panel').classList.add('hidden');
+    renderNotes(tournament);
+    renderParticipantInfo(tournament);
+
+    const { status } = tournament;
+
+    document.getElementById('ctrl-registration').classList.toggle('hidden', status !== 'registration');
+    document.getElementById('ctrl-active').classList.toggle('hidden', status !== 'active');
+    document.getElementById('ctrl-completed').classList.toggle('hidden', status !== 'completed');
+
+    if (status === 'registration') {
+      document.getElementById('reg-count').textContent = participants.length;
+      document.getElementById('reg-max').textContent = tournament.max_participants;
+      renderAdminParticipants(participants, tournament);
+      wireAdminAddParticipant();
+      wireStartButton(tournament, participants);
+    }
+
+    if (status === 'active' || status === 'completed') {
+      renderPendingMatches(tournament, matches, participants);
+      renderCompletedMatches(tournament, matches);
+    }
+  }
+
+  function renderAdminParticipants(participants, tournament) {
+    const list = document.getElementById('admin-participants-list');
+    if (participants.length === 0) {
+      list.innerHTML = '<span class="text-xs text-gray-500">No players yet.</span>';
+      return;
+    }
+    list.innerHTML = participants.map(p => `
+      <span class="inline-flex items-center gap-1.5 rounded-full border border-slate-600/40 bg-slate-800/40 pl-3 pr-1.5 py-1 text-xs text-gray-200">
+        ${esc(p.gamertag)}
+        <button
+          type="button"
+          class="remove-participant-btn rounded-full text-gray-500 hover:text-red-400 transition-colors w-4 h-4 flex items-center justify-center"
+          data-gamertag="${esc(p.gamertag)}"
+          title="Remove ${esc(p.gamertag)}"
+          aria-label="Remove ${esc(p.gamertag)}"
+        >
+          <i class="fas fa-times text-[10px]" aria-hidden="true"></i>
+        </button>
+      </span>
+    `).join('');
+
+    list.querySelectorAll('.remove-participant-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const gt = btn.dataset.gamertag;
+        if (!confirm(`Remove "${gt}" from the tournament?`)) return;
+        btn.disabled = true;
+        try {
+          const res = await fetch(`/api/tournaments/${tournamentId}/participants/${encodeURIComponent(gt)}`, {
+            method: 'DELETE',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ adminPassword }),
+          });
+          if (res.ok) {
+            await refreshTournament();
+          } else {
+            const d = await res.json();
+            alert(d.error ?? 'Failed to remove participant.');
+            btn.disabled = false;
+          }
+        } catch {
+          alert('Network error.');
+          btn.disabled = false;
+        }
+      });
+    });
+  }
+
+  function wireAdminAddParticipant() {
+    const addBtn = document.getElementById('admin-add-btn');
+    const input = document.getElementById('admin-add-gamertag');
+    const msg = document.getElementById('admin-add-msg');
+    addBtn.disabled = false;
+    addBtn.innerHTML = '<i class="fas fa-user-plus" aria-hidden="true"></i> Add Player';
+
+    async function addParticipant() {
+      const gamertag = input.value.trim();
+      msg.classList.add('hidden');
+
+      if (!gamertag) {
+        msg.textContent = 'Enter a gamertag.';
+        msg.className = 'mt-2 text-xs text-red-400';
+        msg.classList.remove('hidden');
+        return;
+      }
+
+      addBtn.disabled = true;
+      addBtn.innerHTML = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Adding...';
+
+      try {
+        const res = await fetch(`/api/tournaments/${tournamentId}/participants/${encodeURIComponent(gamertag)}`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ adminPassword }),
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          msg.textContent = data.error ?? 'Failed to add participant.';
+          msg.className = 'mt-2 text-xs text-red-400';
+          msg.classList.remove('hidden');
+          addBtn.disabled = false;
+          addBtn.innerHTML = '<i class="fas fa-user-plus" aria-hidden="true"></i> Add Player';
+          return;
+        }
+
+        input.value = '';
+        msg.textContent = `${gamertag} added.`;
+        msg.className = 'mt-2 text-xs text-green-400';
+        msg.classList.remove('hidden');
+        await refreshTournament();
+      } catch {
+        msg.textContent = 'Network error.';
+        msg.className = 'mt-2 text-xs text-red-400';
+        msg.classList.remove('hidden');
+        addBtn.disabled = false;
+        addBtn.innerHTML = '<i class="fas fa-user-plus" aria-hidden="true"></i> Add Player';
+      }
+    }
+
+    addBtn.onclick = addParticipant;
+    input.onkeydown = (e) => { if (e.key === 'Enter') addParticipant(); };
+  }
+
+  function wireStartButton(tournament, participants) {
+    const startBtn = document.getElementById('start-btn');
+    const startError = document.getElementById('start-error');
+    startBtn.addEventListener('click', async () => {
+      if (participants.length < 2) {
+        startError.textContent = 'Need at least 2 participants to start.';
+        startError.classList.remove('hidden');
+        return;
+      }
+      startBtn.disabled = true;
+      startBtn.innerHTML = '<i class="fas fa-play"></i> Starting…';
+      startError.classList.add('hidden');
+
+      try {
+        const res = await fetch(`/api/tournaments/${tournamentId}/start`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ adminPassword }),
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          startError.textContent = data.error ?? 'Failed to start tournament.';
+          startError.classList.remove('hidden');
+          startBtn.disabled = false;
+          startBtn.innerHTML = '<i class="fas fa-play" aria-hidden="true"></i> Start Tournament';
+          return;
+        }
+
+        await refreshTournament();
+      } catch {
+        startError.textContent = 'Network error. Please try again.';
+        startError.classList.remove('hidden');
+        startBtn.disabled = false;
+        startBtn.innerHTML = '<i class="fas fa-play" aria-hidden="true"></i> Start Tournament';
+      }
+    });
+  }
+
+  function wireAdminNotesSave() {
+    const saveBtn = document.getElementById('admin-notes-save');
+    const input = document.getElementById('admin-notes-input');
+    const msg = document.getElementById('admin-notes-msg');
+
+    saveBtn.disabled = false;
+    saveBtn.innerHTML = '<i class="fas fa-save" aria-hidden="true"></i> Save Notes';
+
+    saveBtn.onclick = async () => {
+      msg.classList.add('hidden');
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Saving...';
+
+      try {
+        const res = await fetch(`/api/tournaments/${tournamentId}/notes`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ adminPassword, notes: input.value }),
+        });
+        let data = null;
+        try {
+          data = await res.json();
+        } catch {
+          data = null;
+        }
+
+        if (!res.ok) {
+          msg.textContent = data?.error ?? 'Failed to save notes.';
+          msg.className = 'text-xs text-red-400';
+          msg.classList.remove('hidden');
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = '<i class="fas fa-save" aria-hidden="true"></i> Save Notes';
+          return;
+        }
+
+        msg.textContent = 'Notes saved.';
+        msg.className = 'text-xs text-green-400';
+        msg.classList.remove('hidden');
+        await refreshTournament();
+      } catch {
+        msg.textContent = 'Network error.';
+        msg.className = 'text-xs text-red-400';
+        msg.classList.remove('hidden');
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<i class="fas fa-save" aria-hidden="true"></i> Save Notes';
+      }
+    };
+  }
+
+  // ─── Bracket rendering ────────────────────────────────────────────────────
+  function renderBracket(tournament, matches) {
+    bracketEmpty.classList.add('hidden');
+    bracketError.classList.add('hidden');
+    renderTournamentWinner(tournament);
+
+    const bv = window.bracketsViewer;
+    if (!bv) {
+      bracketError.textContent = 'Bracket viewer failed to load. Please refresh the page.';
+      bracketError.classList.remove('hidden');
+      return;
+    }
+
+    const bd = tournament.bracket_data;
+    const matchMetaByBracketsId = new Map(
+      (matches ?? []).map(m => [m.brackets_match_id, m])
+    );
+
+    bracketWrapper.classList.remove('hidden');
+
+    bv.render(
+      {
+        stages: bd.stage ?? [],
+        groups: bd.group ?? [],
+        rounds: bd.round ?? [],
+        matches: (bd.match ?? []).map(m => {
+          const meta = matchMetaByBracketsId.get(m.id);
+          return meta ? { ...m, _meta: meta } : m;
+        }),
+        matchGames: bd.match_game ?? [],
+        participants: bd.participant ?? [],
+      },
+      {
+        selector: '#bracket-container',
+        clear: true,
+        participantOriginPlacement: 'none',
+        separatedChildCountLabel: false,
+        showSlotsOrigin: false,
+        showLowerBracketSlotsOrigin: false,
+      }
+    );
+
+    decorateBracketMatches(tournament, matchMetaByBracketsId);
+  }
+
+  // ─── Pending matches ──────────────────────────────────────────────────────
+  function renderPendingMatches(tournament, matches, participants) {
+    const bd = tournament.bracket_data;
+    if (!bd) return;
+
+    const completedIds = new Set(
+      matches.filter(m => m.status === 'completed').map(m => m.brackets_match_id)
+    );
+    const bracketParticipants = bd.participant ?? [];
+    const getName = (bId) => bracketParticipants.find(p => p.id === bId)?.name ?? '—';
+
+    const pending = (bd.match ?? []).filter(m =>
+      m.opponent1?.id != null &&
+      m.opponent2?.id != null &&
+      m.opponent1?.result == null &&
+      m.opponent2?.result == null &&
+      !completedIds.has(m.id)
+    );
+
+    if (pending.length === 0) return;
+
+    document.getElementById('admin-pending-section').classList.remove('hidden');
+    document.getElementById('pending-count').textContent = `(${pending.length})`;
+
+    const leaderOpts = `<option value="">— optional —</option>` +
+      leaders.map(l => `<option value="${l.id}">${esc(l.name)}</option>`).join('');
+    const mapOpts = `<option value="">— optional —</option>` +
+      tournamentPickerMaps.map(m => `<option value="${esc(m.id)}">${esc(m.name)}</option>`).join('');
+
+    const list = document.getElementById('admin-pending-list');
+    list.innerHTML = pending.map(m => {
+      const p1Name = getName(m.opponent1.id);
+      const p2Name = getName(m.opponent2.id);
+      return `
+        <div class="rounded-lg border border-slate-700/40 bg-slate-800/20 p-4 space-y-3" data-brackets-match-id="${m.id}">
+          <div class="text-sm font-semibold text-white">
+            <span class="text-cyan-200">${esc(p1Name)}</span>
+            <span class="text-gray-500 mx-2">vs</span>
+            <span class="text-cyan-200">${esc(p2Name)}</span>
+          </div>
+
+          <!-- Metadata dropdowns -->
+          <div class="grid grid-cols-3 gap-2 text-xs">
+            <div>
+              <label class="block text-gray-500 mb-1">Map</label>
+              <select class="match-map w-full rounded border border-slate-600/40 bg-slate-900/60 px-2 py-1 text-gray-300 focus:outline-none">${mapOpts}</select>
+            </div>
+            <div>
+              <label class="block text-gray-500 mb-1">${esc(p1Name)} Leader</label>
+              <select class="match-p1-leader w-full rounded border border-slate-600/40 bg-slate-900/60 px-2 py-1 text-gray-300 focus:outline-none">${leaderOpts}</select>
+            </div>
+            <div>
+              <label class="block text-gray-500 mb-1">${esc(p2Name)} Leader</label>
+              <select class="match-p2-leader w-full rounded border border-slate-600/40 bg-slate-900/60 px-2 py-1 text-gray-300 focus:outline-none">${leaderOpts}</select>
+            </div>
+          </div>
+
+          <!-- HW2 match auto-suggest -->
+          <div class="space-y-2">
+            <div class="flex items-center gap-2">
+              <button type="button" class="suggest-btn text-xs rounded border border-slate-600/40 bg-slate-800/60 px-3 py-1 text-cyan-300 hover:bg-slate-700/60 transition-colors">
+                <i class="fas fa-search mr-1" aria-hidden="true"></i>Find HW2 Match
+              </button>
+              <span class="text-gray-500 text-xs">or</span>
+              <input
+                type="text"
+                class="hw2-match-id flex-1 rounded border border-slate-600/40 bg-slate-900/60 px-2 py-1 text-gray-300 text-xs placeholder-gray-600 focus:outline-none"
+                placeholder="Paste HW2 match UUID"
+              />
+              <button type="button" class="hw2-link-btn text-xs rounded border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-cyan-300 hover:bg-cyan-500/20 transition-colors">
+                Look Up
+              </button>
+            </div>
+            <div class="hw2-suggestions hidden space-y-1"></div>
+            <p class="hw2-link-msg hidden text-xs"></p>
+          </div>
+
+          <!-- Result buttons -->
+          <div class="flex gap-2 flex-wrap">
+            <button type="button" class="declare-btn flex-1 min-w-28 rounded border border-green-500/30 bg-green-500/10 px-3 py-2 text-xs font-semibold text-green-300 hover:bg-green-500/20 transition-colors" data-winner="${esc(p1Name)}">
+              <i class="fas fa-crown mr-1" aria-hidden="true"></i>${esc(p1Name)} Wins
+            </button>
+            <button type="button" class="declare-btn flex-1 min-w-28 rounded border border-green-500/30 bg-green-500/10 px-3 py-2 text-xs font-semibold text-green-300 hover:bg-green-500/20 transition-colors" data-winner="${esc(p2Name)}">
+              <i class="fas fa-crown mr-1" aria-hidden="true"></i>${esc(p2Name)} Wins
+            </button>
+          </div>
+
+          <!-- Override section -->
+          <details class="text-xs">
+            <summary class="cursor-pointer text-amber-400 hover:text-amber-300 select-none">
+              <i class="fas fa-flag mr-1" aria-hidden="true"></i>Override (forfeit / no-show)
+            </summary>
+            <div class="mt-2 flex gap-2 flex-wrap">
+              <button type="button" class="override-btn flex-1 rounded border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-300 hover:bg-amber-500/20 transition-colors" data-winner="${esc(p1Name)}">
+                Force ${esc(p1Name)} (override)
+              </button>
+              <button type="button" class="override-btn flex-1 rounded border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-300 hover:bg-amber-500/20 transition-colors" data-winner="${esc(p2Name)}">
+                Force ${esc(p2Name)} (override)
+              </button>
+            </div>
+          </details>
+
+          <p class="match-msg hidden text-xs"></p>
+        </div>
+      `;
+    }).join('');
+
+    // Wire suggest buttons
+    list.querySelectorAll('.suggest-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const card = btn.closest('[data-brackets-match-id]');
+        const bMatchId = Number(card.dataset.bracketsMatchId);
+        const suggestionsEl = card.querySelector('.hw2-suggestions');
+        const msgEl = card.querySelector('.hw2-link-msg');
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Searching…';
+        suggestionsEl.classList.add('hidden');
+        msgEl.classList.add('hidden');
+
+        try {
+          const res = await fetch(`/api/tournaments/${tournamentId}/matches/${bMatchId}/suggest-hw2`);
+          const data = await res.json();
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-search mr-1" aria-hidden="true"></i>Find HW2 Match';
+
+          if (!res.ok || data.suggestions.length === 0) {
+            msgEl.textContent = data.error ?? 'No cached matches found between these players. Have both players look up their HW2 stats first.';
+            msgEl.className = 'text-xs text-amber-400';
+            msgEl.classList.remove('hidden');
+            return;
+          }
+
+          suggestionsEl.classList.remove('hidden');
+          suggestionsEl.innerHTML = '<p class="text-gray-500 text-xs mb-1">Recent matches found — click to use:</p>' +
+            data.suggestions.map(s => {
+              const outcomeLabel = s.inferred_winner
+                ? `<span class="text-green-300 font-medium">${esc(s.inferred_winner)} wins</span>`
+                : '<span class="text-gray-400 font-medium">Winner not in cache</span>';
+              const dataWinner = s.inferred_winner ? esc(s.inferred_winner) : '';
+              return `
+              <div class="flex items-center gap-2 rounded border border-slate-700/40 bg-slate-900/40 px-3 py-2 text-xs">
+                <div class="flex-1 min-w-0">
+                  ${outcomeLabel}
+                  <span class="text-gray-500 mx-1">·</span>
+                  <span class="text-gray-400">${s.map_id ? esc(mapName(s.map_id)) : 'Unknown map'}</span>
+                  <span class="text-gray-500 mx-1">·</span>
+                  <span class="text-gray-500">${fmtDate(s.started_at)}</span>
+                </div>
+                <button
+                  type="button"
+                  class="use-suggestion-btn flex-none rounded border border-cyan-500/30 bg-cyan-500/10 px-2 py-1 text-cyan-300 hover:bg-cyan-500/20 transition-colors"
+                  data-match-id="${esc(s.hw2_match_id)}"
+                  data-map-id="${esc(s.map_id ?? '')}"
+                  data-p1-leader="${s.p1_leader_id ?? ''}"
+                  data-p2-leader="${s.p2_leader_id ?? ''}"
+                  data-winner="${dataWinner}"
+                >
+                  Use this
+                </button>
+              </div>
+            `;
+            }).join('');
+
+          // Wire "Use this" buttons
+          suggestionsEl.querySelectorAll('.use-suggestion-btn').forEach(useBtn => {
+            useBtn.addEventListener('click', () => {
+              // Fill UUID field
+              card.querySelector('.hw2-match-id').value = useBtn.dataset.matchId;
+              // Set map
+              if (useBtn.dataset.mapId) {
+                for (const opt of card.querySelector('.match-map').options) {
+                  if (opt.value === useBtn.dataset.mapId) { opt.selected = true; break; }
+                }
+              }
+              // Set leaders
+              if (useBtn.dataset.p1Leader) {
+                for (const opt of card.querySelector('.match-p1-leader').options) {
+                  if (opt.value === useBtn.dataset.p1Leader) { opt.selected = true; break; }
+                }
+              }
+              if (useBtn.dataset.p2Leader) {
+                for (const opt of card.querySelector('.match-p2-leader').options) {
+                  if (opt.value === useBtn.dataset.p2Leader) { opt.selected = true; break; }
+                }
+              }
+              const winnerName = useBtn.dataset.winner;
+              msgEl.textContent = winnerName
+                ? `Selected: ${winnerName} wins. Click their Wins button below to confirm.`
+                : 'Match details filled — winner not determined from cache; pick the correct Wins button below.';
+              msgEl.className = winnerName ? 'text-xs text-green-400' : 'text-xs text-cyan-400';
+              msgEl.classList.remove('hidden');
+              suggestionsEl.classList.add('hidden');
+            });
+          });
+        } catch {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-search mr-1" aria-hidden="true"></i>Find HW2 Match';
+          msgEl.textContent = 'Network error.';
+          msgEl.className = 'text-xs text-red-400';
+          msgEl.classList.remove('hidden');
+        }
+      });
+    });
+
+    // Wire manual lookup buttons
+    list.querySelectorAll('.hw2-link-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const card = btn.closest('[data-brackets-match-id]');
+        const bMatchId = Number(card.dataset.bracketsMatchId);
+        const hw2MatchId = card.querySelector('.hw2-match-id').value.trim();
+        const msgEl = card.querySelector('.hw2-link-msg');
+
+        if (!hw2MatchId) {
+          msgEl.textContent = 'Paste a HW2 match UUID first.';
+          msgEl.className = 'text-xs text-amber-400';
+          msgEl.classList.remove('hidden');
+          return;
+        }
+        btn.disabled = true;
+        btn.textContent = 'Looking up…';
+        try {
+          const res = await fetch(`/api/tournaments/${tournamentId}/link-hw2`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ hw2MatchId, bracketsMatchId: bMatchId }),
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            msgEl.textContent = data.error ?? 'Lookup failed.';
+            msgEl.className = 'text-xs text-red-400';
+            msgEl.classList.remove('hidden');
+            return;
+          }
+          if (data.map_id) {
+            for (const opt of card.querySelector('.match-map').options) {
+              if (opt.value === data.map_id) { opt.selected = true; break; }
+            }
+          }
+          if (data.p1_leader_id) {
+            for (const opt of card.querySelector('.match-p1-leader').options) {
+              if (Number(opt.value) === data.p1_leader_id) { opt.selected = true; break; }
+            }
+          }
+          if (data.p2_leader_id) {
+            for (const opt of card.querySelector('.match-p2-leader').options) {
+              if (Number(opt.value) === data.p2_leader_id) { opt.selected = true; break; }
+            }
+          }
+          msgEl.textContent = `Found — winner: ${data.winner_gamertag}. Click their Wins button to confirm.`;
+          msgEl.className = 'text-xs text-green-400';
+          msgEl.classList.remove('hidden');
+        } catch {
+          msgEl.textContent = 'Network error.';
+          msgEl.className = 'text-xs text-red-400';
+          msgEl.classList.remove('hidden');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Look Up';
+        }
+      });
+    });
+
+    // Wire declare winner & override buttons
+    list.querySelectorAll('.declare-btn').forEach(btn => {
+      btn.addEventListener('click', () => submitResult(btn, false, participants));
+    });
+    list.querySelectorAll('.override-btn').forEach(btn => {
+      btn.addEventListener('click', () => submitResult(btn, true, participants));
+    });
+  }
+
+  function renderCompletedMatches(tournament, matches) {
+    const bd = tournament.bracket_data;
+    if (!bd) return;
+
+    const completedSection = document.getElementById('admin-completed-section');
+    const completedList = document.getElementById('admin-completed-list');
+    const completedCount = document.getElementById('completed-count');
+    const bracketParticipants = bd.participant ?? [];
+    const metaByBracketsId = new Map((matches ?? []).map(m => [m.brackets_match_id, m]));
+
+    const completed = (bd.match ?? [])
+      .filter(m => m.opponent1?.id != null && m.opponent2?.id != null && matchWinnerId(m) !== null)
+      .sort((a, b) => (b.round_id - a.round_id) || (b.id - a.id));
+
+    if (completed.length === 0) {
+      completedSection.classList.add('hidden');
+      completedList.innerHTML = '';
+      completedCount.textContent = '';
+      return;
+    }
+
+    completedSection.classList.remove('hidden');
+    completedCount.textContent = `(${completed.length})`;
+    completedList.innerHTML = completed.map(match => {
+      const p1Name = participantNameById(bracketParticipants, match.opponent1.id);
+      const p2Name = participantNameById(bracketParticipants, match.opponent2.id);
+      const winnerName = participantNameById(bracketParticipants, matchWinnerId(match));
+      const meta = metaByBracketsId.get(match.id);
+      const mapLabel = meta?.map_id ? mapName(meta.map_id) : 'Map not recorded';
+
+      return `
+        <div class="rounded-lg border border-slate-700/40 bg-slate-800/20 p-4 space-y-3" data-completed-match-id="${match.id}">
+          <div class="flex items-start justify-between gap-3 flex-wrap">
+            <div class="space-y-1">
+              <div class="text-sm font-semibold text-white">
+                <span class="text-cyan-200">${esc(p1Name)}</span>
+                <span class="text-gray-500 mx-2">vs</span>
+                <span class="text-cyan-200">${esc(p2Name)}</span>
+              </div>
+              <p class="text-xs text-green-400">
+                Winner: ${esc(winnerName)}
+                <span class="text-gray-500 mx-1">·</span>
+                ${esc(mapLabel)}
+              </p>
+            </div>
+            <button
+              type="button"
+              class="reopen-match-btn inline-flex items-center gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs font-semibold text-amber-300 hover:bg-amber-500/20 transition-colors"
+              data-match-id="${match.id}"
+            >
+              <i class="fas fa-rotate-left" aria-hidden="true"></i>
+              Reopen Match
+            </button>
+          </div>
+          <p class="completed-match-msg hidden text-xs"></p>
+        </div>
+      `;
+    }).join('');
+
+    completedList.querySelectorAll('.reopen-match-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const card = btn.closest('[data-completed-match-id]');
+        const msgEl = card.querySelector('.completed-match-msg');
+        const matchId = Number(btn.dataset.matchId);
+
+        if (!confirm('Reopen this match and clear any later results that depended on it?')) return;
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Reopening...';
+        msgEl.classList.add('hidden');
+
+        try {
+          const res = await fetch(`/api/tournaments/${tournamentId}/matches/${matchId}/reset`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ adminPassword }),
+          });
+          const data = await res.json();
+
+          if (!res.ok) {
+            msgEl.textContent = data.error ?? 'Failed to reopen match.';
+            msgEl.className = 'completed-match-msg text-xs text-red-400';
+            msgEl.classList.remove('hidden');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-rotate-left" aria-hidden="true"></i> Reopen Match';
+            return;
+          }
+
+          msgEl.textContent = 'Match reopened. Downstream advancements were cleared.';
+          msgEl.className = 'completed-match-msg text-xs text-green-400';
+          msgEl.classList.remove('hidden');
+          await refreshTournament();
+        } catch {
+          msgEl.textContent = 'Network error.';
+          msgEl.className = 'completed-match-msg text-xs text-red-400';
+          msgEl.classList.remove('hidden');
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-rotate-left" aria-hidden="true"></i> Reopen Match';
+        }
+      });
+    });
+  }
+
+  async function submitResult(btn, isOverride, participants) {
+    const card = btn.closest('[data-brackets-match-id]');
+    const bMatchId = Number(card.dataset.bracketsMatchId);
+    const winnerName = btn.dataset.winner;
+    const msgEl = card.querySelector('.match-msg');
+    const mapId = card.querySelector('.match-map').value || null;
+    const p1LeaderId = Number(card.querySelector('.match-p1-leader').value) || null;
+    const p2LeaderId = Number(card.querySelector('.match-p2-leader').value) || null;
+    const hw2MatchId = card.querySelector('.hw2-match-id').value.trim() || null;
+
+    btn.disabled = true;
+    msgEl.classList.add('hidden');
+
+    try {
+      let res, body;
+
+      if (isOverride) {
+        body = { adminPassword, winnerGamertag: winnerName, mapId, p1LeaderId, p2LeaderId };
+        res = await fetch(`/api/tournaments/${tournamentId}/matches/${bMatchId}/override`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+      } else {
+        const winner = participants.find(p => p.gamertag?.toLowerCase() === winnerName?.toLowerCase());
+        if (!winner) {
+          msgEl.textContent = 'Could not find participant record.';
+          msgEl.className = 'text-xs text-red-400';
+          msgEl.classList.remove('hidden');
+          btn.disabled = false;
+          return;
+        }
+        body = {
+          adminPassword,
+          winnerId: winner.id,
+          mapId, p1LeaderId, p2LeaderId, hw2MatchId,
+        };
+        res = await fetch(`/api/tournaments/${tournamentId}/matches/${bMatchId}`, {
+          method: 'PATCH',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+      }
+
+      const data = await res.json();
+      if (!res.ok) {
+        msgEl.textContent = data.error ?? 'Failed to record result.';
+        msgEl.className = 'text-xs text-red-400';
+        msgEl.classList.remove('hidden');
+        btn.disabled = false;
+        return;
+      }
+
+      // Update bracket in-place without page reload
+      msgEl.textContent = data.tournament_status === 'completed'
+        ? 'Tournament complete!'
+        : 'Result recorded!';
+      msgEl.className = 'text-xs text-green-400';
+      msgEl.classList.remove('hidden');
+
+      // Re-fetch and re-render
+      await refreshTournament();
+    } catch {
+      msgEl.textContent = 'Network error.';
+      msgEl.className = 'text-xs text-red-400';
+      msgEl.classList.remove('hidden');
+      btn.disabled = false;
+    }
+  }
+
+  // ─── Refresh (in-place update) ────────────────────────────────────────────
+  async function refreshTournament() {
+    try {
+      const res = await fetch(`/api/tournaments/${tournamentId}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      tournamentData = data;
+
+      // Reset bracket & admin panel before re-render
+      bracketWrapper.classList.add('hidden');
+      bracketEmpty.classList.add('hidden');
+      winnerBanner.classList.add('hidden');
+      document.getElementById('admin-pending-section').classList.add('hidden');
+      document.getElementById('admin-pending-list').innerHTML = '';
+      document.getElementById('admin-completed-section').classList.add('hidden');
+      document.getElementById('admin-completed-list').innerHTML = '';
+      document.getElementById('ctrl-registration').classList.add('hidden');
+      document.getElementById('ctrl-active').classList.add('hidden');
+      document.getElementById('ctrl-completed').classList.add('hidden');
+
+      renderPage(data);
+      if (isAdmin) renderAdminPanel(data);
+    } catch {
+      // Silent fail — user can manually refresh
+    }
+  }
+
+  // ─── Join button ──────────────────────────────────────────────────────────
+  function wireJoinButton(tournament) {
+    const joinBtn = document.getElementById('join-btn');
+    const joinMsg = document.getElementById('join-msg');
+
+    joinBtn.addEventListener('click', async () => {
+      const gamertag = document.getElementById('join-gamertag').value.trim();
+      const joinPassword = tournament.is_private
+        ? document.getElementById('join-password').value.trim()
+        : undefined;
+
+      if (!gamertag) {
+        joinMsg.textContent = 'Please enter your gamertag.';
+        joinMsg.className = 'text-xs text-red-400';
+        joinMsg.classList.remove('hidden');
+        return;
+      }
+
+      joinBtn.disabled = true;
+      joinMsg.classList.add('hidden');
+
+      try {
+        const res = await fetch(`/api/tournaments/${tournamentId}/join`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ gamertag, ...(joinPassword ? { joinPassword } : {}) }),
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          joinMsg.textContent = data.error ?? 'Failed to join.';
+          joinMsg.className = 'text-xs text-red-400';
+          joinMsg.classList.remove('hidden');
+          joinBtn.disabled = false;
+          return;
+        }
+
+        joinMsg.textContent = `${gamertag} joined!`;
+        joinMsg.className = 'text-xs text-green-400';
+        joinMsg.classList.remove('hidden');
+        document.getElementById('join-gamertag').value = '';
+        await refreshTournament();
+      } catch {
+        joinMsg.textContent = 'Network error. Please try again.';
+        joinMsg.className = 'text-xs text-red-400';
+        joinMsg.classList.remove('hidden');
+        joinBtn.disabled = false;
+      }
+    });
+  }
+
+  // ─── Boot ──────────────────────────────────────────────────────────────────
+  loadTournament();
+</script>

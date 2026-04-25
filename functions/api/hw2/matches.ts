@@ -1,4 +1,5 @@
 import { errorResponse, fetchWithKeyFallback, HALO_ENDPOINTS, jsonResponse, statusFromError } from './_shared';
+import { patchMatchSummaryResultsWithResolvedLeaders, syncResolvedLeadersForMatches } from './_shared/leaderCache';
 
 type D1PreparedStatement = {
   bind: (...args: unknown[]) => D1PreparedStatement;
@@ -27,14 +28,39 @@ type MatchSummary = {
   MapId?: string;
   MatchStartDate?: { ISO8601Date?: string };
   PlayerMatchDuration?: string;
+  PlayerIndex?: number;
+  TeamId?: number;
+  LeaderId?: number;
   Players?: Array<{
-    HumanPlayerId?: string;
+    HumanPlayerId?: { Gamertag?: string } | string;
+    Gamertag?: string;
+    PlayerId?: string;
     PlayerType?: number;
     TeamId?: number;
     LeaderId?: number;
     MatchOutcome?: number;
+    PlayerIndex?: number;
   }>;
 };
+
+function patchPlayerSummaryResultsForPlayer(
+  results: MatchSummary[],
+  playerId: string,
+  resolvedByPlayer: Map<string, number | null>
+) {
+  let changed = false;
+
+  results.forEach((match) => {
+    const matchId = match?.MatchId || '';
+    if (!matchId) return;
+    const resolvedLeaderId = resolvedByPlayer.get(`${matchId}::${playerId}`);
+    if (resolvedLeaderId == null || match.LeaderId === resolvedLeaderId) return;
+    match.LeaderId = resolvedLeaderId;
+    changed = true;
+  });
+
+  return changed;
+}
 
 function normalizePlayerId(gamertag: string): string {
   return gamertag.trim().toLowerCase();
@@ -81,6 +107,8 @@ type CachedPlayerRow = {
   is_human: number | null;
   team_id: number | null;
   leader_id: number | null;
+  raw_leader_id: number | null;
+  resolved_leader_id: number | null;
   outcome: number | null;
   player_index: number | null;
 };
@@ -98,9 +126,26 @@ async function loadCompactCachedMatches(db: D1Database, gamertag: string, count:
       parsed && typeof parsed === 'object' && !Array.isArray(parsed)
         ? (parsed as Record<string, unknown>)
         : {};
-    const results = Array.isArray(basePayload.Results)
-      ? (basePayload.Results as MatchSummary[]).slice(0, count)
+    const allResults = Array.isArray(basePayload.Results)
+      ? (basePayload.Results as MatchSummary[])
       : [];
+    const matchIds = allResults.map((match) => match?.MatchId || '').filter(Boolean);
+    const playerId = normalizePlayerId(gamertag);
+    const resolvedByPlayer = await syncResolvedLeadersForMatches(db, matchIds);
+    const changed =
+      patchPlayerSummaryResultsForPlayer(allResults, playerId, resolvedByPlayer) ||
+      patchMatchSummaryResultsWithResolvedLeaders(allResults, resolvedByPlayer);
+    const results = allResults.slice(0, count);
+
+    if (changed) {
+      await db.batch([
+        db.prepare(
+          `UPDATE player_matches_cache
+           SET payload_json = ?
+           WHERE player_id = ?`
+        ).bind(JSON.stringify({ ...basePayload, Results: allResults }), playerId),
+      ]);
+    }
 
     return {
       payload: {
@@ -139,9 +184,10 @@ async function loadLegacyCachedMatches(db: D1Database, gamertag: string, count: 
   if (matchRows.length === 0) return null;
 
   const matchIds = matchRows.map((row) => row.match_id);
+  await syncResolvedLeadersForMatches(db, matchIds);
   const placeholders = matchIds.map(() => '?').join(', ');
   const playerRowsResult = await db.prepare(
-    `SELECT match_id, player_name, is_human, team_id, leader_id, outcome, player_index
+    `SELECT match_id, player_name, is_human, team_id, leader_id, raw_leader_id, resolved_leader_id, outcome, player_index
      FROM match_players
      WHERE match_id IN (${placeholders})`
   ).bind(...matchIds).all<CachedPlayerRow>();
@@ -158,7 +204,7 @@ async function loadLegacyCachedMatches(db: D1Database, gamertag: string, count: 
       PlayerId: isHuman ? name : undefined,
       PlayerType: isHuman ? 0 : 3,
       TeamId: row.team_id ?? undefined,
-      LeaderId: row.leader_id ?? undefined,
+      LeaderId: row.resolved_leader_id ?? row.leader_id ?? row.raw_leader_id ?? undefined,
       MatchOutcome: row.outcome ?? undefined,
       PlayerIndex: row.player_index ?? undefined,
     });
@@ -226,6 +272,10 @@ async function storeMatchSummaries(db: Env['DB'], gamertag: string, matches: Mat
   if (!db || matches.length === 0) return;
   const now = new Date().toISOString();
   const playerId = normalizePlayerId(gamertag);
+  const matchIds = matches.map((match) => match?.MatchId || '').filter(Boolean);
+  const resolvedByPlayer = await syncResolvedLeadersForMatches(db, matchIds);
+  patchPlayerSummaryResultsForPlayer(matches, playerId, resolvedByPlayer);
+  patchMatchSummaryResultsWithResolvedLeaders(matches, resolvedByPlayer);
 
   try {
     await db.batch([

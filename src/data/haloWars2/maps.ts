@@ -83,6 +83,14 @@ export const mapData: Record<string, HaloMap> = {
   },
 };
 
+/** Blitz / non-standard maps hidden from tournament pickers; still in mapData for name lookup. */
+export const MAP_IDS_EXCLUDED_FROM_TOURNAMENT_PICKER = new Set<string>([
+  'rostermode\\design\\RM_EvenFlowNight\\RM_EvenFlowNight',
+  'rostermode\\design\\RM_EvenFlow_Desert\\RM_EvenFlow_Desert',
+  'skirmish\\design\\FF_StopTheSignal\\FF_StopTheSignal',
+  'rostermode\\design\\RM_EvenFlowArt\\RM_EvenFlowArt',
+]);
+
 const CLOUDINARY_CLOUD_NAME = (() => {
   const envName = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME;
   if (envName) return envName;

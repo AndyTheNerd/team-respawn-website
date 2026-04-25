@@ -16,6 +16,8 @@ type Env = {
 type MapDurationRow = { map_id: string; cnt: number; median_seconds: number | null };
 type MedianUnitsRow = { median_units_destroyed: number | null; median_units_lost: number | null };
 type MedianPowersRow = { median_powers: number | null };
+type WeeklyTopSearchRow = { gamertag: string; search_count: number };
+type WeeklyMatchSumRow = { weekly_match_sum: number | null };
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -48,6 +50,8 @@ export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
 
   const db = env.DB;
 
+  const weekStartSql = "datetime('now', '-7 days')";
+
   const [
     totalMatches,
     totalPlayers,
@@ -55,6 +59,8 @@ export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
     medianUnits,
     medianPowers,
     mapDurationStats,
+    weeklyTopSearch,
+    weeklyMatchSum,
   ] = await Promise.all([
     tryFirst<{ total: number }>(
       db.prepare('SELECT COUNT(*) AS total FROM matches')
@@ -107,6 +113,24 @@ export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
          ORDER BY cnt DESC`
       )
     ),
+    tryFirst<WeeklyTopSearchRow>(
+      db.prepare(
+        `SELECT p.gamertag AS gamertag, COUNT(*) AS search_count
+         FROM search_events se
+         JOIN players p ON p.player_id = se.player_id
+         WHERE se.searched_at >= ${weekStartSql}
+         GROUP BY se.player_id, p.gamertag
+         ORDER BY search_count DESC, p.gamertag ASC
+         LIMIT 1`
+      )
+    ),
+    tryFirst<WeeklyMatchSumRow>(
+      db.prepare(
+        `SELECT COALESCE(SUM(match_count), 0) AS weekly_match_sum
+         FROM search_events
+         WHERE searched_at >= ${weekStartSql}`
+      )
+    ),
   ]);
 
   return jsonResponse({
@@ -117,5 +141,8 @@ export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
     medianUnitsLost: medianUnits?.median_units_lost ?? null,
     medianPowersPerPlayer: medianPowers?.median_powers ?? null,
     mapDurationStats,
+    weeklyMostSearchedGamertag: weeklyTopSearch?.gamertag ?? null,
+    weeklyMostSearchedCount: weeklyTopSearch?.search_count ?? 0,
+    weeklyMatchesAnalyzed: weeklyMatchSum?.weekly_match_sum ?? 0,
   });
 };

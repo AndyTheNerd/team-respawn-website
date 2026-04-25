@@ -11,7 +11,7 @@ import { loadMatchGraphs } from './matchGraphs';
 import { loadMatchSummary, type MatchSummaryContext, type PlayerSummary } from './matchSummary';
 import { fetchMatchEventsPayload, buildEventEntries } from './matchEventProcessing';
 import { getMatchResult } from '../../utils/haloApi';
-import { getLeaderName } from '../../data/haloWars2/leaders';
+import { getLeaderImage, getLeaderImageFallback, getLeaderName } from '../../data/haloWars2/leaders';
 import { getMapName, getMapImage, getMapImageFallback } from '../../data/haloWars2/maps';
 import { getPlaylistName } from '../../data/haloWars2/playlists';
 import { resolvePlayerLeaderId } from './leaderResolution';
@@ -27,16 +27,23 @@ function findPlayerByGamertag(match: any, gamertag: string): any | null {
   return players.find((p: any) => getPlayerGamertag(p).toLowerCase() === gtLower) || players[0] || null;
 }
 
-function getResolvedLeaderName(match: any, gamertag: string): string {
+function getResolvedLeaderAssets(match: any, gamertag: string): { name: string; imageUrl: string; fallbackUrl: string } {
   const player = findPlayerByGamertag(match, gamertag);
-  if (!player) return 'Unknown';
+  if (!player) return { name: 'Unknown', imageUrl: '', fallbackUrl: '' };
 
   const resolution = resolvePlayerLeaderId({
     rawLeaderId: player?.LeaderId ?? match?.LeaderId,
     leaderPowerStats: player?.LeaderPowerStats,
   });
   logLeaderResolutionMismatch(match?.MatchId || 'unknown', getPlayerGamertag(player), resolution);
-  return resolution.resolvedLeaderId != null ? getLeaderName(resolution.resolvedLeaderId) : 'Unknown';
+  const leaderId = resolution.resolvedLeaderId;
+  if (leaderId == null) return { name: 'Unknown', imageUrl: '', fallbackUrl: '' };
+
+  return {
+    name: getLeaderName(leaderId),
+    imageUrl: getLeaderImage(leaderId),
+    fallbackUrl: getLeaderImageFallback(leaderId),
+  };
 }
 
 async function hydrateVisibleMatchLeaderLabels(matches: any[], gamertag: string, container: HTMLElement) {
@@ -54,7 +61,16 @@ async function hydrateVisibleMatchLeaderLabels(matches: any[], gamertag: string,
 
     const leaderEl = container.querySelector(`[data-match-leader-id="${matchId}"]`) as HTMLElement | null;
     if (leaderEl) {
-      leaderEl.textContent = getResolvedLeaderName(fullMatch, gamertag);
+      leaderEl.textContent = getResolvedLeaderAssets(fullMatch, gamertag).name;
+    }
+    const leaderImgEl = container.querySelector(`[data-match-leader-overlay-id="${matchId}"]`) as HTMLImageElement | null;
+    if (leaderImgEl) {
+      const leaderAssets = getResolvedLeaderAssets(fullMatch, gamertag);
+      if (leaderAssets.imageUrl) {
+        leaderImgEl.src = leaderAssets.imageUrl;
+        if (leaderAssets.fallbackUrl) leaderImgEl.setAttribute('data-fallback', leaderAssets.fallbackUrl);
+        leaderImgEl.classList.remove('hidden');
+      }
     }
   }));
 }
@@ -172,9 +188,16 @@ export function renderMatches(matches: any[], gamertag: string) {
 
     const matchId = match.MatchId || '';
     const cachedFullMatch = matchId ? state.matchResultCache.get(matchId) : null;
-    const leaderName = cachedFullMatch
-      ? getResolvedLeaderName(cachedFullMatch, gamertag)
-      : ((player?.LeaderId ?? match.LeaderId) != null ? getLeaderName(player?.LeaderId ?? match.LeaderId) : 'Unknown');
+    const leaderAssets = cachedFullMatch
+      ? getResolvedLeaderAssets(cachedFullMatch, gamertag)
+      : ((player?.LeaderId ?? match.LeaderId) != null
+        ? {
+            name: getLeaderName(player?.LeaderId ?? match.LeaderId),
+            imageUrl: getLeaderImage(player?.LeaderId ?? match.LeaderId),
+            fallbackUrl: getLeaderImageFallback(player?.LeaderId ?? match.LeaderId),
+          }
+        : { name: 'Unknown', imageUrl: '', fallbackUrl: '' });
+    const leaderName = leaderAssets.name;
     const mapName = getMapName(match.MapId || '');
     const mapImg = getMapImage(match.MapId || '');
     const mapFallback = getMapImageFallback(match.MapId || '');
@@ -234,18 +257,42 @@ export function renderMatches(matches: any[], gamertag: string) {
 
     return `
       <div class="${bgClass} hover:bg-slate-700/20 transition-colors" style="border-left: 4px solid ${borderColor};">
-        <div class="flex items-start gap-4 p-4">
+        <div class="flex items-start gap-5 p-4 sm:p-5">
           ${mapImg
-            ? `<img src="${mapImg}" alt="${mapName}"${fallbackAttr} class="w-16 h-10 sm:w-20 sm:h-12 rounded object-cover flex-shrink-0 border border-slate-600/30" loading="lazy" />`
-            : `<div class="w-16 h-10 sm:w-20 sm:h-12 rounded bg-slate-700/50 flex-shrink-0 flex items-center justify-center text-xs text-gray-500">${mapName}</div>`
+            ? `
+              <div class="relative w-20 h-12 sm:w-28 sm:h-16 flex-shrink-0">
+                <img src="${mapImg}" alt="${mapName}"${fallbackAttr} class="h-full w-full rounded object-cover border border-slate-600/30" loading="lazy" />
+                <img
+                  src="${leaderAssets.imageUrl || ''}"
+                  alt="${leaderName}"
+                  data-match-leader-overlay-id="${matchId}"
+                  data-fallback="${leaderAssets.fallbackUrl || ''}"
+                  class="${leaderAssets.imageUrl ? '' : 'hidden '}absolute -bottom-1.5 -right-1.5 h-8 w-8 sm:h-11 sm:w-11 rounded-md border-2 border-white/90 bg-slate-900/90 object-contain p-0.5 shadow-lg"
+                  loading="lazy"
+                />
+              </div>
+            `
+            : `
+              <div class="relative w-20 h-12 sm:w-28 sm:h-16 rounded bg-slate-700/50 flex-shrink-0 flex items-center justify-center text-xs text-gray-500">
+                ${mapName}
+                <img
+                  src="${leaderAssets.imageUrl || ''}"
+                  alt="${leaderName}"
+                  data-match-leader-overlay-id="${matchId}"
+                  data-fallback="${leaderAssets.fallbackUrl || ''}"
+                  class="${leaderAssets.imageUrl ? '' : 'hidden '}absolute -bottom-1.5 -right-1.5 h-8 w-8 sm:h-11 sm:w-11 rounded-md border-2 border-white/90 bg-slate-900/90 object-contain p-0.5 shadow-lg"
+                  loading="lazy"
+                />
+              </div>
+            `
           }
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-2 flex-wrap">
+          <div class="flex-1 min-w-0 space-y-2">
+            <div class="flex items-center gap-2.5 flex-wrap">
               <span class="font-semibold ${resultColor} text-sm">${resultText}</span>
               <span class="text-gray-400 text-xs">on</span>
               <span class="text-white text-sm truncate">${mapName}</span>
             </div>
-            <div class="flex items-center gap-3 text-xs text-gray-400 mt-1 flex-wrap">
+            <div class="flex items-center gap-x-4 gap-y-1.5 text-xs leading-5 text-gray-400 flex-wrap">
               <span data-match-leader-id="${matchId}">${leaderName}</span>
               ${dateStr ? `<span>${dateStr}</span>` : ''}
               ${durationStr ? `<span>• ${durationStr}</span>` : ''}
@@ -256,7 +303,20 @@ export function renderMatches(matches: any[], gamertag: string) {
               ${unitsText ? `<span>• Units ${unitsText}</span>` : ''}
             </div>
             ${matchId ? `
-              <div class="flex flex-wrap gap-2 mt-3">
+              <div>
+                <button
+                  type="button"
+                  class="match-copy-id-btn inline-flex items-center gap-1.5 text-[10px] text-gray-500 hover:text-gray-300 transition-colors font-mono"
+                  data-match-id="${matchId}"
+                  title="Copy match ID"
+                >
+                  <i class="fas fa-copy text-[9px]" aria-hidden="true"></i>
+                  <span class="match-id-label">${matchId}</span>
+                </button>
+              </div>
+            ` : ''}
+            ${matchId ? `
+              <div class="flex flex-wrap gap-2.5 pt-1">
                 <button
                   type="button"
                   class="match-details-toggle flex-none w-full sm:w-auto sm:flex-[4] flex items-center justify-between rounded-md border border-cyan-500/20 bg-slate-800/40 px-3 py-2 text-xs text-cyan-300 hover:text-cyan-200 hover:border-cyan-400/40 transition-colors"
@@ -696,6 +756,20 @@ export function renderMatches(matches: any[], gamertag: string) {
       } finally {
         button.disabled = false;
         if (spanEl) spanEl.textContent = originalText;
+      }
+    });
+  });
+
+  matchesContent.querySelectorAll('.match-copy-id-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const matchId = (btn as HTMLElement).getAttribute('data-match-id') || '';
+      if (!matchId) return;
+      await navigator.clipboard.writeText(matchId);
+      const label = btn.querySelector('.match-id-label');
+      if (label) {
+        const original = label.textContent;
+        label.textContent = 'Copied!';
+        setTimeout(() => { label.textContent = original; }, 1500);
       }
     });
   });

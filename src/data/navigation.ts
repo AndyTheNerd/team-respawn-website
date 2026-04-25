@@ -58,12 +58,14 @@ export const headerPrimaryLinks: NavLink[] = [
   { href: '/blog', label: 'Blog', activeMatch: 'prefix' },
   { href: '/videos', label: 'Videos', activeMatch: 'videos' },
   { href: '/halo-wars-stats', label: 'HW2 Stats', activeMatch: 'hw2Stats' },
+  { href: '/tournaments', label: 'Tournaments', activeMatch: 'prefix' },
   { href: '/halo-wars-de-player-count', label: 'HW1 Data', activeMatch: 'exact' },
 ];
 
 export const sidePanelPrimaryLinks: NavLink[] = [
   { href: '/blog', label: 'Blog', icon: 'fas fa-blog', activeMatch: 'prefix' },
   { href: '/halo-wars-stats', label: 'HW2 Stats', icon: 'fas fa-chart-bar', activeMatch: 'hw2Stats' },
+  { href: '/tournaments', label: 'Tournaments', icon: 'fas fa-trophy', activeMatch: 'prefix' },
   { href: '/halo-wars-de-player-count', label: 'HW1 Data', icon: 'fas fa-table', activeMatch: 'exact' },
   { href: '/videos', label: 'Video Database', icon: 'fas fa-database', activeMatch: 'videos' },
   { href: '/blog?category=Guides', label: 'All Guides', icon: 'fas fa-gamepad', activeMatch: 'never' },
