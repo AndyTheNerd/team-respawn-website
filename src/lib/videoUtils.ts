@@ -11,14 +11,16 @@ export type GameTag =
   | 'goblin-commander'
   | 'command-and-conquer'
   | 'company-of-heroes'
-  | 'tempest-rising'
+  | 'minecraft'
   | 'spellforce'
   | 'ashes'
+  | 'retro'
   | 'other';
 
 export type SeriesTag =
   | 'mythbusters'
   | 'super-turtle'
+  | 'zombies'
   | 'walkthrough'
   | 'guide'
   | 'review'
@@ -107,15 +109,17 @@ export const GAME_LABELS: Record<GameTag, string> = {
   'goblin-commander': 'Goblin Commander',
   'command-and-conquer': 'Command & Conquer',
   'company-of-heroes': 'Company of Heroes',
-  'tempest-rising': 'Tempest Rising',
+  minecraft: 'Minecraft',
   spellforce: 'Spellforce',
   ashes: 'Ashes of the Singularity',
+  retro: 'Retro',
   other: 'Other',
 };
 
 export const SERIES_LABELS: Record<SeriesTag, string> = {
   mythbusters: 'Mythbusters',
   'super-turtle': 'Super Turtle',
+  zombies: 'Zombies',
   walkthrough: 'Walkthrough',
   guide: 'Guides',
   review: 'Reviews',
@@ -209,12 +213,12 @@ export const GAME_OPTIONS: VideoComposerOption<GameTag>[] = [
     image: '/img/game-icons/Company-of-Heroes.png',
   },
   {
-    value: 'tempest-rising',
-    label: 'Tempest Rising',
-    shortLabel: 'Tempest',
-    title: 'Tempest Rising videos',
-    description: 'Modern RTS previews and match coverage.',
-    icon: 'fa-wind',
+    value: 'minecraft',
+    label: 'Minecraft',
+    shortLabel: 'MC',
+    title: 'Minecraft videos',
+    description: 'Survival, builds, caves, and sandbox adventures.',
+    icon: 'fa-cube',
   },
   {
     value: 'spellforce',
@@ -231,6 +235,14 @@ export const GAME_OPTIONS: VideoComposerOption<GameTag>[] = [
     title: 'Ashes of the Singularity videos',
     description: 'Ashes of the Singularity gameplay and impressions.',
     icon: 'fa-meteor',
+  },
+  {
+    value: 'retro',
+    label: 'Retro',
+    shortLabel: 'Retro',
+    title: 'Retro games',
+    description: 'Classic console and handheld throwbacks.',
+    icon: 'fa-compact-disc',
   },
   {
     value: 'other',
@@ -256,6 +268,13 @@ export const SERIES_OPTIONS: VideoComposerOption<SeriesTag>[] = [
     title: 'Super Turtle series',
     description: 'Defensive holdouts and stubborn late-game builds.',
     icon: 'fa-shield-halved',
+  },
+  {
+    value: 'zombies',
+    label: 'Zombies',
+    title: 'Call of Duty Zombies',
+    description: 'Black Ops, World at War, WWII, and custom Zombies maps and modes.',
+    icon: 'fa-skull',
   },
   {
     value: 'walkthrough',
@@ -411,7 +430,7 @@ export function getGame(title: string): GameTag {
   if (/\bage of mythology\b|\baom\b|\bretold\b/.test(text)) return 'aom';
 
   if (
-    /\bhalo infinite\b|\bhalo 3\b|\bhalo 4\b|\bhalo 2\b|\bhalo reach\b|\bhalo ce\b|\bcombat evolved\b|\bhalo mcc\b|\bhalo odst\b|\bhalo campaign\b/.test(
+    /\bhalo infinite\b|\bhalo 3\b|\bhalo 4\b|\bhalo 2\b|\bhalo reach\b|\bhalo ce\b|\bcombat evolved\b|\bhalo mcc\b|\bmaster chief collection\b|\bhalo odst\b|\bhalo campaign\b/.test(
       text,
     )
   ) {
@@ -423,16 +442,53 @@ export function getGame(title: string): GameTag {
   if (/\bgoblin commander\b/.test(text)) return 'goblin-commander';
   if (/\bcommand and conquer\b|\bred alert\b|\bc c\b|\bkane s wrath\b/.test(text)) return 'command-and-conquer';
   if (/\bcompany of heroes\b|\bcoh\b/.test(text)) return 'company-of-heroes';
-  if (/\btempest rising\b/.test(text)) return 'tempest-rising';
+  if (/\bminecraft\b/.test(text)) return 'minecraft';
   if (/\bspellforce\b|\bconquest of eo\b/.test(text)) return 'spellforce';
   if (/\bashes of the singularity\b/.test(text)) return 'ashes';
 
+  if (isRetroGameTitle(text)) return 'retro';
+
   return 'other';
+}
+
+/** Classic / legacy console & handheld games bucketed for the Retro filter (not general "other"). */
+function isRetroGameTitle(text: string): boolean {
+  if (/\bcrackdown\b/.test(text)) return true;
+  if (/\broads to victory\b/.test(text)) return true;
+  if (/\bpsp\b/.test(text) && /\b(cod|call of duty)\b/.test(text)) return true;
+  if (/\bpokemon\b|\bpok mon\b/.test(text)) return true;
+  if (/\bmedal of honor\b/.test(text)) return true;
+  if (/\barmy of two\b/.test(text)) return true;
+  if (/\breckless racing\b/.test(text)) return true;
+  if (/\bmotor storm\b|\bmotorstorm\b/.test(text)) return true;
+  if (/\bssx\b/.test(text)) return true;
+  if (/\bblur\b/.test(text) && /\b(xbox 360|ps3|racing|gem|underrated)\b/.test(text)) return true;
+  if (/\bempire earth\b/.test(text)) return true;
+  if (/\bearthsiege\b|\bearth siege\b/.test(text)) return true;
+  if (/\brollercoaster tycoon\b|\broller coaster tycoon\b/.test(text)) return true;
+  if (/\brct2\b|\brct 2\b|\bopen rct2\b/.test(text)) return true;
+  if (/\bgran turismo\b/.test(text)) return true;
+  if (/\bbattle for middle earth\b|\bbfme\b/.test(text)) return true;
+  if (/\bcounter strike\b|\bcounterstrike\b|\bcsgo\b|\bcs go\b/.test(text)) return true;
+  if (/\bretro fighters\b/.test(text) && /\b(unboxing|controller)\b/.test(text)) return true;
+
+  return false;
+}
+
+/** Titles that are clearly Call of Duty Zombies (mode), including common map phrasing. */
+function isCallOfDutyZombiesTitle(text: string): boolean {
+  if (/\b(cod|call of duty)\b/.test(text) && /\bzombies?\b/.test(text)) return true;
+  if (/\bblack ops\b/.test(text) && /\bzombies?\b/.test(text)) return true;
+  if (/\bnuketown zombies\b/.test(text)) return true;
+  if (/\bascension zombies\b/.test(text)) return true;
+
+  return false;
 }
 
 export function getSeries(title: string): SeriesTag {
   const text = normalizeSearchText(title);
 
+  if (isCallOfDutyZombiesTitle(text)) return 'zombies';
   if (/\bmythbuster/.test(text)) return 'mythbusters';
   if (/\bsuper turtle\b/.test(text)) return 'super-turtle';
   if (/\bwalkthrough\b|\bfull campaign\b|\bfull legendary\b|\bplaythrough\b/.test(text)) return 'walkthrough';
@@ -514,6 +570,8 @@ export function getFacetCounts<T extends string | number>(
   return counts;
 }
 
+// Games preserve the priority order defined in GAME_OPTIONS (flagship titles first).
+// Series options are sorted alphabetically instead since they have no natural hierarchy.
 export function getGameOptions(videos: TaggedVideo[]): VideoComposerCountOption<GameTag>[] {
   const counts = getFacetCounts(videos, (video) => video.game);
   return GAME_OPTIONS.filter((option) => counts.has(option.value)).map((option) => ({
@@ -524,10 +582,12 @@ export function getGameOptions(videos: TaggedVideo[]): VideoComposerCountOption<
 
 export function getSeriesOptions(videos: TaggedVideo[]): VideoComposerCountOption<SeriesTag>[] {
   const counts = getFacetCounts(videos, (video) => video.series);
-  return SERIES_OPTIONS.filter((option) => counts.has(option.value)).map((option) => ({
-    ...option,
-    count: counts.get(option.value) || 0,
-  }));
+  return SERIES_OPTIONS.filter((option) => counts.has(option.value))
+    .map((option) => ({
+      ...option,
+      count: counts.get(option.value) || 0,
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: 'base' }));
 }
 
 export function getFormatOptions(videos: TaggedVideo[]): VideoComposerCountOption<FormatTag>[] {
