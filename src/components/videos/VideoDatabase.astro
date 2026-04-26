@@ -87,7 +87,7 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
           <span class="vdb-hero-metrics-sep" aria-hidden="true">·</span>
           <span><strong>{stats.longFormCount.toLocaleString()}</strong> long-form</span>
           <span class="vdb-hero-metrics-sep" aria-hidden="true">·</span>
-          <span>Latest <strong>{stats.latestPublishedLabel}</strong></span>
+          <span>Last Updated <strong>{stats.latestPublishedLabel}</strong></span>
         </div>
       </div>
     </div>
@@ -714,8 +714,12 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
     position: relative;
     z-index: 1;
     margin-top: -0.35rem;
-    /* Toolbar game/series cards: 2.1rem icon + 0.45rem vertical padding × 2 */
+    /* Year row chip height */
     --vdb-filter-pill-height: 3rem;
+    /* Game toolbar cards: title + 2-line subtext */
+    --vdb-toolbar-game-series-card-min-h: calc(4.55rem - 3px);
+    /* Series: 4 columns + up to 3 lines of subtext */
+    --vdb-toolbar-series-card-min-h: calc(5.35rem - 2px);
     border-radius: 1.15rem;
     overflow: hidden;
     padding: 0;
@@ -847,6 +851,7 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
     min-width: 0;
     max-width: 12rem;
     padding: 0.55rem 0.65rem;
+    align-items: center;
   }
 
   .vdb-format-grid--toolbar .vdb-format-copy small {
@@ -866,8 +871,9 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
     grid-template-columns: repeat(auto-fill, minmax(13.75rem, 1fr));
   }
 
+  /* Cap at 4 per row so each pill is wider and subtext has more horizontal room */
   .vdb-option-list--toolbar-series {
-    grid-template-columns: repeat(auto-fill, minmax(11.5rem, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .vdb-option-list--toolbar-games .vdb-option-card,
@@ -875,19 +881,15 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
     width: 100%;
     max-width: none;
     min-width: 0;
-    min-height: var(--vdb-filter-pill-height);
-    padding: 0.45rem 0.55rem;
+    align-items: center;
+    min-height: var(--vdb-toolbar-game-series-card-min-h);
+    padding: 0.44rem 0.55rem;
     grid-template-columns: auto minmax(0, 1fr) auto;
     gap: 0.45rem;
   }
 
-  .vdb-option-list--toolbar-games .vdb-option-card {
-    align-items: start;
-  }
-
-  .vdb-option-list--toolbar-games .vdb-option-copy small,
-  .vdb-option-list--toolbar-series .vdb-option-copy small {
-    display: none;
+  .vdb-option-list--toolbar-series .vdb-option-card {
+    min-height: var(--vdb-toolbar-series-card-min-h);
   }
 
   .vdb-option-list--toolbar-games .vdb-option-icon,
@@ -895,11 +897,6 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
     width: 2.1rem;
     height: 2.1rem;
     border-radius: 0.65rem;
-  }
-
-  .vdb-option-list--toolbar-games .vdb-option-count {
-    align-self: start;
-    margin-top: 0.1rem;
   }
 
   .vdb-option-list--toolbar-games .vdb-option-count,
@@ -967,6 +964,9 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
 
   .vdb-toolbar-track .vdb-sort-pill {
     flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     white-space: nowrap;
     padding: 0.42rem 0.65rem;
     font-size: 0.72rem;
@@ -1121,6 +1121,31 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
     hyphens: manual;
   }
 
+  .vdb-option-list--toolbar-games .vdb-option-copy small {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+    font-size: 0.65rem;
+    line-height: 1.28;
+    word-break: normal;
+    /* Prefer word breaks over the global option-copy `overflow-wrap: anywhere` */
+    overflow-wrap: break-word;
+  }
+
+  .vdb-option-list--toolbar-series .vdb-option-copy small {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+    font-size: 0.65rem;
+    line-height: 1.28;
+    word-break: normal;
+    overflow-wrap: break-word;
+  }
+
   .vdb-option-list--toolbar-series .vdb-option-copy strong {
     font-size: 0.78rem;
     line-height: 1.25;
@@ -1133,8 +1158,11 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
 
   .vdb-option-list--toolbar-games .vdb-option-copy,
   .vdb-option-list--toolbar-series .vdb-option-copy {
-    display: block;
+    display: grid;
+    gap: 0.12rem;
     min-width: 0;
+    align-content: center;
+    justify-items: start;
   }
 
   .vdb-option-count {
@@ -1180,6 +1208,9 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
   }
 
   .vdb-sort-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 999px;
     background: rgba(6, 11, 21, 0.68);
@@ -1580,10 +1611,6 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
       grid-template-columns: repeat(auto-fill, minmax(11.5rem, 1fr));
     }
 
-    .vdb-option-list--toolbar-series {
-      grid-template-columns: repeat(auto-fill, minmax(10.25rem, 1fr));
-    }
-
     .vdb-toolbar-row {
       grid-template-columns: 1fr;
       gap: 0.35rem;
@@ -1618,9 +1645,14 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
       align-items: start;
     }
 
+    .vdb-format-grid--toolbar .vdb-format-card {
+      align-items: center;
+    }
+
     .vdb-option-list--toolbar-games .vdb-option-card,
     .vdb-option-list--toolbar-series .vdb-option-card {
       grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
     }
 
     .vdb-option-list--toolbar-games .vdb-option-count,
