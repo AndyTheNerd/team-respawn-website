@@ -42,5 +42,8 @@
     "sass": "^1.9.0",
     "typescript": "^5.9.3",
     "wrangler": "^4.76.0"
+  },
+  "engines": {
+    "node": ">=22.12.0"
   }
 }
