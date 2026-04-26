@@ -4,6 +4,28 @@ import {
   generateId, hashSecret, expiresAt,
 } from './_shared';
 
+function d1ErrorMessage(e: unknown): string {
+  return String((e as { message?: unknown })?.message ?? e ?? '');
+}
+
+/** Map D1 insert failures to JSON — never throw so clients avoid CF HTML 1101 pages. */
+function tournamentCreateInsertErrorResponse(message: string): Response {
+  if (/no such column:.*\badmin_password_hash\b/i.test(message)) {
+    return errorResponse(
+      'Database is missing admin password support. Apply D1 migration 0012 (npm run cf:d1:migrate:12), then retry.',
+      503,
+    );
+  }
+  if (/no such table:.*\btournaments\b/i.test(message)) {
+    return errorResponse(
+      'Tournament tables are missing. Apply D1 migration 0011 (npm run cf:d1:migrate:11).',
+      503,
+    );
+  }
+  console.error('[api/tournaments POST] insert failed:', message);
+  return errorResponse('Could not create tournament.', 500);
+}
+
 // ── GET /api/tournaments ──────────────────────────────────────────────────────
 // Returns non-expired tournaments. Optional ?status= filter.
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
@@ -106,20 +128,25 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       format, maxParticipants, now, expires, rules, startsAt,
     ).run();
   } catch (e: unknown) {
-    const message = String((e as { message?: unknown })?.message ?? e ?? '');
-    if (/no such column:\s*(rules|starts_at)/i.test(message)) {
-      await env.DB.prepare(
-        `INSERT INTO tournaments
-           (id, name, organizer_name, admin_token_hash, admin_password_hash, join_password_hash,
-            format, status, bracket_data, max_participants, created_at, expires_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, 'registration', NULL, ?, ?, ?)`
-      ).bind(
-        id, name, organizerName, legacyTokenHash, adminPasswordHash, joinPasswordHash,
-        format, maxParticipants, now, expires,
-      ).run();
-      return jsonResponse({ id }, 201);
+    const message = d1ErrorMessage(e);
+    // Older DBs from 0011 + 0012 but before 0016 — no rules / starts_at columns.
+    if (/no such column:.*\b(rules|starts_at)\b/i.test(message)) {
+      try {
+        await env.DB.prepare(
+          `INSERT INTO tournaments
+             (id, name, organizer_name, admin_token_hash, admin_password_hash, join_password_hash,
+              format, status, bracket_data, max_participants, created_at, expires_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, 'registration', NULL, ?, ?, ?)`
+        ).bind(
+          id, name, organizerName, legacyTokenHash, adminPasswordHash, joinPasswordHash,
+          format, maxParticipants, now, expires,
+        ).run();
+        return jsonResponse({ id }, 201);
+      } catch (e2: unknown) {
+        return tournamentCreateInsertErrorResponse(d1ErrorMessage(e2));
+      }
     }
-    throw e;
+    return tournamentCreateInsertErrorResponse(message);
   }
 
   return jsonResponse({ id }, 201);
