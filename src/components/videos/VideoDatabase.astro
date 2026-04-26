@@ -756,8 +756,6 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
     flex-direction: column;
     gap: 0.35rem;
     padding: 0.45rem 0.65rem 0.65rem;
-    max-height: min(58vh, 28rem);
-    overflow-y: auto;
     overflow-x: hidden;
   }
 
@@ -769,18 +767,6 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
 
   .vdb-toolbar-body-wrap {
     position: relative;
-  }
-
-  .vdb-toolbar-body-wrap::after {
-    content: '';
-    position: sticky;
-    bottom: 0;
-    display: block;
-    height: 2rem;
-    margin-top: -2rem;
-    pointer-events: none;
-    background: linear-gradient(to bottom, transparent, rgba(7, 13, 24, 0.9));
-    border-radius: 0 0 1.15rem 1.15rem;
   }
 
   .vdb-toolbar-row {
@@ -1558,12 +1544,6 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
     border: 0;
   }
 
-  @media (max-width: 1100px) {
-    .vdb-toolbar-body {
-      max-height: min(46vh, 24rem);
-    }
-  }
-
   @media (max-width: 720px) {
     .vdb-shell::before {
       display: none;
@@ -1594,10 +1574,6 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
       justify-content: flex-start;
       text-align: left;
       min-width: 0;
-    }
-
-    .vdb-toolbar-body {
-      max-height: min(52vh, 22rem);
     }
 
     .vdb-option-list--toolbar-games {
