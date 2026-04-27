@@ -3,9 +3,11 @@ import SecondaryPageLayout from './SecondaryPageLayout.astro';
 import BlogHeader from '../components/BlogHeader.astro';
 import BlogSidebar from '../components/BlogSidebar.astro';
 import ShareButtons from '../components/ShareButtons.astro';
+import ScrollToTop from '../components/ScrollToTop.astro';
 import Author from '../blocks/Author/Author.astro';
 import authorInfo from '../data/authorInfo.js';
 import { getBlogPromo } from '../data/blogPromos';
+import { getBlogNeighborsForPathname } from '../utils/blogNeighbors';
 
 interface Props {
   title: string;
@@ -13,6 +15,8 @@ interface Props {
   category: string;
   publishedDate: string;
   dateIso: string;
+  /** When the article body was revised after first publish (JSON-LD `dateModified`). */
+  dateModifiedIso?: string;
   ogImage?: string;
   youtubeId?: string;
   tags?: string[];
@@ -24,6 +28,7 @@ const {
   category,
   publishedDate,
   dateIso,
+  dateModifiedIso,
   ogImage,
   youtubeId,
   tags
@@ -32,6 +37,8 @@ const {
 const canonical = `https://www.teamrespawn.net${Astro.url.pathname}`;
 const resolvedOgImage = ogImage ? `https://www.teamrespawn.net${ogImage}` : undefined;
 const blogPromo = getBlogPromo(category, tags ?? []);
+const { prev, next, readingMinutes } = getBlogNeighborsForPathname(Astro.url.pathname);
+const dateModifiedForLd = dateModifiedIso ?? dateIso;
 
 // JSON-LD structured data for Article
 const jsonLd = {
@@ -41,7 +48,7 @@ const jsonLd = {
   "description": description,
   "image": resolvedOgImage,
   "datePublished": dateIso,
-  "dateModified": dateIso,
+  "dateModified": dateModifiedForLd,
   "author": {
     "@type": "Organization",
     "name": "Team Respawn",
@@ -81,7 +88,6 @@ if (youtubeId) {
   ogDescription={description}
   ogImage={resolvedOgImage}
   ogType="article"
-  showScrollToTop
 >
   <Fragment slot="head">
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
@@ -92,7 +98,7 @@ if (youtubeId) {
   <div class="max-w-6xl mx-auto flex flex-col lg:flex-row gap-8">
     <!-- Sidebar (appears first on mobile, moves to right on desktop) -->
     <div class="lg:order-2 lg:w-64 lg:flex-shrink-0">
-      <BlogSidebar category={category} title={title}>
+      <BlogSidebar category={category} title={title} showScrollToTop>
         <ShareButtons url={canonical} title={title} />
       </BlogSidebar>
     </div>
@@ -100,8 +106,13 @@ if (youtubeId) {
     <!-- Main Content -->
     <main id="main-content" class="flex-1 min-w-0">
       <h1 class="text-4xl font-bold mb-2 text-cyan-400">{title}</h1>
-      <p class="text-gray-400 text-sm mb-8">
-        <time datetime={dateIso}>{publishedDate}</time> by Team Respawn
+      <p class="text-gray-400 text-sm mb-8 flex flex-wrap items-center gap-x-2 gap-y-1">
+        <span><time datetime={dateIso}>{publishedDate}</time> by Team Respawn</span>
+        {readingMinutes != null ? (
+          <span class="text-gray-500" aria-label={`Estimated reading time ${readingMinutes} minutes`}>
+            · ~{readingMinutes} min read
+          </span>
+        ) : null}
       </p>
 
       {tags?.length ? (
@@ -122,16 +133,52 @@ if (youtubeId) {
           <iframe
             src={`https://www.youtube.com/embed/${youtubeId}`}
             title={title}
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            loading="lazy"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowfullscreen
-            class="w-full h-full"
+            class="h-full w-full border-0"
           ></iframe>
         </div>
       )}
 
+      <div id="blog-toc-mount" class="blog-toc-mount mb-6" aria-live="polite"></div>
+
       <div class="prose prose-invert text-gray-300">
         <slot />
+      </div>
+
+      {(prev || next) && (
+        <nav
+          class="not-prose mt-10 flex flex-col gap-3 rounded-lg border border-gray-700/80 bg-gray-900/40 p-4 sm:flex-row sm:justify-between"
+          aria-label="Adjacent posts"
+        >
+          {prev ? (
+            <a
+              href={prev.href}
+              class="text-cyan-400 hover:text-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 rounded sm:max-w-[48%]"
+            >
+              <span class="block text-xs uppercase tracking-wide text-gray-500">Older</span>
+              <span class="font-medium text-gray-100">{prev.title}</span>
+            </a>
+          ) : (
+            <span />
+          )}
+          {next ? (
+            <a
+              href={next.href}
+              class="text-right text-cyan-400 hover:text-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 rounded sm:max-w-[48%] sm:ml-auto"
+            >
+              <span class="block text-xs uppercase tracking-wide text-gray-500">Newer</span>
+              <span class="font-medium text-gray-100">{next.title}</span>
+            </a>
+          ) : null}
+        </nav>
+      )}
+
+      <!-- Author Block -->
+      <div class="mt-12 pb-8 border-b border-gray-700">
+        <h2 class="text-lg font-semibold text-gray-400 mb-4">About the Author</h2>
+        <Author {...authorInfo} className="bg-gray-800/50 border border-gray-700" />
       </div>
 
       {blogPromo && (
@@ -176,12 +223,127 @@ if (youtubeId) {
           </div>
         </section>
       )}
-
-      <!-- Author Block -->
-      <div class="mt-12 pt-8 border-t border-gray-700">
-        <h2 class="text-lg font-semibold text-gray-400 mb-4">About the Author</h2>
-        <Author {...authorInfo} className="bg-gray-800/50 border border-gray-700" />
-      </div>
     </main>
   </div>
+
+  <div class="max-w-6xl mx-auto mt-8 lg:hidden">
+    <ScrollToTop variant="sidebar" />
+  </div>
+
+  <Fragment slot="scripts">
+    <script src="/js/blog-toc.js" is:inline></script>
+  </Fragment>
 </SecondaryPageLayout>
+
+<style is:global>
+  .blog-toc-mount:empty {
+    display: none;
+  }
+
+  .blog-toc {
+    position: relative;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    background: linear-gradient(135deg, rgba(17, 24, 39, 0.97) 0%, rgba(15, 23, 42, 0.92) 45%, rgba(8, 15, 30, 0.94) 100%);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.04) inset,
+      0 12px 32px rgba(2, 6, 23, 0.55);
+    overflow: hidden;
+  }
+
+  .blog-toc::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, #22d3ee 0%, #0891b2 55%, #164e63 100%);
+    opacity: 0.95;
+    pointer-events: none;
+  }
+
+  .blog-toc__inner {
+    padding: 1rem 1.25rem 1.125rem 1.5rem;
+  }
+
+  .blog-toc__label {
+    margin: 0 0 0.75rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(103, 232, 249, 0.9);
+  }
+
+  .blog-toc__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+
+  .blog-toc__item {
+    margin: 0;
+    padding: 0;
+    position: relative;
+    padding-left: 0.875rem;
+  }
+
+  .blog-toc__item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.65em;
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background: rgba(34, 211, 238, 0.35);
+    box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.12);
+  }
+
+  .blog-toc__link {
+    display: block;
+    padding: 0.4rem 0.5rem;
+    margin-left: -0.25rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    font-weight: 500;
+    color: #cbd5e1;
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition:
+      color 0.15s ease,
+      background 0.15s ease,
+      border-color 0.15s ease;
+  }
+
+  .blog-toc__link:hover {
+    color: #ecfeff;
+    background: rgba(6, 182, 212, 0.1);
+    border-color: rgba(34, 211, 238, 0.15);
+  }
+
+  .blog-toc__link:focus {
+    outline: none;
+  }
+
+  .blog-toc__link:focus-visible {
+    outline: 2px solid #22d3ee;
+    outline-offset: 2px;
+    color: #ecfeff;
+  }
+
+  @media (min-width: 1024px) {
+    .blog-toc__inner {
+      padding: 1.125rem 1.375rem 1.25rem 1.625rem;
+    }
+
+    .blog-toc__link {
+      font-size: 0.9375rem;
+    }
+  }
+</style>

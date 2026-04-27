@@ -1,4 +1,12 @@
+import { getCollection } from 'astro:content';
 import blogPosts from '../data/blogPosts.js';
+
+type SitemapPage = {
+  url: string;
+  lastmod: string;
+  changefreq: string;
+  priority: string;
+};
 
 export async function GET({ site }: { site?: { origin: string } }) {
   const siteUrl = site?.origin || 'https://www.teamrespawn.net';
@@ -79,16 +87,38 @@ export async function GET({ site }: { site?: { origin: string } }) {
     }
   ];
 
-  // Generate blog post URLs from blogPosts data
-  const blogPostPages = blogPosts.map(post => ({
+  const legacyBlogPages: SitemapPage[] = blogPosts.map((post) => ({
     url: post.href,
     lastmod: post.dateIso || new Date().toISOString().split('T')[0],
     changefreq: 'monthly',
-    priority: '0.7'
+    priority: '0.7',
   }));
 
+  let contentBlogPages: SitemapPage[] = [];
+  try {
+    const entries = await getCollection(
+      'blog',
+      (e) => !e.data.draft && Boolean(e.data.canonicalPath)
+    );
+    contentBlogPages = entries.map((e) => ({
+      url: e.data.canonicalPath!,
+      lastmod: e.data.dateIso || new Date().toISOString().split('T')[0],
+      changefreq: 'monthly',
+      priority: '0.7',
+    }));
+  } catch {
+    // tolerate environments where content collections are unavailable
+  }
+
+  const seen = new Set<string>();
+  const blogPostPages = [...legacyBlogPages, ...contentBlogPages].filter((p) => {
+    if (seen.has(p.url)) return false;
+    seen.add(p.url);
+    return true;
+  });
+
   // Combine all pages
-  const allPages = [...staticPages, ...blogPostPages];
+  const allPages: SitemapPage[] = [...staticPages, ...blogPostPages];
 
   // Generate XML sitemap
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>

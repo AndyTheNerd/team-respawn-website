@@ -1,43 +1,61 @@
+import type { APIRoute } from 'astro';
 import blogPosts from '../data/blogPosts.js';
 import { SITE_URL } from '../config.js';
 
 const siteUrl = SITE_URL || 'https://www.teamrespawn.net';
 
-// Get the 20 most recent posts
-const recentPosts = blogPosts.slice(0, 20);
+function sortPostsByDateDesc(posts: typeof blogPosts) {
+  return [...posts].sort((a, b) => {
+    const aD = a.dateIso ? Date.parse(a.dateIso) : 0;
+    const bD = b.dateIso ? Date.parse(b.dateIso) : 0;
+    return bD - aD;
+  });
+}
 
-// Function to format date for RSS
-function formatDate(dateString) {
+function formatDate(dateString: string) {
   const date = new Date(dateString);
   return date.toUTCString();
 }
 
-// Function to escape XML special characters
-function escapeXml(unsafe) {
-  return unsafe.replace(/[<>&'"]/g, function (c) {
+function escapeXml(unsafe: unknown) {
+  const s = unsafe == null ? '' : String(unsafe);
+  return s.replace(/[<>&'"]/g, (c) => {
     switch (c) {
-      case '<': return '&lt;';
-      case '>': return '&gt;';
-      case '&': return '&amp;';
-      case '\'': return '&apos;';
-      case '"': return '&quot;';
+      case '<':
+        return '&lt;';
+      case '>':
+        return '&gt;';
+      case '&':
+        return '&amp;';
+      case "'":
+        return '&apos;';
+      case '"':
+        return '&quot;';
+      default:
+        return c;
     }
   });
 }
 
-// Generate RSS items
-const rssItems = recentPosts.map(post => `
+export const GET: APIRoute = async () => {
+  const recentPosts = sortPostsByDateDesc(blogPosts).slice(0, 20);
+
+  const rssItems = recentPosts
+    .map(
+      (post) => `
   <item>
     <title>${escapeXml(post.title)}</title>
-    <description>${escapeXml(post.excerpt)}</description>
+    <description>${escapeXml(post.excerpt ?? '')}</description>
     <link>${siteUrl}${post.href}</link>
     <guid>${siteUrl}${post.href}</guid>
     <pubDate>${formatDate(post.dateIso)}</pubDate>
     <category>${escapeXml(post.category)}</category>
-    ${post.tags.map(tag => `<category>${escapeXml(tag)}</category>`).join('\n    ')}
-  </item>`).join('\n');
+    ${(post.tags ?? []).map((tag) => `<category>${escapeXml(tag)}</category>`).join('\n    ')}
+  </item>`
+    )
+    .join('\n');
 
-const rssXml = `<?xml version="1.0" encoding="UTF-8"?>
+  const rssXml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>${escapeXml('Team Respawn - Gaming Walkthroughs & Strategy Guides')}</title>
@@ -59,11 +77,10 @@ ${rssItems}
   </channel>
 </rss>`;
 
-export function GET() {
   return new Response(rssXml, {
     headers: {
       'Content-Type': 'application/xml',
-      'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
+      'Cache-Control': 'public, max-age=3600',
     },
   });
-}
+};

@@ -338,7 +338,7 @@
     dateIso: '2025-01-30',
     category: 'Guides',
     tags: ['Halo Wars 2'],
-    featured: true,
+    featured: false,
     excerpt:
       'Master the art of super turtling in Halo Wars 2. Learn the best maps, leaders like Pavium and Serina, build orders, and defensive strategies.',
     href: '/blog/posts/how-to-super-turtle',

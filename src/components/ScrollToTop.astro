@@ -1,26 +1,32 @@
-<button
-  id="scroll-to-top"
-  aria-label="Scroll to top"
-  class="fixed bottom-6 right-6 z-50 p-3 rounded-full bg-gray-800 border border-cyan-500/40 text-cyan-400 shadow-lg opacity-0 pointer-events-none transition-all duration-300 hover:bg-gray-700 hover:border-cyan-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
->
-  <i class="fas fa-chevron-up" aria-hidden="true"></i>
-</button>
+---
+interface Props {
+  /** `floating`: fixed corner (legacy). `sidebar`: full-width control for blog side column. */
+  variant?: 'floating' | 'sidebar';
+}
 
-<script>
-  const btn = document.getElementById('scroll-to-top');
-  if (btn) {
-    window.addEventListener('scroll', () => {
-      if (window.scrollY > 300) {
-        btn.classList.remove('opacity-0', 'pointer-events-none');
-        btn.classList.add('opacity-100');
-      } else {
-        btn.classList.add('opacity-0', 'pointer-events-none');
-        btn.classList.remove('opacity-100');
-      }
-    }, { passive: true });
+const { variant = 'floating' } = Astro.props;
 
-    btn.addEventListener('click', () => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-  }
-</script>
+const floatingClass =
+  'fixed bottom-6 right-6 z-50 p-3 rounded-full bg-gray-800 border border-cyan-500/40 text-cyan-400 shadow-lg opacity-0 pointer-events-none transition-all duration-300 hover:bg-gray-700 hover:border-cyan-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-400';
+
+const sidebarClass =
+  'scroll-to-top--sidebar w-full flex items-center justify-center gap-2 rounded-xl border border-cyan-500/35 bg-gray-800/90 px-4 py-3 text-sm font-semibold text-cyan-100 shadow-md opacity-0 pointer-events-none transition-all duration-300 hover:bg-gray-800 hover:border-cyan-400/60 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-gray-900';
+---
+
+{
+  variant === 'floating' ? (
+    <button
+      type="button"
+      data-scroll-to-top
+      aria-label="Scroll to top"
+      class:list={[floatingClass]}
+    >
+      <i class="fas fa-chevron-up" aria-hidden="true"></i>
+    </button>
+  ) : (
+    <button type="button" data-scroll-to-top class:list={[sidebarClass]}>
+      <i class="fas fa-chevron-up text-cyan-400" aria-hidden="true"></i>
+      <span>Back to top</span>
+    </button>
+  )
+}

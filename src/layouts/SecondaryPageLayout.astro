@@ -2,7 +2,6 @@
 import BaseLayout from './BaseLayout.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
-import ScrollToTop from '../components/ScrollToTop.astro';
 import SidePanel from '../components/SidePanel.astro';
 
 interface Props {
@@ -14,7 +13,6 @@ interface Props {
   ogDescription?: string;
   ogImage?: string;
   ogType?: string;
-  showScrollToTop?: boolean;
 }
 
 const {
@@ -26,7 +24,6 @@ const {
   ogDescription = description,
   ogImage,
   ogType = 'website',
-  showScrollToTop = false,
 } = Astro.props;
 ---
 
@@ -58,7 +55,6 @@ const {
   </div>
 
   <SidePanel />
-  {showScrollToTop && <ScrollToTop />}
 
   <script src="/js/side-panel.js" is:inline></script>
   <script src="/js/tabs.js" is:inline></script>

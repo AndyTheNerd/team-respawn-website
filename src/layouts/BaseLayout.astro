@@ -77,5 +77,6 @@ const cloudflareAnalyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN || ''
   </head>
   <body class={`bg-gray-900 text-white ${resolvedBodyClass}`.trim()}>
     <slot />
+    <script src="/js/scroll-to-top.js" is:inline></script>
   </body>
 </html>

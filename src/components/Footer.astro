@@ -39,9 +39,10 @@ const legalLinks = [
 ];
 ---
 <footer class="mt-16 border-t border-white/10 bg-gradient-to-b from-slate-950/40 to-slate-950/90">
-  <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
-    <div class="grid gap-10 lg:grid-cols-[1.2fr_2fr]">
-      <div class="space-y-4">
+  <!-- Match Header inner horizontal padding (header-glass-container px-4 lg:px-6) so logo/links align with nav, not just the outer container. -->
+  <div class="w-full min-w-0 py-12 px-4 lg:px-6">
+    <div class="grid min-w-0 gap-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,2fr)]">
+      <div class="min-w-0 space-y-4">
         <a href="/" aria-label="Team Respawn home" class="inline-flex items-center gap-3 group">
           <img
             src="/content/Team-Respawn-Full.png"
@@ -67,7 +68,7 @@ const legalLinks = [
         </div>
       </div>
 
-      <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+      <div class="grid min-w-0 gap-8 sm:grid-cols-2 lg:grid-cols-3">
         {columns.map((column) => (
           <div>
             <h3 class="text-sm font-semibold uppercase tracking-widest text-gray-400 mb-4">{column.title}</h3>
@@ -90,13 +91,15 @@ const legalLinks = [
       </div>
     </div>
 
-    <div class="mt-10 border-t border-white/10 pt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <p class="text-xs sm:text-sm text-gray-400">
+    <div
+      class="mt-10 border-t border-white/10 pt-6 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between sm:gap-x-6 sm:gap-y-3"
+    >
+      <p class="text-xs sm:text-sm text-gray-400 min-w-0 sm:flex-1">
         &copy; {year} Team Respawn. All rights reserved.
         <span class="mx-2" aria-hidden="true">•</span>
         <span id="footer-tagline">RTS with a sprinkle of cringe.</span>
       </p>
-      <div class="flex flex-wrap gap-4 text-xs sm:text-sm">
+      <div class="flex flex-wrap gap-x-4 gap-y-2 text-xs sm:text-sm shrink-0">
         {legalLinks.map((link) => (
           <a href={link.href} class="text-gray-400 hover:text-white transition-colors duration-200">
             {link.label}

@@ -348,6 +348,36 @@
 
     updateSelectActiveStates();
     renderActiveFilters();
+    syncUrlQuery();
+  }
+
+  function syncUrlQuery() {
+    if (typeof window === 'undefined') return;
+    var path = window.location.pathname.replace(/\/$/, '') || '/';
+    if (path !== '/blog') return;
+
+    var params = new URLSearchParams();
+    if (searchInput && searchInput.value.trim()) {
+      params.set('q', searchInput.value.trim());
+    } else if (currentSearchTerm) {
+      params.set('q', currentSearchTerm);
+    }
+    if (isActiveCategory()) {
+      params.set('category', currentCategory);
+    }
+    if (isActiveTag()) {
+      params.set('tag', currentTag);
+    }
+    if (isActiveSort()) {
+      params.set('sort', currentSort);
+    }
+
+    var qs = params.toString();
+    var next = qs ? '/blog?' + qs : '/blog';
+    var cur = window.location.pathname + (window.location.search || '');
+    if (cur !== next) {
+      history.replaceState(null, '', next);
+    }
   }
 
   // Debounce function for search input

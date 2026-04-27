@@ -3,8 +3,11 @@ import SecondaryPageLayout from '../../layouts/SecondaryPageLayout.astro';
 import BlogCard from '../../components/BlogCard/BlogCard.astro';
 import { Input, Select } from 'webcoreui/astro';
 import blogPosts from '../../data/blogPosts.js';
+import { absoluteBlogCardImageUrl } from '../../utils/blogImageUrl';
 import '../../styles/webcore.scss';
 import '../../styles/blog-overrides.scss';
+
+// Listing: all posts ship in HTML; filters + pagination run client-side (see /public/js/blog-search.js).
 
 // Pagination settings (handled client-side)
 const pageSize = 12;
@@ -85,7 +88,7 @@ const blogStructuredData = {
       "@type": "Organization",
       "name": "Team Respawn"
     },
-    "image": post.img.src ? `https://www.teamrespawn.net${post.img.src}` : undefined,
+    "image": absoluteBlogCardImageUrl(post.img),
     "about": post.tags?.map(tag => ({
       "@type": "Thing",
       "name": tag
@@ -99,13 +102,12 @@ const blogStructuredData = {
   canonical="https://www.teamrespawn.net/blog"
   ogTitle="Team Respawn Blog"
   ogDescription={metaDescription}
-  showScrollToTop
 >
   <Fragment slot="head">
     <script type="application/ld+json" set:html={JSON.stringify(blogStructuredData)} />
   </Fragment>
 
-  <main id="main-content" class="pt-8">
+  <main id="main-content" class="w-full pt-8">
     <!-- Search and Filter Section -->
     <div class="blog-search-filter mb-8 bg-gray-800/50 border border-gray-700 rounded-lg p-4 sm:p-6">
       <div class="flex flex-col lg:flex-row gap-4">

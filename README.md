@@ -6,7 +6,7 @@ A gaming content website for the [Team Respawn YouTube channel](https://www.yout
 
 ## Features
 
-- Blog posts: guides, walkthroughs, and reviews with pagination
+- Blog posts: guides, walkthroughs, and reviews — client-side search, filters, and pagination on `/blog`; optional Astro Content Collection under `src/content/blog/` (see `src/content.config.ts`) for future MD/MDX entries with `canonicalPath` merged into the sitemap when not `draft`
 - Video database with MCC-style filter/search composer (`/videos`)
 - Halo Wars 2 live stats lookup — player profiles, match history, match details, AI summaries (`/halo-wars-stats`)
 - Halo Wars: Definitive Edition Steam player count — live concurrency, observed daily high, and 30-day trend chart (`/halo-wars-de-player-count`)
@@ -26,7 +26,7 @@ A gaming content website for the [Team Respawn YouTube channel](https://www.yout
 
 | Layer | Technology |
 |---|---|
-| Framework | Astro v5 |
+| Framework | Astro v6 |
 | UI library | WebcoreUI v1.3 (Tailwind CSS) |
 | Styling | SCSS via `sass` |
 | Language | TypeScript + ES modules |
@@ -72,6 +72,8 @@ team-respawn-website/
 │       └── tournament-brackets.css  # Bracket shell + match card styling for tournaments
 ├── scripts/               # Node utility scripts (add-video.mjs)
 ├── src/
+│   ├── content/           # Optional Content Collection (blog MD/MDX); catalog remains blogPosts.js
+│   ├── content.config.ts  # `blog` collection schema (Zod) + glob loader
 │   ├── blocks/            # Reusable content blocks (Author, Socials)
 │   ├── components/        # Astro components (Header, Footer, SidePanel)
 │   ├── data/              # Site data as TS modules
