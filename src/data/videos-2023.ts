@@ -4,6 +4,8 @@ export type Video = {
   durationMs: number | null;
   videoId: string;
   privacy: string;
+  game?: import('../lib/videoUtils').GameTag;
+  series?: import('../lib/videoUtils').SeriesTag;
 };
 
 // Videos from 2023
@@ -953,6 +955,7 @@ export const videos2023: Video[] = [
     durationMs: 518000,
     videoId: "UeaDoFg6cYg",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Can a CONDOR beat everyone? Halo Wars 2",
@@ -2885,6 +2888,7 @@ export const videos2023: Video[] = [
     durationMs: 3229000,
     videoId: "G0aV6TYGoIc",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Here's Decimus! Halo Wars #shorts",
@@ -3501,6 +3505,7 @@ export const videos2023: Video[] = [
     durationMs: 661000,
     videoId: "j4NDGQZFdF8",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "this guy thought TOWER RUSHING would work in Age of Empires 4. He was wrong.",

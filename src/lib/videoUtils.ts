@@ -6,6 +6,7 @@ export type GameTag =
   | 'aoe4'
   | 'aoe2'
   | 'aom'
+  | 'starcraft-2'
   | 'halo-fps'
   | 'gears'
   | 'goblin-commander'
@@ -104,6 +105,7 @@ export const GAME_LABELS: Record<GameTag, string> = {
   aoe4: 'Age of Empires IV',
   aoe2: 'Age of Empires II',
   aom: 'Age of Mythology Retold',
+  'starcraft-2': 'StarCraft II',
   'halo-fps': 'Halo FPS',
   gears: 'Gears of War',
   'goblin-commander': 'Goblin Commander',
@@ -171,6 +173,14 @@ export const GAME_OPTIONS: VideoComposerOption<GameTag>[] = [
     title: 'Age of Mythology videos',
     description: 'Retold coverage, gods, matchups, and showcase battles.',
     image: '/img/game-icons/Retold.png',
+  },
+  {
+    value: 'starcraft-2',
+    label: 'StarCraft II',
+    shortLabel: 'SC2',
+    title: 'StarCraft II videos',
+    description: 'Arcade modes, Direct Strike, Nexus Wars, and custom games.',
+    icon: 'fa-microchip',
   },
   {
     value: 'halo-fps',
@@ -428,6 +438,13 @@ export function getGame(title: string): GameTag {
   if (/\bage of empires iv\b|\bage of empires 4\b|\baoe ?4\b/.test(text)) return 'aoe4';
   if (/\bage of empires ii\b|\bage of empires 2\b|\baoe ?2\b/.test(text)) return 'aoe2';
   if (/\bage of mythology\b|\baom\b|\bretold\b/.test(text)) return 'aom';
+  if (
+    /\bstarcraft\s*(2|ii)\b|\bsc2\b|\bwings of liberty\b|\bheart of the swarm\b|\blegacy of the void\b|\bstarcraft\b/.test(
+      text,
+    )
+  ) {
+    return 'starcraft-2';
+  }
 
   if (
     /\bhalo infinite\b|\bhalo 3\b|\bhalo 4\b|\bhalo 2\b|\bhalo reach\b|\bhalo ce\b|\bcombat evolved\b|\bhalo mcc\b|\bmaster chief collection\b|\bhalo odst\b|\bhalo campaign\b/.test(
@@ -498,6 +515,34 @@ export function getSeries(title: string): SeriesTag {
   return 'general';
 }
 
+/** Halo Wars 2 match / entertainment uploads mis-tagged as guides by title heuristics above. */
+const GUIDE_SERIES_INFERENCE_EXCLUDED_VIDEO_IDS = new Set<string>([
+  'iWlwJD1Nofk',
+  'SzVNuQi51Hg',
+  '2-pzaE8gPrk',
+  'MCC5QAINwgo',
+  'C20qb3Pf09Q',
+  '_rQG9btQgiY',
+  'yLIeulua5VY',
+  'Z1YqK-zfc9o',
+  'MtG1qtid5hY',
+  'aEGUX7Zg6Ww',
+  'B7yxhtkF5W4',
+  'T3066hi88d8',
+  '-NPk3IFs6Yw',
+  '_HuKpXkYYk0',
+  'lXeG3NoP6eA',
+  '3tPLBPEc8io',
+  'VPJLqZiz1NY',
+  '7gAcKNpxtGo',
+  'JYx26SiWAvM',
+  'AGkS8GXkSio',
+  'y7ezbOqWYoE',
+  'O4NqYQE9ZyI',
+  '42KnGEYZeQY',
+  '0ahcD2j2B1s',
+]);
+
 /**
  * Derives game, series, format, and year tags from a raw Video entry.
  * Game and series are inferred from the title via regex when not explicitly set.
@@ -505,7 +550,9 @@ export function getSeries(title: string): SeriesTag {
 export function tagVideo(video: Video): TaggedVideo {
   const format = getFormat(video.durationMs);
   const game = video.game ?? getGame(video.title);
-  const series = video.series ?? getSeries(video.title);
+  const series =
+    video.series ??
+    (GUIDE_SERIES_INFERENCE_EXCLUDED_VIDEO_IDS.has(video.videoId) ? 'general' : getSeries(video.title));
   const year = video.publishedAt ? Number.parseInt(video.publishedAt.slice(0, 4), 10) || 0 : 0;
 
   return { ...video, game, series, format, year };
