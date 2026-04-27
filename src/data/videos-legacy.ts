@@ -31,6 +31,7 @@ export const videosLegacy: Video[] = [
     durationMs: 771000,
     videoId: "9Opqpc6VduU",
     privacy: "Public",
+    game: "retro",
   },
   {
     title: "Minecraft Xbox One Survival Island Seed!",
@@ -200,6 +201,7 @@ export const videosLegacy: Video[] = [
     durationMs: 415000,
     videoId: "j_CiufbZHy0",
     privacy: "Public",
+    game: "halo-fps",
   },
   {
     title: "Arbiter vs Elite Honor Guard - Which is Better? | Halo Wars 2 Mythbusters",
@@ -1479,6 +1481,7 @@ export const videosLegacy: Video[] = [
     durationMs: 325000,
     videoId: "_PEQOmvMPiU",
     privacy: "Public",
+    game: "halo-fps",
   },
   {
     title: "Arbiter vs Elite Honor Guard Retested - Which is Better? | Halo Wars 2 Mythbusters",
@@ -2180,6 +2183,7 @@ export const videosLegacy: Video[] = [
     durationMs: 559000,
     videoId: "CQGyU-IlpAY",
     privacy: "Public",
+    game: "halo-fps",
   },
   {
     title: "You Have to Play These Halo Wars Mods!",
@@ -2889,6 +2893,7 @@ export const videosLegacy: Video[] = [
     durationMs: 412000,
     videoId: "Bbm73eGEWnw",
     privacy: "Public",
+    game: "command-and-conquer",
   },
   {
     title: "Iron Curtain | Halo Wars 2 Multiplayer",

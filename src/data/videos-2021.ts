@@ -754,6 +754,7 @@ export const videos2021: Video[] = [
     durationMs: 3996000,
     videoId: "dTosBwSWGmg",
     privacy: "Public",
+    game: "halo-fps",
   },
   {
     title: "We made a FULL POP of Scorpions in this 2v3 Halo Wars 2 match!",
@@ -1672,6 +1673,7 @@ export const videos2021: Video[] = [
     durationMs: 883000,
     videoId: "bCqwJhhurh0",
     privacy: "Public",
+    game: "command-and-conquer",
   },
   {
     title: "Arby is quite sneakily OP in Halo Wars 2",

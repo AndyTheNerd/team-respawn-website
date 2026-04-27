@@ -486,7 +486,7 @@ export const videos2026: Video[] = [
     durationMs: 1_626_000,
     videoId: "E4fnCMsoUzs",
     privacy: "Public",
-    game: "other",
+    game: "starcraft-2",
   },
   {
     title: "This man saved me from annihilation in AoE4",

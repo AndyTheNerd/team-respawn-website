@@ -2376,6 +2376,7 @@ export const videos2022: Video[] = [
     durationMs: 3542000,
     videoId: "HFblHGTUBsc",
     privacy: "Public",
+    series: "zombies",
   },
   {
     title: "We forgot about the Beam in Halo Wars 2 and paid dearly for it",
@@ -3349,6 +3350,7 @@ export const videos2022: Video[] = [
     durationMs: 565000,
     videoId: "WDGz25zswoo",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Halo Wars 2 is down again... this time 343 refuses to fix it",
