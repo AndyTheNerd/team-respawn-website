@@ -31,6 +31,7 @@
     "cf:d1:migrate": "npm run cf:d1:migrate:1 && npm run cf:d1:migrate:2 && npm run cf:d1:migrate:3 && npm run cf:d1:migrate:4 && npm run cf:d1:migrate:5 && npm run cf:d1:migrate:6 && npm run cf:d1:migrate:7 && npm run cf:d1:migrate:8 && npm run cf:d1:migrate:9 && npm run cf:d1:migrate:10 && npm run cf:d1:migrate:11 && npm run cf:d1:migrate:12 && npm run cf:d1:migrate:13 && npm run cf:d1:migrate:14 && npm run cf:d1:migrate:15 && npm run cf:d1:migrate:16 && npm run cf:d1:migrate:17 && npm run cf:d1:migrate:18"
   },
   "dependencies": {
+    "@astrojs/check": "^0.9.8",
     "astro": "^6.1.6",
     "brackets-manager": "^1.9.1",
     "brackets-viewer": "^1.9.0",
@@ -39,7 +40,10 @@
   },
   "devDependencies": {
     "sass": "^1.9.0",
-    "typescript": "^5.8.0",
+    "typescript": "^5.9.3",
     "wrangler": "^4.76.0"
+  },
+  "engines": {
+    "node": ">=22.12.0"
   }
 }

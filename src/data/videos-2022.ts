@@ -4,6 +4,8 @@ export type Video = {
   durationMs: number | null;
   videoId: string;
   privacy: string;
+  game?: import('../lib/videoUtils').GameTag;
+  series?: import('../lib/videoUtils').SeriesTag;
 };
 
 // Videos from 2022
@@ -1520,6 +1522,7 @@ export const videos2022: Video[] = [
     durationMs: 673000,
     videoId: "jYhzP4bRNi0",
     privacy: "Public",
+    game: "halo-fps",
   },
   {
     title: "I STRUGGLED against the WORST leader in Halo Wars 2!",
@@ -1674,6 +1677,7 @@ export const videos2022: Video[] = [
     durationMs: 407000,
     videoId: "y5hXRrzigSM",
     privacy: "Public",
+    series: "review",
   },
   {
     title: "Fear my MANTIS in Halo Wars 2!",

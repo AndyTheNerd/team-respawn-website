@@ -136,6 +136,7 @@ export const videosLegacy: Video[] = [
     durationMs: 514000,
     videoId: "xCJp2kUthbk",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Halo Wars 2 Terminus Firefight - Who are the Most Effective Leaders?",
@@ -227,6 +228,7 @@ export const videosLegacy: Video[] = [
     durationMs: 729000,
     videoId: "CV3KUTAJAgE",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Halo Wars vs Halo Wars 2 - Which Game is Better?",
@@ -2383,6 +2385,7 @@ export const videosLegacy: Video[] = [
     durationMs: 451000,
     videoId: "GDDiFOnbt1w",
     privacy: "Public",
+    game: "halo-fps",
   },
   {
     title: "Is Air Really OP? | Halo Wars 2 Mythbusters",

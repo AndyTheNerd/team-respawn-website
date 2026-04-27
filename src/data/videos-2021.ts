@@ -4,6 +4,8 @@ export type Video = {
   durationMs: number | null;
   videoId: string;
   privacy: string;
+  game?: import('../lib/videoUtils').GameTag;
+  series?: import('../lib/videoUtils').SeriesTag;
 };
 
 // Videos from 2021
@@ -288,6 +290,7 @@ export const videos2021: Video[] = [
     durationMs: 754000,
     videoId: "Jkh2uxOnRvo",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "We were losing... and then they SUDDENLY RETREAT?! Age of Empires 4 Multiplayer Gameplay",
@@ -2724,6 +2727,8 @@ export const videos2021: Video[] = [
     durationMs: 1381000,
     videoId: "CHddbcxj7ds",
     privacy: "Public",
+    game: "halo-wars-1",
+    series: "guide",
   },
   {
     title: "Mini Base Superiority - Halo Wars 2 Multiplayer",
@@ -2773,6 +2778,8 @@ export const videos2021: Video[] = [
     durationMs: 717000,
     videoId: "KSCrhHzfEpo",
     privacy: "Public",
+    game: "halo-wars-1",
+    series: "guide",
   },
   {
     title: "How to Stop Mass Air in Halo Wars 2",
@@ -2794,6 +2801,8 @@ export const videos2021: Video[] = [
     durationMs: 1039000,
     videoId: "96PQ1ChZc5Y",
     privacy: "Public",
+    game: "halo-wars-1",
+    series: "guide",
   },
   {
     title: "Voridus Last Stand! | Halo Wars 2 Multiplayer",
@@ -2808,5 +2817,7 @@ export const videos2021: Video[] = [
     durationMs: 529000,
     videoId: "tGCHZhlDSp0",
     privacy: "Public",
+    game: "halo-wars-1",
+    series: "guide",
   },
 ];

@@ -4,6 +4,8 @@ export type Video = {
   durationMs: number | null;
   videoId: string;
   privacy: string;
+  game?: import('../lib/videoUtils').GameTag;
+  series?: import('../lib/videoUtils').SeriesTag;
 };
 
 // Videos from 2024
@@ -3263,6 +3265,8 @@ export const videos2024: Video[] = [
     durationMs: 606000,
     videoId: "4K8NxWJg9II",
     privacy: "Public",
+    game: "halo-wars-1",
+    series: "guide",
   },
   {
     title: "I love SENTRY in Halo Wars 2!",
@@ -3368,6 +3372,7 @@ export const videos2024: Video[] = [
     durationMs: 801000,
     videoId: "Byl-mjy-a-s",
     privacy: "Public",
+    game: "halo-fps",
   },
   {
     title: "Halo 3 ODST FULL Legendary Walkthrough (MCC)",
@@ -3424,6 +3429,8 @@ export const videos2024: Video[] = [
     durationMs: 531000,
     videoId: "2xGB56Xao3k",
     privacy: "Public",
+    game: "halo-wars-1",
+    series: "guide",
   },
   {
     title: "we DESTROYED Ayyubids in Age of Empires IV!",
