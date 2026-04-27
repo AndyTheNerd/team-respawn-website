@@ -17,6 +17,7 @@ export const videos2023: Video[] = [
     durationMs: 607000,
     videoId: "6ln9NfB9cZM",
     privacy: "Public",
+    series: "review",
   },
   {
     title: "he KEEP DROPPED my base in AOE4 and I still won",

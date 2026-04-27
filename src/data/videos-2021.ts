@@ -12,13 +12,6 @@ export type Video = {
 // @ts-ignore TS2590: array too large for union inference
 export const videos2021: Video[] = [
   {
-    title: "Thank you. 2021 was incredible and this is why",
-    publishedAt: "2021-12-31T22:36:19+00:00",
-    durationMs: 455000,
-    videoId: "Kh-V7oB6vE4",
-    privacy: "Public",
-  },
-  {
     title: "We had an UNBELIEVABLE DEFENSE in Age of Empires 4!",
     publishedAt: "2021-12-31T16:04:09+00:00",
     durationMs: 2808000,
@@ -2179,6 +2172,7 @@ export const videos2021: Video[] = [
     durationMs: 550000,
     videoId: "ygBubGJHq0Q",
     privacy: "Public",
+    series: "review",
   },
   {
     title: "We Really Shouldn't Have Won this game... Halo Wars 2",
@@ -2640,13 +2634,6 @@ export const videos2021: Video[] = [
     publishedAt: "2021-01-24T18:07:34+00:00",
     durationMs: 1075000,
     videoId: "d1O4Oe5wspU",
-    privacy: "Public",
-  },
-  {
-    title: "Phase 2 - My Plan for 2021",
-    publishedAt: "2021-01-24T04:53:55+00:00",
-    durationMs: 659000,
-    videoId: "a51GedbQ4KI",
     privacy: "Public",
   },
   {

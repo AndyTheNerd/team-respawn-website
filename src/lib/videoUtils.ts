@@ -517,7 +517,7 @@ export function getSeries(title: string): SeriesTag {
   return 'general';
 }
 
-/** Halo Wars 2 match / entertainment uploads mis-tagged as guides by title heuristics above. */
+/** Gameplay / commentary uploads mis-tagged as guides by title heuristics above. */
 const GUIDE_SERIES_INFERENCE_EXCLUDED_VIDEO_IDS = new Set<string>([
   'iWlwJD1Nofk',
   'SzVNuQi51Hg',
@@ -543,6 +543,18 @@ const GUIDE_SERIES_INFERENCE_EXCLUDED_VIDEO_IDS = new Set<string>([
   'O4NqYQE9ZyI',
   '42KnGEYZeQY',
   '0ahcD2j2B1s',
+  '6bposS7ptYs',
+  '7FSF9ZXChfI',
+  '9ywRKxLQ00I',
+  'MC8aHGY_cGw',
+  'PFuhC5TQTsA',
+  'SpfjieR2kes',
+  'Zo_79eopYKo',
+  'ZbvaJPypgf8',
+  'agClz83gwak',
+  'Ky-nXU3fRic',
+  'rg3QJyouZag',
+  'rgLGKdjL3e4',
 ]);
 
 /**

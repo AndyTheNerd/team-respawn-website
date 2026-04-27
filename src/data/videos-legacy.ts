@@ -476,6 +476,7 @@ export const videosLegacy: Video[] = [
     durationMs: 842000,
     videoId: "-A1XD3SAHgk",
     privacy: "Public",
+    series: "review",
   },
   {
     title: "New Halo Wars 2 Content Announced! The Yappening!",
@@ -1526,13 +1527,6 @@ export const videosLegacy: Video[] = [
     privacy: "Public",
   },
   {
-    title: "Thank You. 2020 was a record year!",
-    publishedAt: "2020-12-24T15:11:43+00:00",
-    durationMs: 747000,
-    videoId: "BK_bNKg517M",
-    privacy: "Public",
-  },
-  {
     title: "Scarab Beats Condor in this Epic 2v3 Halo Wars 2 Match!",
     publishedAt: "2020-12-23T13:51:19+00:00",
     durationMs: 2923000,
@@ -1706,6 +1700,7 @@ export const videosLegacy: Video[] = [
     durationMs: 506000,
     videoId: "d_45a2FZ5jc",
     privacy: "Public",
+    series: "review",
   },
   {
     title: "ODST Take Down | Halo Wars 2 Multiplayer",
@@ -2155,6 +2150,7 @@ export const videosLegacy: Video[] = [
     durationMs: 702000,
     videoId: "EFLKmS6XRAo",
     privacy: "Public",
+    series: "review",
   },
   {
     title: "Everyone is bad at Halo Wars 2",
@@ -3099,13 +3095,6 @@ export const videosLegacy: Video[] = [
     privacy: "Public",
   },
   {
-    title: "[Loss] - We made way too many mistakes in Age 4!",
-    publishedAt: "",
-    durationMs: 2734000,
-    videoId: "65Ub5-_uDmY",
-    privacy: "Public",
-  },
-  {
     title: "He was FURIOUS about my Berkshire! AoE4",
     publishedAt: "",
     durationMs: 1747000,
@@ -3117,27 +3106,6 @@ export const videosLegacy: Video[] = [
     publishedAt: "",
     durationMs: 694000,
     videoId: "0-zV1fO4In8",
-    privacy: "Public",
-  },
-  {
-    title: "[Loss] - Blinded by the Money",
-    publishedAt: "",
-    durationMs: 536000,
-    videoId: "aCR7e1aud4k",
-    privacy: "Public",
-  },
-  {
-    title: "[Loss] That was such a great start tho...",
-    publishedAt: "",
-    durationMs: 419000,
-    videoId: "Sh_wDsYPV34",
-    privacy: "Public",
-  },
-  {
-    title: "This may be our fastest loss ever",
-    publishedAt: "",
-    durationMs: 352000,
-    videoId: "Sw8bIjjNs64",
     privacy: "Public",
   },
 ];

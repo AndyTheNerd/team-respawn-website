@@ -171,6 +171,7 @@ export const videos2022: Video[] = [
     durationMs: 472000,
     videoId: "ZgEBgrVsJs0",
     privacy: "Public",
+    series: "review",
   },
   {
     title: "Should You Buy Halo Wars 2 in 2023?",
@@ -178,6 +179,7 @@ export const videos2022: Video[] = [
     durationMs: 497000,
     videoId: "XcrzZH33Ifs",
     privacy: "Public",
+    series: "review",
   },
   {
     title: "this man DESTROYED Decimus in Halo Wars 2!",
@@ -1704,13 +1706,6 @@ export const videos2022: Video[] = [
     privacy: "Public",
   },
   {
-    title: "Update.",
-    publishedAt: "2022-07-19T17:44:09+00:00",
-    durationMs: 315000,
-    videoId: "zraDYLGzRnI",
-    privacy: "Public",
-  },
-  {
     title: "That didn't go according to plan... Halo Wars #SHORTS",
     publishedAt: "2022-07-18T20:06:04+00:00",
     durationMs: 29000,
@@ -2818,6 +2813,7 @@ export const videos2022: Video[] = [
     durationMs: 553000,
     videoId: "OjRximIK-yY",
     privacy: "Public",
+    series: "review",
   },
   {
     title: "ODST weapons in Halo 3 are SO MUCH FUN! Halo MCC",
@@ -3820,6 +3816,7 @@ export const videos2022: Video[] = [
     durationMs: 398000,
     videoId: "3F5PYu5YeIg",
     privacy: "Public",
+    series: "review",
   },
   {
     title: "Captain Cutter is secretly OP in Halo Wars 2 and this is why",

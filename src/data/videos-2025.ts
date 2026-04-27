@@ -3120,6 +3120,7 @@ export const videos2025: Video[] = [
     durationMs: null,
     videoId: "qKlBiZOLgEY",
     privacy: "Public",
+    series: "review",
   },
   {
     title: "we CRUSHED them with an overwhelming Stampede! AoE4",

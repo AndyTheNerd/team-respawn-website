@@ -199,6 +199,7 @@ export const videos2024: Video[] = [
     durationMs: 702000,
     videoId: "t1edn4KYqfI",
     privacy: "Public",
+    series: "review",
   },
   {
     title: "Nobody can stop MASS VULTURES in Halo Wars 2!",
