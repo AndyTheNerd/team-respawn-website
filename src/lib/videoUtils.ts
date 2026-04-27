@@ -59,6 +59,8 @@ export interface VideoSearchRecord extends TaggedVideo {
   formatLabel: string;
   publishedLabel: string;
   durationLabel: string;
+  /** On-site blog URL when a post is tied to this YouTube video (see `buildVideoIdToBlogHrefMap`). */
+  blogHref: string | null;
   searchableText: string;
 }
 
@@ -563,11 +565,15 @@ export function tagVideo(video: Video): TaggedVideo {
  * computes display labels, formats the duration and publish date, and
  * concatenates a normalised searchableText string for fast client-side matching.
  */
-export function buildVideoSearchRecord(video: Video): VideoSearchRecord {
+export function buildVideoSearchRecord(
+  video: Video,
+  blogHrefByVideoId?: ReadonlyMap<string, string>,
+): VideoSearchRecord {
   const taggedVideo = tagVideo(video);
   const gameLabel = GAME_LABELS[taggedVideo.game];
   const seriesLabel = SERIES_LABELS[taggedVideo.series];
   const formatLabel = FORMAT_LABELS[taggedVideo.format];
+  const blogHref = blogHrefByVideoId?.get(taggedVideo.videoId) ?? null;
 
   return {
     ...taggedVideo,
@@ -576,6 +582,7 @@ export function buildVideoSearchRecord(video: Video): VideoSearchRecord {
     gameLabel,
     seriesLabel,
     formatLabel,
+    blogHref,
     publishedLabel: formatPublishedDate(taggedVideo.publishedAt),
     durationLabel: formatDuration(taggedVideo.durationMs),
     searchableText: normalizeSearchText(
@@ -585,15 +592,19 @@ export function buildVideoSearchRecord(video: Video): VideoSearchRecord {
         seriesLabel,
         formatLabel,
         String(taggedVideo.year || ''),
+        blogHref ? 'blog article guide' : '',
       ].join(' '),
     ),
   };
 }
 
-export function buildVideoSearchRecords(videos: Video[]): VideoSearchRecord[] {
+export function buildVideoSearchRecords(
+  videos: Video[],
+  blogHrefByVideoId?: ReadonlyMap<string, string>,
+): VideoSearchRecord[] {
   return videos
     .filter((video) => video.privacy === 'Public')
-    .map(buildVideoSearchRecord)
+    .map((video) => buildVideoSearchRecord(video, blogHrefByVideoId))
     .sort((left, right) => right.publishedAt.localeCompare(left.publishedAt));
 }
 

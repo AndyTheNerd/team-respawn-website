@@ -16,8 +16,11 @@ import {
   paginateVideos,
   parseStateFromSearchParams,
 } from '../../lib/videoUtils';
+import blogPosts from '../../data/blogPosts.js';
+import { buildVideoIdToBlogHrefMap } from '../../utils/videoBlogHrefMap';
 
-const searchableVideos = buildVideoSearchRecords(videos);
+const videoBlogHrefById = buildVideoIdToBlogHrefMap(blogPosts);
+const searchableVideos = buildVideoSearchRecords(videos, videoBlogHrefById);
 const initialState = parseStateFromSearchParams(Astro.url.searchParams, searchableVideos);
 const filteredVideos = filterAndSortVideos(searchableVideos, initialState);
 const pagination = paginateVideos(filteredVideos, initialState.page);

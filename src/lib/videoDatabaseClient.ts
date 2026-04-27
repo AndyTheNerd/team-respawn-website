@@ -184,12 +184,18 @@ function renderCards(ctx: VdbContext, videos: VideoSearchRecord[]): void {
       const title = escapeHtml(video.title);
       const thumbnail = escapeHtml(video.thumbnailUrl);
       const gameLabel = escapeHtml(video.gameLabel);
-      const formatLabel = escapeHtml(video.formatLabel);
+      const formatTag =
+        video.format === 'short'
+          ? `<span class="vdb-card-tag is-format">${escapeHtml(video.formatLabel)}</span>`
+          : '';
 
       const seriesTag =
         video.series !== 'general'
           ? `<span class="vdb-card-tag is-series">${escapeHtml(video.seriesLabel)}</span>`
           : '';
+      const blogTag = video.blogHref
+        ? `<a href="${escapeHtml(video.blogHref)}" class="vdb-card-tag is-blog" target="_blank" rel="noopener noreferrer">Blog</a>`
+        : '';
       const durationTag = video.durationLabel
         ? `<span class="vdb-duration-badge">${escapeHtml(video.durationLabel)}</span>`
         : '';
@@ -212,8 +218,9 @@ function renderCards(ctx: VdbContext, videos: VideoSearchRecord[]): void {
           <div class="vdb-card-body">
             <div class="vdb-card-tags">
               <span class="vdb-card-tag is-game">${gameLabel}</span>
-              <span class="vdb-card-tag is-format">${formatLabel}</span>
+              ${formatTag}
               ${seriesTag}
+              ${blogTag}
             </div>
             <h3 class="vdb-card-title">
               <a href="${url}" target="_blank" rel="noopener noreferrer">

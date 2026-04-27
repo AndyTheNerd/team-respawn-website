@@ -487,6 +487,7 @@ export const videos2021: Video[] = [
     durationMs: 4413000,
     videoId: "9LC5DKK1Siw",
     privacy: "Public",
+    series: "super-turtle",
   },
   {
     title: "We BARELY stopped Vulture and Mantis spamming in Halo Wars 2!",
@@ -977,6 +978,7 @@ export const videos2021: Video[] = [
     durationMs: 6785000,
     videoId: "CEArlt0zF1g",
     privacy: "Public",
+    series: "super-turtle",
   },
   {
     title: "Was Halo 2 the best sequel EVER? Halo 2 in Review",
@@ -1698,6 +1700,7 @@ export const videos2021: Video[] = [
     durationMs: 4029000,
     videoId: "dXhSwNv4IYc",
     privacy: "Public",
+    series: "super-turtle",
   },
   {
     title: "Voridus is a cheat code - Halo Wars 2",
@@ -2750,6 +2753,7 @@ export const videos2021: Video[] = [
     durationMs: 1887000,
     videoId: "bX1TJKKm4xs",
     privacy: "Public",
+    series: "super-turtle",
   },
   {
     title: "How to Counter the Rush in Halo Wars 2",

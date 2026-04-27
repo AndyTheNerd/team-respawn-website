@@ -334,8 +334,20 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
               <div class="vdb-card-body">
                 <div class="vdb-card-tags">
                   <span class="vdb-card-tag is-game">{video.gameLabel}</span>
-                  <span class="vdb-card-tag is-format">{video.formatLabel}</span>
+                  {video.format === 'short' && (
+                    <span class="vdb-card-tag is-format">{video.formatLabel}</span>
+                  )}
                   {video.series !== 'general' && <span class="vdb-card-tag is-series">{video.seriesLabel}</span>}
+                  {video.blogHref && (
+                    <a
+                      href={video.blogHref}
+                      class="vdb-card-tag is-blog"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Blog
+                    </a>
+                  )}
                 </div>
                 <h3 class="vdb-card-title">
                   <a href={video.youtubeUrl} target="_blank" rel="noopener noreferrer">
@@ -1371,6 +1383,19 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
   .vdb-card-tag.is-series {
     background: rgba(255, 255, 255, 0.06);
     color: var(--vdb-text-soft);
+  }
+
+  .vdb-card-tag.is-blog {
+    background: rgba(130, 220, 170, 0.16);
+    color: #c6f5dc;
+    text-decoration: none;
+    border: 1px solid rgba(130, 220, 170, 0.35);
+  }
+
+  .vdb-card-tag.is-blog:hover {
+    background: rgba(130, 220, 170, 0.26);
+    color: #e8fff1;
+    border-color: rgba(160, 240, 200, 0.55);
   }
 
   .vdb-card-title {

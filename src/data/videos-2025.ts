@@ -1030,6 +1030,7 @@ export const videos2025: Video[] = [
     durationMs: 5308000,
     videoId: "bl5QiG2UyTQ",
     privacy: "Public",
+    series: "super-turtle",
   },
   {
     title: "He was FURIOUS because we beat his Army! Age of Empires IV",
@@ -1772,6 +1773,7 @@ export const videos2025: Video[] = [
     durationMs: 5598000,
     videoId: "yWJZyLprMgk",
     privacy: "Public",
+    series: "super-turtle",
   },
   {
     title: "Remember COD on the PSP?! Call of Duty Roads to Victory PSP Gameplay!",
@@ -2710,6 +2712,7 @@ export const videos2025: Video[] = [
     durationMs: 4945000,
     videoId: "1xYe8PFdYFk",
     privacy: "Public",
+    series: "super-turtle",
   },
   {
     title: "Nothing but DESTRUCTION in this crazy 3v3! Age of Mythology Retold",
@@ -2976,6 +2979,7 @@ export const videos2025: Video[] = [
     durationMs: 7143000,
     videoId: "ASRqZnJZ7sQ",
     privacy: "Public",
+    series: "super-turtle",
   },
   {
     title: "He tried using TREBUCHETS against my KEEPS! Age of Empires 4",

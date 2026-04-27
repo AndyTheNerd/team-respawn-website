@@ -115,6 +115,7 @@ export const videos2023: Video[] = [
     durationMs: 1311000,
     videoId: "WTZ7HcKK-GY",
     privacy: "Public",
+    series: "super-turtle",
   },
   {
     title: "there was WAR everywhere in this crazy Nomad game! AOE4",
@@ -668,6 +669,7 @@ export const videos2023: Video[] = [
     durationMs: 5870000,
     videoId: "9zPADG7wk5k",
     privacy: "Public",
+    series: "super-turtle",
   },
   {
     title: "The largest forest EVER in Age of Empires! #ageofempires",
@@ -1369,6 +1371,7 @@ export const videos2023: Video[] = [
     durationMs: 15270000,
     videoId: "L01e8DFBnJo",
     privacy: "Public",
+    series: "super-turtle",
   },
   {
     title: "Let's go through the teleporter! #halowars",
@@ -1600,6 +1603,7 @@ export const videos2023: Video[] = [
     durationMs: 4899000,
     videoId: "ohOQ2hNdWMM",
     privacy: "Public",
+    series: "super-turtle",
   },
   {
     title: "Age of Empires IV XBOX Review - How good is AOE4 on Console?!",
@@ -3730,6 +3734,7 @@ export const videos2023: Video[] = [
     durationMs: 1996000,
     videoId: "cg6sH0Ye6DA",
     privacy: "Public",
+    series: "super-turtle",
   },
   {
     title: "Double beam brimmed me! Halo Wars #shorts",
@@ -4031,6 +4036,7 @@ export const videos2023: Video[] = [
     durationMs: 5000000,
     videoId: "0b2VcnQJz5M",
     privacy: "Public",
+    series: "super-turtle",
   },
   {
     title: "Time for bed fellas! Call of Duty #shorts",
@@ -5025,6 +5031,7 @@ export const videos2023: Video[] = [
     durationMs: 3673000,
     videoId: "XGFEmB1lNCo",
     privacy: "Public",
+    series: "super-turtle",
   },
   {
     title: "we had the PERFECT build in Age of Empires 4 Nomad!",

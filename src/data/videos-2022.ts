@@ -395,6 +395,7 @@ export const videos2022: Video[] = [
     durationMs: 5344000,
     videoId: "9b31kFuNQeE",
     privacy: "Public",
+    series: "super-turtle",
   },
   {
     title: "a grown man makes bizarre noises when playing Halo Wars 2. #shorts",
@@ -1642,6 +1643,7 @@ export const videos2022: Video[] = [
     durationMs: 1981000,
     videoId: "03S2BlywXhM",
     privacy: "Public",
+    series: "super-turtle",
   },
   {
     title: "Fear the SIEGE TURTLE! Halo Wars 2",
@@ -1649,6 +1651,7 @@ export const videos2022: Video[] = [
     durationMs: 4183000,
     videoId: "Qwe5W2uXv1o",
     privacy: "Public",
+    series: "super-turtle",
   },
   {
     title: "I lost to a BOAR in Age of Empires 4... here's how",
@@ -1909,6 +1912,7 @@ export const videos2022: Video[] = [
     durationMs: 3774000,
     videoId: "eGnwbalWaV0",
     privacy: "Public",
+    series: "super-turtle",
   },
   {
     title: "Spamming Springalds DESTROYS everyone in Age of Empires 4!",
@@ -1986,6 +1990,7 @@ export const videos2022: Video[] = [
     durationMs: 3113000,
     videoId: "1kYz1wQpquI",
     privacy: "Public",
+    series: "super-turtle",
   },
   {
     title: "I played Command & Conquer Red Alert 3 in 2022! Here's why...",

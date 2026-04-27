@@ -486,6 +486,7 @@ export const videos2024: Video[] = [
     durationMs: 4502000,
     videoId: "ceLo1pHnHX0",
     privacy: "Public",
+    series: "super-turtle",
   },
   {
     title: "A Battle to TEAR DOWN his Walls in Age of Mythology Retold!",
@@ -1186,6 +1187,7 @@ export const videos2024: Video[] = [
     durationMs: 3641000,
     videoId: "2v3L5TCsY4g",
     privacy: "Public",
+    series: "super-turtle",
   },
   {
     title: "Triple Serina is unstoppable in Halo Wars 2!",
@@ -2376,6 +2378,7 @@ export const videos2024: Video[] = [
     durationMs: 4460000,
     videoId: "2B7qj1ZbNmA",
     privacy: "Public",
+    series: "super-turtle",
   },
   {
     title: "the Wraith Invaders are kinda dumb? #halowars",
@@ -2649,6 +2652,7 @@ export const videos2024: Video[] = [
     durationMs: 3531000,
     videoId: "eVpJA-TpdBk",
     privacy: "Public",
+    series: "super-turtle",
   },
   {
     title: "The Scarab STOMPS on his units! #halowars",
@@ -2922,6 +2926,7 @@ export const videos2024: Video[] = [
     durationMs: 11108000,
     videoId: "ctrVjsRQZCA",
     privacy: "Public",
+    series: "super-turtle",
   },
   {
     title: "The Hunter Captain REKTS in Halo Wars 2!",
@@ -3585,6 +3590,7 @@ export const videos2024: Video[] = [
     durationMs: 4258000,
     videoId: "gjHSy1SKU_0",
     privacy: "Public",
+    series: "super-turtle",
   },
   {
     title: "we STUNNED English in Age of Empires IV!",

@@ -663,6 +663,7 @@ export const videosLegacy: Video[] = [
     durationMs: 5940000,
     videoId: "ohSxlf4AiKc",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Three weirdos lose their minds playing Halo Wars 2",
@@ -684,6 +685,7 @@ export const videosLegacy: Video[] = [
     durationMs: 3231000,
     videoId: "4OencHbcNh8",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Hunter Captain is Really OP | Halo Wars 2 Multiplayer",
@@ -705,6 +707,7 @@ export const videosLegacy: Video[] = [
     durationMs: 4193000,
     videoId: "csvU84u_XYw",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "The Boys are Back in Town | Halo Wars 2 Multiplayer",
@@ -740,6 +743,7 @@ export const videosLegacy: Video[] = [
     durationMs: 3153000,
     videoId: "bc67_OlYJSY",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Still Got It | Halo Wars 2 Multiplayer",
@@ -1846,6 +1850,7 @@ export const videosLegacy: Video[] = [
     durationMs: 2160000,
     videoId: "IW9g7IPJF7c",
     privacy: "Public",
+    series: "super-turtle",
   },
   {
     title: "10 Years of Halo Reach! The Last Good Halo Game?",
@@ -2687,6 +2692,7 @@ export const videosLegacy: Video[] = [
     durationMs: 13051000,
     videoId: "05IYyTf7yuQ",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Halo Wars: Playing as the Rebels!",
