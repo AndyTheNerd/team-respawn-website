@@ -798,13 +798,6 @@ export const videosLegacy: Video[] = [
     privacy: "Public",
   },
   {
-    title: "The Future.",
-    publishedAt: "2019-09-04T10:00:03+00:00",
-    durationMs: 383000,
-    videoId: "E8unLJf7rTA",
-    privacy: "Public",
-  },
-  {
     title: "Classic Jump Pack Brute Rush | Halo Wars 2 Multiplayer",
     publishedAt: "2019-09-01T13:00:11+00:00",
     durationMs: 679000,

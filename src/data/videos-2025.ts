@@ -4,6 +4,8 @@ export type Video = {
   durationMs: number | null;
   videoId: string;
   privacy: string;
+  game?: import('../lib/videoUtils').GameTag;
+  series?: import('../lib/videoUtils').SeriesTag;
 };
 
 // Videos from 2025
@@ -43,6 +45,7 @@ export const videos2025: Video[] = [
     durationMs: 21000,
     videoId: "k_W3MJxpP9c",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "They tried stealing our base. It didn't work. Halo Wars 2",
@@ -57,6 +60,7 @@ export const videos2025: Video[] = [
     durationMs: 31000,
     videoId: "OMw3G9sZtmE",
     privacy: "Public",
+    game: "aom",
   },
   {
     title: "He was NOT ready for a Zeus Infantry Rush! Age of Mythology Retold",
@@ -71,6 +75,7 @@ export const videos2025: Video[] = [
     durationMs: 48000,
     videoId: "r2-fw2bTMsM",
     privacy: "Public",
+    game: "aoe4",
   },
   {
     title: "Cutter's Close Air Support is CRAZY",
@@ -85,6 +90,7 @@ export const videos2025: Video[] = [
     durationMs: 49000,
     videoId: "TVq0C6i8ZFQ",
     privacy: "Public",
+    game: "aoe4",
   },
   {
     title: "My units are pure canon fodder",
@@ -92,6 +98,7 @@ export const videos2025: Video[] = [
     durationMs: 29000,
     videoId: "s_7cMAMlFEs",
     privacy: "Public",
+    game: "aoe4",
   },
   {
     title: "King of the Hill is an AWESOME map in AoE4!",
@@ -106,6 +113,7 @@ export const videos2025: Video[] = [
     durationMs: 37000,
     videoId: "pAe4ietuvVw",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Are these enough Vultures in Halo Wars 2?",
@@ -120,6 +128,7 @@ export const videos2025: Video[] = [
     durationMs: 48000,
     videoId: "VLK6GSXNLDM",
     privacy: "Public",
+    game: "aoe4",
   },
   {
     title: "Your cringe is no good here!",
@@ -127,6 +136,7 @@ export const videos2025: Video[] = [
     durationMs: 23000,
     videoId: "qt3-LFYsR7Y",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Oh I did not mean to do that",
@@ -134,6 +144,7 @@ export const videos2025: Video[] = [
     durationMs: 34000,
     videoId: "hRbWRXtgNXQ",
     privacy: "Public",
+    game: "aoe4",
   },
   {
     title: "The Vassal game mode is simply AWESOME! AoE4",
@@ -148,6 +159,7 @@ export const videos2025: Video[] = [
     durationMs: 29000,
     videoId: "SYRGjSIJkQk",
     privacy: "Public",
+    series: "general",
   },
   {
     title: "He Out healed the rush!",
@@ -155,6 +167,7 @@ export const videos2025: Video[] = [
     durationMs: 33000,
     videoId: "49s5d6HHHW0",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "TRIPLE Shipmaster is the Worst idea in Halo Wars 2",
@@ -169,6 +182,7 @@ export const videos2025: Video[] = [
     durationMs: 42000,
     videoId: "2aQCUm-xWwM",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "He lost his villagers, point and laugh!",
@@ -176,6 +190,7 @@ export const videos2025: Video[] = [
     durationMs: 19000,
     videoId: "kXcNEQ0-Fc0",
     privacy: "Public",
+    game: "aoe4",
   },
   {
     title: "So when are they nerfing the OP Elephants in AoE4?",
@@ -190,6 +205,7 @@ export const videos2025: Video[] = [
     durationMs: 19000,
     videoId: "5yNnvWVgXLM",
     privacy: "Public",
+    game: "aoe4",
   },
   {
     title: "Mechs in Halo Wars 2 are AWESOME! Super Turtle",
@@ -204,6 +220,7 @@ export const videos2025: Video[] = [
     durationMs: 77000,
     videoId: "0y7PpHV6rb8",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "I would honestly quit after that",
@@ -211,6 +228,7 @@ export const videos2025: Video[] = [
     durationMs: 38000,
     videoId: "K-Pj-dZzbss",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "He is playing as the wrong leader in Halo Wars!",
@@ -239,6 +257,7 @@ export const videos2025: Video[] = [
     durationMs: 57000,
     videoId: "dIFi0xcpag0",
     privacy: "Public",
+    game: "aoe4",
   },
   {
     title: "What happens when your planned rush FAILS in AoE4?",
@@ -274,6 +293,7 @@ export const videos2025: Video[] = [
     durationMs: 21000,
     videoId: "YsysovLosjI",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "That's a good friend right there",

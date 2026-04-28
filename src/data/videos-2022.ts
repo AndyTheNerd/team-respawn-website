@@ -110,13 +110,6 @@ export const videos2022: Video[] = [
     privacy: "Public",
   },
   {
-    title: "Thank you.",
-    publishedAt: "2022-12-21T07:00:10+00:00",
-    durationMs: 499000,
-    videoId: "Yi1uiCavAw0",
-    privacy: "Public",
-  },
-  {
     title: "We tried to prove we are SUPER TURTLE CHAMPIONS in Halo Wars 2!",
     publishedAt: "2022-12-21T00:16:32+00:00",
     durationMs: 1496000,
