@@ -35,7 +35,12 @@ const {
 } = Astro.props;
 
 const canonical = `https://www.teamrespawn.net${Astro.url.pathname}`;
-const resolvedOgImage = ogImage ? `https://www.teamrespawn.net${ogImage}` : undefined;
+const resolvedOgImage =
+  ogImage && /^https?:\/\//i.test(ogImage)
+    ? ogImage
+    : ogImage
+      ? `https://www.teamrespawn.net${ogImage}`
+      : undefined;
 const blogPromo = getBlogPromo(category, tags ?? []);
 const { prev, next, readingMinutes } = getBlogNeighborsForPathname(Astro.url.pathname);
 const dateModifiedForLd = dateModifiedIso ?? dateIso;

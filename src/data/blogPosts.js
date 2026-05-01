@@ -1,5 +1,22 @@
 ﻿const blogPosts = [
   {
+    title: 'Halo Wars: The Ultimate Design for Console RTS',
+    dateIso: '2026-05-01',
+    category: 'Spotlight',
+    tags: ['Halo Wars 1'],
+    readingTimeMinutes: 6,
+    excerpt:
+      'How Ensemble Studios designed Halo Wars around a controller-only platform — unit selection, locked base slots, and maps built for fixed bases — and why that blueprint still defines console RTS.',
+    href: '/blog/posts/halo-wars-the-ultimate-design-for-console-rts',
+    img: {
+      src: 'https://cdn.dlcompare.com/game_tetiere/upload/gameimage/file/30445.jpeg.webp',
+      alt: 'Halo Wars: The Ultimate Design for Console RTS',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
     title: 'What Happened to Army of Two?',
     dateIso: '2026-05-01',
     category: 'Retro',
@@ -643,7 +660,6 @@
     dateIso: '2026-01-31',
     category: 'Guides',
     tags: ['Age of Empires II'],
-    featured: true,
     excerpt:
       'A guide for new players to Age of Empires II.',
     href: '/blog/posts/noob-to-pro-in-15-minutes-age-of-empires-ii',
