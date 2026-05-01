@@ -40,7 +40,14 @@
             @include typography(xl);
         }
 
-        strong + div {
+        .publishedDate {
+            display: block;
+            font-size: 0.8125rem;
+            color: #9ca3af;
+            margin-top: 0.25rem;
+        }
+
+        .excerpt {
             @include typography(hmd);
             @include spacing(mt-xs);
             flex: 1;

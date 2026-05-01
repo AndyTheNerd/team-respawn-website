@@ -16,3 +16,6 @@ scripts/
 .astro/data-store.json
 .codex-*.log
 .cursor/rules/team-respawn-website.mdc
+AGENTS.md
+devcf.err.log
+devcf.out.log

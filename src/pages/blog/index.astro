@@ -1,8 +1,10 @@
 ---
 import SecondaryPageLayout from '../../layouts/SecondaryPageLayout.astro';
 import BlogCard from '../../components/BlogCard/BlogCard.astro';
+import BlogIndexSidebar from '../../components/BlogIndexSidebar.astro';
 import { Input, Select } from 'webcoreui/astro';
 import blogPosts from '../../data/blogPosts.js';
+import { evergreenBlogPostHrefs } from '../../data/evergreenBlogPosts.js';
 import { absoluteBlogCardImageUrl } from '../../utils/blogImageUrl';
 import '../../styles/webcore.scss';
 import '../../styles/blog-overrides.scss';
@@ -50,6 +52,12 @@ const sortItems = [
   { name: 'Title A-Z', value: 'title-asc' },
   { name: 'Title Z-A', value: 'title-desc' }
 ];
+
+const postByHref = new Map(blogPosts.map((post) => [post.href, post]));
+const evergreenPosts = evergreenBlogPostHrefs.flatMap((href) => {
+  const post = postByHref.get(href);
+  return post ? [{ title: post.title, href: post.href }] : [];
+});
 
 // Enhanced meta description
 const metaDescription = `Team Respawn Blog: ${blogPosts.length}+ gaming guides and strategy articles for Halo Wars, Age of Empires, and Age of Mythology. Master your favorite strategy games with expert tips, walkthroughs, and in-depth guides.`;
@@ -107,7 +115,8 @@ const blogStructuredData = {
     <script type="application/ld+json" set:html={JSON.stringify(blogStructuredData)} />
   </Fragment>
 
-  <main id="main-content" class="w-full pt-8">
+  <div class="w-full flex flex-col lg:flex-row gap-8 pt-8">
+    <main id="main-content" class="flex-1 min-w-0 w-full">
     <!-- Search and Filter Section -->
     <div class="blog-search-filter mb-8 bg-gray-800/50 border border-gray-700 rounded-lg p-4 sm:p-6">
       <div class="flex flex-col lg:flex-row gap-4">
@@ -158,17 +167,8 @@ const blogStructuredData = {
     </div>
 
     <!-- Latest Articles Section -->
-    <div class="flex justify-between items-center mb-8">
+    <div class="mb-8">
       <h2 class="text-2xl font-bold text-white">Latest Articles</h2>
-      <a
-        href="/rss.xml"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300 text-sm"
-      >
-        <i class="fas fa-rss" aria-hidden="true"></i>
-        Subscribe via RSS
-      </a>
     </div>
 
     <div id="blog-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -187,6 +187,7 @@ const blogStructuredData = {
             href={post.href}
             img={post.img}
             title={post.title}
+            dateIso={post.dateIso}
             text={`<span class="blog-category">${post.category}</span><br/>${post.excerpt}`}
             featured={post.featured}
           />
@@ -203,7 +204,12 @@ const blogStructuredData = {
     <nav id="blog-pagination" class="mt-12 flex justify-center" aria-label="Blog pagination">
       <div id="pagination-controls" class="inline-flex flex-wrap items-center gap-2"></div>
     </nav>
-  </main>
+    </main>
+
+    <div class="lg:w-64 lg:flex-shrink-0">
+      <BlogIndexSidebar categories={categories} evergreenPosts={evergreenPosts} />
+    </div>
+  </div>
 
   <Fragment slot="scripts">
     <script define:vars={{ pageSize }}>

@@ -16,12 +16,18 @@ const {
     target,
     img,
     title,
+    dateIso,
     text,
     secondary,
     featured,
     className,
     ...rest
 } = Astro.props
+
+function formatCardDate(iso: string): string {
+    const d = new Date(`${iso}T12:00:00`)
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+}
 ---
 
 <a href={href} target={target} class:list={[styles.link, className, featured && styles.featured]}>
@@ -60,7 +66,12 @@ const {
         <ConditionalWrapper condition={!!text}>
             <div slot="wrapper">children</div>
             {title && <strong>{title}</strong>}
-            {text && <div class="muted" set:html={text} />}
+            {dateIso && (
+                <time class={styles.publishedDate} datetime={dateIso}>
+                    {formatCardDate(dateIso)}
+                </time>
+            )}
+            {text && <div class:list={['muted', styles.excerpt]} set:html={text} />}
         </ConditionalWrapper>
     </Card>
 </a>

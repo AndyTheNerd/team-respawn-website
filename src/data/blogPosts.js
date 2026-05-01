@@ -1,5 +1,21 @@
 ﻿const blogPosts = [
   {
+    title: 'What Happened to Army of Two?',
+    dateIso: '2026-05-01',
+    category: 'Retro',
+    tags: ['Army of Two'],
+    excerpt:
+      'Co-op, aggro, three releases in five years, preservation headaches on modern Xbox, and why a remaster might be the path back.',
+    href: '/blog/posts/what-happened-to-army-of-two',
+    img: {
+      src: 'https://img.youtube.com/vi/04Vp5P1Gw9M/maxresdefault.jpg',
+      alt: 'What Happened to Army of Two?',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
     title: 'Ashes of the Singularity 2 — Demo First Impressions',
     dateIso: '2026-02-23',
     category: 'Reviews',

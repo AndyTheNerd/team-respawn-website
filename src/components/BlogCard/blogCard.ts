@@ -12,6 +12,8 @@ export type BlogCardProps = {
         cloudinaryId?: string
     }
     title?: string
+    /** ISO date string `YYYY-MM-DD` — shown on listing cards when set */
+    dateIso?: string
     text?: string
     secondary?: boolean
     featured?: boolean
