@@ -182,7 +182,9 @@ function renderCards(ctx: VdbContext, videos: VideoSearchRecord[]): void {
       // Pre-escape values used more than once per card
       const url = escapeHtml(video.youtubeUrl);
       const title = escapeHtml(video.title);
-      const thumbnail = escapeHtml(video.thumbnailUrl);
+      const thumbInner = video.thumbnailUrl
+        ? `<img src="${escapeHtml(video.thumbnailUrl)}" alt="" width="480" height="270" loading="lazy" />`
+        : '<span class="vdb-card-thumb-placeholder" aria-hidden="true"></span>';
       const gameLabel = escapeHtml(video.gameLabel);
       const formatTag =
         video.format === 'short'
@@ -212,7 +214,7 @@ function renderCards(ctx: VdbContext, videos: VideoSearchRecord[]): void {
             class="vdb-card-thumb"
             aria-label="Watch ${title} on YouTube"
           >
-            <img src="${thumbnail}" alt="" width="480" height="270" loading="lazy" />
+            ${thumbInner}
             ${durationTag}
           </a>
           <div class="vdb-card-body">

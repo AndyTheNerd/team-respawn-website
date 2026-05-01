@@ -6,6 +6,7 @@ export type Video = {
   privacy: string;
   game?: import('../lib/videoUtils').GameTag;
   series?: import('../lib/videoUtils').SeriesTag;
+  thumbnailPublicId?: string;
 };
 
 // Videos from 2022
@@ -122,6 +123,7 @@ export const videos2022: Video[] = [
     durationMs: 27000,
     videoId: "NVH0gkD_Cg4",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "We played Castle Blood Automatic (CBA) in Age of Empires 4. It was AWESOME!",
@@ -194,6 +196,7 @@ export const videos2022: Video[] = [
     durationMs: 30000,
     videoId: "od4mZ90DHxU",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Age of Empires 4 but our landmarks KISSED! AoE4 Nomad Megarandom",
@@ -271,6 +274,7 @@ export const videos2022: Video[] = [
     durationMs: 31000,
     videoId: "L_JhqpsIPXM",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "We BATTLED on Fort Jordan in Halo Wars 2!",
@@ -299,6 +303,7 @@ export const videos2022: Video[] = [
     durationMs: 39000,
     videoId: "aq31irfN-ZM",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "we were down to ONE VILLAGER in Age of Empires 4.... MUST WATCH!",
@@ -334,6 +339,7 @@ export const videos2022: Video[] = [
     durationMs: 28000,
     videoId: "5kyfu6iC52I",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "we had in INSANE comeback in SWAT! Halo MCC",
@@ -369,6 +375,7 @@ export const videos2022: Video[] = [
     durationMs: 58000,
     videoId: "mj8MqBws8RY",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "WAR in the mountains! Age of Empires 4!",
@@ -419,6 +426,7 @@ export const videos2022: Video[] = [
     durationMs: 43000,
     videoId: "tHlNvfz7qj4",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "This guy left me a FREE BASE in Age of Empires 4!",
@@ -482,6 +490,7 @@ export const videos2022: Video[] = [
     durationMs: 49000,
     videoId: "d_ihHWIdkLM",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "The Ottomans are AMAZING for defense in Age of Empires 4!",
@@ -517,6 +526,7 @@ export const videos2022: Video[] = [
     durationMs: 20000,
     videoId: "Ea9sMZcDa_E",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "not even DECI BANSHEES can stop this CRINGE! Halo Wars 2",
@@ -552,6 +562,7 @@ export const videos2022: Video[] = [
     durationMs: 32000,
     videoId: "TRAwqV_fNSo",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "never forget about Scorpions and Wolverines in Halo Wars 2!",
@@ -573,6 +584,7 @@ export const videos2022: Video[] = [
     durationMs: 33000,
     videoId: "LcJLYHwG3OM",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "There's a reason why VORIDUS is banned in Halo Wars 2",
@@ -685,6 +697,7 @@ export const videos2022: Video[] = [
     durationMs: 38000,
     videoId: "kE2jIvp6cIg",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "this is what happens when you try to be sneaky in Age of Empires 4",
@@ -727,6 +740,7 @@ export const videos2022: Video[] = [
     durationMs: 47000,
     videoId: "SVnGnFteD5Q",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "OMEGA TEAM is CHEDDARFUL! Halo Wars 2",
@@ -762,6 +776,7 @@ export const videos2022: Video[] = [
     durationMs: 53000,
     videoId: "lXiP73ghcqs",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "This build order was CRAZY in Age of Empires 4!",
@@ -811,6 +826,7 @@ export const videos2022: Video[] = [
     durationMs: 51000,
     videoId: "XRc4w0bwWG4",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "REAVER READY TO TAKE DOWN SOME AIR UNITS!  Halo Wars 2",
@@ -867,6 +883,7 @@ export const videos2022: Video[] = [
     durationMs: 42000,
     videoId: "3bNVgZFxFdY",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Who's a big bad grunt?! Halo Wars 2",
@@ -902,6 +919,7 @@ export const videos2022: Video[] = [
     durationMs: 28000,
     videoId: "k5-2-9vCP9A",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Once again you underestimated Cutter in Halo Wars 2. That'll cost you dearly",
@@ -1014,6 +1032,7 @@ export const videos2022: Video[] = [
     durationMs: 32000,
     videoId: "jEhAlcVb9rY",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "We showed them our MAX POWER in Age of Empires 4!",
@@ -1049,6 +1068,7 @@ export const videos2022: Video[] = [
     durationMs: 42000,
     videoId: "QnSb6gNF8mM",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "We thought we were fine.... then a SCARAB showed up! Halo Wars 2",
@@ -1168,6 +1188,7 @@ export const videos2022: Video[] = [
     durationMs: 54000,
     videoId: "YhlXvCIaMj4",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Banshees take on Hornets in Halo Wars 2!",
@@ -1189,6 +1210,7 @@ export const videos2022: Video[] = [
     durationMs: 55000,
     videoId: "Pr-I33UA0BE",
     privacy: "Public",
+    game: "halo-fps",
   },
   {
     title: "NEVER underestimate the SCARAB in Halo Wars 2!",
@@ -1210,6 +1232,7 @@ export const videos2022: Video[] = [
     durationMs: 30000,
     videoId: "9n6-XKoiIi0",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Halo Reach is the BEST Halo multiplayer and here's why",
@@ -1252,6 +1275,7 @@ export const videos2022: Video[] = [
     durationMs: 49000,
     videoId: "2-F2shzUubk",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "My teammates ABANDONED me in Age of Empires 4! Here's why they did it",
@@ -1280,6 +1304,7 @@ export const videos2022: Video[] = [
     durationMs: 36000,
     videoId: "QAr8qEcvfik",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "is SERINA the best Super Turtle leader in Halo Wars 2?",
@@ -1329,6 +1354,7 @@ export const videos2022: Video[] = [
     durationMs: 16000,
     videoId: "XLcRJnBPHfA",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "We fought off DOUBLE CRINGE AIR in Halo Wars 2!",
@@ -1364,6 +1390,7 @@ export const videos2022: Video[] = [
     durationMs: 24000,
     videoId: "lPo1TXulO-g",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Sentinels are TERRIFYING in Halo Wars 2!",
@@ -1392,6 +1419,7 @@ export const videos2022: Video[] = [
     durationMs: 50000,
     videoId: "4NTkKrtHGc0",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Yap Yap's GRUNTDOME is INSANE in Halo Wars 2!",
@@ -1406,6 +1434,7 @@ export const videos2022: Video[] = [
     durationMs: 35000,
     videoId: "DtqYpoX52NU",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "King of the Hill is CRAZY in Age of Empires 4!",
@@ -1448,6 +1477,7 @@ export const videos2022: Video[] = [
     durationMs: 33000,
     videoId: "9CmscafPK0A",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "We DEFENDED our WONDER at all costs in Age of Empires 4!",
@@ -1483,6 +1513,7 @@ export const videos2022: Video[] = [
     durationMs: 31000,
     videoId: "JgjKCGCBj60",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "We DESTROYED everyone with SUPER UNITS in Halo Wars 2!",
@@ -1511,6 +1542,7 @@ export const videos2022: Video[] = [
     durationMs: 45000,
     videoId: "nzSrzTqrwY8",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "this mod adds HALO WARS vehicles in Halo MCC!",
@@ -1568,6 +1600,7 @@ export const videos2022: Video[] = [
     durationMs: 57000,
     videoId: "OeOoVO1Ky44",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "I lost my mind in this Halo Wars 2 super turtle!",
@@ -1661,6 +1694,7 @@ export const videos2022: Video[] = [
     durationMs: 56000,
     videoId: "cRTbuUV6a-c",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "We BLASTED OFF in Ascension Zombies!",
@@ -1668,6 +1702,7 @@ export const videos2022: Video[] = [
     durationMs: 2075000,
     videoId: "uMHfTukBJ28",
     privacy: "Public",
+    thumbnailPublicId: "Zombies-19_modufd",
   },
   {
     title: "Should you Buy Halo Wars Definitive Edition?",
@@ -1704,6 +1739,7 @@ export const videos2022: Video[] = [
     durationMs: 29000,
     videoId: "REEFhsGpqMU",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "I broke my back in Age of Empires 4. Here's how...",
@@ -1746,6 +1782,7 @@ export const videos2022: Video[] = [
     durationMs: 56000,
     videoId: "G_hcoRJdTPQ",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "NEW ALPHA GAMEPLAY! Company of Heroes 3 Mission Alpha",
@@ -1788,6 +1825,7 @@ export const videos2022: Video[] = [
     durationMs: 1583000,
     videoId: "gpWj9pa9vGw",
     privacy: "Public",
+    thumbnailPublicId: "Zombies-18_fpbzr4",
   },
   {
     title: "we survived in a RELENTLESS 2v2 in Age of Empires 4 for 3 HOURS!",
@@ -1802,6 +1840,7 @@ export const videos2022: Video[] = [
     durationMs: 30000,
     videoId: "CAQ62-Wpor8",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Yap Yap's Scarab is UNBEATABLE! Halo Wars 2",
@@ -1886,6 +1925,7 @@ export const videos2022: Video[] = [
     durationMs: 2947000,
     videoId: "CFjPY8XSpkg",
     privacy: "Public",
+    thumbnailPublicId: "Zombies-17_fdexdr",
   },
   {
     title: "Halo Infinite's Co-op Campaign has a MAJOR catch",
@@ -1957,6 +1997,7 @@ export const videos2022: Video[] = [
     durationMs: 1494000,
     videoId: "enIaIDhYPhs",
     privacy: "Public",
+    thumbnailPublicId: "Zombies-16_ruwq4q",
   },
   {
     title: "Wait... a Pavium MEGA TURRET base fails?!",
@@ -2035,6 +2076,7 @@ export const videos2022: Video[] = [
     durationMs: 1414000,
     videoId: "yRNFkYRd-ps",
     privacy: "Public",
+    thumbnailPublicId: "Zombies-15_kgchmb",
   },
   {
     title: "We rushed them with SCARABS in Halo Wars 2!",
@@ -2119,6 +2161,7 @@ export const videos2022: Video[] = [
     durationMs: 2239000,
     videoId: "Kkxlfgmh0vU",
     privacy: "Public",
+    thumbnailPublicId: "Zombies-14_ywg8fa",
   },
   {
     title: "We WON this CRAZY 2v3 in Age of Empires 4!",
@@ -2168,6 +2211,7 @@ export const videos2022: Video[] = [
     durationMs: 1578000,
     videoId: "rlIqw1ZcnEA",
     privacy: "Public",
+    thumbnailPublicId: "Zombies-13_x7sjxp",
   },
   {
     title: "French Cavalry is seriously BROKEN in Age of Empires 4!",
@@ -2238,6 +2282,7 @@ export const videos2022: Video[] = [
     durationMs: 1118000,
     videoId: "KHSJNHS8XK4",
     privacy: "Public",
+    thumbnailPublicId: "Zombies-12_plsxt9",
   },
   {
     title: "We played DOUBLE COLONY in Halo Wars 2... it's UNBEATABLE!",
@@ -2308,6 +2353,7 @@ export const videos2022: Video[] = [
     durationMs: 2336000,
     videoId: "uiQaNDxnFto",
     privacy: "Public",
+    thumbnailPublicId: "Zombies-11_ad8p8h",
   },
   {
     title: "Isabel SCORPIONS can be quite scary in Halo Wars 2!",
@@ -2364,6 +2410,7 @@ export const videos2022: Video[] = [
     durationMs: 3542000,
     videoId: "HFblHGTUBsc",
     privacy: "Public",
+    thumbnailPublicId: "Zombies-10_opb3ib",
     series: "zombies",
   },
   {
@@ -2414,6 +2461,7 @@ export const videos2022: Video[] = [
     durationMs: 1899000,
     videoId: "WLuQNe_HMOI",
     privacy: "Public",
+    thumbnailPublicId: "Zombies-9_ul0e6c",
   },
   {
     title: "I became a mountain man in Age of Empires 4, here's why",
@@ -2526,6 +2574,7 @@ export const videos2022: Video[] = [
     durationMs: 1308000,
     videoId: "Q6M6trmmnlo",
     privacy: "Public",
+    thumbnailPublicId: "Zombies-8_w2doro",
   },
   {
     title: "I made a Condor in Halo Wars 2, here's why...",
@@ -2575,6 +2624,7 @@ export const videos2022: Video[] = [
     durationMs: 2573000,
     videoId: "1KPT9BttafI",
     privacy: "Public",
+    thumbnailPublicId: "Zombies-7_xojvnt",
   },
   {
     title: "They tried to rush us with CANNON FODDER in Halo Wars 2!",
@@ -2617,6 +2667,7 @@ export const videos2022: Video[] = [
     durationMs: 1610000,
     videoId: "yYOPd5l1Tac",
     privacy: "Public",
+    thumbnailPublicId: "Zombies-6_ggortc",
   },
   {
     title: "Halo Infinite Season 2 - Is it Bad?!",
@@ -2715,6 +2766,7 @@ export const videos2022: Video[] = [
     durationMs: 1598000,
     videoId: "R8gpbnWixBY",
     privacy: "Public",
+    thumbnailPublicId: "Zombies-4_el7aka",
   },
   {
     title: "Scorpions take on a SCARAB in Halo Wars 2!",
@@ -2778,6 +2830,7 @@ export const videos2022: Video[] = [
     durationMs: 2384000,
     videoId: "CkWxdzb3eQ4",
     privacy: "Public",
+    thumbnailPublicId: "Zombies-3_yzlqy1",
   },
   {
     title: "Atriox is a gentleman in Halo Wars 2. This is why...",
@@ -2828,6 +2881,7 @@ export const videos2022: Video[] = [
     durationMs: 1152000,
     videoId: "jGA7ysYZBks",
     privacy: "Public",
+    thumbnailPublicId: "Zombies-2_qpd16d",
   },
   {
     title: "We discovered that the Forge Hog is AWESOME in Halo Wars 2!",
@@ -2898,6 +2952,7 @@ export const videos2022: Video[] = [
     durationMs: 2193000,
     videoId: "8zQDgHRZgRw",
     privacy: "Public",
+    thumbnailPublicId: "Zombies-1_ngpouw",
   },
   {
     title: "Who has the BEST Warthogs? | Halo Wars Mythbusters",

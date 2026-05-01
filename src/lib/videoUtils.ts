@@ -1,5 +1,6 @@
 import type { Video } from '../data/videos-legacy';
 
+
 export type GameTag =
   | 'halo-wars-2'
   | 'halo-wars-1'
@@ -586,6 +587,10 @@ const GUIDE_SERIES_INFERENCE_EXCLUDED_VIDEO_IDS = new Set<string>([
   'Ky-nXU3fRic',
   'rg3QJyouZag',
   'rgLGKdjL3e4',
+  'u1jur7Pm-Fg',
+  '0hgrrp20VKc',
+  '8C4oTMnbE2g',
+  'okT91f0ifw8',
 ]);
 
 /**
@@ -621,7 +626,7 @@ export function buildVideoSearchRecord(
   return {
     ...taggedVideo,
     youtubeUrl: getVideoWatchUrl(taggedVideo.videoId),
-    thumbnailUrl: getVideoThumbnailUrl(taggedVideo.videoId),
+    thumbnailUrl: resolveVideoThumbnailUrl(video, taggedVideo.videoId),
     gameLabel,
     seriesLabel,
     formatLabel,
@@ -1008,8 +1013,28 @@ export function getVideoWatchUrl(videoId: string): string {
   return `https://www.youtube.com/watch?v=${videoId}`;
 }
 
+function buildCloudinaryVideoThumbnailUrl(publicId: string): string {
+  const cloudName =
+    import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME || import.meta.env.CLOUDINARY_CLOUD_NAME || '';
+  if (!cloudName || !publicId) return '';
+  const transforms = 'w_640,h_360,c_fill,f_auto,q_auto';
+  return `https://res.cloudinary.com/${cloudName}/image/upload/${transforms}/${publicId}`;
+}
+
 export function getVideoThumbnailUrl(videoId: string): string {
   return `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`;
+}
+
+/**
+ * When `thumbnailPublicId` is set on the video entry, returns a Cloudinary delivery URL only (no YouTube fallback).
+ * Otherwise returns the standard YouTube mqdefault thumbnail URL.
+ */
+export function resolveVideoThumbnailUrl(video: Video, videoId: string): string {
+  const publicId = video.thumbnailPublicId?.trim();
+  if (publicId) {
+    return buildCloudinaryVideoThumbnailUrl(publicId);
+  }
+  return getVideoThumbnailUrl(videoId);
 }
 
 /**

@@ -6,6 +6,7 @@ export type Video = {
   privacy: string;
   game?: import('../lib/videoUtils').GameTag;
   series?: import('../lib/videoUtils').SeriesTag;
+  thumbnailPublicId?: string;
 };
 
 // Videos from 2013–2020
@@ -3089,14 +3090,14 @@ export const videosLegacy: Video[] = [
   },
   {
     title: "He was FURIOUS about my Berkshire! AoE4",
-    publishedAt: "",
+    publishedAt: "2025-12-11T00:00:00+00:00",
     durationMs: 1747000,
     videoId: "VUvmiV_VXoc",
     privacy: "Public",
   },
   {
     title: "We take on EVERYONE in Halo MCC!",
-    publishedAt: "",
+    publishedAt: "2022-08-10T00:00:00+00:00",
     durationMs: 694000,
     videoId: "0-zV1fO4In8",
     privacy: "Public",

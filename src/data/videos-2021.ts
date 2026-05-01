@@ -6,6 +6,7 @@ export type Video = {
   privacy: string;
   game?: import('../lib/videoUtils').GameTag;
   series?: import('../lib/videoUtils').SeriesTag;
+  thumbnailPublicId?: string;
 };
 
 // Videos from 2021

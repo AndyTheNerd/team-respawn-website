@@ -328,7 +328,11 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
                 class="vdb-card-thumb"
                 aria-label={`Watch ${video.title} on YouTube`}
               >
-                <img src={video.thumbnailUrl} alt="" width="480" height="270" loading="lazy" />
+                {video.thumbnailUrl ? (
+                  <img src={video.thumbnailUrl} alt="" width="480" height="270" loading="lazy" />
+                ) : (
+                  <span class="vdb-card-thumb-placeholder" aria-hidden="true" />
+                )}
                 {video.durationLabel && <span class="vdb-duration-badge">{video.durationLabel}</span>}
               </a>
               <div class="vdb-card-body">
@@ -1317,6 +1321,12 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
     aspect-ratio: 16 / 9;
     overflow: hidden;
     background: transparent;
+  }
+
+  .vdb-card-thumb-placeholder {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(145deg, rgba(28, 38, 58, 0.92), rgba(12, 16, 28, 0.96));
   }
 
   .vdb-card-thumb img {

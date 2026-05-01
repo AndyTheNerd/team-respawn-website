@@ -6,6 +6,7 @@ export type Video = {
   privacy: string;
   game?: import('../lib/videoUtils').GameTag;
   series?: import('../lib/videoUtils').SeriesTag;
+  thumbnailPublicId?: string;
 };
 
 // Videos from 2024
@@ -45,6 +46,7 @@ export const videos2024: Video[] = [
     durationMs: 24000,
     videoId: "CnrvJE3DE2c",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "I dropped an Earthquake on his WONDER in Age of Mythology Retold!",
@@ -80,6 +82,7 @@ export const videos2024: Video[] = [
     durationMs: 36000,
     videoId: "jG-M0B9Pen8",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "These guys were RELENTLESS in Age of Mythology Retold!",
@@ -122,6 +125,7 @@ export const videos2024: Video[] = [
     durationMs: 47000,
     videoId: "JQGbJjZyMoc",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "The crazy battle of CAVALRY between Jeanne and French! Age of Empires 4",
@@ -157,6 +161,7 @@ export const videos2024: Video[] = [
     durationMs: 35000,
     videoId: "KAlnpeE2g_Q",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "We RUSHED to build WONDERS in Age of Mythology Retold!",
@@ -221,6 +226,7 @@ export const videos2024: Video[] = [
     durationMs: 34000,
     videoId: "aat4K4gHFkc",
     privacy: "Public",
+    game: "aom",
   },
   {
     title: "Atlantean Dryads CRUSHED them! Age of Mythology Retold",
@@ -263,6 +269,7 @@ export const videos2024: Video[] = [
     durationMs: 59000,
     videoId: "9gZ4oKbdwtc",
     privacy: "Public",
+    game: "aom",
   },
   {
     title: "this matchup DESTROYS Ra in Age of Mythology Retold",
@@ -480,6 +487,7 @@ export const videos2024: Video[] = [
     durationMs: 20000,
     videoId: "d85OIlW9YZI",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "I Super Turtled with SIEGE and a CONDOR! Halo Wars 2",
@@ -572,6 +580,7 @@ export const videos2024: Video[] = [
     durationMs: 18000,
     videoId: "yKrvUIl-AVc",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "my TITAN wins the WAR in Age of Mythology Retold!",
@@ -621,6 +630,7 @@ export const videos2024: Video[] = [
     durationMs: 26000,
     videoId: "8C4oTMnbE2g",
     privacy: "Public",
+    game: "aom",
   },
   {
     title: "we OBLITERATED Poseidon in Age of Mythology Retold!",
@@ -733,6 +743,7 @@ export const videos2024: Video[] = [
     durationMs: 27000,
     videoId: "8zgZIFLmj_Y",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Pavium FAILS to be a T1 Bully! Halo Wars 2",
@@ -768,6 +779,7 @@ export const videos2024: Video[] = [
     durationMs: 29000,
     videoId: "CgdW6kMD_QU",
     privacy: "Public",
+    game: "aom",
   },
   {
     title: "Atlantean Heroes make a Stand against a TITAN! Age of Mythology Retold",
@@ -894,6 +906,7 @@ export const videos2024: Video[] = [
     durationMs: 53000,
     videoId: "8FYJ5dMRAWw",
     privacy: "Public",
+    game: "aom",
   },
   {
     title: "This is the Most ANNOYING Map in Age of Mythology Retold!",
@@ -964,6 +977,7 @@ export const videos2024: Video[] = [
     durationMs: 24000,
     videoId: "6-CduIpCnOs",
     privacy: "Public",
+    game: "aom",
   },
   {
     title: "THIS is why they are NERFING Gaia! Age of Mythology Retold",
@@ -1013,6 +1027,7 @@ export const videos2024: Video[] = [
     durationMs: 57000,
     videoId: "WsMdkvojOiE",
     privacy: "Public",
+    game: "aoe4",
   },
   {
     title: "Age of Mythology Retold - Atlanteans Beginner Guide!",
@@ -1062,6 +1077,7 @@ export const videos2024: Video[] = [
     durationMs: 52000,
     videoId: "pf3aCm3OyrY",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Hades and Thor are a GREAT combo in Age of Mythology Retold!",
@@ -1090,6 +1106,7 @@ export const videos2024: Video[] = [
     durationMs: 22000,
     videoId: "Sb4eFUZxY7k",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Are the Desync issues finally fixed?! AOM Retold Update Patch Notes",
@@ -1139,6 +1156,7 @@ export const videos2024: Video[] = [
     durationMs: 17000,
     videoId: "0p5doSvzazQ",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "a 2v3 Battle while Down a Teammate! Age of Mythology Retold",
@@ -1181,6 +1199,7 @@ export const videos2024: Video[] = [
     durationMs: 21000,
     videoId: "XeDwXuRlLcw",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "We SUPER TURTLED in Age of Mythology Retold and SURVIVED!",
@@ -1266,6 +1285,7 @@ export const videos2024: Video[] = [
     durationMs: 20000,
     videoId: "JVkb1DzTlMY",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "The Meteor Shower leader power is INSANE! Age of Mythology Retold",
@@ -1308,6 +1328,7 @@ export const videos2024: Video[] = [
     durationMs: 30000,
     videoId: "qjG4LLNdbjI",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Teleporting Buildings as Kronos feels OP! Age of Mythology Retold",
@@ -1406,6 +1427,7 @@ export const videos2024: Video[] = [
     durationMs: 23000,
     videoId: "LN5AYGqP4T8",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Zeus is kinda CRAZY in Age of Mythology Retold!",
@@ -1448,6 +1470,7 @@ export const videos2024: Video[] = [
     durationMs: 60000,
     videoId: "RNgRbOdJ8EI",
     privacy: "Public",
+    game: "aom",
   },
   {
     title: "An absolute Fire and Ice CLASSIC! Halo Wars 2",
@@ -1497,6 +1520,7 @@ export const videos2024: Video[] = [
     durationMs: 40000,
     videoId: "tp14jaj9TAw",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "the STRONGEST Vehicle in Halo Wars 2... Spartan Colossus!",
@@ -1574,6 +1598,7 @@ export const videos2024: Video[] = [
     durationMs: 42000,
     videoId: "Fg57GQgELfk",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "They got RUSHED by Early Units! Halo Wars 2",
@@ -1609,6 +1634,7 @@ export const videos2024: Video[] = [
     durationMs: 41000,
     videoId: "Pr8So1c89jM",
     privacy: "Public",
+    game: "aom",
   },
   {
     title: "Double Atriox causes Trouble in Halo Wars 2!",
@@ -1644,6 +1670,7 @@ export const videos2024: Video[] = [
     durationMs: 25000,
     videoId: "vtbaJsZqmtQ",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Their Elite Enforcers destroyed me in Halo Wars 2",
@@ -1679,6 +1706,7 @@ export const videos2024: Video[] = [
     durationMs: 40000,
     videoId: "cwIMnG4EpKQ",
     privacy: "Public",
+    game: "aoe4",
   },
   {
     title: "Voridus Scarabs are PERFECT to Super Turtle with! Halo Wars 2",
@@ -1700,6 +1728,7 @@ export const videos2024: Video[] = [
     durationMs: 45000,
     videoId: "IVLHkCEKo7Q",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Watch out for Jump Pack Brutes! Halo Wars 2",
@@ -1728,6 +1757,7 @@ export const videos2024: Video[] = [
     durationMs: 36000,
     videoId: "mqdfr4rBTvA",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "The UNSC's best Spartan is JEROME! Halo Wars 2",
@@ -1770,6 +1800,7 @@ export const videos2024: Video[] = [
     durationMs: 21000,
     videoId: "XOkLMspIQ78",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "We had to STOP them at our WALL! AOE4",
@@ -1798,6 +1829,7 @@ export const videos2024: Video[] = [
     durationMs: 42000,
     videoId: "mi2yi7dcYpE",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Yap Yap got absolutely REKT in Halo Wars 2!",
@@ -1819,6 +1851,7 @@ export const videos2024: Video[] = [
     durationMs: 33000,
     videoId: "yexbAUYMsZI",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "my Spartan HIJACKED his Siege! Halo Wars 2",
@@ -1861,6 +1894,7 @@ export const videos2024: Video[] = [
     durationMs: 40000,
     videoId: "wuFpZRFGb_M",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Triple Cutter in Halo Wars 2 is INSANE!",
@@ -1882,6 +1916,7 @@ export const videos2024: Video[] = [
     durationMs: 27000,
     videoId: "sj81zlh0OPs",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Beating Legendary Firefight using only COLOSSUS! Halo Wars 2 ft. @RealllyGoodGaming",
@@ -1903,6 +1938,7 @@ export const videos2024: Video[] = [
     durationMs: 42000,
     videoId: "d1gkl5iybxk",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Vultures and Tanks are NO PROBLEM for our Super Turtle! Halo Wars 2",
@@ -1931,6 +1967,7 @@ export const videos2024: Video[] = [
     durationMs: 60000,
     videoId: "5hrKR7-PUbQ",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "there was CHAOS on the WATER! Age of Empires 4",
@@ -1959,6 +1996,7 @@ export const videos2024: Video[] = [
     durationMs: 23000,
     videoId: "U-x9GzpNVZo",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "you need to STOP ignoring SERINA in Halo Wars 2!",
@@ -2001,6 +2039,7 @@ export const videos2024: Video[] = [
     durationMs: 32000,
     videoId: "hZEMGKGkROo",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Age of Mythology Retold is AMAZING! AoM Retold Beta Gameplay",
@@ -2036,6 +2075,7 @@ export const videos2024: Video[] = [
     durationMs: 40000,
     videoId: "-CL_SNQ9V30",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "we traded BASES in Halo Wars 2!",
@@ -2050,6 +2090,7 @@ export const videos2024: Video[] = [
     durationMs: 26000,
     videoId: "p7VJVBHPdfg",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "I stole his GRIZZLY Tanks in Halo Wars 2!",
@@ -2078,6 +2119,7 @@ export const videos2024: Video[] = [
     durationMs: 39000,
     videoId: "HgK_PfeJ9TM",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "They tried an ALL OUT Goliath Rush in Halo Wars 2!",
@@ -2099,6 +2141,7 @@ export const videos2024: Video[] = [
     durationMs: 58000,
     videoId: "ysR5Tpx1sz0",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "He didn't even try to move out of the BEAM!? Halo Wars 2",
@@ -2120,6 +2163,7 @@ export const videos2024: Video[] = [
     durationMs: 42000,
     videoId: "rajeIuT7JXM",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Yap Yap really lives up to a DESTROYER! Halo Wars 2",
@@ -2169,6 +2213,7 @@ export const videos2024: Video[] = [
     durationMs: 35000,
     videoId: "-CKcC79RqS8",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "we ANNOYED these guys with BUNKERS! Halo Wars 2",
@@ -2197,6 +2242,7 @@ export const videos2024: Video[] = [
     durationMs: 25000,
     videoId: "js77DGqVGHQ",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "I dropped a BERKSHIRE in this man's base! Age of Empires 4",
@@ -2218,6 +2264,7 @@ export const videos2024: Video[] = [
     durationMs: 35000,
     videoId: "qkMet-HohSM",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "You cannot STOP the ODSTs in Halo Wars 2!",
@@ -2232,6 +2279,7 @@ export const videos2024: Video[] = [
     durationMs: 22000,
     videoId: "FDUtfiM7Mgk",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "I made a FULL POP of Blisterbacks in Halo Wars 2!",
@@ -2246,6 +2294,7 @@ export const videos2024: Video[] = [
     durationMs: 28000,
     videoId: "rT8g73nElsw",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "these guys ALMOST beat us on Sentry! Halo Wars 2",
@@ -2274,6 +2323,7 @@ export const videos2024: Video[] = [
     durationMs: 38000,
     videoId: "PJQwq_fQjKs",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Here's why the DECIMUS Wraiths are AWESOME! Halo Wars 2",
@@ -2288,6 +2338,7 @@ export const videos2024: Video[] = [
     durationMs: 18000,
     videoId: "67uu3s68mLE",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "we faced against the best SIEGE Leaders in Halo Wars 2!",
@@ -2309,6 +2360,7 @@ export const videos2024: Video[] = [
     durationMs: 57000,
     videoId: "3iEeNOifzek",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Turns out ANTI MANTI works in Halo Wars 2!",
@@ -2351,6 +2403,7 @@ export const videos2024: Video[] = [
     durationMs: 25000,
     videoId: "P-Vg4QGPr78",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "he tried to Counter us with BLISTERBACKS! Halo Wars 2",
@@ -2387,6 +2440,7 @@ export const videos2024: Video[] = [
     durationMs: 18000,
     videoId: "Pcd1P4ew4Zw",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Don't mess with TRIPLE ATRIOX in Halo Wars 2!",
@@ -2401,6 +2455,7 @@ export const videos2024: Video[] = [
     durationMs: 32000,
     videoId: "fEGVtaPk8D8",
     privacy: "Public",
+    game: "aoe4",
   },
   {
     title: "This was a WILD 3v3 battle! Halo Wars 2",
@@ -2429,6 +2484,7 @@ export const videos2024: Video[] = [
     durationMs: 33000,
     videoId: "dIZ50EP3c44",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "USA Campaign Mission 1: Safe Route - Men of War 2 Gameplay!",
@@ -2443,6 +2499,7 @@ export const videos2024: Video[] = [
     durationMs: 28000,
     videoId: "9aLFl6oUxoQ",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Make way for SUPER KINSANO in Halo Wars 2!",
@@ -2478,6 +2535,7 @@ export const videos2024: Video[] = [
     durationMs: 23000,
     videoId: "OLil8VbiPjU",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "HOW did we Win this?! Halo Wars 2",
@@ -2604,6 +2662,7 @@ export const videos2024: Video[] = [
     durationMs: 48000,
     videoId: "f0-TMjLRtC8",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "How to Play as Anders - Beginners Guide for Halo Wars 2",
@@ -2618,6 +2677,7 @@ export const videos2024: Video[] = [
     durationMs: 28000,
     videoId: "vKJSCxmztq4",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "SPARTANS are Awesome in Halo Wars 2!",
@@ -2646,6 +2706,7 @@ export const videos2024: Video[] = [
     durationMs: 28000,
     videoId: "1PdllezyCX8",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "We Super Turtled them and of course they went Cringe Air...",
@@ -2661,6 +2722,7 @@ export const videos2024: Video[] = [
     durationMs: 25000,
     videoId: "DUL-QqA8C8E",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "I used the tanks everyone forgets about in Halo Wars 2",
@@ -2689,6 +2751,7 @@ export const videos2024: Video[] = [
     durationMs: 35000,
     videoId: "e33_qjyrfKY",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "I'm having a BLAST playing Halo Wars 2!",
@@ -2710,6 +2773,7 @@ export const videos2024: Video[] = [
     durationMs: 18000,
     videoId: "GmmU0BKvd8k",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "we made an INCREDIBLE Stand as Pavium in Halo Wars 2!",
@@ -2731,6 +2795,7 @@ export const videos2024: Video[] = [
     durationMs: 49000,
     videoId: "t8osRAjYy8U",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "They tried countering us with FROSTRAVENS in Halo Wars 2!",
@@ -2752,6 +2817,7 @@ export const videos2024: Video[] = [
     durationMs: 24000,
     videoId: "jQ-wXPPdH-k",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Take your Mini Bases in Halo Wars 2... or I will",
@@ -2773,6 +2839,7 @@ export const videos2024: Video[] = [
     durationMs: 30000,
     videoId: "TgUyUSmf1gQ",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Triple Pavium vs Triple Yap Yap in Halo Wars 2 is Crazy!",
@@ -2801,6 +2868,7 @@ export const videos2024: Video[] = [
     durationMs: 41000,
     videoId: "LAYhMOjbB3g",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "Halo Wars 2: 1,000 videos later, thank you.",
@@ -2920,6 +2988,7 @@ export const videos2024: Video[] = [
     durationMs: 31000,
     videoId: "aHWSG_E7gs4",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "They Super Turtled US for Over 3 HOURS?! Halo Wars 2",
@@ -3047,6 +3116,7 @@ export const videos2024: Video[] = [
     durationMs: 55000,
     videoId: "TPkJX7VdIo0",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "These are NOT the Best Openers in Age of Empires IV",
@@ -3075,6 +3145,7 @@ export const videos2024: Video[] = [
     durationMs: 57000,
     videoId: "ewP_J5nOdGI",
     privacy: "Public",
+    game: "halo-wars-2",
   },
   {
     title: "2v2v2v2 Nomad is the BEST game mode in Age of Empires IV!",
@@ -3472,6 +3543,8 @@ export const videos2024: Video[] = [
     durationMs: 59000,
     videoId: "qh9EN-qkDKE",
     privacy: "Public",
+    game: "halo-wars-2",
+    series: "guide",
   },
   {
     title: "he RAGE QUIT over Jeanne d'Arc! AOE4",
@@ -3542,6 +3615,7 @@ export const videos2024: Video[] = [
     durationMs: 45000,
     videoId: "RkcWE57dLAU",
     privacy: "Public",
+    game: "aoe4",
   },
   {
     title: "How to Fix Halo Wars 2",

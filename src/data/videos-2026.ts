@@ -6,6 +6,7 @@ export type Video = {
   privacy: string;
   game?: import('../lib/videoUtils').GameTag;
   series?: import('../lib/videoUtils').SeriesTag;
+  thumbnailPublicId?: string;
 };
 
 // Videos from 2026
@@ -529,12 +530,28 @@ export const videos2026: Video[] = [
     game: "aoe4",
   },
   {
+    title: "I almost lost it all in Minecraft",
+    publishedAt: "2026-04-21T00:00:00+00:00",
+    durationMs: 55_000,
+    videoId: "wLSQRsT8p_Y",
+    privacy: "Public",
+    game: "minecraft",
+  },
+  {
     title: "Isabel's Hornets take on the Hunter Captain! Halo Wars 2",
     publishedAt: "2026-04-22T00:00:00+00:00",
     durationMs: 818_000,
     videoId: "yy1RY7K6Ljw",
     privacy: "Public",
     game: "halo-wars-2",
+  },
+  {
+    title: "Is This House Made of CHEESE!? Minecraft",
+    publishedAt: "2026-04-22T00:00:00+00:00",
+    durationMs: 39_000,
+    videoId: "ZoGjGCiRA_g",
+    privacy: "Public",
+    game: "minecraft",
   },
   {
     title: "Teutonic Knights, Knight Raids, and Absolute Mayhem | AoE4",
@@ -545,10 +562,42 @@ export const videos2026: Video[] = [
     game: "aoe4",
   },
   {
+    title: "WHY DID THEY HIT ME WHAT HAPPENED",
+    publishedAt: "2026-04-24T00:00:00+00:00",
+    durationMs: 48_000,
+    videoId: "t_h9bStAGwc",
+    privacy: "Public",
+    game: "minecraft",
+  },
+  {
+    title: "What IS That Flying Thing in Minecraft?!",
+    publishedAt: "2026-04-25T00:00:00+00:00",
+    durationMs: 45_000,
+    videoId: "Ly3YKN4QB40",
+    privacy: "Public",
+    game: "minecraft",
+  },
+  {
+    title: "Our Siege DESTROYS a Scarab!",
+    publishedAt: "2026-04-25T00:00:00+00:00",
+    durationMs: 38_000,
+    videoId: "tr-WQ4qZBN4",
+    privacy: "Public",
+    game: "halo-wars-2",
+  },
+  {
     title: "A basement dweller builds his basement in Minecraft",
     publishedAt: "2026-04-26T00:00:00+00:00",
     durationMs: 2_948_000,
     videoId: "sIp2xM7hFs4",
+    privacy: "Public",
+    game: "minecraft",
+  },
+  {
+    title: "My Friend Watched Me Die in Minecraft!",
+    publishedAt: "2026-04-26T00:00:00+00:00",
+    durationMs: 30_000,
+    videoId: "-MfmXmh2-bc",
     privacy: "Public",
     game: "minecraft",
   },
@@ -569,10 +618,51 @@ export const videos2026: Video[] = [
     game: "aoe4",
   },
   {
+    title: "Hide the traders!",
+    publishedAt: "2026-04-28T00:00:00+00:00",
+    durationMs: 27_000,
+    videoId: "wkDlfRUAg0M",
+    privacy: "Public",
+    game: "aoe4",
+  },
+  {
     title: "We returned to Helldivers and absolutely loved it",
     publishedAt: "2026-04-29T00:00:00+00:00",
     durationMs: 1_853_000,
     videoId: "qq0DUxgpPLI",
+    privacy: "Public",
+    game: "helldivers",
+    thumbnailPublicId: "Helldivers_2026_t1ujvt",
+  },
+  {
+    title: "This Game is Like NOTHING You've Played Before!",
+    publishedAt: "2026-04-29T00:00:00+00:00",
+    durationMs: 87_000,
+    videoId: "TvVn1KEUlEA",
+    privacy: "Public",
+    game: "other",
+  },
+  {
+    title: "This guy must be upset",
+    publishedAt: "2026-04-29T00:00:00+00:00",
+    durationMs: 19_000,
+    videoId: "adGJx8aPTEU",
+    privacy: "Public",
+    game: "aoe4",
+  },
+  {
+    title: "I love doing this trick",
+    publishedAt: "2026-04-30T00:00:00+00:00",
+    durationMs: 16_000,
+    videoId: "L1Ar6wa0B2U",
+    privacy: "Public",
+    game: "halo-wars-2",
+  },
+  {
+    title: "He is never playing Helldivers again",
+    publishedAt: "2026-05-01T00:00:00+00:00",
+    durationMs: 70_000,
+    videoId: "Zlkjz7XlnMI",
     privacy: "Public",
     game: "helldivers",
   },
