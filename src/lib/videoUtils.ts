@@ -9,6 +9,7 @@ export type GameTag =
   | 'starcraft-2'
   | 'halo-fps'
   | 'gears'
+  | 'helldivers'
   | 'goblin-commander'
   | 'command-and-conquer'
   | 'company-of-heroes'
@@ -110,6 +111,7 @@ export const GAME_LABELS: Record<GameTag, string> = {
   'starcraft-2': 'StarCraft II',
   'halo-fps': 'Halo FPS',
   gears: 'Gears of War',
+  helldivers: 'Helldivers 2',
   'goblin-commander': 'Goblin Commander',
   'command-and-conquer': 'Command & Conquer',
   'company-of-heroes': 'Company of Heroes',
@@ -176,37 +178,14 @@ export const GAME_OPTIONS: VideoComposerOption<GameTag>[] = [
     description: 'Retold coverage, gods, matchups, and showcase battles.',
     image: '/img/game-icons/Retold.png',
   },
+  // Remaining games: A–Z by label, then Other and Retro as the last two cards.
   {
-    value: 'starcraft-2',
-    label: 'StarCraft II',
-    shortLabel: 'SC2',
-    title: 'StarCraft II videos',
-    description: 'Arcade modes, Direct Strike, Nexus Wars, and custom games.',
-    icon: 'fa-microchip',
-  },
-  {
-    value: 'halo-fps',
-    label: 'Halo FPS',
-    shortLabel: 'Halo FPS',
-    title: 'Halo FPS videos',
-    description: 'Campaign moments, multiplayer clips, and Halo deep dives.',
-    image: '/img/game-icons/H1-White.png',
-  },
-  {
-    value: 'gears',
-    label: 'Gears of War',
-    shortLabel: 'Gears',
-    title: 'Gears of War videos',
-    description: 'Gears gameplay, commentary, and classic uploads.',
-    image: '/img/game-icons/Gears-Cog.png',
-  },
-  {
-    value: 'goblin-commander',
-    label: 'Goblin Commander',
-    shortLabel: 'Goblin Cmdr',
-    title: 'Goblin Commander videos',
-    description: 'Retro strategy game coverage from the archive.',
-    icon: 'fa-chess-king',
+    value: 'ashes',
+    label: 'Ashes of the Singularity',
+    shortLabel: 'Ashes',
+    title: 'Ashes of the Singularity videos',
+    description: 'Ashes of the Singularity gameplay and impressions.',
+    icon: 'fa-meteor',
   },
   {
     value: 'command-and-conquer',
@@ -225,6 +204,38 @@ export const GAME_OPTIONS: VideoComposerOption<GameTag>[] = [
     image: '/img/game-icons/Company-of-Heroes.png',
   },
   {
+    value: 'gears',
+    label: 'Gears of War',
+    shortLabel: 'Gears',
+    title: 'Gears of War videos',
+    description: 'Gears gameplay, commentary, and classic uploads.',
+    image: '/img/game-icons/Gears-Cog.png',
+  },
+  {
+    value: 'goblin-commander',
+    label: 'Goblin Commander',
+    shortLabel: 'Goblin Cmdr',
+    title: 'Goblin Commander videos',
+    description: 'Retro strategy game coverage from the archive.',
+    icon: 'fa-chess-king',
+  },
+  {
+    value: 'halo-fps',
+    label: 'Halo FPS',
+    shortLabel: 'Halo FPS',
+    title: 'Halo FPS videos',
+    description: 'Campaign moments, multiplayer clips, and Halo deep dives.',
+    image: '/img/game-icons/H1-White.png',
+  },
+  {
+    value: 'helldivers',
+    label: 'Helldivers 2',
+    shortLabel: 'HD2',
+    title: 'Helldivers 2 videos',
+    description: 'Galactic war clips, stratagems, and co-op chaos.',
+    image: '/img/game-icons/helldivers.ico',
+  },
+  {
     value: 'minecraft',
     label: 'Minecraft',
     shortLabel: 'MC',
@@ -241,20 +252,12 @@ export const GAME_OPTIONS: VideoComposerOption<GameTag>[] = [
     image: '/img/game-icons/spellforce.png',
   },
   {
-    value: 'ashes',
-    label: 'Ashes of the Singularity',
-    shortLabel: 'Ashes',
-    title: 'Ashes of the Singularity videos',
-    description: 'Ashes of the Singularity gameplay and impressions.',
-    icon: 'fa-meteor',
-  },
-  {
-    value: 'retro',
-    label: 'Retro',
-    shortLabel: 'Retro',
-    title: 'Retro games',
-    description: 'Classic console and handheld throwbacks.',
-    icon: 'fa-compact-disc',
+    value: 'starcraft-2',
+    label: 'StarCraft II',
+    shortLabel: 'SC2',
+    title: 'StarCraft II videos',
+    description: 'Arcade modes, Direct Strike, Nexus Wars, and custom games.',
+    icon: 'fa-microchip',
   },
   {
     value: 'other',
@@ -263,6 +266,14 @@ export const GAME_OPTIONS: VideoComposerOption<GameTag>[] = [
     title: 'Other videos',
     description: 'Everything else in the Team Respawn archive.',
     icon: 'fa-gamepad',
+  },
+  {
+    value: 'retro',
+    label: 'Retro',
+    shortLabel: 'Retro',
+    title: 'Retro games',
+    description: 'Classic console and handheld throwbacks.',
+    icon: 'fa-compact-disc',
   },
 ];
 
@@ -439,6 +450,7 @@ export function getGame(title: string): GameTag {
   if (/\bhalo wars\b|\bhw1\b/.test(text)) return 'halo-wars-1';
   if (/\bage of empires iv\b|\bage of empires 4\b|\baoe ?4\b/.test(text)) return 'aoe4';
   if (/\bage of empires ii\b|\bage of empires 2\b|\baoe ?2\b/.test(text)) return 'aoe2';
+  if (isHelldiversTitle(text)) return 'helldivers';
   if (/\bage of mythology\b|\baom\b|\bretold\b/.test(text)) return 'aom';
   if (
     /\bstarcraft\s*(2|ii)\b|\bsc2\b|\bwings of liberty\b|\bheart of the swarm\b|\blegacy of the void\b|\bstarcraft\b/.test(
@@ -468,6 +480,25 @@ export function getGame(title: string): GameTag {
   if (isRetroGameTitle(text)) return 'retro';
 
   return 'other';
+}
+
+/** Helldivers 2 from title when `game` is not set on the entry (prefer explicit `game: "helldivers"`). */
+function isHelldiversTitle(text: string): boolean {
+  if (text.includes('helldivers')) return true;
+  if (/\bsuper earth\b/.test(text)) return true;
+
+  if (/\bautomatons\b/.test(text)) {
+    // AoM Retold "Mythic Strike" uses the same unit name; do not bucket as Helldivers without HD2 cues.
+    if (
+      !text.includes('helldivers') &&
+      /\bage of mythology\b|\bretold\b|\bmythic strike\b/.test(text)
+    ) {
+      return false;
+    }
+    return true;
+  }
+
+  return false;
 }
 
 /** Classic / legacy console & handheld games bucketed for the Retro filter (not general "other"). */
@@ -640,7 +671,7 @@ export function getFacetCounts<T extends string | number>(
   return counts;
 }
 
-// Games preserve the priority order defined in GAME_OPTIONS (flagship titles first).
+// Games: first five fixed (HW2, HW1, AoE IV, AoE II, AoM); then A–Z by label; Other and Retro last.
 // Series options are sorted alphabetically instead since they have no natural hierarchy.
 export function getGameOptions(videos: TaggedVideo[]): VideoComposerCountOption<GameTag>[] {
   const counts = getFacetCounts(videos, (video) => video.game);
