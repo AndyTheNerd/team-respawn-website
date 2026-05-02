@@ -1,6 +1,6 @@
 ﻿const blogPosts = [
   {
-    title: 'Team Respawn - Blur retro look back',
+    title: 'Blur - The forgotten Arcade Racer',
     dateIso: '2026-05-02',
     category: 'Retro',
     tags: ['Blur'],
@@ -11,7 +11,7 @@
     img: {
       cloudinaryId: 'Blur_v4_wectyn',
       src: 'https://img.youtube.com/vi/Npvba07XaJI/maxresdefault.jpg',
-      alt: 'Team Respawn - Blur retro look back',
+      alt: 'Blur - The forgotten Arcade Racer',
       width: 400,
       height: 225,
       lazy: true
