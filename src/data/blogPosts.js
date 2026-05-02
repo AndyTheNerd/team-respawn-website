@@ -3,7 +3,7 @@
     title: 'Trophies Are Better Than Achievements',
     dateIso: '2026-05-02',
     category: 'Spotlight',
-    tags: ['Retro', 'PlayStation', 'Xbox'],
+    tags: ['PlayStation', 'Xbox'],
     readingTimeMinutes: 5,
     excerpt:
       'PlayStation trophies versus Xbox achievements: tiers, Platinums, DLC lists, profile levels — and why raw Gamerscore often fails to tell a story.',
