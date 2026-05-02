@@ -15,7 +15,7 @@ A gaming content website for the [Team Respawn YouTube channel](https://www.yout
 - Serverless API functions (Cloudflare Pages Functions) with Cloudflare D1 caching
 - Side panel navigation with keyboard support
 - Responsive Tailwind-based styling via WebcoreUI
-- SEO meta tags and OpenGraph support
+- SEO meta tags and OpenGraph support; **apex → `www` 301** via `functions/_middleware.ts` so `teamrespawn.net` redirects to `https://www.teamrespawn.net` with path and query preserved
 
 ## Navigation Notes
 
@@ -39,29 +39,31 @@ A gaming content website for the [Team Respawn YouTube channel](https://www.yout
 
 ```
 team-respawn-website/
-├── functions/api/         # Cloudflare Pages Functions (serverless API)
-│   ├── hw2/               # Halo Wars 2 stats endpoints
-│   ├── hwde/              # Halo Wars: Definitive Edition endpoints
-│   ├── tournaments/       # HW2 tournament organizer API (see HW2 Tournaments section)
-│   │   ├── _shared.ts       # IDs, password hashing, bracket JSON parse, admin rate-limit helpers
-│   │   ├── _storage.ts      # In-memory adapter for brackets-manager
-│   │   ├── index.ts         # GET list (filters), POST create tournament
-│   │   └── [id]/
-│   │       ├── index.ts              # GET one tournament (+ participants, matches)
-│   │       ├── join.ts               # POST join (optional join password)
-│   │       ├── link-hw2.ts           # POST resolve HW2 cached match vs bracket pair
-│   │       ├── notes.ts              # POST organizer notes (admin password)
-│   │       ├── sidebar.ts            # POST rules + scheduled start (admin password)
-│   │       ├── start.ts              # POST seed bracket, go active (admin password)
-│   │       ├── verify-admin.ts       # POST verify admin password (rate limited)
-│   │       ├── participants/
-│   │       │   └── [gamertag].ts     # POST add / DELETE remove (admin, registration only)
-│   │       └── matches/[matchId]/
-│   │           ├── index.ts          # PATCH record result (admin password)
-│   │           ├── override.ts       # POST force winner (admin password)
-│   │           ├── reset.ts          # POST reopen match + dependents (admin password)
-│   │           └── suggest-hw2.ts    # GET recent cached 1v1s between bracket players
-│   └── youtube/           # YouTube latest videos endpoint
+├── functions/
+│   ├── _middleware.ts     # 301 apex → www (canonical host) for all routes
+│   └── api/               # Cloudflare Pages Functions (serverless API)
+│       ├── hw2/               # Halo Wars 2 stats endpoints
+│       ├── hwde/              # Halo Wars: Definitive Edition endpoints
+│       ├── tournaments/       # HW2 tournament organizer API (see HW2 Tournaments section)
+│       │   ├── _shared.ts       # IDs, password hashing, bracket JSON parse, admin rate-limit helpers
+│       │   ├── _storage.ts      # In-memory adapter for brackets-manager
+│       │   ├── index.ts         # GET list (filters), POST create tournament
+│       │   └── [id]/
+│       │       ├── index.ts              # GET one tournament (+ participants, matches)
+│       │       ├── join.ts               # POST join (optional join password)
+│       │       ├── link-hw2.ts           # POST resolve HW2 cached match vs bracket pair
+│       │       ├── notes.ts              # POST organizer notes (admin password)
+│       │       ├── sidebar.ts            # POST rules + scheduled start (admin password)
+│       │       ├── start.ts              # POST seed bracket, go active (admin password)
+│       │       ├── verify-admin.ts       # POST verify admin password (rate limited)
+│       │       ├── participants/
+│       │       │   └── [gamertag].ts     # POST add / DELETE remove (admin, registration only)
+│       │       └── matches/[matchId]/
+│       │           ├── index.ts          # PATCH record result (admin password)
+│       │           ├── override.ts       # POST force winner (admin password)
+│       │           ├── reset.ts          # POST reopen match + dependents (admin password)
+│       │           └── suggest-hw2.ts    # GET recent cached 1v1s between bracket players
+│       └── youtube/           # YouTube latest videos endpoint
 ├── migrations/            # Cloudflare D1 SQL migrations (numbered)
 │                          # Tournament-related: 0011 (tables), 0012 (admin_password_hash),
 │                          # 0013 (seeding), 0014 (notes), 0015 (gamertag nocase unique),
