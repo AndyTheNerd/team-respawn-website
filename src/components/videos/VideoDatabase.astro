@@ -1631,6 +1631,13 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
       gap: 0.45rem;
     }
 
+    /* Row flex-basis (16rem/12rem) becomes vertical main-axis on column layout and
+       inflates empty space below the lede — size to content instead. */
+    .vdb-hero-lede-metrics .vdb-lede--compact,
+    .vdb-hero-lede-metrics .vdb-hero-metrics {
+      flex: 0 1 auto;
+    }
+
     .vdb-hero-lede-metrics .vdb-lede--compact {
       max-width: none;
     }
@@ -1643,6 +1650,12 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
     }
 
     .vdb-option-list--toolbar-games {
+      grid-template-columns: repeat(auto-fill, minmax(11.5rem, 1fr));
+    }
+
+    /* Desktop forces 4 columns; on narrow viewports that shrinks tracks below card
+       content and causes overflow/overlap — wrap like the games row instead. */
+    .vdb-option-list--toolbar-series {
       grid-template-columns: repeat(auto-fill, minmax(11.5rem, 1fr));
     }
 
