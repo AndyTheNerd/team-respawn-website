@@ -1,5 +1,23 @@
 ﻿const blogPosts = [
   {
+    title: 'Team Respawn - Blur retro look back',
+    dateIso: '2026-05-02',
+    category: 'Retro',
+    tags: ['Blur'],
+    readingTimeMinutes: 4,
+    excerpt:
+      'Blur is framed as a standout Xbox 360 / PS3–era arcade combat racer from Activision and Bizarre Creations: power-up heavy, aggressive, and often described as “Mario Kart for adults” (with the joke that adults play Mario Kart anyway).',
+    href: '/blog/posts/blur-retro-look-back',
+    img: {
+      cloudinaryId: 'Blur_v4_wectyn',
+      src: 'https://img.youtube.com/vi/Npvba07XaJI/maxresdefault.jpg',
+      alt: 'Team Respawn - Blur retro look back',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
     title: 'Halo Wars: The Ultimate Design for Console RTS',
     dateIso: '2026-05-01',
     category: 'Spotlight',
