@@ -118,6 +118,11 @@ if (youtubeId) {
             · ~{readingMinutes} min read
           </span>
         ) : null}
+        {dateModifiedIso && dateModifiedIso !== dateIso ? (
+          <span class="text-gray-500">
+            · Updated <time datetime={dateModifiedIso}>{new Date(dateModifiedIso + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</time>
+          </span>
+        ) : null}
       </p>
 
       {tags?.length ? (

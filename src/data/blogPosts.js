@@ -1,5 +1,56 @@
 ﻿const blogPosts = [
   {
+    title: 'Trophies Are Better Than Achievements',
+    dateIso: '2026-05-02',
+    category: 'Spotlight',
+    tags: ['Retro', 'PlayStation', 'Xbox'],
+    readingTimeMinutes: 5,
+    excerpt:
+      'PlayStation trophies versus Xbox achievements: tiers, Platinums, DLC lists, profile levels — and why raw Gamerscore often fails to tell a story.',
+    href: '/blog/posts/trophies-are-better-than-achievements',
+    img: {
+      src: '/img/blog/trophies-vs-achievements.jpg',
+      alt: 'Comparison of PlayStation trophies and Xbox achievements',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
+    title: 'What Made RollerCoaster Tycoon so much fun?',
+    dateIso: '2026-05-02',
+    category: 'Retro',
+    tags: ['RollerCoaster Tycoon'],
+    readingTimeMinutes: 4,
+    excerpt:
+      'My love letter to the classic RollerCoaster Tycoon line: late-90s PC success, Chris Sawyer’s one-developer craft, OpenRCT2 and RCT3, and why sandbox plus management still resonates with me.',
+    href: '/blog/posts/what-made-rollercoaster-tycoon-so-much-fun',
+    img: {
+      src: 'https://img.youtube.com/vi/vQgrUSl5tVA/maxresdefault.jpg',
+      alt: 'What Made RollerCoaster Tycoon so much fun?',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
+    title: 'Call of Duty: Roads to Victory - The PSP FPS!',
+    dateIso: '2026-05-02',
+    category: 'Retro',
+    tags: ['Call of Duty'],
+    readingTimeMinutes: 3,
+    excerpt:
+      'The video treats Call of Duty: Roads to Victory as a curiosity: a World War II–era CoD built for the PSP when the brand was still strongly associated with WWII, months before the franchise’s modern pivot with Call of Duty 4.',
+    href: '/blog/posts/call-of-duty-roads-to-victory-psp-gameplay-retro',
+    img: {
+      src: 'https://img.youtube.com/vi/NbDp6jaxBB8/maxresdefault.jpg',
+      alt: 'Call of Duty: Roads to Victory - The PSP FPS!',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
     title: 'Blur - The forgotten Arcade Racer',
     dateIso: '2026-05-02',
     category: 'Retro',
@@ -156,15 +207,17 @@
     }
   },
   {
-    title: 'Halo Infinite Full Campaign Walkthrough',
+    title: 'Halo Infinite Co-op Walkthrough 2024',
     dateIso: '2026-02-07',
     category: 'Walkthroughs',
     tags: ['Halo'],
-    excerpt: 'A full walkthrough of Halo Infinite. Watch the complete campaign run.',
+    readingTimeMinutes: 9,
+    excerpt:
+      'Andy and Gus tackle the full Halo Infinite campaign on Legendary in co-op — completing the Storehaus run through mainline Halo (except Halo 5), ~8.5 hours, linear missions plus Zeta Halo sandbox, and mixed verdicts on campaign vs. open world.',
     href: '/blog/posts/halo-infinite-walkthrough',
     img: {
       src: 'https://img.youtube.com/vi/pI_oIv-3MSg/maxresdefault.jpg',
-      alt: 'Halo Infinite Full Campaign Walkthrough',
+      alt: 'Halo Infinite Co-op Walkthrough 2024',
       width: 400,
       height: 225,
       lazy: true
@@ -855,8 +908,9 @@
     category: 'Guides',
     tags: ['Age of Mythology'],
     featured: true,
+    readingTimeMinutes: 3,
     excerpt:
-      'Be a noob no more! Learn the most important tips and tricks of Age of Mythology in 15 minutes.',
+      'A short, dense skill guide for Age of Mythology: Retold—economy, relics, military production, water, civ adaptation, trade, TCs, upgrades, scouting, and learning habits.',
     href: '/blog/posts/noob-to-pro-in-15-minutes-age-of-mythology',
     img: {
       src: '/img/AOM-Guides/Noob to Pro.jpg',

@@ -3,7 +3,7 @@ import BlogPostLayout from '../../../layouts/BlogPostLayout.astro';
 ---
 <BlogPostLayout
   title="Noob to Pro in 15 Minutes - Age of Mythology"
-  description="Be a noob no more! Learn the most important tips and tricks of Age of Mythology in 15 minutes."
+  description="This is a short, dense skill guide for Age of Mythology: Retold aimed at new players (with some value if you knew the legacy game)."
   category="Guides"
   publishedDate="Published on January 31, 2026"
   dateIso="2026-01-31"
@@ -11,8 +11,82 @@ import BlogPostLayout from '../../../layouts/BlogPostLayout.astro';
   youtubeId="V-RsVL8F-U4"
   tags={['Age of Mythology']}
 >
-  <p class="text-lg leading-relaxed mb-6">
-    Be a noob no more! Learn the most important tips and tricks of Age of Mythology in 15 minutes.
+  <p class="text-xl font-semibold mb-4">
+    <em>Age of Mythology: Retold</em> — Noob to pro (quick tips)
   </p>
-</BlogPostLayout>
 
+  <p class="text-lg leading-relaxed mb-6">
+    This is a short, dense skill guide for <strong class="text-cyan-400">Age of Mythology: Retold</strong> aimed at new players (with some value if you knew the legacy game). I treat it as a checklist for economy, map awareness, and production habits rather than a full build-order walkthrough.
+  </p>
+
+  <h2 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Villagers and economy</h2>
+
+  <ul class="list-disc list-inside mb-4 ml-4 space-y-2">
+    <li><strong class="text-cyan-400">Always train villagers.</strong> Auto-queue at the town center is supported on PC and console and is effectively the default—still, I double-check the TC because <strong class="text-cyan-400">canceling a villager breaks auto-queue</strong> until you turn it back on.</li>
+    <li><strong class="text-cyan-400">Idle villagers hurt you.</strong> After a build or gather task finishes, the villager may sit doing nothing unless you reassign it. PC has an <strong class="text-cyan-400">idle villager</strong> hotkey; console will likely offer a similar “jump to idle” affordance.</li>
+    <li><strong class="text-cyan-400">Auto-tasking / villager priorities</strong> can auto-assign gather types and even drop-offs, but I watch it: changing priorities mid-build can make a villager <strong class="text-cyan-400">abandon</strong> a house or range (I have chased “missing” buildings because of this).</li>
+  </ul>
+
+  <h2 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Relics</h2>
+
+  <ul class="list-disc list-inside mb-4 ml-4 space-y-2">
+    <li>In Retold, relics are <strong class="text-cyan-400">randomized permanent buffs</strong> (not the same role as in <em>AoE II</em> / <em>AoE IV</em> gold-and-convert relics). Hover to read the effect—examples include <strong class="text-cyan-400">extra line of sight</strong>, <strong class="text-cyan-400">more carry capacity</strong>, or legacy-style perks like <strong class="text-cyan-400">animals spawning at the temple</strong> on a timer.</li>
+    <li><strong class="text-cyan-400">Any hero</strong> can pick up a relic and return it to your <strong class="text-cyan-400">temple</strong> (not priest-only like some Age titles). I scout relics early and prioritize pickups when I have a hero free; you can <strong class="text-cyan-400">steal relics</strong> by destroying an enemy temple.</li>
+  </ul>
+
+  <h2 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Military production</h2>
+
+  <ul class="list-disc list-inside mb-4 ml-4 space-y-2">
+    <li><strong class="text-cyan-400">More production buildings = more parallel training.</strong> One barracks trains one unit at a time; several train several at once if you can pay for it.</li>
+    <li>I put all barracks (or ranges, stables, etc.) on <strong class="text-cyan-400">control groups</strong> and select the group once: the game <strong class="text-cyan-400">distributes</strong> queued units across buildings in the selection. When I add buildings, I <strong class="text-cyan-400">re-add</strong> them to the group so new production is included.</li>
+  </ul>
+
+  <h2 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Water and food</h2>
+
+  <ul class="list-disc list-inside mb-4 ml-4 space-y-2">
+    <li>On <strong class="text-cyan-400">large water</strong>, I build a <strong class="text-cyan-400">dock</strong> and <strong class="text-cyan-400">fishing boats</strong> early. That stacks with TC villager production—two economic units at once. Fish may be slower than in <em>AoE IV</em> in practice, but it still <strong class="text-cyan-400">frees villagers</strong> from food to push wood, gold, or (as Greek) <strong class="text-cyan-400">temple worship for favor</strong>.</li>
+  </ul>
+
+  <h2 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Civs, map, and adaptation</h2>
+
+  <ul class="list-disc list-inside mb-4 ml-4 space-y-2">
+    <li><strong class="text-cyan-400">Match gather plans to your civ.</strong> Example I use: <strong class="text-cyan-400">Greeks</strong> skew <strong class="text-cyan-400">food and gold</strong> over wood early—so I line up aging and military around that, not a generic default order.</li>
+    <li>I consciously choose: <strong class="text-cyan-400">fast age</strong> with fewer early units vs <strong class="text-cyan-400">early military</strong> or <strong class="text-cyan-400">map control</strong>—and I <strong class="text-cyan-400">react</strong> if the opponent is aggressive (e.g. delay second TC, add walls, or counter units) instead of blindly running the same build every game.</li>
+  </ul>
+
+  <h2 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Teams</h2>
+
+  <ul class="list-disc list-inside mb-4 ml-4 space-y-2">
+    <li>In team games, <strong class="text-cyan-400">call out</strong> what I see—aggressive player, risky fast age, need to stop a push—so the group picks a plan that fits our civs.</li>
+  </ul>
+
+  <h2 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Trade</h2>
+
+  <ul class="list-disc list-inside mb-4 ml-4 space-y-2">
+    <li>Traders run <strong class="text-cyan-400">market → allied town center</strong> (not market–market like <em>AoE IV</em>). <strong class="text-cyan-400">Longer routes = more gold</strong> but more exposure; late game I plan <strong class="text-cyan-400">trade</strong> as mines empty. Some players rush traders—it is a <strong class="text-cyan-400">big upfront cost</strong> with delayed payoff (risk/reward).</li>
+  </ul>
+
+  <h2 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Town centers and population</h2>
+
+  <ul class="list-disc list-inside mb-4 ml-4 space-y-2">
+    <li><strong class="text-cyan-400">Extra TCs on settlement sites</strong> raise <strong class="text-cyan-400">population cap</strong> and let me pump <strong class="text-cyan-400">more villagers</strong> from multiple TCs—effectively a large eco multiplier if I can secure the sites.</li>
+  </ul>
+
+  <h2 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Army size vs upgrades</h2>
+
+  <ul class="list-disc list-inside mb-4 ml-4 space-y-2">
+    <li><strong class="text-cyan-400">Mass often beats small upgraded armies</strong> in Age titles (I draw the same lesson from games like <em>Halo Wars</em>). Upgrades still matter; the takeaway for me is <strong class="text-cyan-400">opportunity cost</strong>: gold/food spent on blacksmith lines is gold/food <strong class="text-cyan-400">not</strong> spent on more units or more production. I do not delay upgrades forever—I balance production spikes with tech timing.</li>
+  </ul>
+
+  <h2 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Scouting</h2>
+
+  <ul class="list-disc list-inside mb-4 ml-4 space-y-2">
+    <li>The starting scout is for <strong class="text-cyan-400">herding</strong> (herdables do <strong class="text-cyan-400">not</strong> follow the scout like in <em>AoE IV</em>—I path them home) and for <strong class="text-cyan-400">intel</strong>: where they take resources, <strong class="text-cyan-400">proxy</strong> production near my base, etc. That information drives what I build and how greedy I can be.</li>
+  </ul>
+
+  <h2 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Learning the game</h2>
+
+  <ul class="list-disc list-inside mb-4 ml-4 space-y-2">
+    <li><strong class="text-cyan-400">Civs diverge more</strong> here than in <em>AoE II</em> / <em>AoE IV</em>—I expect to spend time in <strong class="text-cyan-400">campaign or skirmish</strong> learning one main civ, counters, and a comfortable build. Post-match <strong class="text-cyan-400">stats</strong> are useful for diagnosing wins and losses; early frustration is normal if I treat each game as a lesson.</li>
+  </ul>
+</BlogPostLayout>
