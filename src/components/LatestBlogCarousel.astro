@@ -1,0 +1,160 @@
+---
+import CloudinaryImage from './CloudinaryImage.astro';
+import blogPosts from '../data/blogPosts.js';
+
+const CAROUSEL_LIMIT = 5;
+
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+const latestPosts = [...blogPosts]
+  .sort((a, b) => {
+    const aDate = a.dateIso ? Date.parse(a.dateIso) : 0;
+    const bDate = b.dateIso ? Date.parse(b.dateIso) : 0;
+    return (isNaN(bDate) ? -Infinity : bDate) - (isNaN(aDate) ? -Infinity : aDate);
+  })
+  .slice(0, CAROUSEL_LIMIT);
+---
+
+<section class="mb-8" aria-labelledby="latest-blog-carousel-heading">
+  <div class="flex items-center justify-between mb-4 gap-4 flex-wrap">
+    <h2
+      id="latest-blog-carousel-heading"
+      class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-teal-400 flex items-center gap-2"
+    >
+      <i class="fas fa-newspaper text-cyan-400" aria-hidden="true"></i>
+      Latest from the Blog
+    </h2>
+    <a
+      href="/blog"
+      class="inline-flex items-center gap-1 text-sm text-cyan-400 hover:text-cyan-300 transition-colors duration-200 shrink-0"
+    >
+      View all posts
+      <i class="fas fa-chevron-right text-xs" aria-hidden="true"></i>
+    </a>
+  </div>
+
+  <div
+    class="flex items-stretch gap-2 sm:gap-3"
+    role="region"
+    aria-roledescription="carousel"
+    aria-label="Latest blog posts"
+  >
+    <button
+      type="button"
+      id="home-blog-carousel-prev"
+      class="carousel-nav-btn hidden sm:flex shrink-0 self-center items-center justify-center w-10 h-10 rounded-lg border border-gray-600 bg-gray-800/90 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors"
+      aria-controls="home-blog-carousel-track"
+      aria-label="Show previous blog posts"
+    >
+      <i class="fas fa-chevron-left" aria-hidden="true"></i>
+    </button>
+
+    <div
+      id="home-blog-carousel-track"
+      class="carousel-container flex flex-1 gap-4 overflow-x-auto scroll-smooth min-w-0 py-1 snap-x snap-mandatory"
+      tabindex="0"
+      aria-label="Scrollable blog posts"
+    >
+      {latestPosts.map((post) => (
+        <a
+          href={post.href}
+          class="featured-carousel-card group bg-gray-800 rounded-xl overflow-hidden border border-gray-700/50 block
+                 hover:border-cyan-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-900/20 hover:-translate-y-0.5"
+        >
+          <div class="aspect-video overflow-hidden bg-gray-700">
+            {post.img.cloudinaryId ? (
+              <CloudinaryImage
+                publicId={post.img.cloudinaryId}
+                alt={post.img.alt}
+                width={post.img.width}
+                loading={post.img.lazy ? 'lazy' : 'eager'}
+                fallbackSrc={post.img.src}
+                sizes="(max-width: 640px) 85vw, (max-width: 1024px) 45vw, 30vw"
+                crop="scale"
+                class="h-full w-full object-cover object-center group-hover:opacity-90 transition-opacity duration-200"
+              />
+            ) : (
+              <img
+                src={post.img.src}
+                alt={post.img.alt}
+                width={post.img.width}
+                height={post.img.height}
+                loading={post.img.lazy ? 'lazy' : undefined}
+                class="w-full h-full object-cover group-hover:opacity-90 transition-opacity duration-200"
+              />
+            )}
+          </div>
+          <div class="p-3">
+            <p class="text-xs font-medium text-cyan-500/90 uppercase tracking-wide mb-1">{post.category}</p>
+            <p class="text-sm font-semibold text-gray-100 line-clamp-2 group-hover:text-cyan-300 transition-colors duration-200">
+              {post.title}
+            </p>
+            <p class="text-xs text-gray-500 mt-1">{formatDate(post.dateIso)}</p>
+            <p class="text-xs text-gray-400 mt-2 line-clamp-2">{post.excerpt}</p>
+          </div>
+        </a>
+      ))}
+    </div>
+
+    <button
+      type="button"
+      id="home-blog-carousel-next"
+      class="carousel-nav-btn hidden sm:flex shrink-0 self-center items-center justify-center w-10 h-10 rounded-lg border border-gray-600 bg-gray-800/90 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors"
+      aria-controls="home-blog-carousel-track"
+      aria-label="Show next blog posts"
+    >
+      <i class="fas fa-chevron-right" aria-hidden="true"></i>
+    </button>
+  </div>
+
+  <div class="flex sm:hidden justify-center gap-6 mt-3">
+    <button
+      type="button"
+      class="carousel-nav-btn inline-flex items-center justify-center w-10 h-10 rounded-lg border border-gray-600 bg-gray-800/90 text-gray-200 hover:bg-gray-700"
+      aria-controls="home-blog-carousel-track"
+      aria-label="Show previous blog posts"
+      data-blog-carousel-prev-mobile
+    >
+      <i class="fas fa-chevron-left" aria-hidden="true"></i>
+    </button>
+    <button
+      type="button"
+      class="carousel-nav-btn inline-flex items-center justify-center w-10 h-10 rounded-lg border border-gray-600 bg-gray-800/90 text-gray-200 hover:bg-gray-700"
+      aria-controls="home-blog-carousel-track"
+      aria-label="Show next blog posts"
+      data-blog-carousel-next-mobile
+    >
+      <i class="fas fa-chevron-right" aria-hidden="true"></i>
+    </button>
+  </div>
+</section>
+
+<script is:inline>
+  (function () {
+    const track = document.getElementById('home-blog-carousel-track');
+    const prev = document.getElementById('home-blog-carousel-prev');
+    const next = document.getElementById('home-blog-carousel-next');
+    const prevMobile = document.querySelector('[data-blog-carousel-prev-mobile]');
+    const nextMobile = document.querySelector('[data-blog-carousel-next-mobile]');
+    if (!track) return;
+
+    function scrollDir(dir) {
+      var step = Math.max(track.clientWidth * 0.75, 280);
+      track.scrollBy({ left: step * dir, behavior: 'smooth' });
+    }
+
+    function bind(btn, dir) {
+      if (!btn) return;
+      btn.addEventListener('click', function () {
+        scrollDir(dir);
+      });
+    }
+
+    bind(prev, -1);
+    bind(next, 1);
+    bind(prevMobile, -1);
+    bind(nextMobile, 1);
+  })();
+</script>

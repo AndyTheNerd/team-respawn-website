@@ -10,6 +10,7 @@ import TwitchEmbed from '../components/TwitchEmbed.astro';
 import HeroSection from '../components/HeroSection.astro';
 import ChannelStats from '../components/ChannelStats.astro';
 import YoutubeLatestVideos from '../components/YoutubeLatestVideos.astro';
+import LatestBlogCarousel from '../components/LatestBlogCarousel.astro';
 import RecentHW2Searches from '../components/RecentHW2Searches.astro';
 ---
 <BaseLayout
@@ -61,14 +62,14 @@ import RecentHW2Searches from '../components/RecentHW2Searches.astro';
         />
         <HeroSection />
         <ChannelStats />
-        <TwitchEmbed channel="teamrespawntv" />
+        <YoutubeLatestVideos />
       </section>
 
       <!-- Home-only featured content; hidden when switching tabs -->
       <div id="home-featured-content">
 
-        <!-- Dynamic showcase -->
-        <YoutubeLatestVideos />
+        <LatestBlogCarousel />
+        <TwitchEmbed channel="teamrespawntv" />
         <RecentHW2Searches showOpenStatsLink />
         <!-- Storehaus CTA -->
         <StorehausPromo class="mb-8" />

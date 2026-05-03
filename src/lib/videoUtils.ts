@@ -138,6 +138,20 @@ export const FORMAT_LABELS: Record<FormatTag, string> = {
   long: 'Long Form',
 };
 
+/** Legacy rows without `game` may still be HW2 if the title mentions it. */
+const HW2_STATS_TITLE_HINT = /\bhalo wars 2\b|\bhw2\b/i;
+
+/**
+ * Public videos eligible for the HW2 stats page promo strip.
+ * Prefer catalog `game: halo-wars-2`; otherwise use title keywords only when `game` is unset (older entries).
+ */
+export function videoQualifiesForHw2StatsCta(video: Video): boolean {
+  if (video.privacy !== 'Public') return false;
+  if (video.game === 'halo-wars-2') return true;
+  if (video.game !== undefined) return false;
+  return HW2_STATS_TITLE_HINT.test(video.title);
+}
+
 export const GAME_OPTIONS: VideoComposerOption<GameTag>[] = [
   {
     value: 'halo-wars-2',

@@ -1,0 +1,156 @@
+---
+/**
+ * Fan-made HW2 supply/power estimator (structure counts → SPS / PPS).
+ * Same math as https://github.com/Chase-Simmons/Halo-Wars-2-Calculator
+ */
+---
+
+<section
+  class="mb-8 rounded-xl border border-cyan-500/20 p-6 backdrop-blur-sm"
+  style="background: rgba(30, 41, 59, 0.4);"
+  aria-labelledby="hw2-econ-heading"
+>
+  <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+    <div>
+      <h2 id="hw2-econ-heading" class="text-xl font-bold text-cyan-300">
+        <i class="fas fa-calculator mr-2 text-cyan-400" aria-hidden="true"></i>Economy calculator
+      </h2>
+      <p class="mt-1 max-w-2xl text-sm text-gray-400">
+        Estimate supply and power income from pads and generators.
+      </p>
+    </div>
+  </div>
+
+  <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,220px)] lg:items-start">
+    <div class="grid gap-4 sm:grid-cols-2">
+      <label class="block">
+        <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-400">Supply pads</span>
+        <input
+          id="hw2-econ-supply-pad"
+          type="number"
+          inputmode="numeric"
+          min="0"
+          max="6"
+          value="0"
+          class="w-full rounded-lg border border-cyan-500/30 bg-slate-800/60 px-3 py-2.5 font-mono text-white placeholder-gray-500 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400/50"
+        />
+        <span class="mt-1 block text-[11px] text-gray-500">Max 6</span>
+      </label>
+      <label class="block">
+        <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-400">Heavy supply pads</span>
+        <input
+          id="hw2-econ-heavy-supply"
+          type="number"
+          inputmode="numeric"
+          min="0"
+          max="9"
+          value="0"
+          class="w-full rounded-lg border border-cyan-500/30 bg-slate-800/60 px-3 py-2.5 font-mono text-white placeholder-gray-500 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400/50"
+        />
+        <span class="mt-1 block text-[11px] text-gray-500">Max 9</span>
+      </label>
+      <label class="block">
+        <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-400">Generators</span>
+        <input
+          id="hw2-econ-generator"
+          type="number"
+          inputmode="numeric"
+          min="0"
+          value="0"
+          class="w-full rounded-lg border border-cyan-500/30 bg-slate-800/60 px-3 py-2.5 font-mono text-white placeholder-gray-500 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400/50"
+        />
+      </label>
+      <label class="block">
+        <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-400">Heavy generators</span>
+        <input
+          id="hw2-econ-heavy-generator"
+          type="number"
+          inputmode="numeric"
+          min="0"
+          value="0"
+          class="w-full rounded-lg border border-cyan-500/30 bg-slate-800/60 px-3 py-2.5 font-mono text-white placeholder-gray-500 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400/50"
+        />
+      </label>
+    </div>
+
+    <div class="rounded-xl border border-cyan-500/15 bg-slate-900/50 p-4">
+      <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Output</p>
+      <div class="mt-3 space-y-3">
+        <div>
+          <p class="text-xs text-gray-400">Supply / sec</p>
+          <p id="hw2-econ-sps" class="font-mono text-2xl font-bold text-cyan-200">0</p>
+        </div>
+        <div>
+          <p class="text-xs text-gray-400">Power / sec</p>
+          <p id="hw2-econ-pps" class="font-mono text-2xl font-bold text-amber-200">0</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="mt-4 text-xs text-gray-500">
+    Based on open-source rates from
+    <a
+      href="https://github.com/Chase-Simmons/Halo-Wars-2-Calculator"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="text-cyan-400/90 underline decoration-cyan-500/30 underline-offset-2 hover:text-cyan-300"
+      >Chase-Simmons/Halo-Wars-2-Calculator</a
+    >. Actual in-game income can differ.
+  </p>
+</section>
+
+<script>
+  import {
+    computeHw2Economy,
+    normalizeEconomyInputs,
+  } from '../lib/hw2/economyCalculator';
+
+  function formatRate(n: number): string {
+    const rounded = Math.round(n * 100) / 100;
+    return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(2);
+  }
+
+  function readInputs() {
+    const supplyPads = document.getElementById('hw2-econ-supply-pad') as HTMLInputElement | null;
+    const heavySupplyPads = document.getElementById('hw2-econ-heavy-supply') as HTMLInputElement | null;
+    const generators = document.getElementById('hw2-econ-generator') as HTMLInputElement | null;
+    const heavyGenerators = document.getElementById('hw2-econ-heavy-generator') as HTMLInputElement | null;
+    const spsEl = document.getElementById('hw2-econ-sps');
+    const ppsEl = document.getElementById('hw2-econ-pps');
+    if (!supplyPads || !heavySupplyPads || !generators || !heavyGenerators || !spsEl || !ppsEl) return;
+
+    const normalized = normalizeEconomyInputs({
+      supplyPads: supplyPads.value,
+      heavySupplyPads: heavySupplyPads.value,
+      generators: generators.value,
+      heavyGenerators: heavyGenerators.value,
+    });
+
+    supplyPads.value = String(normalized.supplyPads);
+    heavySupplyPads.value = String(normalized.heavySupplyPads);
+    generators.value = String(normalized.generators);
+    heavyGenerators.value = String(normalized.heavyGenerators);
+
+    const { supplyPerSec, powerPerSec } = computeHw2Economy(normalized);
+    spsEl.textContent = formatRate(supplyPerSec);
+    ppsEl.textContent = formatRate(powerPerSec);
+  }
+
+  function bind() {
+    const ids = [
+      'hw2-econ-supply-pad',
+      'hw2-econ-heavy-supply',
+      'hw2-econ-generator',
+      'hw2-econ-heavy-generator',
+    ];
+    for (const id of ids) {
+      const el = document.getElementById(id);
+      el?.addEventListener('input', readInputs);
+      el?.addEventListener('change', readInputs);
+    }
+    readInputs();
+  }
+
+  bind();
+</script>

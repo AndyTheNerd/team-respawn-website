@@ -10,11 +10,17 @@ const hw2VideoList: VideoCta[] = (() => {
   try {
     const parsed = JSON.parse(videoDataEl.textContent);
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter((entry) => {
+    const filtered = parsed.filter((entry) => {
       if (!entry?.title || !entry?.videoId) return false;
       if (entry.durationMs !== null && !Number.isFinite(entry.durationMs)) return false;
       return entry.durationMs === null || entry.durationMs >= MIN_HW2_VIDEO_DURATION_MS;
     });
+    filtered.sort((a, b) => {
+      const ta = new Date(a.publishedAt).getTime();
+      const tb = new Date(b.publishedAt).getTime();
+      return (Number.isNaN(tb) ? -Infinity : tb) - (Number.isNaN(ta) ? -Infinity : ta);
+    });
+    return filtered;
   } catch {
     return [];
   }
@@ -38,7 +44,7 @@ export function renderVideoCta() {
     videoCtaEl.classList.add('hidden');
     return;
   }
-  const choice = hw2VideoList[Math.floor(Math.random() * hw2VideoList.length)];
+  const choice = hw2VideoList[0];
   const url = `https://www.youtube.com/watch?v=${choice.videoId}`;
   const thumb = `https://img.youtube.com/vi/${choice.videoId}/hqdefault.jpg`;
   const dateLabel = choice.publishedAt
