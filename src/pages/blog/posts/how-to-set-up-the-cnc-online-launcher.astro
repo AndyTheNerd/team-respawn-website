@@ -1,0 +1,87 @@
+---
+import BlogPostLayout from '../../../layouts/BlogPostLayout.astro';
+---
+<BlogPostLayout
+  title="How to set up the CnC Online Launcher"
+  description="Install the C&C Online launcher, use Hook to enable your game, launch from Origin or Steam, then sign in and host a Custom Match lobby for multiplayer."
+  category="Guides"
+  publishedDate="Published on May 6, 2026"
+  dateIso="2026-05-06"
+  ogImage="https://img.youtube.com/vi/sv2gi3ge-3c/maxresdefault.jpg"
+  youtubeId="sv2gi3ge-3c"
+  tags={['Command and Conquer']}
+>
+  <p class="text-xl font-semibold text-gray-200 mb-6">Command & Conquer Online launcher (Origin / Steam)</p>
+
+  <h2 class="text-2xl font-bold mb-4 text-cyan-300">Intro</h2>
+
+  <p class="mb-4">
+    This is a short walkthrough of how I get <strong class="text-cyan-400">C&amp;C Online</strong> working so I can play <strong class="text-cyan-400">Command &amp; Conquer</strong> titles online again. When <strong class="text-cyan-400">GameSpy</strong> went dark, the official online support for these games went with it; C&amp;C Online is a mod/launcher that restores that functionality. I cover installing the launcher, the one UI quirk that trips people up (using <strong class="text-cyan-400">Hook</strong> instead of the big launch buttons), then bringing the game up through <strong class="text-cyan-400">Origin</strong> (same idea for <strong class="text-cyan-400">Steam</strong>), and finally logging in with a <strong class="text-cyan-400">C&amp;C Online</strong> account and opening a <strong class="text-cyan-400">Custom Match</strong> lobby for friends. Overall it’s a small setup process once you know the hook step.
+  </p>
+
+  <section
+    class="not-prose my-8 overflow-hidden rounded-xl border border-cyan-500/20 bg-gradient-to-br from-slate-900/95 via-gray-900/92 to-slate-950/95 p-5 shadow-[0_12px_32px_rgba(2,6,23,0.55)] ring-1 ring-white/[0.06] sm:p-6"
+    aria-labelledby="cnc-official-cta-heading"
+  >
+    <div class="relative pl-4 sm:pl-5 before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:rounded-full before:bg-gradient-to-b before:from-cyan-400 before:via-cyan-500 before:to-cyan-700">
+      <p class="mb-2 text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-cyan-200/90">Official resources</p>
+      <h2 id="cnc-official-cta-heading" class="mb-3 text-xl font-bold text-cyan-300 sm:text-2xl">Official download and FAQ</h2>
+      <p class="mb-5 max-w-2xl text-sm leading-relaxed text-gray-400">
+        Download the launcher from the project site, and use the FAQ for common setup questions and troubleshooting.
+      </p>
+      <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+        <a
+          href="https://cnc-online.net/en/download/"
+          class="inline-flex items-center justify-center gap-2 rounded-lg bg-cyan-600 px-4 py-3 text-sm font-semibold text-white shadow-md transition-colors hover:bg-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-gray-950 sm:min-w-[12rem]"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <i class="fas fa-download" aria-hidden="true"></i>
+          Download launcher
+        </a>
+        <a
+          href="https://cnc-online.net/en/faq/"
+          class="inline-flex items-center justify-center gap-2 rounded-lg border border-cyan-500/45 bg-cyan-950/50 px-4 py-3 text-sm font-semibold text-cyan-50 transition-colors hover:border-cyan-400/80 hover:bg-cyan-900/40 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-gray-950 sm:min-w-[12rem]"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <i class="fas fa-circle-question" aria-hidden="true"></i>
+          View FAQ guide
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <h2 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Install, search, and hook the game</h2>
+
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li>Download the <strong class="text-cyan-400">C&amp;C Online</strong> launcher and install it.</li>
+    <li>After install, use Windows search for <strong class="text-cyan-400">“C&amp;C Online”</strong> to open the app.</li>
+    <li><strong class="text-cyan-400">Important:</strong> The default <strong class="text-cyan-400">launch</strong> entries in the window are misleading—clicking them to start a game <strong class="text-cyan-400">does not</strong> work the way you’d expect.</li>
+    <li>What actually works: use <strong class="text-cyan-400">Hook</strong> and select the game you want (I used <strong class="text-cyan-400">Command &amp; Conquer 3</strong> for the demo). Enable the <strong class="text-cyan-400">checkbox</strong> for that game.</li>
+    <li>When the hook step is finished, <strong class="text-cyan-400">exit</strong> the C&amp;C Online application.</li>
+  </ul>
+
+  <h2 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Launch from your store (example: Origin)</h2>
+
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li>Open your store—<strong class="text-cyan-400">Origin</strong> in my run—and start <strong class="text-cyan-400">Tiberium Wars</strong> / <strong class="text-cyan-400">Kane’s Wrath</strong> as you normally would (e.g. <strong class="text-cyan-400">Play</strong>).</li>
+    <li>You may see the C&amp;C-style launcher; I launched <strong class="text-cyan-400">Tiberium Wars</strong> from there. The first click can <strong class="text-cyan-400">re-open the same launcher</strong> instead of the game; from that state, choose <strong class="text-cyan-400">C&amp;C 3</strong> and give it a few seconds—the game should then start.</li>
+    <li>End state: <strong class="text-cyan-400">Tiberium Wars</strong> is running, having been brought up through the C&amp;C Online path so online features are available.</li>
+  </ul>
+
+  <h2 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Multiplayer, C&amp;C Online account, and hosting</h2>
+
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li>In-game: <strong class="text-cyan-400">Multiplayer</strong> → <strong class="text-cyan-400">Online</strong>.</li>
+    <li>I use an account created on the <strong class="text-cyan-400">C&amp;C Online</strong> site. That login is tied to what the game expects for the <strong class="text-cyan-400">EA account name and password</strong> flow in the online UI.</li>
+    <li>The on-screen <strong class="text-cyan-400">Login</strong> control is <strong class="text-cyan-400">bottom-right</strong> and easy to miss; it can take a moment to sign in after you enter credentials.</li>
+    <li>There is a <strong class="text-cyan-400">“My Server account”</strong> (or similar) page on the C&amp;C Online site where you can see your <strong class="text-cyan-400">username and login</strong> details if you need to double-check them.</li>
+    <li>After sign-in, I used <strong class="text-cyan-400">Custom Match</strong> to set up a session. I set my <strong class="text-cyan-400">online ID</strong> (e.g. <strong class="text-cyan-400">Dr90</strong> in the video) and created an <strong class="text-cyan-400">unranked</strong> game so friends can join; no lobby password if you want it open.</li>
+    <li>Friends on C&amp;C Online can use <strong class="text-cyan-400">Browse games</strong> (from the home flow) and should see your lobby when it’s up.</li>
+  </ul>
+
+  <p class="mb-4">
+    If something breaks, the C&amp;C Online project has <strong class="text-cyan-400">support pages</strong> and a <strong class="text-cyan-400">community Discord</strong> where I got unstuck when I was learning the steps—worth checking before you fight the launcher alone.
+  </p>
+</BlogPostLayout>

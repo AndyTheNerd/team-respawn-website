@@ -1,5 +1,22 @@
 ﻿const blogPosts = [
   {
+    title: 'How to set up the CnC Online Launcher',
+    dateIso: '2026-05-06',
+    category: 'Guides',
+    tags: ['Command and Conquer'],
+    readingTimeMinutes: 2,
+    excerpt:
+      'Install the C&C Online launcher, use Hook to enable your game, launch from Origin or Steam, then sign in and host a Custom Match lobby for multiplayer.',
+    href: '/blog/posts/how-to-set-up-the-cnc-online-launcher',
+    img: {
+      src: 'https://img.youtube.com/vi/sv2gi3ge-3c/maxresdefault.jpg',
+      alt: 'Command & Conquer — C&C Online launcher setup guide',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
     title: 'Trophies Are Better Than Achievements',
     dateIso: '2026-05-02',
     category: 'Spotlight',
@@ -971,7 +988,7 @@
     }
   },
   {
-    title: 'Age of Mythology: Retold — Relic Guide (Summary)',
+    title: 'Age of Mythology: Retold — Relic Guide',
     dateIso: '2026-05-05',
     category: 'Guides',
     tags: ['Age of Mythology'],
@@ -980,7 +997,7 @@
     href: '/blog/posts/best-practices-for-relics-age-of-mythology',
     img: {
       src: 'https://img.youtube.com/vi/9kAAAt-A-_E/maxresdefault.jpg',
-      alt: 'Age of Mythology: Retold — Relic Guide (Summary)',
+      alt: 'Age of Mythology: Retold — Relic Guide',
       width: 400,
       height: 225,
       lazy: true
