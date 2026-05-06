@@ -8,6 +8,7 @@ import Author from '../blocks/Author/Author.astro';
 import authorInfo from '../data/authorInfo.js';
 import { getBlogPromo } from '../data/blogPromos';
 import { getBlogNeighborsForPathname } from '../utils/blogNeighbors';
+import { toSchemaDateTimeUtc } from '../utils/schemaDateTime';
 
 interface Props {
   title: string;
@@ -43,7 +44,8 @@ const resolvedOgImage =
       : undefined;
 const blogPromo = getBlogPromo(category, tags ?? []);
 const { prev, next, readingMinutes } = getBlogNeighborsForPathname(Astro.url.pathname);
-const dateModifiedForLd = dateModifiedIso ?? dateIso;
+const datePublishedLd = toSchemaDateTimeUtc(dateIso);
+const dateModifiedLd = toSchemaDateTimeUtc(dateModifiedIso ?? dateIso);
 
 // JSON-LD structured data for Article
 const jsonLd = {
@@ -52,8 +54,8 @@ const jsonLd = {
   "headline": title,
   "description": description,
   "image": resolvedOgImage,
-  "datePublished": dateIso,
-  "dateModified": dateModifiedForLd,
+  "datePublished": datePublishedLd,
+  "dateModified": dateModifiedLd,
   "author": {
     "@type": "Organization",
     "name": "Team Respawn",
@@ -80,7 +82,7 @@ if (youtubeId) {
     "name": title,
     "description": description,
     "thumbnailUrl": `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`,
-    "uploadDate": dateIso,
+    "uploadDate": datePublishedLd,
     "embedUrl": `https://www.youtube.com/embed/${youtubeId}`
   };
 }
