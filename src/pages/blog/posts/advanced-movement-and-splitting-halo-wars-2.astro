@@ -3,16 +3,126 @@ import BlogPostLayout from '../../../layouts/BlogPostLayout.astro';
 ---
 <BlogPostLayout
   title="Advanced Movement and Splitting - Halo Wars 2"
-  description="Learn how to advanced movement and splitting in Halo Wars 2."
+  description="A Halo Wars 2 tutorial on advanced movement: chaining orders, hold position, control groups, splitting under beams, and intel through fog of war — for both gamepad and mouse & keyboard."
   category="Guides"
   publishedDate="Published on January 31, 2026"
   dateIso="2026-01-31"
+  dateModifiedIso="2026-05-05"
   ogImage="/img/HW-Guides/Advanced-Movement.jpg"
   youtubeId="OcyABRReJE0"
   tags={['Halo Wars 2']}
 >
-  <p class="text-lg leading-relaxed mb-6">
-    Learn how to advanced movement and splitting in Halo Wars 2.
-  </p>
-</BlogPostLayout>
+  <h2 class="text-2xl font-bold mb-4 text-cyan-300">Intro</h2>
 
+  <p class="mb-4">
+    This is a Halo Wars 2 tutorial I put together on <strong>advanced movement</strong>: chaining orders, hold position, control groups, splitting when a beam (or similar power) hits, and squeezing information out of fog of war. I run through <strong>both gamepad and mouse & keyboard</strong> where the inputs differ. Hold position and splitting are the two ideas I’d stress most for online play—they change how you harass bases, dodge leader powers, and keep units where you want them without fat-fingering “all units.”
+  </p>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Queuing movements</h2>
+
+  <p class="mb-4">
+    When I want a squad to hit <strong>multiple waypoints</strong> (e.g. main path plus a swing by a mini-base) without babysitting:
+  </p>
+
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li><strong>Gamepad:</strong> Hold <strong>right trigger</strong>, then <strong>X</strong> for the first move. For the next leg, hold <strong>right trigger</strong> again and <strong>X</strong> again. Stacked orders show everywhere that squad will go until I issue a new order or it finishes the chain.</li>
+    <li><strong>Mouse & keyboard:</strong> Hold <strong>Shift</strong> and <strong>right-click</strong> each destination in sequence. Same idea—queued pathing is visible on the selected squad.</li>
+  </ul>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Hold position</h2>
+
+  <p class="mb-4">
+    Hold position is one of my favorite movement tools in Halo Wars 2 and I think it’s <strong>underused</strong>. Uses I call out:
+  </p>
+
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li><strong>Scouting / line of sight:</strong> Park a unit where it barely sees a choke or center point (e.g. Sentry) so I get a glimpse without committing the whole army.</li>
+    <li><strong>Harass without dragging the group:</strong> If I’m selecting “all units” / “local units” a lot but want <strong>one squad</strong> to stay put (e.g. annoying someone’s mini), hold position locks them until they die or I explicitly move them. <strong>All units</strong> will not scoop those units—that’s intentional.</li>
+  </ul>
+
+  <p class="mb-4"><strong>Inputs</strong></p>
+
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li>
+      <strong>Gamepad (depends on “swap LB and LT”):</strong>
+      <ul class="list-disc list-inside mt-2 ml-4">
+        <li>If <strong>LT is camera speed</strong> and <strong>LB is leader wheel</strong> (my preference, closer to Halo Wars 1, and I like throttling camera speed on trigger): hold <strong>right trigger</strong>, then <strong>double-tap LB</strong> for hold position.</li>
+        <li><strong>Default</strong> (LB = camera, LT = leader wheel): hold <strong>right trigger</strong>, <strong>double-tap LT</strong> instead. Rule of thumb: use whichever shoulder button is bound to <strong>camera speed</strong> for the double-tap after holding right trigger.</li>
+      </ul>
+    </li>
+    <li><strong>Mouse & keyboard:</strong> Select the unit(s) and press <strong>H</strong>. Select and move to cancel.</li>
+  </ul>
+
+  <p class="mb-4"><strong>Veterancy caveat:</strong> Anything in hold position <strong>does not earn veterancy</strong>. I used to park siege inside a Banished shield on hold so I wouldn’t yank them with <strong>Y</strong>—works for safety, but they’ll never vet up. Worth remembering.</p>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Unit groups</h2>
+
+  <p class="mb-4">
+    I don’t lean on groups as much as I could, but they’re handy because Halo Wars 2’s <strong>unit cap is relatively low</strong> compared to many RTS games—so small, named chunks of army matter.
+  </p>
+
+  <p class="mb-4">
+    <strong>Gamepad:</strong> Select the units I want → hold <strong>right trigger</strong> → <strong>D-pad direction</strong> assigns that combo to a group slot (e.g. <strong>up</strong> = group 1). Recall: <strong>right trigger</strong> + same <strong>D-pad</strong> direction. The game announces e.g. “group one assigned.”
+  </p>
+
+  <p class="mb-4">
+    <strong>Mouse & keyboard:</strong> Standard RTS binding—<strong>Ctrl+1</strong> through <strong>Ctrl+10</strong> to assign; <strong>1–0</strong> on the keyboard (or number row) to recall. I can mirror the same squads across pad and MKB in a hybrid setup (e.g. group 2 on Ctrl+2).
+  </p>
+
+  <p class="mb-4">
+    Groups still respond to <strong>all units</strong> and <strong>local units</strong>; they’re an extra selection layer, not a hard isolation.
+  </p>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Splitting out of beams and AoE</h2>
+
+  <p class="mb-4">
+    When a <strong>beam</strong> tags my ball, moving the whole blob one direction often means <strong>everything still dies</strong>. What I practice:
+  </p>
+
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li><strong>Split by selection:</strong> Grab a subset, send one way; another subset, another vector; repeat. Even three spread locations can ride out the beam; then <strong>local units</strong> or <strong>all units</strong> to re-ball.</li>
+  </ul>
+
+  <p class="mb-4">
+    Other escapes depend on the situation—this is mostly <strong>reps and muscle memory</strong>, not a single trick.
+  </p>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Intel through fog of war</h2>
+
+  <p class="mb-4">
+    <strong>Starter / main bases</strong> are fixed locations, so this is strongest when I already know where their HQ is.
+  </p>
+
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li><strong>Controller (PC or Xbox):</strong> Move cursor to their base and press <strong>A</strong>. The UI shows <strong>base structure</strong> info: the <strong>bottom number</strong> is <strong>tech level</strong>; the <strong>bar</strong> is <strong>base health</strong>. I can check “am I behind?” or “are they full HP T3?” without a traditional scout. I note <strong>Expo</strong> can look odd (e.g. five pads but still reading tech in edge cases); cloaking can hide things mid-tutorial too.</li>
+    <li><strong>Mouse & keyboard:</strong> Clicking through fog doesn’t give the same readout reliably.</li>
+    <li><strong>Audio:</strong> I can still <strong>hear</strong> construction and other cues through fog if I’m listening—turning volume up helps for audio intel.</li>
+  </ul>
+
+  <p class="mb-4">
+    I half-joke that this is one spot where <strong>controller feels a bit OP</strong> on PC for quick base taps.
+  </p>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 class="text-2xl font-bold mb-4 mt-8 text-cyan-300">Takeaways</h2>
+
+  <ul class="list-disc list-inside mb-4 ml-4">
+    <li><strong>Most important habits from this video:</strong> <strong>split</strong> under beam/leader powers, and <strong>hold position</strong> for map control, LOS, and avoiding accidental moves when I’m spamming global selects.</li>
+    <li><strong>Queues</strong> (Shift+click / trigger+X) keep multi-stop paths clean.</li>
+    <li><strong>Groups</strong> help for small-army management; <strong>H</strong> vs trigger+double-tap is the big MKB vs pad split for hold.</li>
+    <li>Remember <strong>no veterancy</strong> while holding.</li>
+  </ul>
+
+  <hr class="my-8 border-gray-700" />
+</BlogPostLayout>

@@ -177,15 +177,17 @@
     }
   },
   {
-    title: 'Halo Reach Full Campaign Walkthrough',
+    title: 'Halo Reach Legendary Walkthrough',
     dateIso: '2026-02-07',
     category: 'Walkthroughs',
     tags: ['Halo'],
-    excerpt: 'A full walkthrough of Halo Reach. Watch the complete campaign run.',
+    readingTimeMinutes: 8,
+    excerpt:
+      'Legendary co-op playthrough of Halo Reach in MCC—mission-by-mission notes from Andy and Gus, plus overall campaign takeaways.',
     href: '/blog/posts/halo-reach-walkthrough',
     img: {
       src: 'https://img.youtube.com/vi/tKfsjD-ixGk/maxresdefault.jpg',
-      alt: 'Halo Reach Full Campaign Walkthrough',
+      alt: 'Halo Reach Legendary Walkthrough',
       width: 400,
       height: 225,
       lazy: true
@@ -207,7 +209,7 @@
     }
   },
   {
-    title: 'Halo Infinite Co-op Walkthrough 2024',
+    title: 'Halo Infinite Co-op Walkthrough',
     dateIso: '2026-02-07',
     category: 'Walkthroughs',
     tags: ['Halo'],
@@ -217,7 +219,7 @@
     href: '/blog/posts/halo-infinite-walkthrough',
     img: {
       src: 'https://img.youtube.com/vi/pI_oIv-3MSg/maxresdefault.jpg',
-      alt: 'Halo Infinite Co-op Walkthrough 2024',
+      alt: 'Halo Infinite Co-op Walkthrough',
       width: 400,
       height: 225,
       lazy: true
@@ -684,7 +686,7 @@
     category: 'Guides',
     tags: ['Halo Wars 2'],
     excerpt:
-      'Learn how to advanced movement and splitting in Halo Wars 2.',
+      'This is a Halo Wars 2 tutorial I put together on advanced movement: chaining orders, hold position, control groups, splitting when a beam (or similar power) hits, and squeezing information out of fog of war.',
     href: '/blog/posts/advanced-movement-and-splitting-halo-wars-2',
     img: {
       src: '/img/HW-Guides/Advanced-Movement.jpg',
@@ -969,16 +971,16 @@
     }
   },
   {
-    title: 'Best Practices for Relics - Age of Mythology',
-    dateIso: '2026-01-31',
+    title: 'Age of Mythology: Retold — Relic Guide (Summary)',
+    dateIso: '2026-05-05',
     category: 'Guides',
     tags: ['Age of Mythology'],
     excerpt:
-      'Relics are a powerful resource in Age of Mythology. This guide will show you how to use them to your advantage.',
+      'This is my beginner-friendly walkthrough of relics in Age of Mythology: Retold: how they differ from other Age games, what you need to use them, how I scout and prioritize them, and where the UI still makes things harder on console.',
     href: '/blog/posts/best-practices-for-relics-age-of-mythology',
     img: {
-      src: '/img/AOM-Guides/New Player Guide.jpg',
-      alt: 'Best Practices for Relics - Age of Mythology',
+      src: 'https://img.youtube.com/vi/9kAAAt-A-_E/maxresdefault.jpg',
+      alt: 'Age of Mythology: Retold — Relic Guide (Summary)',
       width: 400,
       height: 225,
       lazy: true
