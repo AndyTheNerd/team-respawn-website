@@ -8,11 +8,15 @@ export const HW2_ECONOMY_LIMITS = {
   maxHeavySupplyPads: 9,
 } as const;
 
+/** Power income per captured power node (fan estimate). */
+export const HW2_POWER_NODE_POWER_PER_SEC = 1.5;
+
 export type Hw2EconomyInputs = {
   supplyPads: number;
   heavySupplyPads: number;
   generators: number;
   heavyGenerators: number;
+  powerNodes: number;
 };
 
 export type Hw2EconomyResult = {
@@ -80,11 +84,13 @@ export function normalizeEconomyInputs(raw: Partial<Hw2EconomyInputs>): Hw2Econo
   const hsp = Math.floor(clampNonNegative(Number(raw.heavySupplyPads)));
   const g = Math.floor(clampNonNegative(Number(raw.generators)));
   const hg = Math.floor(clampNonNegative(Number(raw.heavyGenerators)));
+  const pn = Math.floor(clampNonNegative(Number(raw.powerNodes)));
   return {
     supplyPads: Math.min(sp, HW2_ECONOMY_LIMITS.maxSupplyPads),
     heavySupplyPads: Math.min(hsp, HW2_ECONOMY_LIMITS.maxHeavySupplyPads),
     generators: g,
     heavyGenerators: hg,
+    powerNodes: pn,
   };
 }
 
@@ -93,6 +99,7 @@ export function computeHw2Economy(inputs: Hw2EconomyInputs): Hw2EconomyResult {
   const hSP = inputs.heavySupplyPads;
   const g = inputs.generators;
   const hG = inputs.heavyGenerators;
+  const pn = inputs.powerNodes;
 
   let totalS = 0;
   let totalP = 0;
@@ -108,6 +115,7 @@ export function computeHw2Economy(inputs: Hw2EconomyInputs): Hw2EconomyResult {
 
   totalP += g * 3;
   totalP += hG * 6;
+  totalP += pn * HW2_POWER_NODE_POWER_PER_SEC;
 
   return { supplyPerSec: totalS, powerPerSec: totalP };
 }

@@ -16,61 +16,77 @@
         <i class="fas fa-calculator mr-2 text-cyan-400" aria-hidden="true"></i>Economy calculator
       </h2>
       <p class="mt-1 max-w-2xl text-sm text-gray-400">
-        Estimate supply and power income from pads and generators.
+        Estimate supply and power income from pads, generators, and power nodes.
       </p>
     </div>
   </div>
 
   <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,220px)] lg:items-start">
-    <div class="grid gap-4 sm:grid-cols-2">
-      <label class="block">
-        <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-400">Supply pads</span>
-        <input
-          id="hw2-econ-supply-pad"
-          type="number"
-          inputmode="numeric"
-          min="0"
-          max="6"
-          value="0"
-          class="w-full rounded-lg border border-cyan-500/30 bg-slate-800/60 px-3 py-2.5 font-mono text-white placeholder-gray-500 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400/50"
-        />
-        <span class="mt-1 block text-[11px] text-gray-500">Max 6</span>
-      </label>
-      <label class="block">
-        <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-400">Heavy supply pads</span>
-        <input
-          id="hw2-econ-heavy-supply"
-          type="number"
-          inputmode="numeric"
-          min="0"
-          max="9"
-          value="0"
-          class="w-full rounded-lg border border-cyan-500/30 bg-slate-800/60 px-3 py-2.5 font-mono text-white placeholder-gray-500 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400/50"
-        />
-        <span class="mt-1 block text-[11px] text-gray-500">Max 9</span>
-      </label>
-      <label class="block">
-        <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-400">Generators</span>
-        <input
-          id="hw2-econ-generator"
-          type="number"
-          inputmode="numeric"
-          min="0"
-          value="0"
-          class="w-full rounded-lg border border-cyan-500/30 bg-slate-800/60 px-3 py-2.5 font-mono text-white placeholder-gray-500 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400/50"
-        />
-      </label>
-      <label class="block">
-        <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-400">Heavy generators</span>
-        <input
-          id="hw2-econ-heavy-generator"
-          type="number"
-          inputmode="numeric"
-          min="0"
-          value="0"
-          class="w-full rounded-lg border border-cyan-500/30 bg-slate-800/60 px-3 py-2.5 font-mono text-white placeholder-gray-500 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400/50"
-        />
-      </label>
+    <div class="flex flex-col gap-4">
+      <div class="grid gap-4 sm:grid-cols-2">
+        <label class="block">
+          <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-400">Supply pads</span>
+          <input
+            id="hw2-econ-supply-pad"
+            type="number"
+            inputmode="numeric"
+            min="0"
+            max="6"
+            value="0"
+            class="w-full rounded-lg border border-cyan-500/30 bg-slate-800/60 px-3 py-2.5 font-mono text-white placeholder-gray-500 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400/50"
+          />
+          <span class="mt-1 block text-[11px] text-gray-500">Max 6</span>
+        </label>
+        <label class="block">
+          <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-400">Heavy supply pads</span>
+          <input
+            id="hw2-econ-heavy-supply"
+            type="number"
+            inputmode="numeric"
+            min="0"
+            max="9"
+            value="0"
+            class="w-full rounded-lg border border-cyan-500/30 bg-slate-800/60 px-3 py-2.5 font-mono text-white placeholder-gray-500 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400/50"
+          />
+          <span class="mt-1 block text-[11px] text-gray-500">Max 9</span>
+        </label>
+      </div>
+      <div class="grid gap-4 sm:grid-cols-3">
+        <label class="block min-w-0">
+          <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-400">Generators</span>
+          <input
+            id="hw2-econ-generator"
+            type="number"
+            inputmode="numeric"
+            min="0"
+            value="0"
+            class="w-full rounded-lg border border-cyan-500/30 bg-slate-800/60 px-3 py-2.5 font-mono text-white placeholder-gray-500 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400/50"
+          />
+        </label>
+        <label class="block min-w-0">
+          <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-400">Heavy generators</span>
+          <input
+            id="hw2-econ-heavy-generator"
+            type="number"
+            inputmode="numeric"
+            min="0"
+            value="0"
+            class="w-full rounded-lg border border-cyan-500/30 bg-slate-800/60 px-3 py-2.5 font-mono text-white placeholder-gray-500 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400/50"
+          />
+        </label>
+        <label class="block min-w-0">
+          <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-400">Power nodes</span>
+          <input
+            id="hw2-econ-power-node"
+            type="number"
+            inputmode="numeric"
+            min="0"
+            value="0"
+            class="w-full rounded-lg border border-cyan-500/30 bg-slate-800/60 px-3 py-2.5 font-mono text-white placeholder-gray-500 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400/50"
+          />
+          <span class="mt-1 block text-[11px] text-gray-500">1.5 power/sec each</span>
+        </label>
+      </div>
     </div>
 
     <div class="rounded-xl border border-cyan-500/15 bg-slate-900/50 p-4">
@@ -116,21 +132,24 @@
     const heavySupplyPads = document.getElementById('hw2-econ-heavy-supply') as HTMLInputElement | null;
     const generators = document.getElementById('hw2-econ-generator') as HTMLInputElement | null;
     const heavyGenerators = document.getElementById('hw2-econ-heavy-generator') as HTMLInputElement | null;
+    const powerNodes = document.getElementById('hw2-econ-power-node') as HTMLInputElement | null;
     const spsEl = document.getElementById('hw2-econ-sps');
     const ppsEl = document.getElementById('hw2-econ-pps');
-    if (!supplyPads || !heavySupplyPads || !generators || !heavyGenerators || !spsEl || !ppsEl) return;
+    if (!supplyPads || !heavySupplyPads || !generators || !heavyGenerators || !powerNodes || !spsEl || !ppsEl) return;
 
     const normalized = normalizeEconomyInputs({
       supplyPads: supplyPads.value,
       heavySupplyPads: heavySupplyPads.value,
       generators: generators.value,
       heavyGenerators: heavyGenerators.value,
+      powerNodes: powerNodes.value,
     });
 
     supplyPads.value = String(normalized.supplyPads);
     heavySupplyPads.value = String(normalized.heavySupplyPads);
     generators.value = String(normalized.generators);
     heavyGenerators.value = String(normalized.heavyGenerators);
+    powerNodes.value = String(normalized.powerNodes);
 
     const { supplyPerSec, powerPerSec } = computeHw2Economy(normalized);
     spsEl.textContent = formatRate(supplyPerSec);
@@ -143,6 +162,7 @@
       'hw2-econ-heavy-supply',
       'hw2-econ-generator',
       'hw2-econ-heavy-generator',
+      'hw2-econ-power-node',
     ];
     for (const id of ids) {
       const el = document.getElementById(id);
