@@ -563,6 +563,11 @@ export function getSeries(title: string): SeriesTag {
   return 'general';
 }
 
+/** Short-form uploads that exceed the usual <2 min duration cutoff (e.g. extended Shorts). */
+const FORMAT_SHORT_OVERRIDE_VIDEO_IDS = new Set<string>([
+  'RA0dUAOelmk', // New Super Lucky's Tale on the PS5 is AWESOME!
+]);
+
 /** Gameplay / commentary uploads mis-tagged as guides by title heuristics above. */
 const GUIDE_SERIES_INFERENCE_EXCLUDED_VIDEO_IDS = new Set<string>([
   'iWlwJD1Nofk',
@@ -612,7 +617,9 @@ const GUIDE_SERIES_INFERENCE_EXCLUDED_VIDEO_IDS = new Set<string>([
  * Game and series are inferred from the title via regex when not explicitly set.
  */
 export function tagVideo(video: Video): TaggedVideo {
-  const format = getFormat(video.durationMs);
+  const format = FORMAT_SHORT_OVERRIDE_VIDEO_IDS.has(video.videoId)
+    ? 'short'
+    : getFormat(video.durationMs);
   const game = video.game ?? getGame(video.title);
   const series =
     video.series ??
