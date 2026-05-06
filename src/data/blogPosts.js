@@ -730,16 +730,17 @@
     }
   },
   {
-    title: 'Why is the Scarab mission so FRUSTRATING? - Halo Wars',
+    title: 'Why is the Scarab mission so Frustrating in Halo Wars?',
     dateIso: '2026-01-31',
     category: 'Guides',
     tags: ['Halo Wars 1'],
+    readingTimeMinutes: 4,
     excerpt:
-      'Learn how to beat the most frustrating mission in Halo Wars.',
+      'Scarab mission tips for Halo Wars (original): pylons, Scorpions and Wolverines, Forge and MAC, reading the beam, and closing on the core.',
     href: '/blog/posts/why-is-the-scarab-mission-so-frustrating-halo-wars',
     img: {
-      src: '/img/HW-Guides/Why is the Scarab so frustrating.jpg',
-      alt: 'Why is the Scarab mission so FRUSTRATING? - Halo Wars',
+      src: 'https://img.youtube.com/vi/4K8NxWJg9II/maxresdefault.jpg',
+      alt: 'Why is the Scarab mission so Frustrating in Halo Wars?',
       width: 400,
       height: 225,
       lazy: true
