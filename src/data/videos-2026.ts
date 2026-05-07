@@ -778,4 +778,12 @@ export const videos2026: Video[] = [
     privacy: "Public",
     game: "helldivers",
   },
+  {
+    title: "Sniper Elite Resistance is simply AMAZING!",
+    publishedAt: "2026-05-06T00:00:00+00:00",
+    durationMs: 1_605_000,
+    videoId: "YcKNnvcRXxU",
+    privacy: "Public",
+    game: "other",
+  },
 ];
