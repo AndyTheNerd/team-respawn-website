@@ -51,7 +51,7 @@ const { showOpenStatsLink = false } = Astro.props;
     }
 
     try {
-      const res = await fetch('/api/hw2/recent-searches');
+      const res = await fetch('/api/hw2/recent-searches', { cache: 'no-store' });
       if (!res.ok) throw new Error('fetch failed');
       const data = await res.json();
 

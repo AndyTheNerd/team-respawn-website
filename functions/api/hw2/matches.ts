@@ -268,6 +268,30 @@ async function fetchMatchesBatched(gamertag: string, count: number, apiKeys: str
   return { ok: true as const, data: { Results: collected.slice(0, count) } };
 }
 
+/** Log a profile lookup for /api/hw2/recent-searches (independent of match cache writes). */
+async function recordCommunitySearch(db: Env['DB'], gamertag: string, matchCount: number) {
+  if (!db) return;
+  const now = new Date().toISOString();
+  const playerId = normalizePlayerId(gamertag);
+  try {
+    await db.batch([
+      db.prepare(
+        `INSERT INTO players (player_id, gamertag, last_seen_at)
+         VALUES (?, ?, ?)
+         ON CONFLICT(player_id) DO UPDATE SET
+           gamertag = excluded.gamertag,
+           last_seen_at = excluded.last_seen_at`
+      ).bind(playerId, gamertag, now),
+      db.prepare(
+        `INSERT INTO search_events (search_id, player_id, searched_at, match_count)
+         VALUES (?, ?, ?, ?)`
+      ).bind(crypto.randomUUID(), playerId, now, matchCount),
+    ]);
+  } catch (err) {
+    console.error('[matches] recordCommunitySearch failed:', err);
+  }
+}
+
 async function storeMatchSummaries(db: Env['DB'], gamertag: string, matches: MatchSummary[]) {
   if (!db || matches.length === 0) return;
   const now = new Date().toISOString();
@@ -348,6 +372,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     if (shouldUseCache(result.error.type)) {
       const cached = await loadCachedMatches(env.DB, gamertag, count);
       if (cached?.payload) {
+        const payload = cached.payload as { Results?: unknown[] };
+        const matchCount = Array.isArray(payload.Results) ? payload.Results.length : 0;
+        await recordCommunitySearch(env.DB, gamertag, matchCount);
         return jsonResponse({
           ...(cached.payload as Record<string, unknown>),
           _meta: { ...(cached.payload as any)?._meta, reason: result.error.type },
@@ -359,6 +386,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
   const matches = Array.isArray(result.data?.Results) ? result.data.Results : [];
   await storeMatchSummaries(env.DB, gamertag, matches);
+  if (matches.length === 0) {
+    await recordCommunitySearch(env.DB, gamertag, 0);
+  }
 
   return jsonResponse({ ...result.data, _meta: { cached: false, fetchedAt: new Date().toISOString() } });
 };
