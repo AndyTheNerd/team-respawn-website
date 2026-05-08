@@ -1,5 +1,22 @@
 ﻿const blogPosts = [
   {
+    title: 'The Heroes of Halo Wars',
+    dateIso: '2026-05-08',
+    category: 'Spotlight',
+    tags: ['Halo Wars 1'],
+    readingTimeMinutes: 8,
+    excerpt:
+      'Companion notes to the video: Red Team’s role and lore, Forge’s arc and sacrifice, Anders and Cutter, Serena’s six years alone and rampancy—and why the Spirit of Fire crew stops a Covenant Forerunner gambit decades before Halo CE.',
+    href: '/blog/posts/the-heroes-of-halo-wars',
+    img: {
+      src: 'https://img.youtube.com/vi/gF3Jt0CUFfY/maxresdefault.jpg',
+      alt: 'The Heroes of Halo Wars',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
     title: 'Sniper Elite Resistance: First Impressions',
     dateIso: '2026-05-08',
     category: 'Spotlight',
