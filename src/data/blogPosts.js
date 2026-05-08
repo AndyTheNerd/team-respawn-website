@@ -1,5 +1,22 @@
 ﻿const blogPosts = [
   {
+    title: 'Sniper Elite Resistance: First Impressions',
+    dateIso: '2026-05-08',
+    category: 'Spotlight',
+    tags: ['Sniper Elite'],
+    readingTimeMinutes: 5,
+    excerpt:
+      'Notes from the first campaign mission on PC (medium): third-person pacing, subsonic ammo, traversal, traps, Fleck cannons, dam objectives, and classic Sniper Elite kill-cam feedback.',
+    href: '/blog/posts/sniper-elite-resistance-first-impressions',
+    img: {
+      src: 'https://img.youtube.com/vi/YcKNnvcRXxU/maxresdefault.jpg',
+      alt: 'Sniper Elite Resistance: First Impressions',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
     title: 'How to set up the CnC Online Launcher',
     dateIso: '2026-05-06',
     category: 'Guides',
@@ -137,7 +154,7 @@
     title: 'Halo CE Anniversary Full Campaign Walkthrough',
     dateIso: '2026-02-07',
     category: 'Walkthroughs',
-    tags: ['Halo'],
+    tags: ['Halo FPS'],
     excerpt: 'A full walkthrough of Halo Combat Evolved Anniversary. Watch the complete campaign run.',
     href: '/blog/posts/halo-ce-anniversary-walkthrough',
     img: {
@@ -152,7 +169,7 @@
     title: 'Halo 2 Anniversary Full Campaign Walkthrough',
     dateIso: '2026-02-07',
     category: 'Walkthroughs',
-    tags: ['Halo'],
+    tags: ['Halo FPS'],
     excerpt: 'A full walkthrough of Halo 2 Anniversary. Watch the complete campaign run.',
     href: '/blog/posts/halo-2-anniversary-walkthrough',
     img: {
@@ -167,7 +184,7 @@
     title: 'Halo 3 Full Campaign Walkthrough',
     dateIso: '2026-02-07',
     category: 'Walkthroughs',
-    tags: ['Halo'],
+    tags: ['Halo FPS'],
     excerpt: 'A full walkthrough of Halo 3. Watch the complete campaign run.',
     href: '/blog/posts/halo-3-walkthrough',
     img: {
@@ -182,7 +199,7 @@
     title: 'Halo 3 ODST Full Campaign Walkthrough',
     dateIso: '2026-02-07',
     category: 'Walkthroughs',
-    tags: ['Halo'],
+    tags: ['Halo FPS'],
     excerpt: 'A full walkthrough of Halo 3 ODST. Watch the complete campaign run.',
     href: '/blog/posts/halo-3-odst-walkthrough',
     img: {
@@ -197,7 +214,7 @@
     title: 'Halo Reach Legendary Walkthrough',
     dateIso: '2026-02-07',
     category: 'Walkthroughs',
-    tags: ['Halo'],
+    tags: ['Halo FPS'],
     readingTimeMinutes: 8,
     excerpt:
       'Legendary co-op playthrough of Halo Reach in MCC—mission-by-mission notes from Andy and Gus, plus overall campaign takeaways.',
@@ -214,7 +231,7 @@
     title: 'Halo 4 Full Campaign Walkthrough',
     dateIso: '2026-02-07',
     category: 'Walkthroughs',
-    tags: ['Halo'],
+    tags: ['Halo FPS'],
     excerpt: 'A full walkthrough of Halo 4. Watch the complete campaign run.',
     href: '/blog/posts/halo-4-walkthrough',
     img: {
@@ -229,7 +246,7 @@
     title: 'Halo Infinite Co-op Walkthrough',
     dateIso: '2026-02-07',
     category: 'Walkthroughs',
-    tags: ['Halo'],
+    tags: ['Halo FPS'],
     readingTimeMinutes: 9,
     excerpt:
       'Andy and Gus tackle the full Halo Infinite campaign on Legendary in co-op — completing the Storehaus run through mainline Halo (except Halo 5), ~8.5 hours, linear missions plus Zeta Halo sandbox, and mixed verdicts on campaign vs. open world.',
@@ -752,7 +769,7 @@
     category: 'Guides',
     tags: ['Age of Empires II'],
     excerpt:
-      'A guide for new players to Age of Empires II.',
+      'Villagers, aging up, when to add military, proxy and castle drops, starter counters, and trading — a beginner loop for Age of Empires II from Jimbo, Gus, and Andy.',
     href: '/blog/posts/noob-to-pro-in-15-minutes-age-of-empires-ii',
     img: {
       src: '/img/AOE2-Guides/Noob To Pro.jpg',
@@ -784,7 +801,7 @@
     category: 'Guides',
     tags: ['Age of Empires II'],
     excerpt:
-      'An advanced guide for Xbox players in Age of Empires II.',
+      'Follow-up to basic movement for AoE2 DE on Xbox: chaining villager orders, control groups and production buildings, the Find menu, forward proxy bases, flares, and fast minimap camera moves.',
     href: '/blog/posts/xbox-advanced-guide-age-of-empires-ii',
     img: {
       src: '/img/AOE2-Guides/Advanced Guide.jpg',
@@ -803,7 +820,7 @@
       'Learn how to get maximum villager efficiency in Age of Empires II.',
     href: '/blog/posts/how-to-get-maximum-villager-efficiency-age-of-empires-ii',
     img: {
-      src: '/img/AOE2-Guides/Advanced Guide.jpg',
+      src: 'https://img.youtube.com/vi/WLFOhTXAgb4/maxresdefault.jpg',
       alt: 'How to get Maximum Villager Efficiency - Age of Empires II',
       width: 400,
       height: 225,

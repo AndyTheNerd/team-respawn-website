@@ -236,7 +236,7 @@
 
       const matchesCategory = currentCategory === 'all' ||
         currentCategory === 'all categories' ||
-        category === currentCategory;
+        category.toLowerCase() === currentCategory;
 
       const matchesTag = currentTag === 'all' ||
         currentTag === 'all tags' ||

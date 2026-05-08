@@ -40,7 +40,7 @@ const tags = [
       return acc;
     }, [])
   )
-];
+].sort((a, b) => a.localeCompare(b));
 const tagItems = [
   { name: 'All Tags', value: 'all' },
   ...tags.map(tag => ({ name: tag, value: tag }))

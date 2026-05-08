@@ -3,16 +3,184 @@ import BlogPostLayout from '../../../layouts/BlogPostLayout.astro';
 ---
 <BlogPostLayout
   title="Xbox Advanced Guide - Age of Empires II"
-  description="An advanced guide for Xbox players in Age of Empires II."
+  description="Follow-up to the basic movement tutorial for Age of Empires II Definitive Edition on Xbox: chaining villager orders, control groups, the Find menu, forward bases, flares, and minimap camera movement."
   category="Guides"
   publishedDate="Published on January 31, 2026"
   dateIso="2026-01-31"
+  dateModifiedIso="2026-05-08"
   ogImage="/img/AOE2-Guides/Advanced Guide.jpg"
   youtubeId="nKX9uZon4bI"
   tags={['Age of Empires II']}
 >
+  <h2 id="intro" class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Intro</h2>
+
   <p class="text-lg leading-relaxed mb-6">
-    An advanced guide for Xbox players in Age of Empires II.
+    This is the follow-up to my basic movement tutorial for <strong>Age of Empires II Definitive Edition on Xbox</strong>. Here I focus on practical controller habits: chaining orders for villagers, <strong>control groups</strong> (including buildings), the <strong>Find</strong> menu on the default layout, <strong>forward bases</strong>, <strong>flares</strong>, and moving the camera efficiently via the <strong>minimap</strong>. I aimed this at people who are new to RTS on a pad or new to AoE2 in general—not at squeezing every frame of tournament micro—but I still find these tips genuinely useful in real matches.
+  </p>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 id="scouting" class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Scouting</h2>
+
+  <p class="text-lg leading-relaxed mb-6">
+    I still recommend <strong>auto-scouting</strong> for the scout on many maps when you are learning. The scout keeps generating <strong>line of sight</strong> for you and will surface things like <strong>livestock</strong> without you constantly driving it by hand.
+  </p>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 id="queuing-villager-tasks" class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Queuing villager tasks</h2>
+
+  <p class="text-lg leading-relaxed mb-6">
+    AoE2 lets you <strong>stack orders</strong> the same way rally points feel natural to queue.
+  </p>
+
+  <p class="text-lg leading-relaxed mb-4"><strong>Example — multiple houses without repeating the build flow every time</strong></p>
+
+  <ul class="list-disc list-inside mb-6 ml-4 space-y-2 text-lg leading-relaxed">
+    <li>Select the villager and open the build action (<strong>Y</strong> for the quick build I use in the demo).</li>
+    <li><strong>Hold left trigger (LT)</strong> and <strong>press A</strong> on the first foundation.</li>
+    <li><strong>Keep holding LT</strong> and <strong>press A</strong> again (and again) for additional foundations in sequence.</li>
+  </ul>
+
+  <p class="text-lg leading-relaxed mb-6">The villager finishes one job and automatically walks to the next.</p>
+
+  <p class="text-lg leading-relaxed mb-4"><strong>Chaining different job types</strong></p>
+
+  <p class="text-lg leading-relaxed mb-6">
+    After the build queue, I can select the villager again, <strong>hold LT</strong>, and <strong>A</strong> on a resource (e.g. a tree to chop). She will complete the queued houses, then move on to the gather task. The point is to <strong>reduce babysitting</strong>: one planning pass replaces a lot of back-and-forth selection.
+  </p>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 id="advanced-interface-and-control-groups" class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Advanced interface and control groups</h2>
+
+  <p class="text-lg leading-relaxed mb-6">
+    <strong>Custom control groups are not available on the default “Standard” interface.</strong> To unlock them:
+  </p>
+
+  <ol class="list-decimal list-inside mb-6 ml-4 space-y-2 text-lg leading-relaxed">
+    <li><strong>Start</strong> → <strong>Options</strong></li>
+    <li>First tab → <strong>Interface</strong></li>
+    <li>Under in-game interface, change layout from <strong>Standard</strong> to <strong>Advanced</strong></li>
+    <li>Confirm</li>
+  </ol>
+
+  <p class="text-lg leading-relaxed mb-6">Controls shift slightly, but this is where <strong>player-defined groups</strong> live.</p>
+
+  <p class="text-lg leading-relaxed mb-4"><strong>Assigning a group (units or buildings)</strong></p>
+
+  <ul class="list-disc list-inside mb-6 ml-4 space-y-2 text-lg leading-relaxed">
+    <li>Select the unit(s) or <strong>click the building</strong> I want bound.</li>
+    <li><strong>Hold left bumper (LB)</strong> — a <strong>radial</strong> appears for group slots.</li>
+    <li><strong>X</strong> on a direction to <strong>create / add</strong> to that slot. I like mapping my <strong>first four groups to the D-pad directions</strong> for muscle memory.</li>
+  </ul>
+
+  <p class="text-lg leading-relaxed mb-4"><strong>Recalling a group</strong></p>
+
+  <p class="text-lg leading-relaxed mb-6">
+    Plain <strong>D-pad up</strong> (etc.) still does things like <strong>idle villagers</strong> on the default scheme. To recall <strong>my</strong> group: <strong>hold LB + the D-pad direction</strong> I assigned. Same flow works for <strong>villagers</strong>, <strong>army</strong>, and critically <strong>production buildings</strong>.
+  </p>
+
+  <p class="text-lg leading-relaxed mb-4"><strong>Why I bind barracks (and other producers)</strong></p>
+
+  <p class="text-lg leading-relaxed mb-6">
+    With my army elsewhere, <strong>LB + direction</strong> can snap selection to a <strong>forward barracks</strong>. From there I use <strong>right trigger</strong> to queue units, set a <strong>rally point</strong>, and keep reinforcing without panning home. The <strong>white progress bar</strong> under the building’s health shows training is happening—useful confirmation when I am not looking at the structure model itself.
+  </p>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 id="standard-interface-shortcuts" class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Standard interface shortcuts</h2>
+
+  <p class="text-lg leading-relaxed mb-6">
+    If custom groups feel like too much at first, <strong>Standard</strong> still has strong <strong>presets</strong>:
+  </p>
+
+  <ul class="list-disc list-inside mb-6 ml-4 space-y-2 text-lg leading-relaxed">
+    <li><strong>Tap LB</strong> (the <strong>Find</strong> / radial menu) exposes shortcuts to <strong>select building types</strong> (town center, castles, universities, etc.).</li>
+    <li><strong>A</strong> on an entry selects one instance; <strong>hold A</strong> to grab <strong>all</strong> of that type when I have duplicates (multiple town centers, multiple barracks, ranges, and so on).</li>
+  </ul>
+
+  <p class="text-lg leading-relaxed mb-6">
+    <strong>LB + Y</strong> opens filters for <strong>military selection</strong>—e.g. all military, non-siege, siege-only, warships, etc. <strong>Tap A</strong> to step through individuals; <strong>hold A</strong> for a broad grab (which can include the <strong>scout</strong> in an “all military” style selection). <strong>X</strong> can <strong>cycle</strong> through matching units, which doubles as a <strong>“where are my guys?”</strong> tool when I am lost on a big map.
+  </p>
+
+  <p class="text-lg leading-relaxed mb-6">
+    <strong>LB + D-pad</strong> can also jump me toward registered producers (e.g. straight to a barracks) without custom groups—handy middle ground on controller.
+  </p>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 id="forward-proxy-production" class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Forward / proxy production</h2>
+
+  <p class="text-lg leading-relaxed mb-6">
+    As games go longer, I like sending <strong>villagers</strong> to raise <strong>military buildings between my core and the fight</strong>—not necessarily on the front line in a suicidal spot, but <strong>behind cover</strong> (tree lines, terrain) when I can.
+  </p>
+
+  <p class="text-lg leading-relaxed mb-4"><strong>Why</strong></p>
+
+  <ul class="list-disc list-inside mb-6 ml-4 space-y-2 text-lg leading-relaxed">
+    <li>Reinforcements <strong>spawn near the objective</strong> instead of marching across a huge map.</li>
+    <li>I set the <strong>rally point on the gate (or choke)</strong> I am pressuring so new units join the battle quickly.</li>
+  </ul>
+
+  <p class="text-lg leading-relaxed mb-4"><strong>Risks I call out</strong></p>
+
+  <ul class="list-disc list-inside mb-6 ml-4 space-y-2 text-lg leading-relaxed">
+    <li><strong>Resource cost</strong> of duplicate production—if I lose the proxy, I lose the investment.</li>
+    <li><strong>Villagers are exposed</strong> outside my normal walling or army umbrella.</li>
+    <li><strong>Time</strong> walking out and either walking back or staying forward—if I keep them there, I often drop a <strong>mining camp</strong> or <strong>lumber camp</strong> near the proxy so they have something productive to do.</li>
+  </ul>
+
+  <p class="text-lg leading-relaxed mb-6">
+    Some players run <strong>multiple proxies</strong> or even a <strong>near-full second base</strong> to support a long front. That is playstyle-dependent, but the idea is the same: shorten the pipe from “trained” to “fighting.”
+  </p>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 id="flaring" class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Flaring</h2>
+
+  <p class="text-lg leading-relaxed mb-6">
+    <strong>Flares</strong> ping <strong>everyone on my team</strong> about a spot on the map—standard on PC and fully supported here.
+  </p>
+
+  <p class="text-lg leading-relaxed mb-4"><strong>Controller</strong></p>
+
+  <ul class="list-disc list-inside mb-6 ml-4 space-y-2 text-lg leading-relaxed">
+    <li><strong>Hold right bumper (RB)</strong> for the radial.</li>
+    <li><strong>D-pad up</strong> (in the demo) issues a flare where I am looking.</li>
+  </ul>
+
+  <p class="text-lg leading-relaxed mb-6">
+    Unlike <strong>Age of Empires IV</strong>, AoE2 <strong>does not throttle</strong> flare spam with a timeout—so I can overdo it if I want, though I try to keep pings <strong>meaningful</strong> so teammates actually look.
+  </p>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 id="minimap-navigation" class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Minimap navigation</h2>
+
+  <p class="text-lg leading-relaxed mb-6">
+    Panning the cursor from my base to a distant fight can feel slow on pad. Two techniques I use:
+  </p>
+
+  <ol class="list-decimal list-inside mb-6 ml-4 space-y-2 text-lg leading-relaxed">
+    <li><strong>Hold RB</strong> to <strong>expand the minimap</strong>.</li>
+    <li>Move the <strong>left stick</strong> to position the minimap cursor.</li>
+    <li><strong>Tap Y</strong> to <strong>jump the main camera</strong> to that location.</li>
+  </ol>
+
+  <p class="text-lg leading-relaxed mb-6">
+    For rapid hopping, I <strong>hold RB + hold Y</strong> while steering with the <strong>left stick</strong>—the camera <strong>slides very quickly</strong> across the map. Anytime I just want more situational awareness, <strong>holding RB</strong> alone enlarges the minimap without committing to a jump.
+  </p>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 id="closing-thoughts" class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Closing thoughts</h2>
+
+  <p class="text-lg leading-relaxed mb-6">
+    I play AoE2 on both <strong>keyboard/mouse</strong> and <strong>controller</strong>. KBM is still king for raw RTS speed, but I think <strong>Definitive Edition’s pad implementation</strong> is strong—especially <strong>queued villager work</strong>, <strong>presets</strong>, <strong>groups</strong>, and <strong>minimap camera moves</strong>. These tools add up to less time fighting the UI and more time playing the game.
+  </p>
+
+  <p class="text-lg leading-relaxed mb-6">
+    If you are working through the series, my <strong>basic movement</strong> video is the natural first step; this one assumes you are ready to layer <strong>efficiency and map awareness</strong> on top of those fundamentals.
   </p>
 </BlogPostLayout>
-

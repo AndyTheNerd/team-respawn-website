@@ -3,16 +3,170 @@ import BlogPostLayout from '../../../layouts/BlogPostLayout.astro';
 ---
 <BlogPostLayout
   title="Noob to Pro in 15 Minutes - Age of Empires II"
-  description="A guide for new players to Age of Empires II."
+  description="Beginner-facing explainer for Age of Empires II: economy, aging up, villagers, military timing, building placement, counters, and trading — from a conversation with Jimbo and Gus."
   category="Guides"
   publishedDate="Published on January 31, 2026"
   dateIso="2026-01-31"
+  dateModifiedIso="2026-05-08"
   ogImage="/img/AOE2-Guides/Noob To Pro.jpg"
   youtubeId="fGxWr8s8qjo"
   tags={['Age of Empires II']}
 >
+  <h2 id="intro" class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Intro</h2>
+
   <p class="text-lg leading-relaxed mb-6">
-    A guide for new players to Age of Empires II.
+    I sat down with Jimbo (who has put a ton of time into <em>Age of Empires II</em>) and Gus (who knows <em>Age IV</em> and RTS broadly) to record a beginner-facing explainer for people who have never touched the series. The goal was to translate “what do I even do when I load in?” into a clear loop: grow villagers, age, add military at the right tempo, and understand how the map and buildings change your options. Jimbo carries most of the mechanical specifics; Gus and I add comparisons to other RTS habits and quality-of-life advice. The Definitive Edition is the version you want on PC or console if you are buying today; older SKUs still exist and are easy to confuse.
+  </p>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 id="what-age-of-empires-2-is" class="text-2xl font-bold mb-4 text-cyan-300 mt-8">What Age of Empires 2 is</h2>
+
+  <p class="text-lg leading-relaxed mb-6">
+    Jimbo describes it as a top-down strategy game: you run an economy (villagers, later traders), build military production, and use armies to eliminate the opponent. The pitch that stuck with me is “easy to learn, hard to master.” Gus frames it as straightforward for the genre: every RTS has its own wrinkles, but the macro loop is build up, make an army, fight.
+  </p>
+
+  <p class="text-lg leading-relaxed mb-4">Two broad unit families matter from minute one:</p>
+
+  <ul class="list-disc list-inside mb-6 ml-4 space-y-2 text-lg leading-relaxed">
+    <li><strong>Economic units</strong> — villagers (and later traders).</li>
+    <li><strong>Military units</strong> — everything that fights.</li>
+  </ul>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 id="economy-villagers-and-the-town-center" class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Economy: villagers and the town center</h2>
+
+  <p class="text-lg leading-relaxed mb-6">
+    Early game — Dark Age into early Feudal — Jimbo’s rule is blunt: <strong>keep making villagers.</strong> You want the economy to carry you through the ages. Military ramps harder in Castle (knights, crossbows, monks, siege) and peaks in Imperial with trebuchets and unique units.
+  </p>
+
+  <p class="text-lg leading-relaxed mb-4">When you spawn, you have a <strong>town center (TC)</strong> and a few villagers. Practical first steps:</p>
+
+  <ul class="list-disc list-inside mb-6 ml-4 space-y-2 text-lg leading-relaxed">
+    <li>Send villagers to <strong>food</strong> first; there is usually <strong>sheep</strong> near the TC.</li>
+    <li>Queue <strong>more villagers from the TC</strong>; Jimbo stresses that consistent villager production is the spine of the whole game.</li>
+    <li>You can add more town centers later for parallel production and map control.</li>
+  </ul>
+
+  <p class="text-lg leading-relaxed mb-6">The “Age” in the title is literal: advancing ages unlocks buildings, units, and upgrades.</p>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 id="how-aging-up-works" class="text-2xl font-bold mb-4 text-cyan-300 mt-8">How aging up works</h2>
+
+  <p class="text-lg leading-relaxed mb-6">
+    Compared to <em>Age of Empires IV</em> (where you build landmarks), in <em>Age II</em> you age <strong>through the town center</strong> (with resource costs shown on the UI).
+  </p>
+
+  <p class="text-lg leading-relaxed mb-4">Jimbo’s default rule for prerequisites:</p>
+
+  <ul class="list-disc list-inside mb-6 ml-4 space-y-2 text-lg leading-relaxed">
+    <li>You usually need <strong>two constructed buildings</strong> (prereqs scale with the age) before the TC will let you click <strong>Advance</strong>; the flow is handled from the <strong>town center</strong> UI with costs listed there.</li>
+    <li>When you are <strong>Castle Age and pushing toward Imperial</strong>, you <strong>need a Castle</strong> — Jimbo called that out as the special case instead of “just two generic buildings” in the same breath as the two-building rule.</li>
+    <li><strong>Some civilizations</strong> bend or skip parts of this with bonuses (cheaper ages, fewer buildings, etc.). Treat those as civ-specific once you pick a main.</li>
+  </ul>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 id="what-villagers-actually-do" class="text-2xl font-bold mb-4 text-cyan-300 mt-8">What villagers actually do</h2>
+
+  <p class="text-lg leading-relaxed mb-4">Gus calls the villager a <strong>Swiss army knife</strong>, and I agree after seeing how much is on one unit:</p>
+
+  <ul class="list-disc list-inside mb-6 ml-4 space-y-2 text-lg leading-relaxed">
+    <li>Gather <strong>food, wood, gold, stone</strong>.</li>
+    <li><strong>Build</strong> everything from military production to defenses.</li>
+    <li><strong>Repair</strong> buildings.</li>
+    <li><strong>Wall</strong> and fortify — palisades, stone walls, towers, castles, etc.</li>
+  </ul>
+
+  <p class="text-lg leading-relaxed mb-6">Different units and buildings pull different resource mixes, so your gather assignments shift as the match evolves.</p>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 id="when-to-start-military" class="text-2xl font-bold mb-4 text-cyan-300 mt-8">When to start military</h2>
+
+  <p class="text-lg leading-relaxed mb-4">There is no single clock; <strong>rushes</strong> exist at many timings:</p>
+
+  <ul class="list-disc list-inside mb-6 ml-4 space-y-2 text-lg leading-relaxed">
+    <li><strong>Dark Age</strong> — militia-style pressure exists (Jimbo compared it to English MAA pressure in <em>Age IV</em>).</li>
+    <li><strong>Early Feudal</strong> — archers or <strong>scout</strong> openings if you want to commit early.</li>
+    <li><strong>Castle Age</strong> — common power spike: mass <strong>knights</strong> from multiple stables, or <strong>castle drop</strong> (see below).</li>
+  </ul>
+
+  <p class="text-lg leading-relaxed mb-6">Jimbo’s “default mental model” for many plans still lands on Castle for the first serious army spike unless you are executing a dedicated rush build.</p>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 id="where-you-build-matters" class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Where you build matters</h2>
+
+  <p class="text-lg leading-relaxed mb-6">
+    Coming from games like <em>Halo Wars</em> or <em>Command &amp; Conquer</em>, I called out that many RTS titles <strong>restrict where bases and production can go</strong>. <em>Age of Empires</em> generally does <strong>not</strong>: if the terrain is open, you can place buildings there. Two ideas that come straight from that freedom:
+  </p>
+
+  <ul class="list-disc list-inside mb-6 ml-4 space-y-2 text-lg leading-relaxed">
+    <li><strong>Proxy</strong> — military buildings <strong>forward</strong>, away from your core, so reinforcements arrive faster.</li>
+    <li><strong>Castle drop</strong> — bank <strong>stone</strong>, then place a <strong>Castle aggressively on or near the opponent</strong> to apply pressure (classic <em>Age II</em> play).</li>
+  </ul>
+
+  <p class="text-lg leading-relaxed mb-6">
+    Gus adds a wrinkle I think every beginner should hear early: <strong>buildings block pathing</strong> much more than in <em>Age IV</em>. You can line buildings up like a <strong>wall</strong>. That is powerful defensively, but it cuts both ways: <strong>do not trap your own production</strong> — if you ring stables or ranges tightly with no gap, you can <strong>strand units</strong> that cannot exit cleanly. The Definitive Edition is a remaster of an older design, and these pathing habits are part of that legacy feel.
+  </p>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 id="rough-unit-counters" class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Rough unit counters</h2>
+
+  <p class="text-lg leading-relaxed mb-4">Jimbo gives a <strong>starter triangle</strong> before the endless exceptions:</p>
+
+  <ul class="list-disc list-inside mb-6 ml-4 space-y-2 text-lg leading-relaxed">
+    <li><strong>Infantry</strong> tends to answer <strong>cavalry</strong> (spear-line thinking).</li>
+    <li><strong>Cavalry</strong> chases down <strong>archers</strong>.</li>
+    <li><strong>Archers</strong> punish <strong>infantry</strong> (especially slow melee).</li>
+  </ul>
+
+  <p class="text-lg leading-relaxed mb-6">
+    He immediately caveats that <strong>matchups splinter</strong> with upgrades, civ bonuses, mixed compositions, and unique units (for example <strong>cavalry archers</strong> blur the simple picture). For a first-pass mental model, think <strong>rock–paper–scissors</strong>, similar to <em>Halo Wars 2</em> or <em>StarCraft</em> in spirit — then expect the real game to add layers.
+  </p>
+
+  <p class="text-lg leading-relaxed mb-4">Add-ons at a high level:</p>
+
+  <ul class="list-disc list-inside mb-6 ml-4 space-y-2 text-lg leading-relaxed">
+    <li><strong>Siege</strong> blows up <strong>infantry and archer blobs</strong> if unchecked.</li>
+    <li><strong>Monks</strong> (religious units) are the classic answer to <strong>heavy cavalry</strong> when you can protect the monks.</li>
+  </ul>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 id="trading" class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Trading</h2>
+
+  <p class="text-lg leading-relaxed mb-4">Jimbo separates two ideas:</p>
+
+  <ol class="list-decimal list-inside mb-6 ml-4 space-y-2 text-lg leading-relaxed">
+    <li><strong>Team resource sends</strong> — trade wood or gold to an ally through the <strong>Market</strong> when someone is short (there is a <strong>tax</strong>, with upgrades that can reduce it toward <strong>0%</strong> in team games depending on setup).</li>
+    <li><strong>Trade carts</strong> — units that run between <strong>Markets</strong> (ally markets or neutral distance lines, depending on map/rules) to generate <strong>gold</strong> after map mines deplete.</li>
+  </ol>
+
+  <p class="text-lg leading-relaxed mb-6">
+    Jimbo’s timing advice: <strong>trade carts are slow</strong>; lean on <strong>map gold</strong> first, then pivot to trade in <strong>late game</strong> when mines are gone or contested. Gus and I joked that we once leaned on trade too early in <em>Age IV</em> and got almost nothing for minutes of effort — the lesson I took is <strong>do not expect trade to carry you mid-game</strong> unless the situation calls for it.
+  </p>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 id="closing-tips" class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Closing tips</h2>
+
+  <p class="text-lg leading-relaxed mb-4"><strong>Gus’s two pillars for new players:</strong></p>
+
+  <ol class="list-decimal list-inside mb-6 ml-4 space-y-2 text-lg leading-relaxed">
+    <li><strong>Never stop making villagers</strong> until you are near a full economy population — he ballparks aiming for <strong>roughly half economy, half military</strong> at the high end (around <strong>~100 villagers</strong> as a ceiling he mentioned for “as many as humanly possible” before the split steadies).</li>
+    <li><strong>Hotkeys and control groups</strong> — bind the <strong>TC</strong> and key production so you can <strong>snap the camera</strong>, queue units, and macro without babysitting one screen. That matters on <strong>controller or mouse/keyboard</strong>.</li>
+  </ol>
+
+  <p class="text-lg leading-relaxed mb-6">
+    <strong>My take as Andy:</strong> the series is overwhelming at first — resources, counters, building roles, and civ count (<em>Age II</em> has a huge roster). Use the <strong>in-game tutorials</strong> for structure, play <strong>versus AI</strong> to rehearse builds, then try ladder. <em>Age II</em> uses an <strong>ELO-style</strong> matchmaker: after a few games you tend to land near people with similar results, so losses are information, not a verdict. Repetition is what makes the UI and timings feel automatic; frustration is normal, but the curve is fair once the basics click.
+  </p>
+
+  <p class="text-lg leading-relaxed mb-6">
+    Jimbo closes with something I agree with: the game has <strong>stayed relevant for decades</strong> for a reason — once fundamentals land, you are already most of the way to “okay online” territory.
   </p>
 </BlogPostLayout>
-
