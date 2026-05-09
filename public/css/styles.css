@@ -824,8 +824,10 @@ textarea {
     box-shadow: inset 4px 0 8px rgba(168, 85, 247, 0.2);
 }
 
+/* Active row already uses border-left + border-image; hide ::before so we don't get two stacked gradient bars */
 .side-panel-tab-active::before {
-    height: 80%;
+    content: none;
+    display: none;
 }
 
 .side-panel-tab-inactive {

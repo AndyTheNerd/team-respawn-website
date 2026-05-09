@@ -98,19 +98,33 @@ const showHaloWars2HeaderDropdown = false;
 
       <!-- Center Section: Main Navigation (hidden on mobile) -->
       <nav class="hidden lg:flex items-center gap-1 flex-1 min-w-0 justify-center" role="tablist" aria-label="Main navigation">
-        <button
-          id="home-tab"
-          data-tab-link="/"
-          role="tab"
-          aria-selected={isHome ? "true" : "false"}
-          aria-controls="home-content"
-          aria-label="View home"
-          class={`nav-link ${isHome ? 'nav-link-active' : ''}`}
-          type="button"
-          tabindex={isHome ? "0" : "-1"}
-        >
-          Home
-        </button>
+        {isHome ? (
+          <button
+            id="home-tab"
+            data-tab-link="/"
+            role="tab"
+            aria-selected="true"
+            aria-controls="home-content"
+            aria-label="View home"
+            class="nav-link nav-link-active"
+            type="button"
+            tabindex="0"
+          >
+            Home
+          </button>
+        ) : (
+          <a
+            href="/"
+            id="home-tab"
+            role="tab"
+            aria-selected="false"
+            aria-label="View home"
+            class="nav-link"
+            tabindex="0"
+          >
+            Home
+          </a>
+        )}
         {headerPrimaryLinksWithActive.map((link) => (
           <a
             href={link.href}
