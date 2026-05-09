@@ -261,6 +261,10 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
             <i class="fas fa-arrow-down-wide-short" aria-hidden="true"></i>
             {getSortStatusLabel(clampedState.sort)}
           </span>
+          <p class="vdb-blog-legend" role="note">
+            <span class="vdb-blog-legend-sample vdb-card-tag is-blog">Blog Post</span>
+            <span class="vdb-blog-legend-text">Green tag or border = blog post</span>
+          </p>
         </div>
       </div>
 
@@ -320,7 +324,7 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
       <div id="video-results-grid" class="vdb-results-grid" role="list" aria-live="polite" aria-busy="false">
         {pagination.items.length > 0 ? (
           pagination.items.map((video) => (
-            <article class="vdb-card" role="listitem">
+            <article class:list={['vdb-card', { 'has-blog': !!video.blogHref }]} role="listitem">
               <a
                 href={video.youtubeUrl}
                 target="_blank"
@@ -349,7 +353,7 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      Blog
+                      Blog Post
                     </a>
                   )}
                 </div>
@@ -616,6 +620,14 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
     margin: 0 0 0.45rem;
   }
 
+  .vdb-results-status {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.55rem;
+    max-width: min(22rem, 100%);
+  }
+
   .vdb-results-badge {
     display: inline-flex;
     align-items: center;
@@ -630,6 +642,33 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
 
   .vdb-results-badge i {
     color: var(--vdb-cool);
+  }
+
+  .vdb-blog-legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.45rem 0.55rem;
+    margin: 0;
+    font-size: 0.78rem;
+    line-height: 1.35;
+    color: var(--vdb-text-dim);
+    text-align: right;
+  }
+
+  .vdb-blog-legend-sample.vdb-card-tag.is-blog {
+    flex-shrink: 0;
+    min-height: 1.5rem;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.65rem;
+    cursor: default;
+    pointer-events: none;
+  }
+
+  .vdb-blog-legend-text {
+    flex: 1 1 12rem;
+    min-width: min(100%, 11rem);
   }
 
   .vdb-toolbar,
@@ -1314,6 +1353,17 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
     border: 1px solid rgba(255, 255, 255, 0.08);
     background: rgba(5, 10, 20, 0.88);
     min-height: 100%;
+    transition: border-color 0.2s ease;
+  }
+
+  /** Matches `.vdb-card-tag.is-blog` mint accent when a write-up exists */
+  .vdb-card.has-blog {
+    border-width: 3px;
+    border-color: rgba(130, 220, 170, 0.72);
+  }
+
+  .vdb-card.has-blog:hover {
+    border-color: rgba(160, 240, 200, 0.88);
   }
 
   .vdb-card-thumb {
@@ -1683,8 +1733,23 @@ const paginationWindow = getPaginationWindow(pagination.totalPages, pagination.p
       width: 100%;
     }
 
+    .vdb-results-status {
+      align-items: center;
+      max-width: none;
+    }
+
     .vdb-results-badge {
       justify-content: center;
+    }
+
+    .vdb-blog-legend {
+      justify-content: center;
+      text-align: center;
+    }
+
+    .vdb-blog-legend-text {
+      flex: none;
+      min-width: 0;
     }
 
     .vdb-format-card,
