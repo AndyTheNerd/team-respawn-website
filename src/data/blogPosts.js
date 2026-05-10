@@ -964,7 +964,7 @@
     category: 'Guides',
     tags: ['Age of Mythology'],
     excerpt:
-      'A guide for the Egyptian civilization in Age of Mythology.',
+      'This is a beginner-oriented walkthrough of the Egyptians in Age of Mythology: Retold: how their economy differs from other civs, how pharaoh and priest work, how favor from monuments shapes their game, and how their military scales from the barracks into stronghold cavalry and siege.',
     href: '/blog/posts/egyptians-guide-age-of-mythology',
     img: {
       src: '/img/AOM-Guides/Egypt Guide.jpg',
