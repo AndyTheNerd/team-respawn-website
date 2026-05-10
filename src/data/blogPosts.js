@@ -1,8 +1,25 @@
 ﻿const blogPosts = [
   {
+    title: 'What Happened to Medal of Honor?',
+    dateIso: '2026-05-10',
+    category: 'Retro',
+    tags: ['Medal of Honor'],
+    readingTimeMinutes: 5,
+    excerpt:
+      'From DreamWorks and Spielberg through EA LA and Danger Close, why Warfighter shelved the series, what VR’s Above and Beyond signals, and where the back catalogue is playable today.',
+    href: '/blog/posts/what-happened-to-medal-of-honor',
+    img: {
+      src: 'https://img.youtube.com/vi/D39Ku5pqie8/maxresdefault.jpg',
+      alt: 'What Happened to Medal of Honor?',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
     title: 'What happened to Crackdown?',
     dateIso: '2026-05-08',
-    category: 'Spotlight',
+    category: 'Retro',
     tags: ['Crackdown'],
     readingTimeMinutes: 5,
     excerpt:
@@ -958,16 +975,16 @@
     }
   },
   {
-    title: 'Greeks Guide - Age of Mythology',
+    title: 'Greeks Guide - Age of Mythology (Xbox)',
     dateIso: '2026-01-31',
     category: 'Guides',
     tags: ['Age of Mythology'],
     excerpt:
-      'A guide for the Greek civilization in Age of Mythology.',
+      'Beginner walkthrough for Greeks in Age of Mythology Retold on Xbox/controller: economy, temple and aging, defense, myth units, trade, and Titans—controller shortcuts where they matter.',
     href: '/blog/posts/greeks-guide-age-of-mythology',
     img: {
       src: '/img/AOM-Guides/How to Play as Greeks.jpg',
-      alt: 'Greeks Guide - Age of Mythology',
+      alt: 'Greeks Guide - Age of Mythology (Xbox)',
       width: 400,
       height: 225,
       lazy: true
@@ -1032,7 +1049,7 @@
       'New to Age of Mythology on PS5? Learn the basics of using the controller and the fundamentals of the game.',
     href: '/blog/posts/top-tips-for-beginners-on-ps5-age-of-mythology',
     img: {
-      src: '/img/AOM-Guides/Defense v2.jpg',
+      src: 'https://img.youtube.com/vi/iqhLNODKNyY/maxresdefault.jpg',
       alt: 'Top Tips for Beginners on PS5 - Age of Mythology',
       width: 400,
       height: 225,
