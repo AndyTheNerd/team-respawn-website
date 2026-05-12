@@ -7,12 +7,97 @@ import BlogPostLayout from '../../../layouts/BlogPostLayout.astro';
   category="Guides"
   publishedDate="Published on January 31, 2026"
   dateIso="2026-01-31"
+  dateModifiedIso="2026-05-12"
   ogImage="/img/AOE2-Guides/Advanced Guide.jpg"
   youtubeId="WLFOhTXAgb4"
   tags={['Age of Empires II']}
 >
+  <h2 id="intro" class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Intro</h2>
+
   <p class="text-lg leading-relaxed mb-6">
-    Learn how to get maximum villager efficiency in Age of Empires II.
+    This is my Age of Empires II walkthrough-style tutorial on <strong>getting more out of your villagers</strong>—travel time, farms, and how that idea extends to military and fish. I aimed it at <strong>new players on Xbox</strong> who are new to the series, not at the hardcore ladder meta. I make no claim to perfect optimization; the point is the <strong>overall habits</strong> (short walks, sensible drop-offs, parallel production) so you feel less lost in your first games.
+  </p>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 id="drop-off-points-and-wood" class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Drop-off points and wood</h2>
+
+  <ul class="list-disc list-inside mb-6 ml-4 space-y-2 text-lg leading-relaxed">
+    <li><strong>Dedicated buildings beat walking to the town center</strong> for raw resources. Lumber camps, mining camps, and mills exist so villagers are not burning time on the walk back to the TC. Even though a lumber camp costs wood, I am usually better off paying that cost than having lumberjacks march across the map every trip.</li>
+    <li><strong>The real loss is round-trip travel</strong>: chop → walk → drop → walk back. Anything that shortens that loop raises throughput.</li>
+    <li><strong>Rebuild or add camps as forests shrink.</strong> As I chew through a woodline, one camp’s “efficient” patch gets farther away. I try to notice when I am halfway (or otherwise “too far”) and <strong>drop a second lumber camp</strong> so trees near the new edge stay close to a drop-off.</li>
+    <li><strong>Watch where the game sends villagers.</strong> Pathing can send a villager to the wrong side of a forest relative to the camp. If I have the attention for it, I <strong>redirect</strong> them to trees on the side closer to the camp so they are not taking scenic routes.</li>
+  </ul>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 id="farms-and-mills" class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Farms and mills</h2>
+
+  <ul class="list-disc list-inside mb-6 ml-4 space-y-2 text-lg leading-relaxed">
+    <li><strong>Farms occupy a fixed footprint</strong> (nine small tiles each in this game), so I rarely get a “perfect” ring of farms around a TC or mill—gaps and odd shapes are normal.</li>
+    <li><strong>Rule of thumb:</strong> I do not want farmers walking much more than <strong>about one to two farm tiles</strong> past the edge of their cluster to reach a mill or TC. If I keep extending farms in one direction, I <strong>add another mill</strong> in the middle of the new row so those outer farms have a nearby drop-off again.</li>
+    <li><strong>Civilization caveat:</strong> I mention one civ where <strong>farms do not need a separate drop-off</strong> in the usual way (in the video I slip the name—think of bonuses like <strong>Khmer</strong> in Age II, where farm food does not require walking to a mill). For almost everyone else, <strong>proximity to a mill or TC still matters</strong>.</li>
+    <li><strong>Farm depletion and replant:</strong> Selecting a farm shows <strong>how much food is left</strong>. When it runs out, the villager spends <strong>60 wood</strong> (not the Age IV number I sometimes mix up) to replant and keep the tile working.</li>
+    <li><strong>Mill upgrades (e.g. Horse Collar)</strong> cost food and wood up front but stretch how much food I get per replant. I treat that as paying for <strong>less wood sunk into replants over time</strong>, which stacks up.</li>
+  </ul>
+
+  <p class="text-lg leading-relaxed mb-6">
+    I also keep <strong>wood and food income in my head</strong> at the same time: I need wood for replants and farms while food feeds villagers and military—running one dry quietly wrecks the other.
+  </p>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 id="military-production-and-proxies" class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Military production and proxies</h2>
+
+  <ul class="list-disc list-inside mb-6 ml-4 space-y-2 text-lg leading-relaxed">
+    <li><strong>Construction:</strong> More villagers on one foundation <strong>finish it faster</strong> when I need a building up now.</li>
+    <li><strong>Training:</strong> One barracks pumps one queue. If I can afford the wood, <strong>several production buildings of the same type</strong> mean I refill the army or replace losses much faster than a single building ever could.</li>
+    <li><strong>Proxies:</strong> If I know a big fight is far from home, I sometimes <strong>build military buildings closer to the front</strong> so new units join the fight with less march time. Same efficiency idea as lumber camps—<strong>distance is downtime</strong>.</li>
+  </ul>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 id="fishing-ships" class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Fishing ships</h2>
+
+  <ul class="list-disc list-inside mb-6 ml-4 space-y-2 text-lg leading-relaxed">
+    <li>I use <strong>multiple fishing ships</strong> when the economy allows.</li>
+    <li>I try to work <strong>the nearest fish patches first</strong>; long sails to distant shoals are just dead time. Manual steering helps if the default job picks a silly route.</li>
+  </ul>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 id="villager-presets-on-console" class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Villager presets on console</h2>
+
+  <ul class="list-disc list-inside mb-6 ml-4 space-y-2 text-lg leading-relaxed">
+    <li>On Xbox I can use <strong>villager presets</strong> (e.g. <strong>right stick</strong> toward food/wood categories) so <strong>newly created villagers auto-route</strong> to that economic bucket. That frees me to look elsewhere for a moment.</li>
+    <li><strong>Trade-off:</strong> Presets can <strong>yank villagers off jobs I already assigned</strong>—farms go idle, or a builder <strong>abandons a half-built barracks</strong> because the preset retargeted them. I treat presets as “convenient but not free”: I either babysit after a big queue of new vills or I accept some messy re-pathing.</li>
+    <li>Personally I am not in love with presets, but they exist and it helps to know <strong>why</strong> my builder suddenly ran away mid-construction.</li>
+  </ul>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 id="wheelbarrow-and-extra-town-centers" class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Wheelbarrow and extra town centers</h2>
+
+  <ul class="list-disc list-inside mb-6 ml-4 space-y-2 text-lg leading-relaxed">
+    <li><strong>Wheelbarrow</strong> (from the town center line as I age up) improves <strong>walk speed and carry capacity</strong> for villagers—another direct buff to the drop-off loop.</li>
+    <li>In <strong>Castle Age</strong> I can add <strong>extra town centers</strong>. I like placing them where <strong>more than one resource type</strong> is in easy range—wood plus stone, or gold plus wood, that kind of hub—so one TC acts as a strong <strong>multi-purpose drop-off</strong> and later supports <strong>farms tucked around it</strong>.</li>
+  </ul>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 id="selecting-multiple-town-centers" class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Selecting multiple town centers</h2>
+
+  <ul class="list-disc list-inside mb-6 ml-4 space-y-2 text-lg leading-relaxed">
+    <li>I was on the <strong>basic interface</strong> in the recording, so I could not lean on the same control-group workflow as on advanced—but I can still <strong>select all town centers</strong> from the <strong>Find</strong> menu (<strong>all town centers</strong>, hold <strong>A</strong>) to issue shared production.</li>
+    <li>With <strong>more than one TC selected</strong>, queuing villagers in <strong>multiples of two</strong> (or any count with more than one TC in the selection) effectively <strong>parallel-trains</strong> from both buildings.</li>
+    <li>I come from a lot of <strong>Age of Empires IV</strong> where I aim for roughly <strong>~100 villagers</strong> as a comfort number; in Age II the “correct” count for ranked play may differ, but the habit I stand by is <strong>keep making villagers for a long time</strong> and only really stop when my plan calls for it.</li>
+  </ul>
+
+  <hr class="my-8 border-gray-700" />
+
+  <h2 id="closing-thoughts" class="text-2xl font-bold mb-4 text-cyan-300 mt-8">Closing thoughts</h2>
+
+  <p class="text-lg leading-relaxed mb-6">
+    Efficiency here is mostly <strong>geometry and queues</strong>: <strong>short walks</strong> to the right building, <strong>extra mills and camps</strong> before travel explodes, <strong>upgrades</strong> that stretch farms and villager carries, <strong>more production and forward buildings</strong> for armies, <strong>close fish</strong>, and <strong>care with presets</strong> so I do not sabotage my own builders. None of this replaces studying build orders or civ-specific meta, but for someone picking up Age II on console for the first time, I hope it makes the economy feel less opaque and a little more intentional.
   </p>
 </BlogPostLayout>
-

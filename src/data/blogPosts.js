@@ -1,5 +1,39 @@
 ﻿const blogPosts = [
   {
+    title: 'What Happened to Medal of Honor?',
+    dateIso: '2026-05-10',
+    category: 'Retro',
+    tags: ['Medal of Honor'],
+    readingTimeMinutes: 5,
+    excerpt:
+      'From DreamWorks and Spielberg through EA LA and Danger Close, why Warfighter shelved the series, what VR’s Above and Beyond signals, and where the back catalogue is playable today.',
+    href: '/blog/posts/what-happened-to-medal-of-honor',
+    img: {
+      src: 'https://img.youtube.com/vi/D39Ku5pqie8/maxresdefault.jpg',
+      alt: 'What Happened to Medal of Honor?',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
+    title: 'What happened to Crackdown?',
+    dateIso: '2026-05-08',
+    category: 'Retro',
+    tags: ['Crackdown'],
+    readingTimeMinutes: 5,
+    excerpt:
+      'From Crackdown 1’s Halo 3 beta tailwind and co-op sandbox to Crackdown 2’s freak outbreak, Crackdown 3’s cloud-destruction pivot—and whether Microsoft might revisit the series.',
+    href: '/blog/posts/what-happened-to-crackdown',
+    img: {
+      src: 'https://img.youtube.com/vi/ZY3XDpg9Q3c/maxresdefault.jpg',
+      alt: 'What happened to Crackdown?',
+      width: 400,
+      height: 225,
+      lazy: true
+    }
+  },
+  {
     title: 'The Heroes of Halo Wars',
     dateIso: '2026-05-08',
     category: 'Spotlight',
@@ -797,16 +831,16 @@
     }
   },
   {
-    title: 'Xbox Beginners Guide - Age of Empires II',
+    title: 'Age of Empires 2 Definitive Edition on Xbox — Getting Started',
     dateIso: '2026-01-31',
     category: 'Guides',
     tags: ['Age of Empires II'],
     excerpt:
-      'A comprehensive guide for new players to the world of Age of Empires II, covering civilizations, resources, and combat. This guide is for the Xbox version of the game.',
+      'Walkthrough-style breakdown of getting moving in Age of Empires II: DE on Xbox: villagers, priority presets, early resources, aging up, and controller basics (radial menus, attack move, rally points).',
     href: '/blog/posts/xbox-beginners-guide-age-of-empires-ii',
     img: {
       src: '/img/AOE2-Guides/Guide for New players.jpg',
-      alt: 'Xbox Beginners Guide - Age of Empires II',
+      alt: 'Age of Empires 2 Definitive Edition on Xbox — Getting Started',
       width: 400,
       height: 225,
       lazy: true
@@ -831,6 +865,7 @@
   {
     title: 'How to get Maximum Villager Efficiency - Age of Empires II',
     dateIso: '2026-01-31',
+    readingTimeMinutes: 5,
     category: 'Guides',
     tags: ['Age of Empires II'],
     excerpt:
@@ -930,7 +965,7 @@
     category: 'Guides',
     tags: ['Age of Mythology'],
     excerpt:
-      'A guide for the Egyptian civilization in Age of Mythology.',
+      'This is a beginner-oriented walkthrough of the Egyptians in Age of Mythology: Retold: how their economy differs from other civs, how pharaoh and priest work, how favor from monuments shapes their game, and how their military scales from the barracks into stronghold cavalry and siege.',
     href: '/blog/posts/egyptians-guide-age-of-mythology',
     img: {
       src: '/img/AOM-Guides/Egypt Guide.jpg',
@@ -941,16 +976,16 @@
     }
   },
   {
-    title: 'Greeks Guide - Age of Mythology',
+    title: 'Greeks Guide - Age of Mythology (Xbox)',
     dateIso: '2026-01-31',
     category: 'Guides',
     tags: ['Age of Mythology'],
     excerpt:
-      'A guide for the Greek civilization in Age of Mythology.',
+      'Beginner walkthrough for Greeks in Age of Mythology Retold on Xbox/controller: economy, temple and aging, defense, myth units, trade, and Titans—controller shortcuts where they matter.',
     href: '/blog/posts/greeks-guide-age-of-mythology',
     img: {
       src: '/img/AOM-Guides/How to Play as Greeks.jpg',
-      alt: 'Greeks Guide - Age of Mythology',
+      alt: 'Greeks Guide - Age of Mythology (Xbox)',
       width: 400,
       height: 225,
       lazy: true
@@ -1015,7 +1050,7 @@
       'New to Age of Mythology on PS5? Learn the basics of using the controller and the fundamentals of the game.',
     href: '/blog/posts/top-tips-for-beginners-on-ps5-age-of-mythology',
     img: {
-      src: '/img/AOM-Guides/Defense v2.jpg',
+      src: 'https://img.youtube.com/vi/iqhLNODKNyY/maxresdefault.jpg',
       alt: 'Top Tips for Beginners on PS5 - Age of Mythology',
       width: 400,
       height: 225,
