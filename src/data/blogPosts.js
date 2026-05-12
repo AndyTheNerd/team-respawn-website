@@ -865,6 +865,7 @@
   {
     title: 'How to get Maximum Villager Efficiency - Age of Empires II',
     dateIso: '2026-01-31',
+    readingTimeMinutes: 5,
     category: 'Guides',
     tags: ['Age of Empires II'],
     excerpt:
