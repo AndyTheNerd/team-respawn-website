@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@astrojs/check": "^0.9.8",
-    "astro": "^6.1.6",
+    "astro": "^6.1.10",
     "brackets-manager": "^1.9.1",
     "brackets-viewer": "^1.9.0",
     "cloudinary": "^2.9.0",
