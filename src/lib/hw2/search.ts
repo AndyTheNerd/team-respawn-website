@@ -1,9 +1,9 @@
 import { MATCH_FETCH_COUNT, CURRENT_SEASON, state } from './state';
-import { globalError, resultsContainer, playerGamertagEl, playerContentCreatorIndicatorEl, playerCheaterIndicatorEl, playerSmurfIndicatorEl, playerLastSeenEl, profileShareBtn, recentHw2SearchesSectionEl, videoCtaEl } from './dom';
+import { globalError, resultsContainer, playerGamertagEl, playerContentCreatorIndicatorEl, playerCheaterIndicatorEl, playerSmurfIndicatorEl, playerLastSeenEl, profileShareBtn, recentHw2SearchesSectionEl, videoCtaEl, hw2CsrRankGuideEl, hw2ReturnToSearchWrapEl } from './dom';
 import { showSkeleton, hideSkeleton, showError, showStaleBanner, hideStaleBanner } from './uiState';
 import { destroyAllCharts } from './chartManager';
 import { updateLastSeen, isContentCreatorGamertag, isConfirmedCheaterGamertag, isSuspectedSmurfGamertag } from './dataProcessing';
-import { syncProfileUrl } from './urlProfile';
+import { syncProfileUrl, syncHw2CsrRankGuideVisibility, syncHw2ReturnToSearchVisibility } from './urlProfile';
 import { addRecentSearch } from './localStorage';
 import { renderOverview } from './renderOverview';
 import { renderRankedStats } from './renderRanked';
@@ -17,6 +17,8 @@ export async function performSearch(gamertag: string, options: { matchId?: strin
   const cleanGamertag = gamertag.trim();
   if (!cleanGamertag) return;
   syncProfileUrl(cleanGamertag, options.matchId ?? null);
+  syncHw2CsrRankGuideVisibility(hw2CsrRankGuideEl);
+  syncHw2ReturnToSearchVisibility(hw2ReturnToSearchWrapEl);
 
   globalError.classList.add('hidden');
   globalError.innerHTML = '';

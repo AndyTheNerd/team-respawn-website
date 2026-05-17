@@ -7,6 +7,7 @@ import StorehausPromo from '../../components/StorehausPromo.astro';
 import RecentHW2Searches from '../../components/RecentHW2Searches.astro';
 import HW2CommunityStats from '../../components/HW2CommunityStats.astro';
 import HW2EconomyCalculator from '../../components/HW2EconomyCalculator.astro';
+import HW2CsrRankGuide from '../../components/HW2CsrRankGuide.astro';
 import { videos } from '../../data/videos';
 import { videoQualifiesForHw2StatsCta } from '../../lib/videoUtils';
 import { hw2NameMappings } from '../../data/haloWars2/nameMappings';
@@ -459,12 +460,12 @@ const hw2SmurfGamertagsJson = JSON.stringify(suspectedSmurfGamertags).replace(/<
 
     <main id="main-content" aria-label="Halo Wars 2 Stats">
       <!-- Hero Banner -->
-      <section class="relative mb-8 rounded-xl overflow-hidden border border-cyan-500/20 scan-line" style="background: linear-gradient(135deg, #0a1628 0%, #0c2942 40%, #0a1628 100%);">
-        <div class="relative z-10 px-6 py-10 sm:py-14 text-center">
-          <h1 class="text-3xl sm:text-5xl font-bold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-cyan-400 to-teal-300">
+      <section class="relative mb-6 rounded-xl overflow-hidden border border-cyan-500/20 scan-line" style="background: linear-gradient(135deg, #0a1628 0%, #0c2942 40%, #0a1628 100%);">
+        <div class="relative z-10 px-5 py-5 text-center sm:px-6 sm:py-6">
+          <h1 class="mb-1.5 text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-cyan-400 to-teal-300 sm:mb-2 sm:text-4xl">
             Halo Wars 2 Stats
           </h1>
-          <p class="text-cyan-200/70 text-base sm:text-lg max-w-2xl mx-auto">
+          <p class="mx-auto max-w-2xl text-sm text-cyan-200/70 sm:text-base">
             Search for a gamertag to view player stats, ranked CSR, leader usage, and recent match history.
           </p>
         </div>
@@ -472,8 +473,8 @@ const hw2SmurfGamertagsJson = JSON.stringify(suspectedSmurfGamertags).replace(/<
 
       <!-- Search Bar -->
       <section class="mb-8">
-        <div class="flex flex-col sm:flex-row gap-3 max-w-2xl mx-auto">
-          <div class="relative flex-1">
+        <div class="mx-auto flex max-w-3xl flex-col gap-3 sm:flex-row sm:items-stretch">
+          <div class="relative min-w-0 flex-1">
             <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400/60" aria-hidden="true"></i>
             <input
               id="gamertag-input"
@@ -484,22 +485,33 @@ const hw2SmurfGamertagsJson = JSON.stringify(suspectedSmurfGamertags).replace(/<
               aria-label="Gamertag search"
             />
           </div>
-          <button
-            id="search-btn"
-            type="button"
-            class="px-6 py-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white font-semibold transition-colors duration-200 flex items-center justify-center gap-2 whitespace-nowrap"
-          >
-            <i class="fas fa-search" aria-hidden="true"></i>
-            Search
-          </button>
+          <div class="flex flex-shrink-0 flex-row flex-wrap items-stretch gap-2">
+            <button
+              id="search-btn"
+              type="button"
+              class="px-6 py-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white font-semibold transition-colors duration-200 flex items-center justify-center gap-2 whitespace-nowrap"
+            >
+              <i class="fas fa-search" aria-hidden="true"></i>
+              Search
+            </button>
+            <div id="hw2-return-to-search-wrap" class="hidden">
+              <a
+                href="/halo-wars-stats"
+                class="inline-flex items-center justify-center gap-2 rounded-lg border border-cyan-500/30 bg-slate-800/50 px-4 py-3 text-sm font-semibold text-cyan-200 transition-colors hover:border-cyan-400/50 hover:bg-slate-800/80 hover:text-cyan-100"
+              >
+                <i class="fas fa-arrow-left text-cyan-400/80" aria-hidden="true"></i>
+                Back to HW2 home
+              </a>
+            </div>
+          </div>
         </div>
         <!-- Recent Searches -->
-        <div id="recent-searches" class="max-w-2xl mx-auto mt-3 flex flex-wrap gap-2 hidden"></div>
+        <div id="recent-searches" class="mx-auto mt-3 flex max-w-3xl flex-wrap gap-2 hidden"></div>
       </section>
 
       <!-- Player Comparison -->
       <section id="compare-section" class="mb-8">
-        <div class="max-w-2xl mx-auto">
+        <div class="mx-auto max-w-3xl">
           <button
             id="compare-toggle"
             type="button"
@@ -551,6 +563,8 @@ const hw2SmurfGamertagsJson = JSON.stringify(suspectedSmurfGamertags).replace(/<
       </section>
 
       <HW2EconomyCalculator />
+
+      <HW2CsrRankGuide />
 
       <div id="recent-hw2-searches-section" class="hidden">
         <RecentHW2Searches />
@@ -1033,7 +1047,7 @@ const hw2SmurfGamertagsJson = JSON.stringify(suspectedSmurfGamertags).replace(/<
     import { setSearchCallback, renderRecentSearches } from '../../lib/hw2/localStorage';
     import { initShareModalListeners, closeShareModal } from '../../lib/hw2/shareCard';
     import { initProfileShareListeners, closeProfileShareModal } from '../../lib/hw2/profileShare';
-    import { parseGamertagFromProfilePath } from '../../lib/hw2/urlProfile';
+    import { parseGamertagFromProfilePath, syncHw2CsrRankGuideVisibility, syncHw2ReturnToSearchVisibility } from '../../lib/hw2/urlProfile';
     import { performSearch } from '../../lib/hw2/search';
     import { runComparison } from '../../lib/hw2/comparePlayers';
     import { getMatchResult } from '../../utils/haloApi';
@@ -1176,6 +1190,11 @@ const hw2SmurfGamertagsJson = JSON.stringify(suspectedSmurfGamertags).replace(/<
 
     // --- URL-based initialization ---
     const recentHw2SearchesSection = document.getElementById('recent-hw2-searches-section') as HTMLElement | null;
+    const csrRankGuideEl = document.getElementById('hw2-csr-rank-guide') as HTMLElement | null;
+    const returnToSearchWrapEl = document.getElementById('hw2-return-to-search-wrap') as HTMLElement | null;
+    syncHw2CsrRankGuideVisibility(csrRankGuideEl);
+    syncHw2ReturnToSearchVisibility(returnToSearchWrapEl);
+
     const setRecentHw2SearchesVisible = (visible: boolean) => {
       recentHw2SearchesSection?.classList.toggle('hidden', !visible);
     };
@@ -1204,5 +1223,10 @@ const hw2SmurfGamertagsJson = JSON.stringify(suspectedSmurfGamertags).replace(/<
     } else {
       setRecentHw2SearchesVisible(true);
     }
+
+    window.addEventListener('popstate', () => {
+      syncHw2CsrRankGuideVisibility(csrRankGuideEl);
+      syncHw2ReturnToSearchVisibility(returnToSearchWrapEl);
+    });
   </script>
 </BaseLayout>
