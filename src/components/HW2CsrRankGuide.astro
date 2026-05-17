@@ -1,0 +1,113 @@
+---
+/**
+ * Explains Halo Wars 2 ranked CSR tiers using the same icons as in-game / stats cards.
+ * Visibility is toggled client-side: shown only on the base HW2 stats URL (no gamertag).
+ */
+import { csrData } from '../data/haloWars2/csr';
+
+const metalDesignations = [1, 2, 3, 4, 5] as const;
+const tierLadder = metalDesignations.map((designation) => {
+  const rank = csrData[designation];
+  return {
+    title: rank.title,
+    tiers: [1, 2, 3, 4, 5, 6].map((tier) => rank.tiers[tier]),
+  };
+});
+
+const onyxTier = csrData[6].tiers[1];
+const championTier = csrData[7].tiers[1];
+---
+
+<section
+  id="hw2-csr-rank-guide"
+  class="mb-8 rounded-xl border border-cyan-500/20 p-6 backdrop-blur-sm"
+  style="background: rgba(30, 41, 59, 0.4);"
+  aria-labelledby="hw2-csr-rank-guide-heading"
+>
+  <div class="mb-5">
+    <h2 id="hw2-csr-rank-guide-heading" class="text-xl font-bold text-cyan-300">
+      <i class="fas fa-layer-group mr-2 text-cyan-400" aria-hidden="true"></i>What ranked CSR tiers mean
+    </h2>
+    <p class="mt-2 max-w-3xl text-sm text-gray-400">
+      Halo Wars 2 ranked playlists use CSR (Competitive Skill Rank) grouped into named tiers. Within each metal
+      band, tier 1 is the lowest and tier 6 is the highest. The icons below match what you see on player profiles
+      and match cards.
+    </p>
+  </div>
+
+  <div class="space-y-6">
+    {
+      tierLadder.map((group) => (
+        <div class="rounded-lg border border-cyan-500/10 bg-slate-900/35 p-4">
+          <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-300">{group.title}</h3>
+          <p class="mt-1 text-xs text-gray-500">
+            {group.title} 1 (lowest) through {group.title} 6 (highest).
+          </p>
+          <div class="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-6">
+            {group.tiers.map((tier) => (
+              <figure class="flex flex-col items-center gap-1">
+                <div class="csr-glow flex aspect-square w-full max-w-[3.75rem] items-center justify-center rounded-full border border-cyan-500/25 bg-slate-800/60 p-1.5">
+                  <img
+                    src={tier.imageUrl}
+                    alt=""
+                    width="56"
+                    height="56"
+                    class="h-full w-full object-contain"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+                <figcaption class="text-center text-[10px] font-medium leading-tight text-cyan-200/90">
+                  {tier.title}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </div>
+      ))
+    }
+
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div class="rounded-lg border border-cyan-500/10 bg-slate-900/35 p-4">
+        <div class="flex flex-col items-center gap-3 sm:flex-row sm:items-start">
+          <div class="csr-glow flex h-20 w-20 shrink-0 items-center justify-center rounded-full border border-cyan-500/25 bg-slate-800/60 p-2">
+            <img
+              src={onyxTier.imageUrl}
+              alt=""
+              width="64"
+              height="64"
+              class="h-14 w-14 object-contain"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-300">{onyxTier.title}</h3>
+            <p class="mt-1 text-sm text-gray-400">CSR 1500 and above.</p>
+          </div>
+        </div>
+      </div>
+      <div class="rounded-lg border border-cyan-500/10 bg-slate-900/35 p-4">
+        <div class="flex flex-col items-center gap-3 sm:flex-row sm:items-start">
+          <div class="csr-glow flex h-20 w-20 shrink-0 items-center justify-center rounded-full border border-cyan-500/25 bg-slate-800/60 p-2">
+            <img
+              src={championTier.imageUrl}
+              alt=""
+              width="64"
+              height="64"
+              class="h-14 w-14 object-contain"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-300">{championTier.title}</h3>
+            <p class="mt-1 text-sm text-gray-400">
+              The top 200 players who have at least CSR 1600.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
