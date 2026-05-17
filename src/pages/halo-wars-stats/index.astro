@@ -445,6 +445,50 @@ const hw2SmurfGamertagsJson = JSON.stringify(suspectedSmurfGamertags).replace(/<
           width: 90px;
         }
       }
+
+      /* Fixed scroll-to-top (aligned with videos database `.vdb-scroll-top`) */
+      .hw2-scroll-top {
+        position: fixed;
+        right: 1.2rem;
+        bottom: 1.2rem;
+        width: 2.9rem;
+        height: 2.9rem;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(7, 13, 24, 0.92);
+        color: #edf3fb;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(0.45rem);
+        z-index: 30;
+        transition:
+          transform 0.18s ease,
+          border-color 0.18s ease,
+          color 0.18s ease,
+          background 0.18s ease,
+          box-shadow 0.18s ease,
+          opacity 0.18s ease;
+      }
+
+      .hw2-scroll-top.is-visible {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0);
+      }
+
+      .hw2-scroll-top:hover {
+        border-color: #f5a44a;
+        background: rgba(245, 164, 74, 0.16);
+      }
+
+      @media (max-width: 640px) {
+        .hw2-scroll-top {
+          right: 0.85rem;
+          bottom: 0.85rem;
+          width: 2.6rem;
+          height: 2.6rem;
+        }
+      }
     </style>
   </Fragment>
 
@@ -1029,6 +1073,10 @@ const hw2SmurfGamertagsJson = JSON.stringify(suspectedSmurfGamertags).replace(/<
 
       <!-- Storehaus Promo -->
       <StorehausPromo class="mt-10" />
+
+      <button id="hw2-scroll-top" class="hw2-scroll-top" type="button" aria-label="Scroll to top">
+        <i class="fas fa-arrow-up" aria-hidden="true"></i>
+      </button>
     </main>
 
     <Footer />
@@ -1048,6 +1096,7 @@ const hw2SmurfGamertagsJson = JSON.stringify(suspectedSmurfGamertags).replace(/<
     import { initShareModalListeners, closeShareModal } from '../../lib/hw2/shareCard';
     import { initProfileShareListeners, closeProfileShareModal } from '../../lib/hw2/profileShare';
     import { parseGamertagFromProfilePath, syncHw2CsrRankGuideVisibility, syncHw2ReturnToSearchVisibility } from '../../lib/hw2/urlProfile';
+    import { initHw2ScrollToTop } from '../../lib/hw2/scrollToTop';
     import { performSearch } from '../../lib/hw2/search';
     import { runComparison } from '../../lib/hw2/comparePlayers';
     import { getMatchResult } from '../../utils/haloApi';
@@ -1187,6 +1236,7 @@ const hw2SmurfGamertagsJson = JSON.stringify(suspectedSmurfGamertags).replace(/<
 
     startSearchPlaceholderRotation();
     renderRecentSearches();
+    initHw2ScrollToTop();
 
     // --- URL-based initialization ---
     const recentHw2SearchesSection = document.getElementById('recent-hw2-searches-section') as HTMLElement | null;
