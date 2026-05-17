@@ -196,7 +196,7 @@ function renderCards(ctx: VdbContext, videos: VideoSearchRecord[]): void {
           ? `<span class="vdb-card-tag is-series">${escapeHtml(video.seriesLabel)}</span>`
           : '';
       const blogTag = video.blogHref
-        ? `<a href="${escapeHtml(video.blogHref)}" class="vdb-card-tag is-blog" target="_blank" rel="noopener noreferrer">Blog</a>`
+        ? `<a href="${escapeHtml(video.blogHref)}" class="vdb-card-tag is-blog" target="_blank" rel="noopener noreferrer">Blog Post</a>`
         : '';
       const durationTag = video.durationLabel
         ? `<span class="vdb-duration-badge">${escapeHtml(video.durationLabel)}</span>`
@@ -205,8 +205,10 @@ function renderCards(ctx: VdbContext, videos: VideoSearchRecord[]): void {
         ? `<span class="vdb-card-detail is-date"><i class="fas fa-calendar-days" aria-hidden="true"></i>${escapeHtml(video.publishedLabel)}</span>`
         : '';
 
+      const cardClass = video.blogHref ? 'vdb-card has-blog' : 'vdb-card';
+
       return `
-        <article class="vdb-card" role="listitem">
+        <article class="${cardClass}" role="listitem">
           <a
             href="${url}"
             target="_blank"

@@ -40,6 +40,29 @@ export function buildProfileUrl(gamertag: string, matchId?: string | null): stri
   return `${window.location.origin}/halo-wars-stats?${params.toString()}`;
 }
 
+/** True when the HW2 stats page has no active gamertag in the URL (base landing view). */
+export function isHw2StatsBaseView(): boolean {
+  const pathname = window.location.pathname;
+  const normalizedPath = pathname.replace(/\/+$/, '') || '/';
+  if (normalizedPath !== '/halo-wars-stats') return false;
+  const gamertagParam = new URLSearchParams(window.location.search).get('gamertag')?.trim() ?? '';
+  return !gamertagParam;
+}
+
+export function syncHw2CsrRankGuideVisibility(guideEl: HTMLElement | null) {
+  if (!guideEl) return;
+  guideEl.classList.toggle('hidden', !isHw2StatsBaseView());
+}
+
+/** “Back to HW2 home” control: visible whenever the URL is not the base stats landing (e.g. ?gamertag= or /player/…). */
+export function syncHw2ReturnToSearchVisibility(wrapEl: HTMLElement | null) {
+  if (!wrapEl) return;
+  const base = isHw2StatsBaseView();
+  wrapEl.classList.toggle('hidden', base);
+  wrapEl.classList.toggle('flex', !base);
+  wrapEl.classList.toggle('items-stretch', !base);
+}
+
 export function syncProfileUrl(gamertag: string, matchId?: string | null) {
   const cleanGamertag = gamertag.trim();
   if (!cleanGamertag) return;

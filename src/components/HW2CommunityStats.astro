@@ -185,7 +185,18 @@ const mapNames: Record<string, string> = Object.fromEntries(
       if (!res.ok) throw new Error('fetch failed');
       const data = await res.json();
 
-      if (!data.totalMatches) {
+      const totalMatches = Number(data.totalMatches ?? 0);
+      const totalPlayers = Number(data.totalPlayers ?? 0);
+      const weeklyMatches = Number(data.weeklyMatchesAnalyzed ?? 0);
+      const weeklyTop =
+        typeof data.weeklyMostSearchedGamertag === 'string'
+          ? data.weeklyMostSearchedGamertag.trim()
+          : '';
+      const hasMaps = Array.isArray(data.mapDurationStats) && data.mapDurationStats.length > 0;
+      const hasWeekly = weeklyMatches > 0 || weeklyTop.length > 0;
+      const hasSnapshot = totalMatches > 0 || totalPlayers > 0;
+
+      if (!hasSnapshot && !hasWeekly && !hasMaps) {
         container.innerHTML =
           '<p class="text-sm text-gray-500 italic">No data yet &mdash; stats will appear once players are searched.</p>';
         return;

@@ -50,8 +50,6 @@ export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
 
   const db = env.DB;
 
-  const weekStartSql = "datetime('now', '-7 days')";
-
   const [
     totalMatches,
     totalPlayers,
@@ -118,7 +116,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
         `SELECT p.gamertag AS gamertag, COUNT(*) AS search_count
          FROM search_events se
          JOIN players p ON p.player_id = se.player_id
-         WHERE se.searched_at >= ${weekStartSql}
+         WHERE datetime(se.searched_at) >= datetime('now', '-7 days')
          GROUP BY se.player_id, p.gamertag
          ORDER BY search_count DESC, p.gamertag ASC
          LIMIT 1`
@@ -128,7 +126,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
       db.prepare(
         `SELECT COALESCE(SUM(match_count), 0) AS weekly_match_sum
          FROM search_events
-         WHERE searched_at >= ${weekStartSql}`
+         WHERE datetime(searched_at) >= datetime('now', '-7 days')`
       )
     ),
   ]);
