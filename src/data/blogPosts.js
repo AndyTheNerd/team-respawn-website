@@ -400,6 +400,7 @@ const blogPosts = [
     href: "/blog/posts/halo-wars-2-review-after-1000-hours",
     img: {
       src: "https://img.youtube.com/vi/74TM5X3jgTk/maxresdefault.jpg",
+      cloudinaryId: "Review_2023_u0rg8q",
       alt: "Halo Wars 2 Review After 1,000 Hours",
       width: 400,
       height: 225,
@@ -476,6 +477,7 @@ const blogPosts = [
     href: "/blog/posts/all-the-skulls-in-halo-wars-2",
     img: {
       src: "https://res.cloudinary.com/damu0vqmp/image/upload/v1769973137/HW2_Campaign_nxrb8a.webp",
+      cloudinaryId: "HW2_Campaign_nxrb8a",
       alt: "All the Skulls in Halo Wars 2",
       width: 400,
       height: 225,

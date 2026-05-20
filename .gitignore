@@ -11,7 +11,11 @@ nul
 .claude/
 REFACTOR_CHANGELOG.md
 changelogs/
-scripts/
+# scripts/: only the blog generator is required for CI; other .mjs tools stay local
+scripts/*
+!scripts/generate-blog-posts.mjs
+scripts/_*
+scripts/*.csv
 .astro/settings.json
 .astro/data-store.json
 .codex-*.log
