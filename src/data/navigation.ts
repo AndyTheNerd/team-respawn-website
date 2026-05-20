@@ -27,6 +27,22 @@ export function normalizePathname(pathname: string): string {
   return normalized || '/';
 }
 
+/** True when an HW2 Franchise Hub dropdown entry is the current page (not HW2 Stats / Videos top-nav). */
+export function isHw2FranchiseHubActive(
+  sections: NavSection[],
+  pathname: string,
+  flags: { isVideos?: boolean; isHw2Stats?: boolean } = {}
+): boolean {
+  return sections.some((section) =>
+    section.links.some((link) => {
+      const match = link.activeMatch ?? 'exact';
+      // Page-level routes have their own header links; do not light the hub toggle too.
+      if (match === 'videos' || match === 'hw2Stats') return false;
+      return isNavLinkActive(link, pathname, flags);
+    })
+  );
+}
+
 export function isNavLinkActive(
   link: NavLink,
   pathname: string,

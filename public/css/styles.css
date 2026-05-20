@@ -222,6 +222,49 @@ textarea {
 .header-content-wrapper {
     position: relative;
     z-index: 2;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 0.5rem;
+}
+
+@media (min-width: 1280px) {
+    .header-content-wrapper {
+        column-gap: 0.75rem;
+    }
+}
+
+.header-brand {
+    grid-column: 1;
+    justify-self: start;
+    z-index: 20;
+}
+
+.header-main-nav {
+    grid-column: 2;
+    justify-self: center;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.header-actions {
+    grid-column: 3;
+    justify-self: end;
+    z-index: 20;
+    flex-shrink: 0;
+}
+
+/* Tighter nav on xl–2xl so links do not crowd search / logo */
+@media (min-width: 1280px) and (max-width: 1535px) {
+    .header-main-nav .nav-link {
+        padding: 0.35rem 0.5rem;
+        font-size: 0.8125rem;
+    }
+
+    .header-main-nav .nav-dropdown-icon {
+        width: 0.875rem;
+        height: 0.875rem;
+    }
 }
 
 /* Tab navigation within header */

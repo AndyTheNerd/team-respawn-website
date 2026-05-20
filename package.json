@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "astro dev",
     "dev:cf": "wrangler pages dev --proxy 4321",
-    "build": "astro build",
+    "generate:blog-posts": "node scripts/generate-blog-posts.mjs",
+    "build": "npm run generate:blog-posts && astro build",
     "preview": "astro preview",
     "astro": "astro",
     "add-video": "node scripts/add-video.mjs",

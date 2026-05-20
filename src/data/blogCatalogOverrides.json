@@ -1,0 +1,220 @@
+{
+  "what-happened-to-medal-of-honor": {
+    "excerpt": "From DreamWorks and Spielberg through EA LA and Danger Close, why Warfighter shelved the series, what VR’s Above and Beyond signals, and where the back catalogue is playable today.",
+    "readingTimeMinutes": 5
+  },
+  "what-happened-to-crackdown": {
+    "excerpt": "From Crackdown 1’s Halo 3 beta tailwind and co-op sandbox to Crackdown 2’s freak outbreak, Crackdown 3’s cloud-destruction pivot—and whether Microsoft might revisit the series.",
+    "readingTimeMinutes": 5
+  },
+  "the-heroes-of-halo-wars": {
+    "excerpt": "Companion notes to the video: Red Team’s role and lore, Forge’s arc and sacrifice, Anders and Cutter, Serena’s six years alone and rampancy—and why the Spirit of Fire crew stops a Covenant Forerunner gambit decades before Halo CE.",
+    "readingTimeMinutes": 8
+  },
+  "sniper-elite-resistance-first-impressions": {
+    "excerpt": "Notes from the first campaign mission on PC (medium): third-person pacing, subsonic ammo, traversal, traps, Fleck cannons, dam objectives, and classic Sniper Elite kill-cam feedback.",
+    "readingTimeMinutes": 5
+  },
+  "how-to-set-up-the-cnc-online-launcher": {
+    "readingTimeMinutes": 2,
+    "img": {
+      "src": "https://img.youtube.com/vi/sv2gi3ge-3c/maxresdefault.jpg",
+      "alt": "Command & Conquer — C&C Online launcher setup guide",
+      "width": 400,
+      "height": 225,
+      "lazy": true
+    }
+  },
+  "trophies-are-better-than-achievements": {
+    "excerpt": "PlayStation trophies versus Xbox achievements: tiers, Platinums, DLC lists, profile levels — and why raw Gamerscore often fails to tell a story.",
+    "readingTimeMinutes": 5,
+    "img": {
+      "src": "/img/blog/trophies-vs-achievements.jpg",
+      "alt": "Comparison of PlayStation trophies and Xbox achievements",
+      "width": 400,
+      "height": 225,
+      "lazy": true
+    }
+  },
+  "what-made-rollercoaster-tycoon-so-much-fun": {
+    "excerpt": "My love letter to the classic RollerCoaster Tycoon line: late-90s PC success, Chris Sawyer’s one-developer craft, OpenRCT2 and RCT3, and why sandbox plus management still resonates with me.",
+    "readingTimeMinutes": 4
+  },
+  "call-of-duty-roads-to-victory-psp-gameplay-retro": {
+    "excerpt": "The video treats Call of Duty: Roads to Victory as a curiosity: a World War II–era CoD built for the PSP when the brand was still strongly associated with WWII, months before the franchise’s modern pivot with Call of Duty 4.",
+    "readingTimeMinutes": 3
+  },
+  "blur-retro-look-back": {
+    "readingTimeMinutes": 4
+  },
+  "halo-wars-the-ultimate-design-for-console-rts": {
+    "excerpt": "How Ensemble Studios designed Halo Wars around a controller-only platform — unit selection, locked base slots, and maps built for fixed bases — and why that blueprint still defines console RTS.",
+    "readingTimeMinutes": 6
+  },
+  "what-happened-to-army-of-two": {
+    "excerpt": "Co-op, aggro, three releases in five years, preservation headaches on modern Xbox, and why a remaster might be the path back."
+  },
+  "ashes-of-the-singularity-2-demo-impressions": {
+    "excerpt": "First impressions of the Ashes of the Singularity 2 demo — a large-scale RTS that blends Command & Conquer, Company of Heroes, and Halo Wars."
+  },
+  "halo-ce-anniversary-walkthrough": {
+    "excerpt": "A full walkthrough of Halo Combat Evolved Anniversary. Watch the complete campaign run."
+  },
+  "halo-2-anniversary-walkthrough": {
+    "excerpt": "A full walkthrough of Halo 2 Anniversary. Watch the complete campaign run."
+  },
+  "halo-3-walkthrough": {
+    "excerpt": "A full walkthrough of Halo 3. Watch the complete campaign run."
+  },
+  "halo-3-odst-walkthrough": {
+    "excerpt": "A full walkthrough of Halo 3 ODST. Watch the complete campaign run."
+  },
+  "halo-reach-walkthrough": {
+    "excerpt": "Legendary co-op playthrough of Halo Reach in MCC—mission-by-mission notes from Andy and Gus, plus overall campaign takeaways.",
+    "readingTimeMinutes": 8
+  },
+  "halo-4-walkthrough": {
+    "excerpt": "A full walkthrough of Halo 4. Watch the complete campaign run."
+  },
+  "halo-infinite-walkthrough": {
+    "excerpt": "Andy and Gus tackle the full Halo Infinite campaign on Legendary in co-op — completing the Storehaus run through mainline Halo (except Halo 5), ~8.5 hours, linear missions plus Zeta Halo sandbox, and mixed verdicts on campaign vs. open world.",
+    "readingTimeMinutes": 9
+  },
+  "halo-wars-2-campaign-walkthrough": {
+    "excerpt": "A full walkthrough of the Halo Wars 2 campaign. Watch the complete run."
+  },
+  "gears-of-war-ultimate-edition-walkthrough": {
+    "excerpt": "A full walkthrough of Gears of War: Ultimate Edition. Watch the complete campaign run."
+  },
+  "goblin-commander-walkthrough": {
+    "excerpt": "A full walkthrough of Goblin Commander: Unleash the Horde. Watch the complete campaign run."
+  },
+  "hw2-operation-spearbreaker-walkthrough": {
+    "img": {
+      "src": "https://img.youtube.com/vi/WxWnwAIB2Ak/maxresdefault.jpg",
+      "alt": "Halo Wars 2 - Operation Spearkbreaker Walkthrough",
+      "width": 400,
+      "height": 225,
+      "lazy": true
+    }
+  },
+  "halo-wars-de-full-campaign-coop-legendary": {
+    "featured": true,
+    "img": {
+      "src": "https://img.youtube.com/vi/BYBLYmBIS2A/maxresdefault.jpg",
+      "alt": "Halo Wars Definitive Edition Full Campaign Walkthrough (Co-op Legendary)",
+      "width": 400,
+      "height": 225,
+      "lazy": true
+    }
+  },
+  "halo-wars-2-review-after-1000-hours": {
+    "img": {
+      "src": "https://img.youtube.com/vi/74TM5X3jgTk/maxresdefault.jpg",
+      "cloudinaryId": "Review_2023_u0rg8q",
+      "alt": "Halo Wars 2 Review After 1,000 Hours",
+      "width": 400,
+      "height": 225,
+      "lazy": true
+    }
+  },
+  "all-the-skulls-in-halo-wars-2": {
+    "featured": false,
+    "img": {
+      "src": "https://res.cloudinary.com/damu0vqmp/image/upload/v1769973137/HW2_Campaign_nxrb8a.webp",
+      "cloudinaryId": "HW2_Campaign_nxrb8a",
+      "alt": "All the Skulls in Halo Wars 2",
+      "width": 400,
+      "height": 225,
+      "lazy": true
+    }
+  },
+  "how-to-super-turtle": {
+    "featured": false
+  },
+  "10-tips-for-beginners-halo-wars-2": {
+    "excerpt": "New to Halo Wars 2? Learn the basics with these ten essential tips to get you started on the battlefield!"
+  },
+  "how-to-play-as-unsc-halo-wars-2": {
+    "excerpt": "Learn how to play as UNSC in Halo Wars 2."
+  },
+  "how-to-play-as-the-banished-halo-wars-2": {
+    "excerpt": "Learn how to play as The Banished in Halo Wars 2."
+  },
+  "how-to-play-as-captain-cutter-halo-wars-2": {
+    "excerpt": "Learn how to play as Captain Cutter in Halo Wars 2."
+  },
+  "how-to-play-as-colony-halo-wars-2": {
+    "excerpt": "Learn how to play as Colony in Halo Wars 2."
+  },
+  "how-to-play-as-kinsano-halo-wars-2": {
+    "excerpt": "Learn how to play as Kinsano in Halo Wars 2."
+  },
+  "how-to-play-as-yap-yap-halo-wars-2": {
+    "excerpt": "Learn how to play as Yap Yap in Halo Wars 2."
+  },
+  "how-to-play-as-pavium-halo-wars-2": {
+    "excerpt": "Learn how to play as Pavium in Halo Wars 2."
+  },
+  "how-to-play-as-atriox-halo-wars-2": {
+    "excerpt": "Learn how to play as Atriox in Halo Wars 2."
+  },
+  "how-to-play-as-sgt-forge-halo-wars-2": {
+    "excerpt": "Learn how to play as Sgt. Forge in Halo Wars 2."
+  },
+  "how-to-play-as-voridus-halo-wars-2": {
+    "excerpt": "Learn how to play as Voridus in Halo Wars 2."
+  },
+  "how-to-stop-air-spam-halo-wars-2": {
+    "excerpt": "Learn how to stop air spam in Halo Wars 2."
+  },
+  "how-to-break-the-super-turtle-halo-wars-2": {
+    "excerpt": "Learn how to break the super turtle in Halo Wars 2."
+  },
+  "advanced-movement-and-splitting-halo-wars-2": {
+    "excerpt": "This is a Halo Wars 2 tutorial I put together on advanced movement: chaining orders, hold position, control groups, splitting when a beam (or similar power) hits, and squeezing information out of fog of war."
+  },
+  "why-is-the-scarab-mission-so-frustrating-halo-wars": {
+    "excerpt": "Scarab mission tips for Halo Wars (original): pylons, Scorpions and Wolverines, Forge and MAC, reading the beam, and closing on the core.",
+    "readingTimeMinutes": 4
+  },
+  "noob-to-pro-in-15-minutes-age-of-empires-ii": {
+    "excerpt": "Villagers, aging up, when to add military, proxy and castle drops, starter counters, and trading — a beginner loop for Age of Empires II from Jimbo, Gus, and Andy."
+  },
+  "xbox-beginners-guide-age-of-empires-ii": {
+    "excerpt": "Walkthrough-style breakdown of getting moving in Age of Empires II: DE on Xbox: villagers, priority presets, early resources, aging up, and controller basics (radial menus, attack move, rally points)."
+  },
+  "xbox-advanced-guide-age-of-empires-ii": {
+    "excerpt": "Follow-up to basic movement for AoE2 DE on Xbox: chaining villager orders, control groups and production buildings, the Find menu, forward proxy bases, flares, and fast minimap camera moves."
+  },
+  "how-to-get-maximum-villager-efficiency-age-of-empires-ii": {
+    "readingTimeMinutes": 5,
+    "img": {
+      "src": "https://img.youtube.com/vi/WLFOhTXAgb4/maxresdefault.jpg",
+      "alt": "How to get Maximum Villager Efficiency - Age of Empires II",
+      "width": 400,
+      "height": 225,
+      "lazy": true
+    }
+  },
+  "atlanteans-guide-age-of-mythology": {
+    "excerpt": "A guide for the Atlantean civilization in Age of Mythology."
+  },
+  "greeks-guide-age-of-mythology": {
+    "excerpt": "Beginner walkthrough for Greeks in Age of Mythology Retold on Xbox/controller: economy, temple and aging, defense, myth units, trade, and Titans—controller shortcuts where they matter."
+  },
+  "noob-to-pro-in-15-minutes-age-of-mythology": {
+    "excerpt": "A short, dense skill guide for Age of Mythology: Retold—economy, relics, military production, water, civ adaptation, trade, TCs, upgrades, scouting, and learning habits.",
+    "featured": true,
+    "readingTimeMinutes": 3
+  },
+  "top-tips-for-beginners-on-ps5-age-of-mythology": {
+    "img": {
+      "src": "https://img.youtube.com/vi/iqhLNODKNyY/maxresdefault.jpg",
+      "alt": "Top Tips for Beginners on PS5 - Age of Mythology",
+      "width": 400,
+      "height": 225,
+      "lazy": true
+    }
+  }
+}

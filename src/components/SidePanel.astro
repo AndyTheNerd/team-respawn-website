@@ -82,15 +82,14 @@ const featuredLinks = [
       <h2 class="mt-2 text-2xl font-extrabold text-white">Browse</h2>
     </div>
     <nav class="flex flex-col gap-2" aria-label="Main navigation">
-      <button
-        data-tab-id="home-tab"
+      <a
+        href="/"
         class={primaryLinkClass(isHome)}
-        type="button"
-        role="menuitem"
+        aria-current={isHome ? 'page' : undefined}
       >
         <i class="fas fa-home w-5 text-center" aria-hidden="true"></i>
         <span>Home</span>
-      </button>
+      </a>
       {primaryLinks.map((link) => (
         <a
           href={link.href}

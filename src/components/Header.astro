@@ -5,6 +5,7 @@ import {
   aboutLinks,
   headerPrimaryLinks,
   hw2GuideSections,
+  isHw2FranchiseHubActive,
   isNavLinkActive,
   normalizePathname,
   otherProjectSections,
@@ -59,15 +60,15 @@ const isStorehausRoute =
   normalizedPath.startsWith('/storehaus/');
 const isOtherProjects = isStorehausRoute || headerOtherProjectSections.some((section) => section.links.some((link) => link.active));
 const isAboutSection = headerAboutLinks.some((link) => link.active);
-const isHaloWars2Section = isHw2Stats || headerHw2Sections.some((section) => section.links.some((link) => link.active));
-const showHaloWars2HeaderDropdown = false;
+const isHaloWars2Section = isHw2FranchiseHubActive(hw2GuideSections, pathname, navFlags);
+const showHaloWars2HeaderDropdown = true;
 ---
 
 <header class="compact-header relative w-full mb-6">
   <div class="header-glass-container compact-header-glass relative w-full px-4 lg:px-6 py-3 rounded-xl overflow-visible">
-    <div class="header-content-wrapper relative z-10 flex items-center justify-between gap-4">
-      <!-- Left Section: Logo + Hamburger -->
-      <div class="flex items-center gap-3 flex-shrink-0">
+    <div class="header-content-wrapper relative z-10">
+      <!-- Left Section: Logo + Hamburger (side panel below xl) -->
+      <div class="header-brand flex items-center gap-2 sm:gap-3">
         <a href="/" aria-label="Return to Team Respawn homepage" class="logo-link inline-block group">
           <img
             src="/content/Team-Respawn-Full.png"
@@ -83,7 +84,7 @@ const showHaloWars2HeaderDropdown = false;
           <button
             id="open-panel-button"
             data-open-panel
-            class="header-menu-btn-compact flex-shrink-0 p-2 rounded-lg backdrop-blur-sm bg-gray-800/40 hover:bg-gray-700/60 border border-white/10 hover:border-purple-400/30 transition-all duration-300 hover:scale-110 group"
+            class="header-menu-btn-compact xl:hidden flex-shrink-0 p-2 rounded-lg backdrop-blur-sm bg-gray-800/40 hover:bg-gray-700/60 border border-white/10 hover:border-purple-400/30 transition-all duration-300 hover:scale-110 group"
             aria-label="Open navigation menu"
             aria-expanded="false"
             aria-controls="side-panel"
@@ -96,35 +97,15 @@ const showHaloWars2HeaderDropdown = false;
         )}
       </div>
 
-      <!-- Center Section: Main Navigation (hidden on mobile) -->
-      <nav class="hidden lg:flex items-center gap-1 flex-1 min-w-0 justify-center" role="tablist" aria-label="Main navigation">
-        {isHome ? (
-          <button
-            id="home-tab"
-            data-tab-link="/"
-            role="tab"
-            aria-selected="true"
-            aria-controls="home-content"
-            aria-label="View home"
-            class="nav-link nav-link-active"
-            type="button"
-            tabindex="0"
-          >
-            Home
-          </button>
-        ) : (
-          <a
-            href="/"
-            id="home-tab"
-            role="tab"
-            aria-selected="false"
-            aria-label="View home"
-            class="nav-link"
-            tabindex="0"
-          >
-            Home
-          </a>
-        )}
+      <!-- Center Section: Main Navigation (desktop only; constrained so it cannot overlap neighbors) -->
+      <nav class="header-main-nav hidden xl:flex items-center justify-center gap-0.5 2xl:gap-1 min-w-0 w-full px-1" aria-label="Main navigation">
+        <a
+          href="/"
+          class={`nav-link ${isHome ? 'nav-link-active' : ''}`}
+          aria-current={isHome ? 'page' : undefined}
+        >
+          Home
+        </a>
         {headerPrimaryLinksWithActive.map((link) => (
           <a
             href={link.href}
@@ -349,7 +330,7 @@ const showHaloWars2HeaderDropdown = false;
       </nav>
 
       <!-- Right Section: Search + Social Icons -->
-      <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-shrink-0">
+      <div class="header-actions flex items-center justify-end gap-2 sm:gap-3">
         <SearchBar />
         <div class="header-social-container-compact hidden xl:block 2xl:hidden" aria-label="Primary social media links">
           <SocialIcons compact links={['youtube', 'twitch', 'discord']} />
@@ -360,6 +341,4 @@ const showHaloWars2HeaderDropdown = false;
       </div>
     </div>
   </div>
-
-  <div role="status" aria-live="polite" aria-atomic="true" class="sr-only" id="tab-announcement"></div>
 </header>

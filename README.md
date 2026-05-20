@@ -6,7 +6,7 @@ A gaming content website for the [Team Respawn YouTube channel](https://www.yout
 
 ## Features
 
-- Blog posts: guides, walkthroughs, and reviews — client-side search, filters, and pagination on `/blog`; optional Astro Content Collection under `src/content/blog/` (see `src/content.config.ts`) for future MD/MDX entries with `canonicalPath` merged into the sitemap when not `draft`
+- Blog posts: guides, walkthroughs, and reviews — each post is an `.astro` file under `src/pages/blog/posts/`; the blog index catalog (`src/data/blogPosts.js`) is **generated at build time** from those files (see [Blog authoring](#blog-authoring))
 - Video database with MCC-style filter/search composer (`/videos`)
 - Halo Wars 2 live stats lookup — player profiles, match history, match details, AI summaries (`/halo-wars-stats`)
 - Halo Wars: Definitive Edition Steam player count — live concurrency, observed daily high, and 30-day trend chart (`/halo-wars-de-player-count`)
@@ -16,11 +16,6 @@ A gaming content website for the [Team Respawn YouTube channel](https://www.yout
 - Side panel navigation with keyboard support
 - Responsive Tailwind-based styling via WebcoreUI
 - SEO meta tags and OpenGraph support; **apex → `www` 301** via `functions/_middleware.ts` so `teamrespawn.net` redirects to `https://www.teamrespawn.net` with path and query preserved
-
-## Navigation Notes
-
-- The desktop header `Halo Wars 2` Franchise Hub dropdown is intentionally hidden for now.
-- Its content remains in `src/components/Header.astro` behind `showHaloWars2HeaderDropdown` so it can be re-enabled quickly later.
 
 ## Tech Stack
 
@@ -72,13 +67,15 @@ team-respawn-website/
 ├── public/                # Static assets (served as-is)
 │   └── css/
 │       └── tournament-brackets.css  # Bracket shell + match card styling for tournaments
-├── scripts/               # Node utility scripts (add-video.mjs)
+├── scripts/               # Node utility scripts (add-video.mjs, generate-blog-posts.mjs)
 ├── src/
-│   ├── content/           # Optional Content Collection (blog MD/MDX); catalog remains blogPosts.js
+│   ├── content/           # Optional Content Collection (blog MD/MDX, future)
 │   ├── content.config.ts  # `blog` collection schema (Zod) + glob loader
 │   ├── blocks/            # Reusable content blocks (Author, Socials)
 │   ├── components/        # Astro components (Header, Footer, SidePanel)
 │   ├── data/              # Site data as TS modules
+│   │   ├── blogCatalogOverrides.json  # Optional per-slug catalog tweaks (excerpt, featured, …)
+│   │   ├── blogPosts.js               # AUTO-GENERATED blog index catalog
 │   │   ├── haloWars2/     # HW2 static data (leaders, maps, CSR, etc.)
 │   │   ├── haloWars1.ts   # HW1 unit reference data
 │   │   └── videos-YYYY.ts # Video entries by year
@@ -121,7 +118,16 @@ Copy `.env.example` to `.env` and fill in the required keys (Cloudinary, HW2 API
 ```bash
 npm run dev       # Astro dev server → http://localhost:4321 (no CF functions)
 npm run dev:cf    # Wrangler proxy — use this when testing API functions or D1
+npm run generate:blog-posts  # Regenerate src/data/blogPosts.js from blog post .astro files
 ```
+
+## Blog authoring
+
+1. Add `src/pages/blog/posts/your-slug.astro` using `BlogPostLayout` (title, description, category, `dateIso`, optional `youtubeId` / `ogImage` / `tags`).
+2. Run `npm run generate:blog-posts` (also runs automatically before `npm run build`).
+3. Optional catalog tweaks in `src/data/blogCatalogOverrides.json` — custom card `excerpt`, `featured`, `readingTimeMinutes`, or `img` when the defaults are not right.
+
+`src/data/blogPosts.js` is auto-generated; edit the `.astro` source (and overrides if needed), not the catalog file by hand.
 
 Use `npm run dev` for UI/content work. Use `npm run dev:cf` when testing anything under `functions/`.
 

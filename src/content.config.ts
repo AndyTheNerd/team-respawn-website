@@ -3,8 +3,9 @@ import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
 /**
- * Optional MD/MDX posts under `src/content/blog/`.
- * The live catalog remains [`src/data/blogPosts.js`](src/data/blogPosts.js) until entries set `canonicalPath` and are wired to routes.
+ * Optional MD/MDX posts under `src/content/blog/` for future use.
+ * The live catalog is generated into [`src/data/blogPosts.js`](src/data/blogPosts.js) from
+ * [`src/pages/blog/posts/*.astro`](../pages/blog/posts/) via `npm run generate:blog-posts`.
  */
 const blog = defineCollection({
   loader: glob({

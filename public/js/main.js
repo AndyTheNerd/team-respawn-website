@@ -115,7 +115,6 @@ async function loadAndRenderProjects() {
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         initSidePanel();
-        initTabs();
         await loadAndRenderVideos();
         await loadAndRenderProjects();
     } catch (error) {

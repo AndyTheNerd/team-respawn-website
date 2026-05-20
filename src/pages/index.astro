@@ -23,6 +23,21 @@ import RecentHW2Searches from '../components/RecentHW2Searches.astro';
   ogImage="https://www.teamrespawn.net/content/Team-Respawn-Full.png"
 >
   <Fragment slot="head">
+    <script is:inline>
+      (function () {
+        const legacyHomeHashes = {
+          'halo-wars': '/halo-wars-guides',
+          'age-of-empires': '/age-of-empires-guides',
+          'age-of-mythology': '/age-of-mythology-guides',
+          walkthroughs: '/blog?category=Walkthroughs',
+          'other-projects': '/storehaus',
+        };
+        const hash = window.location.hash.replace(/^#/, '');
+        if (legacyHomeHashes[hash]) {
+          window.location.replace(legacyHomeHashes[hash]);
+        }
+      })();
+    </script>
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -50,59 +65,20 @@ import RecentHW2Searches from '../components/RecentHW2Searches.astro';
   <div class="container mx-auto p-4 sm:p-8">
     <Header />
 
-    <main id="main-content" aria-label="Home page content">
-
-      <!-- Home tab panel -->
-      <section id="home-content" role="tabpanel" aria-labelledby="home-tab" aria-label="Home content">
-        <AnnouncementBanner
-          message="Explore the HW2 Stats page to search any gamertag, check CSR, and review recent matches."
-          href="/halo-wars-stats"
-          linkText="Open HW2 Stats"
-          storageKey="tr_hw2_announcement_dismissed_v1"
-        />
-        <HeroSection />
-        <ChannelStats />
-        <YoutubeLatestVideos />
-      </section>
-
-      <!-- Home-only featured content; hidden when switching tabs -->
-      <div id="home-featured-content">
-
-        <LatestBlogCarousel />
-        <TwitchEmbed channel="teamrespawntv" />
-        <RecentHW2Searches showOpenStatsLink />
-        <!-- Storehaus CTA -->
-        <StorehausPromo class="mb-8" />
-
-      </div>
-
-      <!-- Halo Wars guides tab panel -->
-      <section
-        id="halo-wars-content"
-        class="hidden grid grid-cols-1 gap-8"
-        role="tabpanel"
-        aria-labelledby="halo-wars-tab"
-        aria-label="Halo Wars guides content"
-      ></section>
-
-      <!-- Age of Empires guides tab panel -->
-      <section
-        id="age-of-empires-content"
-        class="hidden grid grid-cols-1 gap-8"
-        role="tabpanel"
-        aria-labelledby="age-of-empires-tab"
-        aria-label="Age of Empires guides content"
-      ></section>
-
-      <!-- Age of Mythology guides tab panel -->
-      <section
-        id="age-of-mythology-content"
-        class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-        role="tabpanel"
-        aria-labelledby="age-of-mythology-tab"
-        aria-label="Age of Mythology guides content"
-      ></section>
-
+    <main id="main-content" class="space-y-8" aria-label="Home page content">
+      <AnnouncementBanner
+        message="Explore the HW2 Stats page to search any gamertag, check CSR, and review recent matches."
+        href="/halo-wars-stats"
+        linkText="Open HW2 Stats"
+        storageKey="tr_hw2_announcement_dismissed_v1"
+      />
+      <HeroSection />
+      <ChannelStats />
+      <YoutubeLatestVideos />
+      <LatestBlogCarousel />
+      <TwitchEmbed channel="teamrespawntv" />
+      <RecentHW2Searches showOpenStatsLink />
+      <StorehausPromo />
     </main>
 
     <Footer />
@@ -111,9 +87,6 @@ import RecentHW2Searches from '../components/RecentHW2Searches.astro';
   <SidePanel />
 
   <script src="/js/side-panel.js" is:inline></script>
-  <script src="/js/tabs.js" is:inline></script>
+  <script src="/js/twitch-embed.js" is:inline></script>
   <script src="/js/dropdowns.js" is:inline></script>
-  <script src="/js/video-card.js" is:inline></script>
-  <script src="/js/project-card.js" is:inline></script>
-  <script src="/js/main.js" is:inline></script>
 </BaseLayout>
